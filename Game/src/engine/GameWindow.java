@@ -4,8 +4,8 @@ import javax.swing.JFrame;
 
 public class GameWindow extends JFrame{
 	
-	// TODO: Add key listener, mouse listener, game thread
-	private final GamePanel gamePanel;
+	// TODO: Add key listener, mouse listener
+	private final GameThread gameThread;
 	
 	public GameWindow(String name){
 		super(name);
@@ -19,9 +19,8 @@ public class GameWindow extends JFrame{
 		
 		// Init other stuff
 		
-		gamePanel = new GamePanel();
-		this.add(gamePanel);
-		
+		gameThread = new GameThread();
+		this.add(gameThread);
 		
 		this.setVisible(true);
 	}
