@@ -4,25 +4,32 @@ import javax.swing.JFrame;
 
 public class GameWindow extends JFrame{
 	
-	// TODO: Add key listener, mouse listener
 	private final GameThread gameThread;
+	
+	private final KeyboardListener keyListener;
 	
 	public GameWindow(String name){
 		super(name);
 		// Init window
 		
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		this.setSize(800, 600);
-		this.setResizable(false);
-		this.setLocationRelativeTo(null);
+		setSize(800, 600);
+		setResizable(false);
+		setLocationRelativeTo(null);
 		
 		// Init other stuff
 		
-		gameThread = new GameThread();
-		this.add(gameThread);
+		keyListener = new KeyboardListener();
+		addKeyListener(keyListener);
 		
-		this.setVisible(true);
+		gameThread = new GameThread(keyListener);
+		
+		add(gameThread);
+		
+		setVisible(true);
+		
+		gameThread.run();
 	}
 	
 }
