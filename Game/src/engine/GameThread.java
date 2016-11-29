@@ -24,39 +24,65 @@ public class GameThread extends JPanel implements Runnable{
 	}
 	
 	private void init(){
-		WorldScreen testScreen = new WorldScreen();
+		
+		// Create test game screen
+		MainScreen testScreen = new MainScreen();
 		testScreen.init(keyListener);
 		
+		// Set up screen manager
 		screenManager = new ScreenManager();
 		screenManager.setScreen(testScreen);
 		
+		// Image holds graphics for the screen
 		screenImg = new BufferedImage(800, 600, BufferedImage.TYPE_INT_ARGB);
 		g2d = (Graphics2D) screenImg.getGraphics();
 	}
 	
 	public void run(){
-
+		
 		init();
 		
 		boolean running = true;
 		
+		// Timing
+		double lastLoopTime = System.nanoTime();
+		
 		final int TARGET_FPS = 60;
 		final long OPTIMAL_TIME = 1000000000/TARGET_FPS;
-		long lastLoopTime = System.nanoTime();
+		
+		// FPS count
+		int lastSecondTime = (int)(lastLoopTime/1000000000);
+		int fps = 60;
+		int frameCount = 0;
 		
 		while(running){
-			long currentTime = System.nanoTime();
-			long updateLength = currentTime - lastLoopTime;
-			lastLoopTime = currentTime;
+			// Timing
+			long startTime = System.nanoTime();
+			lastLoopTime = startTime;
 			
-			double delta = updateLength/((double)OPTIMAL_TIME);
-			
+			// Game logic and drawing
 			update();
 			draw();
 			drawToScreen();
+			frameCount++;
 			
+			// FPS
+			int currentSecond = (int)(lastLoopTime/1000000000);
+			
+			if(currentSecond > lastSecondTime){
+				fps = frameCount;
+				frameCount = 0;
+				lastSecondTime = currentSecond;
+				
+				System.out.println("FPS: " + fps);
+			}
+			
+			// Timing
 			try{
-				Thread.sleep((lastLoopTime - System.nanoTime() + OPTIMAL_TIME)/1000000);
+				long wait = (long)((lastLoopTime - System.nanoTime() + OPTIMAL_TIME)/1000000);
+				wait = wait < 0 ? 1 : wait;
+				//Thread.yield();
+				Thread.sleep(wait);
 			}
 			catch(Exception e){
 				e.printStackTrace();
@@ -73,6 +99,7 @@ public class GameThread extends JPanel implements Runnable{
 	}
 	
 	private void drawToScreen(){
+		// Draw bufferedimage to the screen
 		Graphics g = getGraphics();
 		g.drawImage(screenImg, 0, 0, 800, 600, null);
 		g.dispose();

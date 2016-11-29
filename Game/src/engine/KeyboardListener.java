@@ -5,6 +5,7 @@ import java.awt.event.KeyListener;
 
 public class KeyboardListener implements KeyListener{
 	
+	// Holds booleans for key presses
 	private boolean keys[] = new boolean[256];
 	
 	public void keyTyped(KeyEvent e){
@@ -21,5 +22,9 @@ public class KeyboardListener implements KeyListener{
 	
 	public boolean isKeyPressed(int key){
 		return keys[key];
+	}
+
+	public boolean isKeyReleased(int key){
+		return !keys[key];
 	}
 }
