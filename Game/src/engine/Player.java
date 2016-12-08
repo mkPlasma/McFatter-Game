@@ -18,7 +18,8 @@ public class Player extends GameEntity{
 	private boolean focused = false;
 	
 	public Player(float x, float y, KeyboardListener keyListener){
-		super(x, y);
+		setX(x);
+		setY(y);
 		this.keyListener = keyListener;
 	}
 	

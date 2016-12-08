@@ -15,32 +15,63 @@ public class MainScreen extends GameScreen{
 	public void init(KeyboardListener keyListener){
 		this.keyListener = keyListener;
 		player = new Player(400, 400, keyListener);
+		enemy = new Enemy();
 	}
 	
+	// Test stuff (temporary)
 	private int timer = 0;
 	private int counter = 0;
 	
 	private Random random = new Random();
 	
+	private Enemy enemy;
+	
 	public void update(){
 		player.update();
+		
+		enemy.update();
 		
 		updateBullets();
 		checkCollisions();
 		
+		
 		// Bullet test
+
+		InstructionSet inst = new InstructionSet();
+		inst.add(new BulletInstruction(null, 0, BulletInstruction.SET_POS, new float[]{400, 150}));
+		inst.add(new BulletInstruction(null, 0, BulletInstruction.CONST_SPD_DIR, new float[]{0, 2}));
+		
+		Bullet b = new Bullet(inst, Bullet.TYPE_ORB_L, 0);
+		
+		InstructionSet pset = new InstructionSet();
+		pset.add(new PatternInstruction(0, PatternInstruction.PATTERN_CIRCLE, new float[]{32, 0}, b));
+		
+		pset.run();
+		addBullets(pset.getBullets());
+		
+		/*
 		timer++;
-		if(timer > 60){
+		if(timer > 15){
 			timer = 0;
 			counter++;
 			
-			int c = 64;
+			int c = 16;
+			int r = random.nextInt(360);
 			
-			for(int i = 0; i < c; i++){
-				float dir = i*(360/(float)c);
-				bullets.add(new Bullet(400, 100, random.nextInt(360), random.nextInt(4) + 3, Bullet.TYPE_ORB_L, 0));
+			for(int i = 0; i < c*0.75; i++){
+				float dir = i*(360/(float)c) + r;
+				
+				InstructionSet inst = new InstructionSet();
+				inst.add(new BulletInstruction(null, 0, BulletInstruction.SET_POS, new float[]{400, 150}));
+				inst.add(new BulletInstruction(null, 0, BulletInstruction.CONST_SPD_DIR, new float[]{dir, 2}));
+				inst.add(new BulletInstruction(null, 0, BulletInstruction.SET_BOUNCES, new float[]{3, Bullet.BOUNCE_SIDES_TOP}));
+				
+				Bullet b = new Bullet(inst, Bullet.TYPE_ORB_L, 0);
+				
+				bullets.add(b);
 			}
 		}
+		*/
 	}
 	
 	private void updateBullets(){
@@ -48,11 +79,7 @@ public class MainScreen extends GameScreen{
 		// Collision and edge deletion
 		for(int i = 0; i < bullets.size(); i++){
 			
-			float x = bullets.get(i).getX();
-			float y = bullets.get(i).getY();
-			
-			// Delete offscreen bullets
-			if(x < -64 || x > 864 || y < -64 || y > 664){
+			if(bullets.get(i).remove()){
 				bullets.remove(i);
 			}
 			else{// Update bullets
@@ -68,10 +95,21 @@ public class MainScreen extends GameScreen{
 			final Bullet b = bullets.get(i);
 			final float bpos[] = b.getPos();
 			
-			if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) <= player.getHitboxSize() + b.getHitboxSize()){
-				player.death();
+			// Hitbox size is slightly inaccurate, so it should be reduced
+			if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) < player.getHitboxSize() + b.getHitboxSize() - 2){
+				//player.death();
 				bullets.remove(i);
 			}
+		}
+	}
+	
+	private void addBullets(ArrayList<Bullet> bullets){
+		if(bullets.size() < 1)
+			return;
+		
+		for(int i = 0; i < bullets.size(); i++){
+			if(bullets.get(i) != null)
+				this.bullets.add(bullets.get(i));
 		}
 	}
 	
@@ -85,6 +123,7 @@ public class MainScreen extends GameScreen{
 	}
 	
 	private void drawBullets(Graphics2D g2d){
+		
 		for(int i = 0; i < bullets.size(); i++){
 			bullets.get(i).draw(g2d);
 		}
