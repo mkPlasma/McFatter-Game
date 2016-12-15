@@ -7,15 +7,17 @@ public abstract class Instruction{
 	
 	// Time will control when the instruction is run
 	// Time in frames from start of instruction set execution
-	protected final int time;
+	
+	// Not final, allows an instruction to repeat itself
+	protected int time;
 	
 	// Type controls what kind of action will be performed
 	protected final int type;
 	
 	// Args will control how the action is done
-	protected final float[] args;
+	protected final double[] args;
 	
-	public Instruction(int time, int type, float args[]){
+	public Instruction(int time, int type, double args[]){
 		this.time = time;
 		this.type = type;
 		this.args = args;
@@ -36,7 +38,7 @@ public abstract class Instruction{
 		return type;
 	}
 	
-	public float[] getArgs(){
+	public double[] getArgs(){
 		return args;
 	}
 }

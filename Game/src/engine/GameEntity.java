@@ -4,36 +4,36 @@ import java.awt.Graphics2D;
 
 public abstract class GameEntity{
 	
-	protected float x, y;
+	protected double x, y;
 	
-	public void setX(float x){
+	public void setX(double x){
 		this.x = x;
 	}
 	
-	public void setY(float y){
+	public void setY(double y){
 		this.y = y;
 	}
 	
-	public void setPos(float x, float y){
+	public void setPos(double x, double y){
 		setX(x);
 		setY(y);
 	}
 	
-	public void setPos(float[] pos){
+	public void setPos(double[] pos){
 		setX(pos[0]);
 		setY(pos[1]);
 	}
 	
-	public float getX(){
+	public double getX(){
 		return x;
 	}
 	
-	public float getY(){
+	public double getY(){
 		return y;
 	}
 	
-	public float[] getPos(){
-		return new float[]{x, y};
+	public double[] getPos(){
+		return new double[]{x, y};
 	}
 	
 	public abstract void update();

@@ -29,7 +29,7 @@ public class Bullet extends GameEntity{
 	// 3 - Bounce borders
 	private int attr[] = new int[4];
 	
-	private float dir, angVel, spd, accel, spdMin, spdMax;
+	private double dir, angVel, spd, accel, spdMin, spdMax;
 	
 	private int type, color;
 	private int hitboxSize;
@@ -39,6 +39,25 @@ public class Bullet extends GameEntity{
 	
 	// If true, bullet will not be updated
 	private boolean paused;
+	
+	public Bullet(Bullet b){
+		inst = new InstructionSet(b.getInstructionSet());
+		
+		attr = b.getAttributes();
+		
+		dir = b.getDir();
+		angVel = b.getAngVel();
+		spd = b.getSpd();
+		accel = b.getAccel();
+		spdMin = b.getSpdMin();
+		spdMax = b.getSpdMax();
+		
+		type = b.getType();
+		color = b.getColor();
+		initHitboxSize();
+		
+		paused = b.isPaused();
+	}
 	
 	public Bullet(BulletInstruction inst, int type, int color){
 		
@@ -62,11 +81,11 @@ public class Bullet extends GameEntity{
 		initHitboxSize();
 	}
 	
-	public Bullet(float x, float y, float dir, float spd, int type, int color){
+	public Bullet(double x, double y, double dir, double spd, int type, int color){
 		setX(x);
 		setY(y);
 		
-		BulletInstruction bi = new BulletInstruction(this, 0, BulletInstruction.CONST_SPD_DIR, new float[]{x, y, dir, spd});
+		BulletInstruction bi = new BulletInstruction(this, 0, BulletInstruction.CONST_DIR_SPD, new double[]{x, y, dir, spd});
 		inst = new InstructionSet(bi);
 		inst.init();
 		
@@ -107,51 +126,55 @@ public class Bullet extends GameEntity{
 		this.attr = attr;
 	}
 	
-	public float getDir(){
+	public int[] getAttributes(){
+		return attr;
+	}
+	
+	public double getDir(){
 		return dir;
 	}
 	
-	public void setDir(float dir){
+	public void setDir(double dir){
 		this.dir = dir;
 	}
 	
-	public float getSpd(){
+	public double getSpd(){
 		return spd;
 	}
 	
-	public void setSpd(float spd){
+	public void setSpd(double spd){
 		this.spd = spd;
 	}
 	
-	public float getAccel(){
+	public double getAccel(){
 		return accel;
 	}
 	
-	public void setAccel(float accel){
+	public void setAccel(double accel){
 		this.accel = accel;
 	}
 	
-	public float getSpdMax(){
+	public double getSpdMax(){
 		return spdMax;
 	}
 	
-	public void setSpdMax(float spdMax){
+	public void setSpdMax(double spdMax){
 		this.spdMax = spdMax;
 	}
 	
-	public float getSpdMin(){
+	public double getSpdMin(){
 		return spdMin;
 	}
 	
-	public void setSpdMin(float spdMin){
+	public void setSpdMin(double spdMin){
 		this.spdMin = spdMin;
 	}
 	
-	public float getAngVel(){
+	public double getAngVel(){
 		return angVel;
 	}
 	
-	public void setAngVel(float angVel){
+	public void setAngVel(double angVel){
 		this.angVel = angVel;
 	}
 	
@@ -161,6 +184,22 @@ public class Bullet extends GameEntity{
 	
 	public void setHitboxSize(int hitboxSize){
 		this.hitboxSize = hitboxSize;
+	}
+	
+	public int getType(){
+		return type;
+	}
+	
+	public void setType(int type){
+		this.type = type;
+	}
+	
+	public int getColor(){
+		return color;
+	}
+	
+	public void setColor(int color){
+		this.color = color;
 	}
 	
 	
