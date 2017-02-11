@@ -3,7 +3,9 @@ package engine;
 import java.awt.Graphics2D;
 
 public abstract class GameScreen{
-	public abstract void init(KeyboardListener keyListener);
+	protected Renderer renderer;
+	
+	public abstract void init(Graphics2D g2d);
 	public abstract void update();
-	public abstract void draw(Graphics2D g2d);
+	public abstract void draw();
 }

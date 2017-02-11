@@ -1,46 +1,41 @@
 package engine;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-
-public class Bullet extends GameEntity{
-	
-	public static final int
-		TYPE_ORB_S = 0,
-		TYPE_ORB_M = 1,
-		TYPE_ORB_L = 2;
+public class Bullet extends MovableEntity{
 	
 	public static final byte
-		BOUNCE_LEFT =		0b0000001,
-		BOUNCE_RIGHT =		0b0000010,
-		BOUNCE_TOP =		0b0000100,
-		BOUNCE_BOTTOM =		0b0001000,
-		BOUNCE_SIDES =		BOUNCE_LEFT | BOUNCE_RIGHT,
-		BOUNCE_SIDES_TOP =	BOUNCE_SIDES | BOUNCE_TOP,
-		BOUNCE_SPRITE_SIZE = 0b1000000;
-	
-	// Instruction set will control bullet movements
-	private InstructionSet inst;
+		BOUNCE_LEFT =			0b0000001,
+		BOUNCE_RIGHT =			0b0000010,
+		BOUNCE_TOP =			0b0000100,
+		BOUNCE_BOTTOM =			0b0001000,
+		BOUNCE_SIDES =			BOUNCE_LEFT | BOUNCE_RIGHT,
+		BOUNCE_SIDES_TOP =		BOUNCE_SIDES | BOUNCE_TOP,
+		BOUNCE_ALL =			BOUNCE_SIDES_TOP | BOUNCE_BOTTOM,
+		BOUNCE_SPRITE_SIZE =	0b1000000;
+		
 	
 	// Bullet attributes
 	// 0 - Use min spd
 	// 1 - Use max spd
 	// 2 - Num bounces
-	// 3 - Bounce borders
+	// 3 - Bounce bordersBulletSheet
 	private int attr[] = new int[4];
 	
-	private double dir, angVel, spd, accel, spdMin, spdMax;
 	
-	private int type, color;
-	private int hitboxSize;
+	// Player shots only
+	private int damage, dmgReduce;
 	
-	// If true, the bullet will be deleted
-	private boolean remove;
+	// Holds sprite data and hitbox size
+	private BulletFrame frame;
 	
 	// If true, bullet will not be updated
 	private boolean paused;
 	
+	// Whether bullet is drawn or not
+	private boolean visible = true;
+	
 	public Bullet(Bullet b){
+		super(b.getPos());
+		
 		inst = new InstructionSet(b.getInstructionSet());
 		
 		attr = b.getAttributes();
@@ -52,167 +47,54 @@ public class Bullet extends GameEntity{
 		spdMin = b.getSpdMin();
 		spdMax = b.getSpdMax();
 		
-		type = b.getType();
-		color = b.getColor();
-		initHitboxSize();
+		frame = b.getBulletFrame();
 		
 		paused = b.isPaused();
 	}
 	
-	public Bullet(BulletInstruction inst, int type, int color){
+	public Bullet(MovementInstruction inst, BulletFrame frame){
+		super();
 		
-		inst.setBullet(this);
+		inst.setEntity(this);
 		this.inst = new InstructionSet(inst);
 		this.inst.init();
 		
-		this.type = type;
-		this.color = color;
-		initHitboxSize();
+		this.frame = frame;
 	}
 	
-	public Bullet(InstructionSet inst, int type, int color){
+	public Bullet(InstructionSet inst, BulletFrame frame){
+		super();
 		
-		inst.setBullet(this);
+		inst.setEntity(this);
 		this.inst = inst;
 		inst.init();
 		
-		this.type = type;
-		this.color = color;
-		initHitboxSize();
+		this.frame = frame;
 	}
 	
-	public Bullet(double x, double y, double dir, double spd, int type, int color){
-		setX(x);
-		setY(y);
+	public Bullet(float x, float y, float dir, float spd, BulletFrame frame){
+		super(x, y);
 		
-		BulletInstruction bi = new BulletInstruction(this, 0, BulletInstruction.CONST_DIR_SPD, new double[]{x, y, dir, spd});
-		inst = new InstructionSet(bi);
-		inst.init();
+		inst = new InstructionSet(InstructionSet.INST_BULLET);
+		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_BULLET, MovementInstruction.SET_POS, new float[]{x, y}));
+		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_BULLET, MovementInstruction.CONST_DIR_SPD, new float[]{dir, spd}));
+		inst.init(2);
 		
-		this.type = type;
-		this.color = color;
-		initHitboxSize();
+		this.frame = frame;
 	}
-	
-	private void initHitboxSize(){
-		switch(type){
-			case 0:
-				hitboxSize = 2;
-				return;
-			case 1:
-				hitboxSize = 5;
-				return;
-			case 2:
-				hitboxSize = 8;
-				return;
-		}
+
+	public Bullet(float x, float y, float dir, float spd, BulletFrame frame, int damage, int dmgReduce){
+		super(x, y);
 		
-		return;
-	}
-	
-	
-	public InstructionSet getInstructionSet(){
-		return inst;
-	}
-	
-	public void setInstructionSet(InstructionSet inst){
-		this.inst = inst;
-	}
-	public void setInstructionSet(BulletInstruction inst){
-		this.inst = new InstructionSet(inst);
-	}
-	
-	public void setAttributes(int[] attr){
-		this.attr = attr;
-	}
-	
-	public int[] getAttributes(){
-		return attr;
-	}
-	
-	public double getDir(){
-		return dir;
-	}
-	
-	public void setDir(double dir){
-		this.dir = dir;
-	}
-	
-	public double getSpd(){
-		return spd;
-	}
-	
-	public void setSpd(double spd){
-		this.spd = spd;
-	}
-	
-	public double getAccel(){
-		return accel;
-	}
-	
-	public void setAccel(double accel){
-		this.accel = accel;
-	}
-	
-	public double getSpdMax(){
-		return spdMax;
-	}
-	
-	public void setSpdMax(double spdMax){
-		this.spdMax = spdMax;
-	}
-	
-	public double getSpdMin(){
-		return spdMin;
-	}
-	
-	public void setSpdMin(double spdMin){
-		this.spdMin = spdMin;
-	}
-	
-	public double getAngVel(){
-		return angVel;
-	}
-	
-	public void setAngVel(double angVel){
-		this.angVel = angVel;
-	}
-	
-	public int getHitboxSize(){
-		return hitboxSize;
-	}
-	
-	public void setHitboxSize(int hitboxSize){
-		this.hitboxSize = hitboxSize;
-	}
-	
-	public int getType(){
-		return type;
-	}
-	
-	public void setType(int type){
-		this.type = type;
-	}
-	
-	public int getColor(){
-		return color;
-	}
-	
-	public void setColor(int color){
-		this.color = color;
-	}
-	
-	
-	public boolean remove(){
-		return remove;
-	}
-	
-	public void setPaused(boolean paused){
-		this.paused = paused;
-	}
-	
-	public boolean isPaused(){
-		return paused;
+		inst = new InstructionSet(InstructionSet.INST_BULLET);
+		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_BULLET, MovementInstruction.SET_POS, new float[]{x, y}));
+		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_BULLET, MovementInstruction.CONST_DIR_SPD, new float[]{dir, spd}));
+		inst.init(2);
+		
+		this.frame = frame;
+		
+		this.damage = damage;
+		this.dmgReduce = dmgReduce;
 	}
 	
 	public void update(){
@@ -226,6 +108,7 @@ public class Bullet extends GameEntity{
 		spd += accel;
 		
 		// Keep speed within range
+		
 		if(attr[1] == 1 && spd > spdMax)
 			spd = spdMax;
 		else if(attr[0] == 1 && spd < spdMin)
@@ -243,22 +126,93 @@ public class Bullet extends GameEntity{
 			remove = true;
 		
 		// Bouncing
-		if(attr[2] > 0){
+		if(attr[2] > 0 || attr[2] == -1){
 			if(((attr[3] & BOUNCE_LEFT) == BOUNCE_LEFT && x <= 0) || ((attr[3] & BOUNCE_LEFT) == BOUNCE_LEFT && x >= 800)){
 				dir = -dir + 180;
-				attr[2]--;
+				if(attr[2] > 0) attr[2]--;
 			}
 			if(((attr[3] & BOUNCE_TOP) == BOUNCE_TOP && y <= 0) || ((attr[3] & BOUNCE_BOTTOM) == BOUNCE_BOTTOM && y >= 600)){
 				dir = -dir;
-				attr[2]--;
+				if(attr[2] > 0) attr[2]--;
 			}
 		}
+		
+		damage -= dmgReduce;
+		
+		time++;
 	}
 	
-	public void draw(Graphics2D g2d){
-		float size = hitboxSize;
+	public void draw(Renderer r){
 		
-		g2d.setColor(Color.BLUE);
-		g2d.fillOval((int)(x - (size/2)), (int)(y - (size/2)), (int)size, (int)size);
+		float rotation = 0;
+		
+		if(frame.spriteAlign())
+			rotation = dir + 90;
+		
+		rotation += time*frame.getSpriteRotation()*(frame.spriteRotationBySpd() ? spd : 1);
+		
+		if(visible)
+			r.render(frame.getSprite(), x, y, rotation, 1f);
+		
+		// Draw hitbox
+		//r.drawCircle((int)(x - (hitboxSize)), (int)(y - (hitboxSize)), (int)hitboxSize*2, (int)hitboxSize*2, Color.RED);
+	}
+	
+	public void onCreate(){
+		
+	}
+	
+	public void onDestroy(){
+		remove = true;
+	}
+	
+	
+	
+	public void setAttributes(int[] attr){
+		this.attr = attr;
+	}
+	
+	public int[] getAttributes(){
+		return attr;
+	}
+	
+	public void setBulletFrame(BulletFrame frame){
+		this.frame = frame;
+	}
+	
+	public BulletFrame getBulletFrame(){
+		return frame;
+	}
+	
+	public void setDamage(int damage){
+		this.damage = damage;
+	}
+	
+	public int getDamage(){
+		return damage;
+	}
+	
+	public void setDamageReduce(int dmgReduce){
+		this.dmgReduce = dmgReduce;
+	}
+	
+	public int getDamageReduce(){
+		return dmgReduce;
+	}
+	
+	public void setPaused(boolean paused){
+		this.paused = paused;
+	}
+	
+	public boolean isPaused(){
+		return paused;
+	}
+	
+	public void setVisible(boolean visible){
+		this.visible = visible;
+	}
+	
+	public boolean isVisible(){
+		return visible;
 	}
 }

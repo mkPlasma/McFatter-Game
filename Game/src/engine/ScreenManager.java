@@ -1,7 +1,5 @@
 package engine;
 
-import java.awt.Graphics2D;
-
 public class ScreenManager{
 	
 	private GameScreen screen;
@@ -10,8 +8,8 @@ public class ScreenManager{
 		screen.update();
 	}
 	
-	public void draw(Graphics2D g2d){
-		screen.draw(g2d);
+	public void draw(){
+		screen.draw();
 	}
 	
 	public void setScreen(GameScreen screen){

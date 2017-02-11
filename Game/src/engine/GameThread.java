@@ -1,41 +1,63 @@
 package engine;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.awt.image.VolatileImage;
 
 import javax.swing.JPanel;
 
 public class GameThread extends JPanel implements Runnable{
 	
 	private Graphics2D g2d;
-	private KeyboardListener keyListener;
 	private ScreenManager screenManager;
 	
-	private BufferedImage screenImg;
+	// VolatileImage is used if hardware acceleration is on
+	private VolatileImage screenImg;
+	private BufferedImage screenImgB;
 	
-	public GameThread(KeyboardListener keyListener){
+	// Resolution scale
+	private float scale;
+	
+	private int fps;
+	
+	public GameThread(){
 		super();
-		setFocusable(true);
-		requestFocus();
-		
-		addKeyListener(keyListener);
-		this.keyListener = keyListener;
 	}
 	
 	private void init(){
 		
+		setFocusable(true);
+		requestFocus();
+		
+		final KeyboardListener keyListener = new KeyboardListener();
+		addKeyListener(keyListener);
+		
+		// Image holds graphics for the screen
+		
+		scale = Settings.getWindowScale();
+		
+		if(Settings.useHardwareAcceleration()){
+			screenImg = createVolatileImage((int)(800*scale), (int)(600*scale));
+			g2d = (Graphics2D)screenImg.getGraphics();
+		}
+		else{
+			screenImgB = new BufferedImage((int)(800*scale), (int)(600*scale), BufferedImage.TYPE_INT_ARGB);
+			g2d = (Graphics2D)screenImgB.getGraphics();
+		}
+		
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+		g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		
 		// Create test game screen
 		MainScreen testScreen = new MainScreen();
-		testScreen.init(keyListener);
+		testScreen.init(g2d);
 		
 		// Set up screen manager
 		screenManager = new ScreenManager();
 		screenManager.setScreen(testScreen);
-		
-		// Image holds graphics for the screen
-		screenImg = new BufferedImage(800, 600, BufferedImage.TYPE_INT_ARGB);
-		g2d = (Graphics2D) screenImg.getGraphics();
 	}
 	
 	public void run(){
@@ -52,8 +74,8 @@ public class GameThread extends JPanel implements Runnable{
 		
 		// FPS count
 		int lastSecondTime = (int)(lastLoopTime/1000000000);
-		int fps = 60;
 		int frameCount = 0;
+		fps = 60;
 		
 		while(running){
 			// Timing
@@ -73,15 +95,12 @@ public class GameThread extends JPanel implements Runnable{
 				fps = frameCount;
 				frameCount = 0;
 				lastSecondTime = currentSecond;
-				
-				System.out.println("FPS: " + fps);
 			}
 			
 			// Timing
 			try{
 				long wait = (long)((lastLoopTime - System.nanoTime() + OPTIMAL_TIME)/1000000);
 				wait = wait < 0 ? 1 : wait;
-				//Thread.yield();
 				Thread.sleep(wait);
 			}
 			catch(Exception e){
@@ -95,13 +114,26 @@ public class GameThread extends JPanel implements Runnable{
 	}
 	
 	private void draw(){
-		screenManager.draw(g2d);
+		screenManager.draw();
 	}
 	
 	private void drawToScreen(){
 		// Draw bufferedimage to the screen
 		Graphics g = getGraphics();
-		g.drawImage(screenImg, 0, 0, 800, 600, null);
+		
+		g2d.setColor(Color.WHITE);
+		
+		if(fps <= 57)
+			g2d.setColor(Color.RED);
+		
+		g2d.drawString(Integer.toString(fps), 782*scale, 596*scale);
+		
+		
+		if(Settings.useHardwareAcceleration())
+			g.drawImage(screenImg, 0, 0, (int)(800*scale), (int)(600*scale), null);
+		else
+			g.drawImage(screenImgB, 0, 0, (int)(800*scale), (int)(600*scale), null);
+		
 		g.dispose();
 	}
 }

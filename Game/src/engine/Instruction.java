@@ -15,9 +15,9 @@ public abstract class Instruction{
 	protected final int type;
 	
 	// Args will control how the action is done
-	protected final double[] args;
+	protected final float[] args;
 	
-	public Instruction(int time, int type, double args[]){
+	public Instruction(int time, int type, float args[]){
 		this.time = time;
 		this.type = type;
 		this.args = args;
@@ -38,7 +38,7 @@ public abstract class Instruction{
 		return type;
 	}
 	
-	public double[] getArgs(){
+	public float[] getArgs(){
 		return args;
 	}
 }

@@ -1,7 +1,5 @@
 package engine;
 
-import java.util.ArrayList;
-
 public class InstructionSet{
 	
 	private Instruction[] inst;
@@ -15,8 +13,6 @@ public class InstructionSet{
 	
 	private final int type;
 	
-	// Pattern Instruction bullet list
-	//private ArrayList<Bullet> bullets;
 	
 	public InstructionSet(InstructionSet instset){
 		inst = instset.getInstructionArray();
@@ -25,7 +21,7 @@ public class InstructionSet{
 		switch(type){
 			case INST_BULLET:
 				for(int i = 0; i < inst.length; i++){
-					inst[i] = new BulletInstruction((BulletInstruction)inst[i]);
+					inst[i] = new MovementInstruction((MovementInstruction)inst[i]);
 				}
 				break;
 		}
@@ -36,52 +32,22 @@ public class InstructionSet{
 	}
 	
 	// Bullet Instructions
-	public InstructionSet(BulletInstruction[] inst){
+	public InstructionSet(MovementInstruction[] inst){
 		this.inst = inst;
 		type = INST_BULLET;
 	}
 
-	public InstructionSet(BulletInstruction inst){
-		this.inst = new BulletInstruction[]{inst};
+	public InstructionSet(MovementInstruction inst){
+		this.inst = new MovementInstruction[]{inst};
 		type = INST_BULLET;
 	}
 	
-	public void setBullet(Bullet bullet){
+	public void setEntity(MovableEntity entity){
 		for(int i = 0; i < inst.length; i++){
-			BulletInstruction bi = (BulletInstruction)inst[i];
-			bi.setBullet(bullet);
+			MovementInstruction bi = (MovementInstruction)inst[i];
+			bi.setEntity(entity);
 		}
 	}
-	
-	
-	// Pattern Instructions
-	// Removed for now
-	/*
-	public InstructionSet(PatternInstruction[] inst){
-		this.inst = inst;
-		bullets = new ArrayList<Bullet>();
-		type = INST_PATTERN;
-	}
-
-	public InstructionSet(PatternInstruction inst){
-		this.inst = new PatternInstruction[]{inst};
-		bullets = new ArrayList<Bullet>();
-		type = INST_PATTERN;
-	}
-	
-	public ArrayList<Bullet> getBullets(){
-		// Returns bullets then clears the array list
-		// This is because the bullets on the frame should only be fired once
-		// If not cleared, all previous bullets would keep firing forever
-		
-		if(bullets == null || bullets.size() < 1)
-			return null;
-
-		ArrayList<Bullet> temp = new ArrayList<Bullet>(bullets);
-		bullets.clear();
-		
-		return temp;
-	}*/
 	
 	// General functions
 	public int length(){
@@ -158,12 +124,15 @@ public class InstructionSet{
 	// Use to set initial position of bullets for example
 	public void init(){
 		inst[0].run(0);
+		index++;
 	}
 	
 	public void init(int count){
 		for(int i = 0; i < count; i++){
-			if(inst[i] != null)
+			if(inst[i] != null){
 				inst[i].run(0);
+				index++;
+			}
 		}
 	}
 	
@@ -187,8 +156,6 @@ public class InstructionSet{
 		// Runs all instructions with that time value
 		while(inst[index].run(time) && inst[index].getTime() != -1){
 			
-			//addBullets();
-			
 			// Increment instruction index
 			index++;
 			
@@ -196,32 +163,12 @@ public class InstructionSet{
 			if(index == inst.length)
 				return true;
 			
+			time = 0;
 			ran = true;
 		}
-		
-		//addBullets();
 		
 		// Increment time
 		time++;
 		return ran;
 	}
-	
-	/*
-	private void addBullets(){
-		// Add bullets for Pattern Instructions
-		if(type == INST_PATTERN && inst[index] != null){
-			PatternInstruction pi = (PatternInstruction)inst[index];
-			ArrayList<Bullet> b = pi.getBullets();
-			
-			if(bullets == null)
-				bullets = new ArrayList<Bullet>();
-			
-			if(b != null){
-				for(int i = 0; i < b.size(); i++){
-					if(b.get(i) != null)
-						bullets.add(b.get(i));
-				}
-			}
-		}
-	}*/
 }

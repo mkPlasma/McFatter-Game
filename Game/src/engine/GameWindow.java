@@ -1,32 +1,25 @@
 package engine;
 
+import java.awt.Dimension;
+
 import javax.swing.JFrame;
 
 public class GameWindow extends JFrame{
 	
-	private final GameThread gameThread;
-	
-	private final KeyboardListener keyListener;
-	
 	public GameWindow(String name){
 		super(name);
-		// Init window
-		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		setSize(800, 600);
 		setResizable(false);
-		setLocationRelativeTo(null);
 		
-		// Init other stuff
+		float scale = Settings.getWindowScale();
 		
-		keyListener = new KeyboardListener();
-		addKeyListener(keyListener);
-		
-		gameThread = new GameThread(keyListener);
-		
+		final GameThread gameThread = new GameThread();
+		gameThread.setPreferredSize((new Dimension((int)(800*scale), (int)(600*scale))));
 		add(gameThread);
 		
+		pack();
+		setLocationRelativeTo(null);
 		setVisible(true);
 		
 		gameThread.run();
