@@ -1,10 +1,12 @@
-package engine;
+package engine.entities;
 
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 import content.BulletSheet;
+import engine.KeyboardListener;
+import engine.graphics.Renderer;
 
 public class Player extends GameEntity{
 	
@@ -24,8 +26,7 @@ public class Player extends GameEntity{
 	
 	
 	public Player(float x, float y){
-		setX(x);
-		setY(y);
+		super(x, y);
 		
 		bullets = new ArrayList<Bullet>();
 		

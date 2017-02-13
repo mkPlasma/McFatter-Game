@@ -1,4 +1,4 @@
-package engine;
+package engine.entities;
 
 public abstract class MovableEntity extends GameEntity{
 	
@@ -6,13 +6,9 @@ public abstract class MovableEntity extends GameEntity{
 	protected InstructionSet inst;
 	
 	protected float dir, angVel, spd, accel, spdMin, spdMax;
-
-	// If true, the entity will be deleted
-	protected boolean remove;
-	
 	
 	public MovableEntity(){
-		
+		super();
 	}
 	
 	public MovableEntity(float x, float y){
@@ -30,9 +26,11 @@ public abstract class MovableEntity extends GameEntity{
 	public void setInstructionSet(InstructionSet inst){
 		this.inst = inst;
 	}
+	
 	public void setInstructionSet(MovementInstruction inst){
 		this.inst = new InstructionSet(inst);
 	}
+	
 	
 	public float getDir(){
 		return dir;
@@ -80,9 +78,5 @@ public abstract class MovableEntity extends GameEntity{
 	
 	public void setAngVel(float angVel){
 		this.angVel = angVel;
-	}
-	
-	public boolean remove(){
-		return remove;
 	}
 }

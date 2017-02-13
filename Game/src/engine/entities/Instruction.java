@@ -1,4 +1,4 @@
-package engine;
+package engine.entities;
 
 public abstract class Instruction{
 	

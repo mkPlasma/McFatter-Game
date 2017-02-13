@@ -1,9 +1,17 @@
-package engine;
+package engine.entities;
+
+import engine.graphics.Renderer;
 
 public abstract class GameEntity{
 	
 	protected float x, y;
-	protected int time = 0;
+	protected int time;
+
+	// If true, the entity will be deleted
+	protected boolean remove;
+	
+	// Whether entity is drawn or not
+	protected boolean visible;
 	
 	public GameEntity(){
 		
@@ -52,5 +60,17 @@ public abstract class GameEntity{
 	
 	public float[] getPos(){
 		return new float[]{x, y};
+	}
+	
+	public boolean remove(){
+		return remove;
+	}
+	
+	public void setVisible(boolean visible){
+		this.visible = visible;
+	}
+	
+	public boolean isVisible(){
+		return visible;
 	}
 }

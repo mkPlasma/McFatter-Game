@@ -1,4 +1,8 @@
-package engine;
+package engine.entities;
+
+import java.awt.Color;
+
+import engine.graphics.Renderer;
 
 public class Bullet extends MovableEntity{
 	
@@ -17,84 +21,81 @@ public class Bullet extends MovableEntity{
 	// 0 - Use min spd
 	// 1 - Use max spd
 	// 2 - Num bounces
-	// 3 - Bounce bordersBulletSheet
-	private int attr[] = new int[4];
+	// 3 - Bounce borders
+	protected byte attr[] = new byte[4];
 	
-	
-	// Player shots only
-	private int damage, dmgReduce;
 	
 	// Holds sprite data and hitbox size
 	private BulletFrame frame;
 	
+	// Player shots only
+	private int damage, dmgReduce;
+	
+	// Whether entity can collide
+	protected boolean collisions = true;
+	
 	// If true, bullet will not be updated
 	private boolean paused;
 	
-	// Whether bullet is drawn or not
-	private boolean visible = true;
-	
-	public Bullet(Bullet b){
-		super(b.getPos());
-		
-		inst = new InstructionSet(b.getInstructionSet());
-		
-		attr = b.getAttributes();
-		
-		dir = b.getDir();
-		angVel = b.getAngVel();
-		spd = b.getSpd();
-		accel = b.getAccel();
-		spdMin = b.getSpdMin();
-		spdMax = b.getSpdMax();
-		
-		frame = b.getBulletFrame();
-		
-		paused = b.isPaused();
-	}
-	
 	public Bullet(MovementInstruction inst, BulletFrame frame){
 		super();
+		
+		visible = true;
+
+		this.frame = frame;
 		
 		inst.setEntity(this);
 		this.inst = new InstructionSet(inst);
 		this.inst.init();
 		
-		this.frame = frame;
+		onCreate();
 	}
 	
 	public Bullet(InstructionSet inst, BulletFrame frame){
 		super();
 		
+		visible = true;
+		
+		this.frame = frame;
+		
 		inst.setEntity(this);
 		this.inst = inst;
 		inst.init();
 		
-		this.frame = frame;
+		onCreate();
 	}
 	
 	public Bullet(float x, float y, float dir, float spd, BulletFrame frame){
 		super(x, y);
 		
-		inst = new InstructionSet(InstructionSet.INST_BULLET);
+		visible = true;
+
+		this.frame = frame;
+		
+		inst = new InstructionSet(InstructionSet.INST_MOVABLE);
 		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_BULLET, MovementInstruction.SET_POS, new float[]{x, y}));
 		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_BULLET, MovementInstruction.CONST_DIR_SPD, new float[]{dir, spd}));
 		inst.init(2);
 		
-		this.frame = frame;
+		onCreate();
 	}
-
+	
 	public Bullet(float x, float y, float dir, float spd, BulletFrame frame, int damage, int dmgReduce){
 		super(x, y);
 		
-		inst = new InstructionSet(InstructionSet.INST_BULLET);
-		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_BULLET, MovementInstruction.SET_POS, new float[]{x, y}));
-		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_BULLET, MovementInstruction.CONST_DIR_SPD, new float[]{dir, spd}));
-		inst.init(2);
+		visible = true;
 		
 		this.frame = frame;
 		
 		this.damage = damage;
 		this.dmgReduce = dmgReduce;
+		
+		inst = new InstructionSet(InstructionSet.INST_MOVABLE);
+		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_BULLET, MovementInstruction.SET_POS, new float[]{x, y}));
+		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_BULLET, MovementInstruction.CONST_DIR_SPD, new float[]{dir, spd}));
+		inst.init(2);
+		
+		onCreate();
 	}
 	
 	public void update(){
@@ -144,6 +145,9 @@ public class Bullet extends MovableEntity{
 	
 	public void draw(Renderer r){
 		
+		if(!visible)
+			return;
+		
 		float rotation = 0;
 		
 		if(frame.spriteAlign())
@@ -155,6 +159,7 @@ public class Bullet extends MovableEntity{
 			r.render(frame.getSprite(), x, y, rotation, 1f);
 		
 		// Draw hitbox
+		int hitboxSize = frame.getHitboxSize();
 		//r.drawCircle((int)(x - (hitboxSize)), (int)(y - (hitboxSize)), (int)hitboxSize*2, (int)hitboxSize*2, Color.RED);
 	}
 	
@@ -167,21 +172,21 @@ public class Bullet extends MovableEntity{
 	}
 	
 	
-	
-	public void setAttributes(int[] attr){
-		this.attr = attr;
-	}
-	
-	public int[] getAttributes(){
-		return attr;
-	}
-	
 	public void setBulletFrame(BulletFrame frame){
 		this.frame = frame;
 	}
 	
 	public BulletFrame getBulletFrame(){
 		return frame;
+	}
+
+	
+	public void setAttributes(byte[] attr){
+		this.attr = attr;
+	}
+	
+	public byte[] getAttributes(){
+		return attr;
 	}
 	
 	public void setDamage(int damage){
@@ -207,12 +212,12 @@ public class Bullet extends MovableEntity{
 	public boolean isPaused(){
 		return paused;
 	}
-	
-	public void setVisible(boolean visible){
-		this.visible = visible;
+
+	public void setCollisions(boolean collisions){
+		this.collisions = collisions;
 	}
 	
-	public boolean isVisible(){
-		return visible;
+	public boolean collisionsEnabled(){
+		return collisions;
 	}
 }

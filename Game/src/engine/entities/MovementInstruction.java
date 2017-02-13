@@ -1,10 +1,10 @@
-package engine;
+package engine.entities;
 
 public class MovementInstruction extends Instruction{
 	
 	// Class controls movements and arguments of enemies and bullets
 	
-	// Type of bullet instruction will determine movement pattern.
+	// Type of instruction will determine movement pattern
 	
 	// args reference
 	// CONST_DIR_SPD		[dir, spd]
@@ -59,7 +59,8 @@ public class MovementInstruction extends Instruction{
 		SET_BOUNCES =			0b000010000000000,
 		
 		// Misc
-		SET_VISIBLE =			0b000100000000000;
+		SET_VISIBLE =			0b000100000000000,
+		SET_COLLISIONS =		0b001000000000000;
 	
 	// Entity controlled
 	private MovableEntity e;
@@ -73,26 +74,19 @@ public class MovementInstruction extends Instruction{
 	
 	// Bullet values
 	private float x, y, dir, angVel, spd, accel, spdMin, spdMax;
-	private int[] attr = new int[4];
-	private boolean visible;
+	private byte[] attr;
+	private boolean visible, collisions;
 	
 	public MovementInstruction(MovableEntity entity, int time, int entType, int type, float[] args){
 		super(time, type, args);
 		e = entity;
 		this.entType = entType;
+		
 		init(false);
 	}
 	
-	// For cloning
-	// Remember to set entity manually
-	public MovementInstruction(MovementInstruction inst){
-		super(inst.getTime(), inst.getType(), inst.getArgs());
-		entType = inst.getEntType();
-		init(false);
-	}
-	
-	private void init(boolean attrOnly){
-		if(!attrOnly){
+	private void init(boolean attributes){
+		if(!attributes){
 			// Initialize variables to arguments
 			x = type == SET_X || type == SET_POS || type == CHANGE_X || type == CHANGE_POS ? args[0] : 0;
 			y = type == SET_Y || type == CHANGE_Y ? args[0] : type == SET_POS || type == CHANGE_POS ? args[1] : 0;
@@ -103,22 +97,29 @@ public class MovementInstruction extends Instruction{
 			spdMin = type == SET_SPD_MIN || type == SET_SPD_MIN_MAX || type == CHANGE_SPD_MIN || type == CHANGE_SPD_MIN_MAX ? args[0] : type == CONST_ACCEL || type == OFFSET_ACCEL ? args[3] : type == CONST_ANGVEL_ACCEL || type == OFFSET_ANGVEL_ACCEL ? args[4] : 0;
 			spdMax = type == SET_SPD_MAX || type == CHANGE_SPD_MAX ? args[0] : type == SET_SPD_MIN_MAX || type == CHANGE_SPD_MIN_MAX ? args[1] : type == CONST_ACCEL || type == OFFSET_ANGVEL ? args[4] : type == CONST_ANGVEL_ACCEL || type == OFFSET_ANGVEL_ACCEL ? args[5] : 0;
 		}
-
-		if(entType == ENT_BULLET){
-			// These values should stay the same if not modified
+		
+		if(!attributes)
+			return;
+		
+		// These values should stay the same if not modified
+		visible = type == SET_VISIBLE ? args[0] == 1 ? true : false : visible;
+		
+		if(entType == ENT_BULLET || entType == ENT_ENEMY){
 			
 			// Auto set use min/max spd
 			attr[0] = type == SET_SPD_MIN || type == SET_SPD_MIN_MAX || type == CHANGE_SPD_MIN || type == CHANGE_SPD_MIN_MAX || type == CONST_ACCEL || type == OFFSET_ACCEL ? 1 : attr[0];
 			attr[1] = type == SET_SPD_MAX || type == SET_SPD_MIN_MAX || type == CHANGE_SPD_MAX || type == CHANGE_SPD_MIN_MAX || type == CONST_ACCEL || type == OFFSET_ACCEL ? 1 : attr[1];
 			
 			// Override that if user sets it manually
-			attr[0] = type == USE_SPD_MIN ? (int)args[0] : attr[0];
-			attr[1] = type == USE_SPD_MAX ? (int)args[0] : attr[1];
+			attr[0] = type == USE_SPD_MIN ? (byte)args[0] : attr[0];
+			attr[1] = type == USE_SPD_MAX ? (byte)args[0] : attr[1];
 			
-			attr[2] = type == SET_BOUNCES ? (int)args[0] : attr[2];
-			attr[3] = type == SET_BOUNCES ? (int)args[1] : attr[3];
+			collisions = type == SET_VISIBLE ? args[0] == 1 ? true : false : collisions;
 			
-			visible = type == SET_VISIBLE ? args[0] == 1 ? true : false : visible;
+			if(entType == ENT_BULLET){
+				attr[2] = type == SET_BOUNCES ? (byte)args[0] : attr[2];
+				attr[3] = type == SET_BOUNCES ? (byte)args[1] : attr[3];
+			}
 		}
 	}
 	
@@ -158,16 +159,38 @@ public class MovementInstruction extends Instruction{
 		if((type & SET_ANGVEL) == SET_ANGVEL)
 			e.setAngVel(angVel);
 		
+		visible = e.isVisible();
+		
 		if(entType == ENT_BULLET){
-			Bullet b = (Bullet)e;
+			Bullet e2 = (Bullet)e;
 			
 			// Set attributes so they do not get overwritten
-			attr = b.getAttributes();
-			visible = b.isVisible();
+			attr = e2.getAttributes();
+			collisions = e2.collisionsEnabled();
+			
 			init(true);
 			
-			b.setAttributes(attr);
-			b.setVisible(visible);
+			e.setVisible(visible);
+			e2.setAttributes(attr);
+			e2.setCollisions(collisions);
+		}
+		else if(entType == ENT_ENEMY){
+			Enemy e2 = (Enemy)e;
+			
+			// Set attributes so they do not get overwritten
+			attr = e2.getAttributes();
+			collisions = e2.collisionsEnabled();
+			
+			init(true);
+			
+			e.setVisible(visible);
+			e2.setAttributes(attr);
+			e2.setCollisions(collisions);
+			
+		}
+		else{
+			init(true);
+			e.setVisible(visible);
 		}
 		
 		return true;

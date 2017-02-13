@@ -1,4 +1,4 @@
-package engine;
+package engine.graphics;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -29,7 +29,6 @@ public class Sprite{
 	
 	// Load sprite to img
 	public void load(){
-		System.out.println("Loading sprite");
 		
 		File imgFile = new File(path);
 		

@@ -1,4 +1,4 @@
-package engine;
+package engine.entities;
 
 public class InstructionSet{
 	
@@ -8,24 +8,9 @@ public class InstructionSet{
 	// Type of instruction
 	public static final int
 		INST_DEFAULT = 0,
-		INST_BULLET = 1,
-		INST_PATTERN = 2;
+		INST_MOVABLE = 1;
 	
 	private final int type;
-	
-	
-	public InstructionSet(InstructionSet instset){
-		inst = instset.getInstructionArray();
-		type = instset.getType();
-		
-		switch(type){
-			case INST_BULLET:
-				for(int i = 0; i < inst.length; i++){
-					inst[i] = new MovementInstruction((MovementInstruction)inst[i]);
-				}
-				break;
-		}
-	}
 	
 	public InstructionSet(int type){
 		this.type = type;
@@ -34,12 +19,12 @@ public class InstructionSet{
 	// Bullet Instructions
 	public InstructionSet(MovementInstruction[] inst){
 		this.inst = inst;
-		type = INST_BULLET;
+		type = INST_MOVABLE;
 	}
 
 	public InstructionSet(MovementInstruction inst){
 		this.inst = new MovementInstruction[]{inst};
-		type = INST_BULLET;
+		type = INST_MOVABLE;
 	}
 	
 	public void setEntity(MovableEntity entity){

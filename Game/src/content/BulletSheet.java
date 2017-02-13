@@ -1,8 +1,8 @@
 package content;
 
-import engine.BulletFrame;
-import engine.Sprite;
-import engine.SpriteCache;
+import engine.entities.BulletFrame;
+import engine.graphics.Sprite;
+import engine.graphics.SpriteCache;
 
 public class BulletSheet{
 	

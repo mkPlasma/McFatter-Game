@@ -30,12 +30,13 @@ public class GameThread extends JPanel implements Runnable{
 	private void init(){
 		
 		setFocusable(true);
-		requestFocus();
 		
-		final KeyboardListener keyListener = new KeyboardListener();
-		addKeyListener(keyListener);
+		// There are meant to be two of these
+		// If there is only one then the controls don't work sometimes when launched on Windows
+		requestFocusInWindow();
+		requestFocusInWindow();
 		
-		// Image holds graphics for the screen
+		addKeyListener(new KeyboardListener());
 		
 		scale = Settings.getWindowScale();
 		

@@ -1,8 +1,10 @@
-package engine;
+package engine.graphics;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+
+import engine.Settings;
 
 public class Renderer{
 	

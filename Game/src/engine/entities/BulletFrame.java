@@ -1,4 +1,6 @@
-package engine;
+package engine.entities;
+
+import engine.graphics.Sprite;
 
 public class BulletFrame{
 
