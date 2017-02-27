@@ -1,7 +1,5 @@
 package engine.entities;
 
-import java.awt.Color;
-
 import engine.graphics.Renderer;
 
 public class Bullet extends MovableEntity{
@@ -18,11 +16,9 @@ public class Bullet extends MovableEntity{
 		
 	
 	// Bullet attributes
-	// 0 - Use min spd
-	// 1 - Use max spd
-	// 2 - Num bounces
-	// 3 - Bounce borders
-	protected byte attr[] = new byte[4];
+	// 1 - Num bounces
+	// 2 - Bounce borders
+	protected byte attr[] = new byte[2];
 	
 	
 	// Holds sprite data and hitbox size
@@ -102,39 +98,21 @@ public class Bullet extends MovableEntity{
 		if(paused)
 			return;
 		
-		// Set up bullet movements
-		inst.run();
-		
-		// Acceleration
-		spd += accel;
-		
-		// Keep speed within range
-		
-		if(attr[1] == 1 && spd > spdMax)
-			spd = spdMax;
-		else if(attr[0] == 1 && spd < spdMin)
-			spd = spdMin;
-		
-		// Angular velocity
-		dir += angVel;
-		
-		// Bullet movement
-		x += spd*Math.cos(Math.toRadians(dir));
-		y += spd*Math.sin(Math.toRadians(dir));
+		updateMovements();
 		
 		// Delete at borders
 		if(x < -64 || x > 864 || y < -64 || y > 664)
 			remove = true;
 		
 		// Bouncing
-		if(attr[2] > 0 || attr[2] == -1){
-			if(((attr[3] & BOUNCE_LEFT) == BOUNCE_LEFT && x <= 0) || ((attr[3] & BOUNCE_LEFT) == BOUNCE_LEFT && x >= 800)){
+		if(attr[0] > 0 || attr[0] == -1){
+			if(((attr[1] & BOUNCE_LEFT) == BOUNCE_LEFT && x <= 0) || ((attr[1] & BOUNCE_LEFT) == BOUNCE_LEFT && x >= 800)){
 				dir = -dir + 180;
-				if(attr[2] > 0) attr[2]--;
+				if(attr[0] > 0) attr[2]--;
 			}
-			if(((attr[3] & BOUNCE_TOP) == BOUNCE_TOP && y <= 0) || ((attr[3] & BOUNCE_BOTTOM) == BOUNCE_BOTTOM && y >= 600)){
+			if(((attr[1] & BOUNCE_TOP) == BOUNCE_TOP && y <= 0) || ((attr[1] & BOUNCE_BOTTOM) == BOUNCE_BOTTOM && y >= 600)){
 				dir = -dir;
-				if(attr[2] > 0) attr[2]--;
+				if(attr[0] > 0) attr[2]--;
 			}
 		}
 		
@@ -159,7 +137,8 @@ public class Bullet extends MovableEntity{
 			r.render(frame.getSprite(), x, y, rotation, 1f);
 		
 		// Draw hitbox
-		int hitboxSize = frame.getHitboxSize();
+		
+		//int hitboxSize = frame.getHitboxSize();
 		//r.drawCircle((int)(x - (hitboxSize)), (int)(y - (hitboxSize)), (int)hitboxSize*2, (int)hitboxSize*2, Color.RED);
 	}
 	

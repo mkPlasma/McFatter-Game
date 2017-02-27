@@ -28,30 +28,35 @@ public class TestMission extends Mission{
 		enemies.add(new Enemy(inst));
 	}
 	
-	int counter;
+	int counter, counter2;
 	
 	public void update(){
-		int c = 64;
+		int c = 32;
 		
-		int t = 120;
+		int t = 60;
 		
 		if(time % t == 0){
 			for(int i = 0; i < c; i++){
-				float dir = i*(360f/c) + (180/c) + 90;
+				float dir = i*(360f/c) + (180f/c) + 90;
 				
 				InstructionSet inst = new InstructionSet(InstructionSet.INST_MOVABLE);
 				inst.add(new MovementInstruction(null, 0, MovementInstruction.ENT_BULLET, MovementInstruction.SET_POS, new float[]{400, 200}));
 				inst.add(new MovementInstruction(null, 0, MovementInstruction.ENT_BULLET, MovementInstruction.CONST_ACCEL, new float[]{dir, 6, -0.1f, 0, 10}));
 				inst.add(new MovementInstruction(null, t, MovementInstruction.ENT_BULLET, MovementInstruction.CONST_ACCEL, new float[]{dir, 0, 0.05f, 0, 10}));
 				
-				Bullet b = new Bullet(inst, BulletSheet.get((byte)counter, BulletSheet.COLOR_PURPLE));
+				Bullet b = new Bullet(inst, BulletSheet.get((byte)counter, (byte)counter2));
 				bullets.add(b);
 			}
-			
+
 			counter++;
 			
-			if(counter == 8)
+			if(counter == 1){
 				counter = 0;
+				counter2++;
+				
+				if(counter2 == 16)
+					counter2 = 0;
+			}
 		}
 		
 		

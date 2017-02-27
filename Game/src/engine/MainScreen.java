@@ -9,7 +9,6 @@ import com.sun.glass.events.KeyEvent;
 import content.TestMission;
 import engine.entities.Bullet;
 import engine.entities.Enemy;
-import engine.entities.Player;
 import engine.graphics.Renderer;
 
 public class MainScreen extends GameScreen{

@@ -13,11 +13,14 @@ public class Sprite{
 	// Area of spritesheet to use
 	private final int x, y, width, height;
 	
+	// Stores source image (not cropped)
+	private BufferedImage srcImg;
+	
 	// Stores sprite
 	private BufferedImage img;
 	
 	// True if sprite has been loaded
-	private boolean loaded;
+	private boolean loaded, srcLoaded;
 	
 	public Sprite(String path, int x, int y, int width, int height){
 		this.path = path;
@@ -30,15 +33,18 @@ public class Sprite{
 	// Load sprite to img
 	public void load(){
 		
-		File imgFile = new File(path);
-		
-		try{
-			img = ImageIO.read(imgFile);
-		}catch(Exception e){
-			e.printStackTrace();
+		if(!srcLoaded){
+			File imgFile = new File(path);
+			
+			try{
+				srcImg = ImageIO.read(imgFile);
+				srcLoaded = true;
+			}catch(Exception e){
+				e.printStackTrace();
+			}
 		}
 		
-		img = img.getSubimage(x, y, width, height);
+		img = srcImg.getSubimage(x, y, width, height);
 		
 		loaded = true;
 	}
@@ -64,10 +70,26 @@ public class Sprite{
 				sprite.height == height;
 	}
 	
+	public void setSrcImg(BufferedImage srcImg){
+		this.srcImg = srcImg;
+	}
+	
+	public BufferedImage getSrcImg(){
+		return srcImg;
+	}
+	
 	public boolean isLoaded(){
 		return loaded;
 	}
 	
+	public boolean isSrcLoaded(){
+		return srcLoaded;
+	}
+	
+	
+	public String getPath(){
+		return path;
+	}
 	
 	public int getX(){
 		return x;

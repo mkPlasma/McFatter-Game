@@ -6,11 +6,6 @@ import engine.graphics.Renderer;
 
 public class Enemy extends MovableEntity{
 	
-	// Movement attributes
-	// 0 - Use min spd
-	// 1 - Use max spd
-	protected byte attr[] = new byte[2];
-	
 	private final int hitboxSize;
 	
 	// Whether entity can collide
@@ -38,27 +33,7 @@ public class Enemy extends MovableEntity{
 	
 	
 	public void update(){
-		
-		// Set up bullet movements
-		inst.run();
-		
-		// Acceleration
-		spd += accel;
-		
-		// Keep speed within range
-		
-		if(attr[1] == 1 && spd > spdMax)
-			spd = spdMax;
-		else if(attr[0] == 1 && spd < spdMin)
-			spd = spdMin;
-		
-		// Angular velocity
-		dir += angVel;
-		
-		// Movement
-		x += spd*Math.cos(Math.toRadians(dir));
-		y += spd*Math.sin(Math.toRadians(dir));
-		
+		updateMovements();
 		time++;
 	}
 	
@@ -81,15 +56,6 @@ public class Enemy extends MovableEntity{
 	public void onDestroy(){
 		
 	}
-
-	public void setAttributes(byte[] attr){
-		this.attr = attr;
-	}
-	
-	public byte[] getAttributes(){
-		return attr;
-	}
-	
 	
 	public void damage(int damage){
 		health -= damage;

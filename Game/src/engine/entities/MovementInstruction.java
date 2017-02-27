@@ -73,9 +73,14 @@ public class MovementInstruction extends Instruction{
 	
 	
 	// Bullet values
-	private float x, y, dir, angVel, spd, accel, spdMin, spdMax;
+	protected float	x, y, 
+					dir, angVel,
+					spd, accel,
+					spdMin, spdMax;
+
+	private boolean useSpdMin, useSpdMax, visible, collisions;
+	
 	private byte[] attr;
-	private boolean visible, collisions;
 	
 	public MovementInstruction(MovableEntity entity, int time, int entType, int type, float[] args){
 		super(time, type, args);
@@ -102,23 +107,23 @@ public class MovementInstruction extends Instruction{
 			return;
 		
 		// These values should stay the same if not modified
-		visible = type == SET_VISIBLE ? args[0] == 1 ? true : false : visible;
 		
-		if(entType == ENT_BULLET || entType == ENT_ENEMY){
-			
-			// Auto set use min/max spd
-			attr[0] = type == SET_SPD_MIN || type == SET_SPD_MIN_MAX || type == CHANGE_SPD_MIN || type == CHANGE_SPD_MIN_MAX || type == CONST_ACCEL || type == OFFSET_ACCEL ? 1 : attr[0];
-			attr[1] = type == SET_SPD_MAX || type == SET_SPD_MIN_MAX || type == CHANGE_SPD_MAX || type == CHANGE_SPD_MIN_MAX || type == CONST_ACCEL || type == OFFSET_ACCEL ? 1 : attr[1];
-			
-			// Override that if user sets it manually
-			attr[0] = type == USE_SPD_MIN ? (byte)args[0] : attr[0];
-			attr[1] = type == USE_SPD_MAX ? (byte)args[0] : attr[1];
-			
-			collisions = type == SET_VISIBLE ? args[0] == 1 ? true : false : collisions;
+		// Auto set use min/max spd
+		useSpdMin = (type & SET_SPD_MAX) == SET_SPD_MAX || (type & CONST_ACCEL) == CONST_ACCEL ? true : useSpdMin;
+		useSpdMax = (type & SET_SPD_MIN) == SET_SPD_MIN || (type & CONST_ACCEL) == CONST_ACCEL ? true : useSpdMax;
+		
+		// Override that if user sets it manually
+		useSpdMin = type == USE_SPD_MIN ? args[0] == 1 : useSpdMin;
+		useSpdMax = type == USE_SPD_MAX ? args[0] == 1 : useSpdMax;
+		
+		visible = type == SET_VISIBLE ? args[0] == 1 : visible;
+		
+		if(entType == ENT_BULLET  || entType == ENT_ENEMY){
+			collisions = type == SET_VISIBLE ? args[0] == 1 : collisions;
 			
 			if(entType == ENT_BULLET){
-				attr[2] = type == SET_BOUNCES ? (byte)args[0] : attr[2];
-				attr[3] = type == SET_BOUNCES ? (byte)args[1] : attr[3];
+				attr[0] = type == SET_BOUNCES ? (byte)args[0] : attr[0];
+				attr[1] = type == SET_BOUNCES ? (byte)args[1] : attr[1];
 			}
 		}
 	}
@@ -158,7 +163,9 @@ public class MovementInstruction extends Instruction{
 			e.setSpdMax(spdMax);
 		if((type & SET_ANGVEL) == SET_ANGVEL)
 			e.setAngVel(angVel);
-		
+
+		useSpdMin = e.useSpdMin();
+		useSpdMax = e.useSpdMax();
 		visible = e.isVisible();
 		
 		if(entType == ENT_BULLET){
@@ -178,18 +185,18 @@ public class MovementInstruction extends Instruction{
 			Enemy e2 = (Enemy)e;
 			
 			// Set attributes so they do not get overwritten
-			attr = e2.getAttributes();
 			collisions = e2.collisionsEnabled();
 			
 			init(true);
 			
 			e.setVisible(visible);
-			e2.setAttributes(attr);
 			e2.setCollisions(collisions);
 			
 		}
 		else{
 			init(true);
+			e.setUseSpdMin(useSpdMin);
+			e.setUseSpdMax(useSpdMax);
 			e.setVisible(visible);
 		}
 		

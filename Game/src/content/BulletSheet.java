@@ -6,6 +6,8 @@ import engine.graphics.SpriteCache;
 
 public class BulletSheet{
 	
+	// Generates and caches Bullet Frame objects
+	
 	public static final byte
 		TYPE_ORB_M =		0,
 		TYPE_SCALE =		1,
@@ -42,8 +44,21 @@ public class BulletSheet{
 		COLOR_GRAY =		14,
 		COLOR_BLACK =		15;
 	
+	
+	// Cache and index of current bullet frame cache
+	private static BulletFrame[] cache = new BulletFrame[256];
+	private static int index;
+	
 	public static BulletFrame get(byte type, byte color){
-		return new BulletFrame(getSprite(type, color), getHitboxSize(type), getSpriteAlign(type), getSpriteRotation(type), getSpriteRotationBySpd(type));
+		
+		for(int i = 0; i < index; i++)
+			if(cache[i].getType() == type && cache[i].getColor() == color)
+				return cache[i];
+		
+		cache[index] = new BulletFrame(type, color, getSprite(type, color), getHitboxSize(type), getSpriteAlign(type), getSpriteRotation(type), getSpriteRotationBySpd(type));
+		index++;
+		
+		return cache[index - 1];
 	}
 	
 	public static Sprite getSprite(byte type, byte color){
@@ -52,11 +67,13 @@ public class BulletSheet{
 		
 		if(type <= 7)
 			path += "01.png";
-		else if(type <= 15)
-			path += "02.png";
+		else if(type <= 15){
+			path += "01b.png";
+			type -= 8;
+		}
 		
 		Sprite sprite = new Sprite(path, color*size, type*size, size, size);
-		sprite = SpriteCache.loadSprite(sprite);
+		sprite = SpriteCache.cacheSprite(sprite);
 		
 		return sprite;
 	}
@@ -64,8 +81,9 @@ public class BulletSheet{
 	public static int getHitboxSize(byte type){
 		switch(type){
 			case TYPE_SCALE: case TYPE_STAR4: case TYPE_CRYSTAL: case TYPE_MISSILE: case TYPE_PLUS: case TYPE_WALL:
+			case TYPE_SCALE_DARK: case TYPE_STAR4_DARK: case TYPE_CRYSTAL_DARK: case TYPE_MISSILE_DARK: case TYPE_PLUS_DARK: case TYPE_WALL_DARK:
 				return 3;
-			case TYPE_ORB_M: case TYPE_MINE:
+			case TYPE_ORB_M: case TYPE_MINE: case TYPE_ORB_M_DARK: case TYPE_MINE_DARK:
 				return 5;
 		}
 		
@@ -73,30 +91,29 @@ public class BulletSheet{
 	}
 	
 	public static boolean getSpriteAlign(byte type){
-		if( type == TYPE_SCALE		||
-			type == TYPE_CRYSTAL	||
-			type == TYPE_MISSILE	||
-			type == TYPE_WALL)
-				return true;
-		
-		return false;
+		return	type == TYPE_SCALE			||
+				type == TYPE_CRYSTAL		||
+				type == TYPE_MISSILE		||
+				type == TYPE_WALL			||
+				type == TYPE_SCALE_DARK		||
+				type == TYPE_CRYSTAL_DARK	||
+				type == TYPE_MISSILE_DARK	||
+				type == TYPE_WALL_DARK;
 	}
 	
 	public static float getSpriteRotation(byte type){
 		switch(type){
-			case TYPE_STAR4: case TYPE_PLUS:
+			case TYPE_STAR4: case TYPE_PLUS: case TYPE_STAR4_DARK: case TYPE_PLUS_DARK:
 				return 2;
-			case TYPE_MINE:
+			case TYPE_MINE: case TYPE_MINE_DARK:
 				return -0.1f;
+			default:
+				return 0;
 		}
-		
-		return 0;
 	}
 	
 	public static boolean getSpriteRotationBySpd(byte type){
-		if(type == TYPE_MINE)
-				return true;
-		
-		return false;
+		return	type == TYPE_MINE		||
+				type == TYPE_MINE_DARK;
 	}
 }
