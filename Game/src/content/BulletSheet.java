@@ -1,12 +1,13 @@
 package content;
 
 import engine.entities.BulletFrame;
+import engine.graphics.Animation;
 import engine.graphics.Sprite;
 import engine.graphics.SpriteCache;
 
 public class BulletSheet{
 	
-	// Generates and caches Bullet Frame objects
+	// Generates and caches BulletFrame objects
 	
 	public static final byte
 		TYPE_ORB_M =		0,
@@ -24,7 +25,8 @@ public class BulletSheet{
 		TYPE_MISSILE_DARK =	12,
 		TYPE_MINE_DARK =	13,
 		TYPE_PLUS_DARK =	14,
-		TYPE_WALL_DARK =	15;
+		TYPE_WALL_DARK =	15,
+		TYPE_LASER =		16;
 	
 	public static final byte
 		COLOR_RED =			0,
@@ -55,7 +57,7 @@ public class BulletSheet{
 			if(cache[i].getType() == type && cache[i].getColor() == color)
 				return cache[i];
 		
-		cache[index] = new BulletFrame(type, color, getSprite(type, color), getHitboxSize(type), getSpriteAlign(type), getSpriteRotation(type), getSpriteRotationBySpd(type));
+		cache[index] = new BulletFrame(type, color, getSprite(type, color), getHitboxSize(type), getHBLengthCrop(type), getSpriteAlign(type), getSpriteRotationBySpd(type));
 		index++;
 		
 		return cache[index - 1];
@@ -71,8 +73,22 @@ public class BulletSheet{
 			path += "01b.png";
 			type -= 8;
 		}
+		else if(type <= 32){
+			path += "02.png";
+			type -= 16;
+		}
 		
-		Sprite sprite = new Sprite(path, color*size, type*size, size, size);
+		// Standard sprite rotation will be stored in an animation
+		// Rotation by speed will be handled by the bullet
+		float rotation = getSpriteRotation(type);
+		
+		Sprite sprite;
+		
+		if(rotation == 0)
+			sprite = new Sprite(path, color*size, type*size, size, size);
+		else
+			sprite = new Sprite(path, color*size, type*size, size, size, new Animation(Animation.ANIM_ROTATION, 1, new float[]{rotation}));
+		
 		sprite = SpriteCache.cacheSprite(sprite);
 		
 		return sprite;
@@ -83,12 +99,25 @@ public class BulletSheet{
 			case TYPE_SCALE: case TYPE_STAR4: case TYPE_CRYSTAL: case TYPE_MISSILE: case TYPE_PLUS: case TYPE_WALL:
 			case TYPE_SCALE_DARK: case TYPE_STAR4_DARK: case TYPE_CRYSTAL_DARK: case TYPE_MISSILE_DARK: case TYPE_PLUS_DARK: case TYPE_WALL_DARK:
 				return 3;
-			case TYPE_ORB_M: case TYPE_MINE: case TYPE_ORB_M_DARK: case TYPE_MINE_DARK:
+			case TYPE_ORB_M: case TYPE_MINE: case TYPE_ORB_M_DARK: case TYPE_MINE_DARK: case TYPE_LASER:
 				return 5;
 		}
 		
 		return 0;
 	}
+	
+	public static float getHBLengthCrop(byte type){
+		switch(type){
+			case TYPE_SCALE: case TYPE_STAR4: case TYPE_CRYSTAL: case TYPE_MISSILE: case TYPE_PLUS: case TYPE_WALL:
+			case TYPE_SCALE_DARK: case TYPE_STAR4_DARK: case TYPE_CRYSTAL_DARK: case TYPE_MISSILE_DARK: case TYPE_PLUS_DARK: case TYPE_WALL_DARK:
+				return .8f;
+			case TYPE_ORB_M: case TYPE_MINE: case TYPE_ORB_M_DARK: case TYPE_MINE_DARK: case TYPE_LASER:
+				return .9f;
+		}
+		
+		return 0;
+	}
+	
 	
 	public static boolean getSpriteAlign(byte type){
 		return	type == TYPE_SCALE			||
@@ -98,7 +127,8 @@ public class BulletSheet{
 				type == TYPE_SCALE_DARK		||
 				type == TYPE_CRYSTAL_DARK	||
 				type == TYPE_MISSILE_DARK	||
-				type == TYPE_WALL_DARK;
+				type == TYPE_WALL_DARK		||
+				type == TYPE_LASER;
 	}
 	
 	public static float getSpriteRotation(byte type){
@@ -112,8 +142,12 @@ public class BulletSheet{
 		}
 	}
 	
-	public static boolean getSpriteRotationBySpd(byte type){
-		return	type == TYPE_MINE		||
-				type == TYPE_MINE_DARK;
+	public static float getSpriteRotationBySpd(byte type){
+		switch(type){
+			case TYPE_MINE: case TYPE_MINE_DARK:
+				return .1f;
+		}
+		
+		return 0;
 	}
 }

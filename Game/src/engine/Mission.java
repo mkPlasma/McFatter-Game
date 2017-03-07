@@ -3,6 +3,7 @@ package engine;
 import java.util.ArrayList;
 
 import engine.entities.Bullet;
+import engine.entities.Effect;
 import engine.entities.Enemy;
 import engine.entities.Player;
 import engine.graphics.Renderer;
@@ -13,14 +14,16 @@ public abstract class Mission extends GameStage{
 	protected ArrayList<Enemy> enemies;
 	protected Player player;
 	
-	
 	public Mission(Renderer r){
 		super(r, TYPE_MISSION);
 	}
 	
 	
-	public ArrayList<Bullet> updatePlayer(){
+	public void updatePlayer(){
 		player.update();
+	}
+
+	public ArrayList<Bullet> getPlayerBullets(){
 		return player.getBullets();
 	}
 	

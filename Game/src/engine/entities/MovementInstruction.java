@@ -14,21 +14,21 @@ public class MovementInstruction extends Instruction{
 	
 	// SET_BOUNCES			[num, borders]
 	
-	public static final short
+	public static final int
 		// Base values
-		SET_X =					0b000000000000001,
-		SET_Y =					0b000000000000010,
+		SET_X =					0b1,
+		SET_Y =					0b10,
 		SET_POS =				SET_X | SET_Y,
-		SET_DIR =				0b000000000000100,
-		SET_SPD =				0b000000000001000,
-		SET_ACCEL =				0b000000000010000,
-		SET_SPD_MIN =			0b000000000100000,
-		SET_SPD_MAX =			0b000000001000000,
-		SET_ANGVEL =			0b000000010000000,
+		SET_DIR =				0b100,
+		SET_SPD =				0b1000,
+		SET_ACCEL =				0b10000,
+		SET_SPD_MIN =			0b100000,
+		SET_SPD_MAX =			0b1000000,
+		SET_ANGVEL =			0b10000000,
 		SET_SPD_MIN_MAX =		SET_SPD_MIN | SET_SPD_MAX,
 		
 		// Change values
-		CHANGE_VALUE =			0b100000000000000,
+		CHANGE_VALUE =			0b10000000000000000000000000000000,
 		CHANGE_X =				CHANGE_VALUE | SET_X,
 		CHANGE_Y =				CHANGE_VALUE | SET_Y,
 		CHANGE_POS =			CHANGE_VALUE | SET_POS,
@@ -54,13 +54,22 @@ public class MovementInstruction extends Instruction{
 		OFFSET_ANGVEL_ACCEL =	CHANGE_VALUE | CONST_ANGVEL_ACCEL,
 		
 		// Attributes
-		USE_SPD_MIN =			0b000000100000000,
-		USE_SPD_MAX =			0b000001000000000,
-		SET_BOUNCES =			0b000010000000000,
+		USE_SPD_MIN =			0b100000000,
+		USE_SPD_MAX =			0b1000000000,
+		SET_BOUNCES =			0b10000000000,
+		
+		// Laser
+		SET_LENGTH =			0b10000000000000,
+		SET_WIDTH =				0b100000000000000,
+		SET_SIZE =				SET_LENGTH | SET_WIDTH,
+		CHANGE_LENGTH =			CHANGE_VALUE | SET_LENGTH,
+		CHANGE_WIDTH =			CHANGE_VALUE | SET_WIDTH,
+		CHANGE_SIZE =			CHANGE_VALUE | SET_SIZE,
 		
 		// Misc
-		SET_VISIBLE =			0b000100000000000,
-		SET_COLLISIONS =		0b001000000000000;
+		SET_VISIBLE =			0b100000000000,
+		SET_COLLISIONS =		0b1000000000000,
+		DESTROY =				0b10000000000000;
 	
 	// Entity controlled
 	private MovableEntity e;
@@ -69,16 +78,19 @@ public class MovementInstruction extends Instruction{
 	
 	public static final byte
 		ENT_BULLET = 0,
-		ENT_ENEMY = 1;
-	
+		ENT_LASER = 1,
+		ENT_ENEMY = 2,
+		ENT_EFFECT = 3;
 	
 	// Bullet values
-	protected float	x, y, 
+	private float	x, y, 
 					dir, angVel,
 					spd, accel,
 					spdMin, spdMax;
-
+	
 	private boolean useSpdMin, useSpdMax, visible, collisions;
+	
+	private int length, width;
 	
 	private byte[] attr;
 	
@@ -101,6 +113,11 @@ public class MovementInstruction extends Instruction{
 			accel = type == SET_ACCEL || type == CHANGE_ACCEL ? args[0] : type == CONST_ACCEL || type == OFFSET_ACCEL ? args[2] : type == CONST_ANGVEL_ACCEL || type == OFFSET_ANGVEL_ACCEL ? args[5] : 0;
 			spdMin = type == SET_SPD_MIN || type == SET_SPD_MIN_MAX || type == CHANGE_SPD_MIN || type == CHANGE_SPD_MIN_MAX ? args[0] : type == CONST_ACCEL || type == OFFSET_ACCEL ? args[3] : type == CONST_ANGVEL_ACCEL || type == OFFSET_ANGVEL_ACCEL ? args[4] : 0;
 			spdMax = type == SET_SPD_MAX || type == CHANGE_SPD_MAX ? args[0] : type == SET_SPD_MIN_MAX || type == CHANGE_SPD_MIN_MAX ? args[1] : type == CONST_ACCEL || type == OFFSET_ANGVEL ? args[4] : type == CONST_ANGVEL_ACCEL || type == OFFSET_ANGVEL_ACCEL ? args[5] : 0;
+			
+			if(entType == ENT_LASER){
+				length = (int)(type == SET_LENGTH || type == SET_SIZE || type == CHANGE_LENGTH || type == CHANGE_SIZE ? args[0] : 0);
+				width = (int)(type == SET_WIDTH || type == CHANGE_WIDTH ? args[0] : type == SET_SIZE || type == CHANGE_SIZE ? args[1] : 0);
+			}
 		}
 		
 		if(!attributes)
@@ -118,7 +135,7 @@ public class MovementInstruction extends Instruction{
 		
 		visible = type == SET_VISIBLE ? args[0] == 1 : visible;
 		
-		if(entType == ENT_BULLET  || entType == ENT_ENEMY){
+		if(entType == ENT_BULLET || entType == ENT_LASER || entType == ENT_ENEMY){
 			collisions = type == SET_VISIBLE ? args[0] == 1 : collisions;
 			
 			if(entType == ENT_BULLET){
@@ -133,7 +150,10 @@ public class MovementInstruction extends Instruction{
 		// Return false if not time for instruction to be run yet
 		if(time < this.time)
 			return false;
-
+		
+		if((type & DESTROY) == DESTROY)
+			e.onDestroy();
+		
 		// Offset variables if they should be changed rather than set
 		if((type & CHANGE_VALUE) == CHANGE_VALUE){
 			x += e.getX();
@@ -144,6 +164,13 @@ public class MovementInstruction extends Instruction{
 			spdMin += e.getSpdMin();
 			spdMax += e.getSpdMax();
 			angVel += e.getAngVel();
+			
+			if(entType == ENT_LASER){
+				Laser e2 = (Laser)e;
+				
+				length += e2.getLength();
+				width += e2.getWidth();
+			}
 		}
 		
 		//  Set values if necessary
@@ -163,12 +190,22 @@ public class MovementInstruction extends Instruction{
 			e.setSpdMax(spdMax);
 		if((type & SET_ANGVEL) == SET_ANGVEL)
 			e.setAngVel(angVel);
-
+		
+		if(entType == ENT_LASER){
+			Laser e2 = (Laser)e;
+			
+			if((type & SET_LENGTH) == SET_LENGTH)
+				e2.setLength(length);
+			
+			if((type & SET_WIDTH) == SET_WIDTH)
+				e2.setWidth(width);
+		}
+		
 		useSpdMin = e.useSpdMin();
 		useSpdMax = e.useSpdMax();
 		visible = e.isVisible();
 		
-		if(entType == ENT_BULLET){
+		if(entType == ENT_BULLET || entType == ENT_LASER){
 			Bullet e2 = (Bullet)e;
 			
 			// Set attributes so they do not get overwritten

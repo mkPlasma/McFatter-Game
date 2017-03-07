@@ -1,6 +1,9 @@
 package engine.entities;
 
+import content.EffectSheet;
+import engine.graphics.Animation;
 import engine.graphics.Renderer;
+import engine.graphics.Sprite;
 
 public class Bullet extends MovableEntity{
 	
@@ -22,19 +25,19 @@ public class Bullet extends MovableEntity{
 	
 	
 	// Holds sprite data and hitbox size
-	private BulletFrame frame;
+	protected BulletFrame frame;
 	
 	// Player shots only
-	private int damage, dmgReduce;
+	protected int damage, dmgReduce;
 	
 	// Whether entity can collide
 	protected boolean collisions = true;
 	
 	// If true, bullet will not be updated
-	private boolean paused;
+	protected boolean paused;
 	
 	public Bullet(MovementInstruction inst, BulletFrame frame){
-		super();
+		//super();
 		
 		visible = true;
 
@@ -48,7 +51,7 @@ public class Bullet extends MovableEntity{
 	}
 	
 	public Bullet(InstructionSet inst, BulletFrame frame){
-		super();
+		//super();
 		
 		visible = true;
 		
@@ -62,7 +65,7 @@ public class Bullet extends MovableEntity{
 	}
 	
 	public Bullet(float x, float y, float dir, float spd, BulletFrame frame){
-		super(x, y);
+		//super(x, y);
 		
 		visible = true;
 
@@ -77,7 +80,7 @@ public class Bullet extends MovableEntity{
 	}
 	
 	public Bullet(float x, float y, float dir, float spd, BulletFrame frame, int damage, int dmgReduce){
-		super(x, y);
+		//super(x, y);
 		
 		visible = true;
 		
@@ -92,6 +95,30 @@ public class Bullet extends MovableEntity{
 		inst.init(2);
 		
 		onCreate();
+	}
+	
+	public void onCreate(){
+		frame.getSprite().addUser();
+	}
+	
+	public void onDestroy(){
+		remove = true;
+		frame.getSprite().removeUser();
+		
+		InstructionSet inst = new InstructionSet(InstructionSet.INST_MOVABLE);
+		inst.add(new MovementInstruction(null, 0, MovementInstruction.ENT_EFFECT, MovementInstruction.SET_POS, new float[]{x, y}));
+		inst.add(new MovementInstruction(null, 0, MovementInstruction.ENT_EFFECT, MovementInstruction.CONST_DIR_SPD, new float[]{-dir, 5}));
+		inst.add(new MovementInstruction(null, 50, MovementInstruction.ENT_EFFECT, MovementInstruction.DESTROY, null));
+		
+		Animation[] a = new Animation[]{new Animation(Animation.ANIM_ALPHA, 1, -.02f, 0, 1), new Animation(Animation.ANIM_SCALE, 1, -.02f, 0, 1)};
+		
+		Sprite s = new Sprite("Game/res/img/bullets/01.png", 0, 0, 32, 32, a);
+		
+		EntityFrame f = new EntityFrame(0, s, false, 0);
+		
+		Effect e = new Effect(inst, f);
+		
+		EffectGenerator.addEffect(e);
 	}
 	
 	public void update(){
@@ -131,23 +158,15 @@ public class Bullet extends MovableEntity{
 		if(frame.spriteAlign())
 			rotation = dir + 90;
 		
-		rotation += time*frame.getSpriteRotation()*(frame.spriteRotationBySpd() ? spd : 1);
+		rotation += time*spd*frame.spriteRotationBySpd();
 		
-		if(visible)
-			r.render(frame.getSprite(), x, y, rotation, 1f);
+		frame.getSprite().setRotation(rotation);
+		r.render(frame.getSprite(), time, x, y);
 		
 		// Draw hitbox
 		
 		//int hitboxSize = frame.getHitboxSize();
 		//r.drawCircle((int)(x - (hitboxSize)), (int)(y - (hitboxSize)), (int)hitboxSize*2, (int)hitboxSize*2, Color.RED);
-	}
-	
-	public void onCreate(){
-		
-	}
-	
-	public void onDestroy(){
-		remove = true;
 	}
 	
 	

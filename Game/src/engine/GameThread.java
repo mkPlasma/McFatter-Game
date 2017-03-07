@@ -1,6 +1,7 @@
 package engine;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -86,7 +87,10 @@ public class GameThread extends JPanel implements Runnable{
 			// Game logic and drawing
 			update();
 			draw();
+			
+			drawFPS();
 			drawToScreen();
+			
 			frameCount++;
 			
 			// FPS
@@ -118,17 +122,20 @@ public class GameThread extends JPanel implements Runnable{
 		screenManager.draw();
 	}
 	
-	private void drawToScreen(){
-		// Draw bufferedimage to the screen
-		Graphics g = getGraphics();
-		
+	private void drawFPS(){
 		g2d.setColor(Color.WHITE);
 		
 		if(fps <= 57)
 			g2d.setColor(Color.RED);
 		
-		g2d.drawString(Integer.toString(fps), 782*scale, 596*scale);
+		String f = Integer.toString(fps);
 		
+		g2d.drawString(f, (796 - f.length()*5)*scale, 596*scale);
+	}
+	
+	private void drawToScreen(){
+		// Draw bufferedimage to the screen
+		Graphics g = getGraphics();
 		
 		if(Settings.useHardwareAcceleration())
 			g.drawImage(screenImg, 0, 0, (int)(800*scale), (int)(600*scale), null);

@@ -6,6 +6,7 @@ public class SpriteCache{
 	
 	// Size of sprite and image caches
 	private static final short cacheSize = 256;
+	private static final short srcCacheSize = 64;
 	
 	// Index of next sprite (how many sprites are cached)
 	private static int index = 0;
@@ -15,14 +16,15 @@ public class SpriteCache{
 	
 	// Caches for sprite objects and images
 	private static Sprite[] sprites = new Sprite[cacheSize];
-	private static BufferedImage[] images = new BufferedImage[cacheSize];
+	//private static BufferedImage[] images = new BufferedImage[cacheSize];
 	
 	// Caches for source images (sprite sheets)
-	private static String[] srcImgPaths = new String[cacheSize];
-	private static BufferedImage[] srcImages = new BufferedImage[cacheSize];
+	private static String[] srcImgPaths = new String[srcCacheSize];
+	private static BufferedImage[] srcImages = new BufferedImage[srcCacheSize];
 	
 	// Caches and loads sprite and image
 	// Make sure never to return the original sprite, always return sprite from cache
+	
 	public static Sprite cacheSprite(Sprite sprite){
 		
 		int i = spriteExists(sprite);
@@ -46,7 +48,7 @@ public class SpriteCache{
 	private static void loadSprite(Sprite sprite){
 		
 		if(sprite.isSrcLoaded()){// If source image is loaded
-			images[index] = sprite.getImg();
+			sprite.load();
 			return;
 		}
 		
@@ -54,14 +56,14 @@ public class SpriteCache{
 		
 		if(i > -1){// If source image is cached
 			sprite.setSrcImg(srcImages[i]);
-			images[index] = sprite.getImg();
+			sprite.load();
 			
 			return;
 		}
 		
 		// If source image is not cached
 		
-		images[index] = sprite.getImg();
+		sprite.load();
 		
 		srcImgPaths[srcIndex] = sprite.getPath();
 		srcImages[srcIndex] = sprite.getSrcImg();
@@ -96,20 +98,18 @@ public class SpriteCache{
 	
 	// Returns index of sprite if sprite object is already cached, -1 otherwise
 	private static int spriteExists(Sprite sprite){
-		for(int i = 0; i < index; i++){
+		for(int i = 0; i < index; i++)
 			if(sprite.isEqual(sprites[i]))
 				return i;
-		}
 		
 		return -1;
 	}
 
 	// Returns index of source image if already cached, -1 otherwise
 	private static int srcImgExists(Sprite sprite){
-		for(int i = 0; i < srcIndex; i++){
+		for(int i = 0; i < srcIndex; i++)
 			if(srcImgPaths[i].equals(sprite.getPath()))
 				return i;
-		}
 		
 		return -1;
 	}
