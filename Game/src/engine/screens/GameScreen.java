@@ -1,13 +1,11 @@
-package engine;
-
-import java.awt.Graphics2D;
+package engine.screens;
 
 import engine.graphics.Renderer;
 
 public abstract class GameScreen{
 	protected Renderer r;
 	
-	public abstract void init(Graphics2D g2d);
+	public abstract void init();
 	public abstract void update();
-	public abstract void draw();
+	public abstract void render();
 }

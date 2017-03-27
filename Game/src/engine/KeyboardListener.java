@@ -1,30 +1,22 @@
 package engine;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
+import org.lwjgl.glfw.GLFWKeyCallback;
 
-public class KeyboardListener implements KeyListener{
+public class KeyboardListener extends GLFWKeyCallback{
 	
 	// Holds booleans for key presses
-	private static boolean keys[] = new boolean[256];
+	private static boolean keys[] = new boolean[65536];
 	
-	public void keyTyped(KeyEvent e){
-		
+	public void invoke(long window, int key, int scancode, int action, int mods){
+		keys[key] = action != GLFW_RELEASE;
 	}
 	
-	public void keyPressed(KeyEvent e){
-		keys[e.getKeyCode()] = true;
-	}
-	
-	public void keyReleased(KeyEvent e){
-		keys[e.getKeyCode()] = false;
-	}
-	
-	public static boolean isKeyPressed(int key){
+	public static boolean isKeyDown(int key){
 		return keys[key];
 	}
 
-	public static boolean isKeyReleased(int key){
+	public static boolean isKeyUp(int key){
 		return !keys[key];
 	}
 }

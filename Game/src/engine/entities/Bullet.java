@@ -1,9 +1,9 @@
 package engine.entities;
 
-import content.EffectSheet;
 import engine.graphics.Animation;
 import engine.graphics.Renderer;
 import engine.graphics.Sprite;
+import engine.graphics.SpriteCache;
 
 public class Bullet extends MovableEntity{
 	
@@ -113,6 +113,7 @@ public class Bullet extends MovableEntity{
 		Animation[] a = new Animation[]{new Animation(Animation.ANIM_ALPHA, 1, -.02f, 0, 1), new Animation(Animation.ANIM_SCALE, 1, -.02f, 0, 1)};
 		
 		Sprite s = new Sprite("Game/res/img/bullets/01.png", 0, 0, 32, 32, a);
+		s = SpriteCache.cache(s);
 		
 		EntityFrame f = new EntityFrame(0, s, false, 0);
 		
@@ -148,7 +149,7 @@ public class Bullet extends MovableEntity{
 		time++;
 	}
 	
-	public void draw(Renderer r){
+	public void render(){
 		
 		if(!visible)
 			return;
@@ -161,7 +162,7 @@ public class Bullet extends MovableEntity{
 		rotation += time*spd*frame.spriteRotationBySpd();
 		
 		frame.getSprite().setRotation(rotation);
-		r.render(frame.getSprite(), time, x, y);
+		Renderer.render(frame.getSprite(), time, x, y);
 		
 		// Draw hitbox
 		

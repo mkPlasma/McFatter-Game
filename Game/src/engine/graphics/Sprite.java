@@ -1,11 +1,30 @@
 package engine.graphics;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
+import static org.lwjgl.stb.STBImage.stbi_load_from_memory;
 
-import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.channels.FileChannel;
+
+import org.lwjgl.BufferUtils;
+import org.lwjgl.stb.STBImage;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class Sprite{
+	
+	// Stores texture object and misc properties (scale, alpha, etc)
+	
+	/* 
+	 * Do not load sprites directly. Instead use:
+	 * 
+	 * sprite = SpriteCache.cache(sprite);
+	 * 
+	 * This will place the sprite in the cache and return an loaded instance of the sprite.
+	*/
 	
 	// Path of spritesheet
 	private final String path;
@@ -13,31 +32,47 @@ public class Sprite{
 	// Number of current sprite users
 	private int numUsers;
 	
+	// Full image dimensions
+	private int texWidth, texHeight;
+	private int comp;
+	
 	// Area of spritesheet to use
 	private int x, y, width, height;
+
+	// Normalized texture coordinates of texture for rendering
+	// 0 - Top left
+	// 1 - Top right
+	// 2 - Bottom right
+	// 3 - Bottom left
+	private float[][] texCoords;
 	
 	private float rotation = 0;
 	private float scaleX = 1, scaleY = 1;
 	private float alpha = 1;
 	
-	// Stores source image (not cropped)
-	private BufferedImage srcImg;
-	
-	// Stores sprite
-	private BufferedImage img;
+	// Stores texture
+	private ByteBuffer texture;
+	private int texID;
 	
 	// True if sprite has been loaded
-	private boolean loaded, srcLoaded;
+	private boolean loaded;
 
 	// Sprite animation
 	private Animation[] anim;
 	
+	
 	public Sprite(Sprite spr){
 		path = spr.getPath();
+		
 		x = spr.getX();
 		y = spr.getY();
 		width = spr.getWidth();
 		height = spr.getHeight();
+		
+		texHeight = spr.getTexHeight();
+		texWidth = spr.getTexWidth();
+		
+		genTextureCoords();
 		
 		rotation = spr.getRotation();
 		scaleX = spr.getScaleX();
@@ -46,9 +81,9 @@ public class Sprite{
 		
 		anim = spr.getAnimations();
 		
-		srcImg = spr.getSrcImg();
-		img = spr.getImg();
-		srcLoaded = true;
+		texture = spr.getTexture();
+		texID = spr.getTextureID();
+		
 		loaded = true;
 	}
 	
@@ -78,32 +113,77 @@ public class Sprite{
 		this.anim = anim;
 	}
 	
-	// Load sprite to img
+	// Load sprite to texture
 	public void load(){
 		
-		if(!srcLoaded){
-			File imgFile = new File(path);
-			
-			try{
-				srcImg = ImageIO.read(imgFile);
-				srcLoaded = true;
-			}catch(Exception e){
-				e.printStackTrace();
-			}
+		if(loaded)
+			return;
+		
+		IntBuffer w = BufferUtils.createIntBuffer(1);
+		IntBuffer h = BufferUtils.createIntBuffer(1);
+		IntBuffer comp = BufferUtils.createIntBuffer(1);
+		
+		ByteBuffer t = null;
+		
+		try{
+			t = stbi_load_from_memory(readFile(path), w, h, comp, 0);
+			loaded = true;
+		}catch(IOException e){
+			e.printStackTrace();
 		}
 		
-		img = srcImg.getSubimage(x, y, width, height);
+		if(t == null)
+			throw new RuntimeException("Failed to load image: " + STBImage.stbi_failure_reason());
 		
-		loaded = true;
+		texWidth = w.get(0);
+		texHeight = h.get(0);
+		this.comp = comp.get(0);
+		
+		texture = t;
+		
+		texID = glGenTextures();
+		glBindTexture(GL_TEXTURE_2D, texID);
+		
+		if(this.comp == 3){
+			if((texWidth & 3) != 0)
+				glPixelStorei(GL_UNPACK_ALIGNMENT, 2 - (texWidth & 1));
+			
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
+		}
+		else
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture);
+		
+		genTextureCoords();
 	}
 	
-	// Returns the image, loads it if necessary
-	public BufferedImage getImg(){
-		if(loaded)
-			return img;
+	private ByteBuffer readFile(String path) throws IOException{
+		FileInputStream fis = new FileInputStream(new File(path));
+		FileChannel fc = fis.getChannel();
 		
-		load();
-		return img;
+		ByteBuffer buffer = BufferUtils.createByteBuffer((int)fc.size() + 1);
+		
+		while(fc.read(buffer) != -1);
+		
+		fis.close();
+		fc.close();
+		buffer.flip();
+		
+		return buffer;
+	}
+	
+	// Creates texture coordinates
+	public void genTextureCoords(){
+		float left =	(float)x/(float)texWidth;
+		float right =	((float)x + (float)width)/(float)texWidth;
+		float top =		(float)y/(float)texHeight;
+		float bottom =	((float)y + (float)height)/(float)texHeight;
+		
+		texCoords = new float[][]{
+			{left,  top},
+			{right, top},
+			{right, bottom},
+			{left,  bottom}
+		};
 	}
 	
 	// Returns a modified sprite for the animation at the given time
@@ -122,48 +202,83 @@ public class Sprite{
 		return spr;
 	}
 	
-	// Sets sprite image again if it has been updated by the animation
-	public void reload(){
-		img = srcImg.getSubimage(x, y, width, height);
-	}
-	
 	// Return true if two sprites are the same, used in SpriteCache
 	public boolean isEqual(Sprite sprite){
 		
 		if(sprite == null)
 			return false;
 		
-		return sprite.path.equals(path) &&
+		// Check if all animations are equal
+		Animation[] a = sprite.getAnimations();
+		
+		// Return false if one is null
+		if((a == null && anim != null) || (a != null && anim == null))
+			return false;
+		
+		if(a != null && anim != null){
+			// Return false if they don't have the same amount
+			if(a.length != anim.length)
+				return false;
+			
+			// Check if equal
+			for(int i = 0; i < sprite.getAnimations().length; i++)
+				if(a[i] != anim[i])
+					return false;
+		}
+		
+		return	sprite.path.equals(path) &&
 				sprite.x == x &&
 				sprite.y == y &&
 				sprite.width == width &&
 				sprite.height == height &&
-				//sprite.rotation == rotation && // Commented out due to animations, may be changed later
-				//sprite.scaleX == scaleX &&
-				//sprite.scaleY == scaleY &&
-				//sprite.alpha == alpha &&
-				sprite.anim.equals(anim);
+				sprite.rotation == rotation &&
+				sprite.scaleX == scaleX &&
+				sprite.scaleY == scaleY &&
+				sprite.alpha == alpha;
 	}
 	
-	public void setSrcImg(BufferedImage srcImg){
-		this.srcImg = srcImg;
+	public float[][] getTextureCoords(){
+		return texCoords;
 	}
 	
-	public BufferedImage getSrcImg(){
-		return srcImg;
+	public void setTexture(ByteBuffer texture){
+		this.texture = texture;
+	}
+
+	public ByteBuffer getTexture(){
+		return texture;
 	}
 	
-	public boolean isLoaded(){
-		return loaded;
+	public void setTextureID(int texID){
+		this.texID = texID;
 	}
 	
-	public boolean isSrcLoaded(){
-		return srcLoaded;
+	public int getTextureID(){
+		return texID;
 	}
 	
+	public void setTexWidth(int texWidth){
+		this.texWidth = texWidth;
+	}
 	
-	public String getPath(){
-		return path;
+	public int getTexWidth(){
+		return texWidth;
+	}
+	
+	public void setTexHeight(int texHeight){
+		this.texHeight = texHeight;
+	}
+	
+	public int getTexHeight(){
+		return texHeight;
+	}
+	
+	public void setComp(int comp){
+		this.comp = comp;
+	}
+	
+	public int getComp(){
+		return comp;
 	}
 	
 	public void addUser(){
@@ -176,6 +291,15 @@ public class Sprite{
 	
 	public int getNumUsers(){
 		return numUsers;
+	}
+	
+	
+	public boolean isLoaded(){
+		return loaded;
+	}
+	
+	public String getPath(){
+		return path;
 	}
 	
 	public void setX(int x){

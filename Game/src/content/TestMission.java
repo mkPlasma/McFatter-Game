@@ -2,22 +2,17 @@ package content;
 
 import java.util.ArrayList;
 
-import engine.Mission;
 import engine.entities.Bullet;
-import engine.entities.BulletFrame;
 import engine.entities.Enemy;
 import engine.entities.InstructionSet;
-import engine.entities.Laser;
 import engine.entities.MovementInstruction;
 import engine.entities.Player;
-import engine.graphics.Animation;
-import engine.graphics.Renderer;
-import engine.graphics.Sprite;
+import engine.screens.Mission;
 
 public class TestMission extends Mission{
 	
-	public TestMission(Renderer r){
-		super(r);
+	public TestMission(){
+		super();
 	}
 	
 	public void init(){
@@ -37,23 +32,23 @@ public class TestMission extends Mission{
 	
 	
 	public void update(){
-		int c = 16;
-		
+		int c = 1;
 		int t = 1;
+		int s = 20;
 		
 		if(time % t == 0){
 			for(int i = 0; i < c; i++){
-				float dir = i*(360f/c) + (180f/c) + 90;
+				float dir = i*(360f/c) + (180f/c) - 90;
 				
 				InstructionSet inst = new InstructionSet(InstructionSet.INST_MOVABLE);
 				inst.add(new MovementInstruction(null, 0, MovementInstruction.ENT_BULLET, MovementInstruction.SET_POS, new float[]{400, 200}));
-				inst.add(new MovementInstruction(null, 0, MovementInstruction.ENT_BULLET, MovementInstruction.CONST_ACCEL, new float[]{dir, 6, -0.1f, 0, 10}));
-				inst.add(new MovementInstruction(null, t, MovementInstruction.ENT_BULLET, MovementInstruction.CONST_ACCEL, new float[]{dir, 0, 0.05f, 0, 10}));
+				//inst.add(new MovementInstruction(null, 0, MovementInstruction.ENT_BULLET, MovementInstruction.CONST_ACCEL, new float[]{dir, s, -((float)s/(float)t), 0, s}));
+				inst.add(new MovementInstruction(null, t, MovementInstruction.ENT_BULLET, MovementInstruction.CONST_ACCEL, new float[]{dir + time*5, 0, 0.01f, 0, 10}));
 				
 				Bullet b = new Bullet(inst, BulletSheet.get((byte)counter, (byte)counter2));
 				bullets.add(b);
 			}
-
+			
 			counter++;
 			
 			if(counter == 16){
@@ -87,7 +82,7 @@ public class TestMission extends Mission{
 		time++;
 	}
 	
-	public void draw(){
-		player.draw(r);
+	public void render(){
+		player.render();
 	}
 }

@@ -37,16 +37,16 @@ public class Enemy extends MovableEntity{
 		time++;
 	}
 	
-	public void draw(Renderer r){
+	public void render(){
 		
 		if(!visible)
 			return;
 		
-		r.drawCircle((int)x - hitboxSize, (int)y - hitboxSize, hitboxSize*2, hitboxSize*2, Color.GREEN);
+		Renderer.drawRectangle(x, y, hitboxSize, hitboxSize);
 		
 		// Health bar (temporary)
-		r.drawRectangle(10, 10, 780, 10, Color.DARK_GRAY);
-		r.drawRectangle(10, 10, (int)(780*((double)health/(double)hpmax)), 10, Color.GREEN);
+		//Renderer.drawRectangle(10, 10, 780, 10, Color.DARK_GRAY);
+		//Renderer.drawRectangle(10, 10, (int)(780*((double)health/(double)hpmax)), 10, Color.GREEN);
 	}
 	
 	public void onCreate(){

@@ -1,72 +1,133 @@
 package engine.graphics;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
+import static org.lwjgl.opengl.GL11.*;
 
 import engine.Settings;
 
 public class Renderer{
 	
-	private final Graphics2D g2d;
-	
 	// Resolution scale
-	private float scale;
+	private static float scale;
 	
-	public Renderer(Graphics2D g2d){
-		this.g2d = g2d;
+	public static void render(Sprite sprs, int time, float x, float y, float alpha, float rot, float scx, float scy){
 		
-		updateScale();
-	}
-	
-	public void render(Sprite sprs, int time, float x, float y, float alpha, float rot, float scx, float scy){
-		
-		AffineTransform t = new AffineTransform();
-		
+		// Render
 		Sprite spr = sprs.animate(time);
 		
-		// Set sprite to location
-		t.setToTranslation(x*scale, y*scale);
+		float[][] tc = spr.getTextureCoords();
+		float[][] vc = getVertexCoords(x, y, spr.getScaleX()*spr.getWidth(), spr.getScaleY()*spr.getHeight());
 		
-		// Set rotation
-		t.rotate(Math.toRadians(spr.getRotation() + rot));
+		int id = spr.getTextureID();
+		
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindTexture(GL_TEXTURE_2D, id);
+		
+		if(spr.getComp() != 3){
+			glEnable(GL_BLEND);
+			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+			glColor4f(1, 1, 1, spr.getAlpha());
+		}
+		
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		
+		glPushMatrix();
 		
 		// Set scale
-		t.scale(spr.getScaleX()*scale*scx, spr.getScaleY()*scale*scy);
+		glScalef(scale, scale, 1);
 		
-		// Set transform to center
-		t.translate(-spr.getWidth()/2, -spr.getHeight()/2);
+		// Set rotation
+		glTranslatef(x, y, 0);
+		glRotatef(spr.getRotation() + rot, 0, 0, 1);
+		glTranslatef(-x, -y, 0);
 		
-		// Draw sprite
-		g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, spr.getAlpha()*alpha));
-		g2d.drawImage(spr.getImg(), t, null);
+		glEnable(GL_TEXTURE_2D);
 		
-		g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+		glBegin(GL_TRIANGLES);
+		
+		// Tri 1
+		
+		// Top left
+		glTexCoord2f(tc[0][0], tc[0][1]);
+		glVertex2f(vc[0][0], vc[0][1]);
+		
+		// Top right
+		glTexCoord2f(tc[1][0], tc[1][1]);
+		glVertex2f(vc[1][0], vc[1][1]);
+		
+		// Bottom left
+		glTexCoord2f(tc[3][0], tc[3][1]);
+		glVertex2f(vc[3][0], vc[3][1]);
+		
+		// Tri 2
+		// Bottom left
+		glTexCoord2f(tc[3][0], tc[3][1]);
+		glVertex2f(vc[3][0], vc[3][1]);
+		
+		// Bottom right
+		glTexCoord2f(tc[2][0], tc[2][1]);
+		glVertex2f(vc[2][0], vc[2][1]);
+		
+		// Top right
+		glTexCoord2f(tc[1][0], tc[1][1]);
+		glVertex2f(vc[1][0], vc[1][1]);
+		
+		glEnd();
+		
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_BLEND);
+		
+		glPopMatrix();
 	}
 	
-	public void render(Sprite spr, int time, float x, float y){
+	public static void render(Sprite spr, int time, float x, float y){
 		render(spr, time, x, y, 1, 0, 1, 1);
 	}
 	
-	public void drawCircle(int x, int y, int w, int h, Color c){
-		g2d.setColor(c);
-		g2d.fillOval((int)(x*scale), (int)(y*scale), (int)(w*scale), (int)(h*scale));
+	public static void drawRectangle(float x, float y, float w, float h){
+		
+		float[][] vc = getVertexCoords(x, y, w, h);
+		
+		glColor3f(1, 1, 1);
+
+		glPushMatrix();
+		
+		// Set scale
+		glScalef(scale, scale, 1);
+		
+		glBegin(GL_QUADS);
+		glVertex2f(vc[0][0], vc[0][1]);
+		glVertex2f(vc[1][0], vc[1][1]);
+		glVertex2f(vc[2][0], vc[2][1]);
+		glVertex2f(vc[3][0], vc[3][1]);
+		glEnd();
+		
+		glPopMatrix();
 	}
 	
-	public void drawRectangle(int x, int y, int w, int h, Color c){
-		g2d.setColor(c);
-		g2d.fillRect((int)(x*scale), (int)(y*scale), (int)(w*scale), (int)(h*scale));
-	}
-
-	public void drawLine(int x1, int y1, int x2, int y2, Color c){
-		g2d.setColor(c);
-		g2d.drawLine((int)(x1*scale), (int)(y1*scale), (int)(x2*scale), (int)(y2*scale));
+	// Returns normalized vertex coordinates
+	// 0 - Top left
+	// 1 - Top right
+	// 2 - Bottom right
+	// 3 - Bottom left
+	private static float[][] getVertexCoords(float x, float y, float w, float h){
+		float left =	(x - (w/2));
+		float right =	(x + (w/2));
+		float top =		(y - (h/2));
+		float bottom =	(y + (h/2));
+		
+		return new float[][]{
+			{left,  top},
+			{right, top},
+			{right, bottom},
+			{left,  bottom}
+		};
 	}
 	
 	// Gets window scale from settings
 	// Use on launch or when resolution is changed
-	public void updateScale(){
+	public static void updateScale(){
 		scale = Settings.getWindowScale();
 	}
 }

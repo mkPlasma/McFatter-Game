@@ -1,116 +1,66 @@
 package engine.graphics;
 
-import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 public class SpriteCache{
 	
-	// Size of sprite and image caches
-	private static final short cacheSize = 256;
-	private static final short srcCacheSize = 64;
+	private static short maxSize = 512;
 	
-	// Index of next sprite (how many sprites are cached)
-	private static int index = 0;
+	private static ArrayList<Sprite> sprites = new ArrayList<Sprite>();
 	
-	// Index of next source image
-	private static int srcIndex = 0;
+	// Caches sprite or returns cache in sprite
+	// Use when loading sprites
 	
-	// Caches for sprite objects and images
-	private static Sprite[] sprites = new Sprite[cacheSize];
-	//private static BufferedImage[] images = new BufferedImage[cacheSize];
-	
-	// Caches for source images (sprite sheets)
-	private static String[] srcImgPaths = new String[srcCacheSize];
-	private static BufferedImage[] srcImages = new BufferedImage[srcCacheSize];
-	
-	// Caches and loads sprite and image
-	// Make sure never to return the original sprite, always return sprite from cache
-	
-	public static Sprite cacheSprite(Sprite sprite){
+	public static Sprite cache(Sprite spr){
 		
-		int i = spriteExists(sprite);
+		int i = getSpriteIndex(spr);
 		
-		if(i == -1){// If not cached or loaded
-			sprites[index] = sprite;
-			loadSprite(sprites[index]);
+		// Return sprite in cache if it exists
+		if(i > -1)
+			return sprites.get(i);
+		
+		i = getTextureIndex(spr);
+		
+		// Sets the texture if it is the same
+		if(i > -1){
+			Sprite s = sprites.get(i);
 			
-			index++;
+			spr.setTexture(s.getTexture());
+			spr.setTextureID(s.getTextureID());
+			spr.setTexWidth(s.getTexWidth());
+			spr.setTexHeight(s.getTexHeight());
+			spr.setComp(s.getComp());
 			
-			return sprites[index - 1];
+			spr.genTextureCoords();
 		}
+		else if(!spr.isLoaded())// Load it otherwise, if neccessary
+			spr.load();
 		
-		if(!sprites[i].isLoaded())// If cached and not loaded
-			loadSprite(sprites[i]);
+		// Cache sprite
+		sprites.add(spr);
 		
-		return sprites[i];
+		if(sprites.size() > maxSize)
+			throw new RuntimeException("Sprite count exceeded cache size of " + maxSize);
+		
+		// Return modified sprite
+		return spr;
 	}
 	
-	// Loads the sprite image and caches the source image
-	private static void loadSprite(Sprite sprite){
-		
-		if(sprite.isSrcLoaded()){// If source image is loaded
-			sprite.load();
-			return;
-		}
-		
-		int i = srcImgExists(sprite);
-		
-		if(i > -1){// If source image is cached
-			sprite.setSrcImg(srcImages[i]);
-			sprite.load();
-			
-			return;
-		}
-		
-		// If source image is not cached
-		
-		sprite.load();
-		
-		srcImgPaths[srcIndex] = sprite.getPath();
-		srcImages[srcIndex] = sprite.getSrcImg();
-		
-		srcIndex++;
-	}
-	
-	// Loads sprite if necessary, then returns it
-	// Currently unused
-	/*
-	public static BufferedImage getImage(Sprite sprite){
-		
-		int i = spriteExists(sprite);
-		
-		if(i > -1){// If cached
-			if(!sprites[i].isLoaded()){
-				System.out.println("Loaded");
-				images[i] = sprites[i].getImg();
-			}
-			
-			return images[i];
-		}
-		
-		sprites[index] = sprite;
-		images[index] = sprite.getImg();
-		
-		index++;
-		
-		return images[index - 1];
-	}
-	*/
-	
-	// Returns index of sprite if sprite object is already cached, -1 otherwise
-	private static int spriteExists(Sprite sprite){
-		for(int i = 0; i < index; i++)
-			if(sprite.isEqual(sprites[i]))
+	// Returns index of sprite in cache
+	// -1 if not cached
+	private static int getSpriteIndex(Sprite spr){
+		for(int i = 0; i < sprites.size(); i++)
+			if(sprites.get(i).isEqual(spr))
 				return i;
-		
 		return -1;
 	}
 
-	// Returns index of source image if already cached, -1 otherwise
-	private static int srcImgExists(Sprite sprite){
-		for(int i = 0; i < srcIndex; i++)
-			if(srcImgPaths[i].equals(sprite.getPath()))
+	// Returns index of sprite texture in cache
+	// -1 if not cached
+	private static int getTextureIndex(Sprite spr){
+		for(int i = 0; i < sprites.size(); i++)
+			if(sprites.get(i).getPath().equals(spr.getPath()))
 				return i;
-		
 		return -1;
 	}
 }

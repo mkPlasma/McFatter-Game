@@ -1,4 +1,4 @@
-package engine;
+package engine.screens;
 
 import java.util.ArrayList;
 
@@ -14,8 +14,8 @@ public abstract class Mission extends GameStage{
 	protected ArrayList<Enemy> enemies;
 	protected Player player;
 	
-	public Mission(Renderer r){
-		super(r, TYPE_MISSION);
+	public Mission(){
+		super(TYPE_MISSION);
 	}
 	
 	

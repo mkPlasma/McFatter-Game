@@ -38,7 +38,7 @@ public class Animation{
 	
 	
 	// Time increment to run the animation on
-	private int inc;
+	private int tInc;
 	
 	private final int type;
 	private final float[] args;
@@ -47,19 +47,19 @@ public class Animation{
 
 	public Animation(int type, int inc, float[] args){
 		this.type = type;
-		this.inc = inc;
+		this.tInc = inc;
 		this.args = args;
 	}
 	
 	public Animation(int type, int inc, float aInc, float min, float max){
 		this.type = type;
-		this.inc = inc;
+		this.tInc = inc;
 		args = new float[]{aInc, min, max};
 	}
 	
 	public Animation(int inc, int xStart, int yStart, int xInc, int yInc, int xEnd, int yEnd, int xReturn, int yReturn){
 		type = ANIM_SET_SPRITE;
-		this.inc = inc;
+		this.tInc = inc;
 		args = new float[]{xStart, yStart, xInc, yInc, xEnd, yEnd, xReturn, yReturn};
 	}
 	
@@ -68,7 +68,7 @@ public class Animation{
 	public void update(int time){
 		
 		// Multiplies the animation effect
-		int m = (int)Math.floor(time/inc);
+		int m = (int)Math.floor(time/tInc);
 		
 		// Rotation
 		if(type == ANIM_ROTATION)
@@ -131,12 +131,33 @@ public class Animation{
 				}
 				
 				spr.setPos(pos);
-				spr.reload();
 			}
 		}
 	}
 	
+	public boolean isEqual(Animation anim){
+		
+		if(anim == null)
+			return false;
+		
+		return	anim.getType() == type &&
+				anim.getArgs() == args &&
+				anim.getSprite().isEqual(spr);
+	}
+	
+	public int getType(){
+		return type;
+	}
+	
+	public float[] getArgs(){
+		return args;
+	}
+	
 	public void setSprite(Sprite spr){
 		this.spr = spr;
+	}
+	
+	public Sprite getSprite(){
+		return spr;
 	}
 }

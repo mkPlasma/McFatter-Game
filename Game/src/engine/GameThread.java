@@ -1,23 +1,30 @@
 package engine;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
-import java.awt.image.VolatileImage;
+import org.lwjgl.glfw.*;
+import org.lwjgl.opengl.*;
+import org.lwjgl.system.*;
 
-import javax.swing.JPanel;
+import engine.graphics.Renderer;
+import engine.screens.ScreenManager;
 
-public class GameThread extends JPanel implements Runnable{
+import static org.lwjgl.glfw.Callbacks.*;
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.system.MemoryStack.*;
+import static org.lwjgl.system.MemoryUtil.*;
+
+import org.lwjgl.BufferUtils;
+
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
+
+public class GameThread implements Runnable{
 	
-	private Graphics2D g2d;
-	private ScreenManager screenManager;
+	private long window;
 	
-	// VolatileImage is used if hardware acceleration is on
-	private VolatileImage screenImg;
-	private BufferedImage screenImgB;
+	private GLFWKeyCallback keyCallback;
 	
 	// Resolution scale
 	private float scale;
@@ -30,43 +37,74 @@ public class GameThread extends JPanel implements Runnable{
 	
 	private void init(){
 		
-		setFocusable(true);
+		// Set GLFW to print errors
+		GLFWErrorCallback.createPrint(System.err).set();
 		
-		// There are meant to be two of these
-		// If there is only one then the controls don't work sometimes when launched on Windows
-		requestFocusInWindow();
-		requestFocusInWindow();
+		if(!glfwInit())
+			throw new IllegalStateException("Unabled to initialize GLFW");
 		
-		addKeyListener(new KeyboardListener());
+		// Make not resizable
+		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 		
+		// Create window
 		scale = Settings.getWindowScale();
+		Renderer.updateScale();
 		
-		if(Settings.useHardwareAcceleration()){
-			screenImg = createVolatileImage((int)(800*scale), (int)(600*scale));
-			g2d = (Graphics2D)screenImg.getGraphics();
+		window = glfwCreateWindow((int)(800*scale), (int)(600*scale), "DSG", NULL, NULL);
+		
+		if(window == NULL)
+			throw new RuntimeException("Failed to create GLFW window");
+		
+		glfwSetKeyCallback(window, keyCallback = new KeyboardListener());
+		
+		try(MemoryStack stack = stackPush()){
+			IntBuffer pWidth = stack.mallocInt(1);
+			IntBuffer pHeight = stack.mallocInt(1);
+			
+			glfwGetWindowSize(window, pWidth, pHeight);
+
+			// Get monitor
+			GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+			
+			// Center window
+			glfwSetWindowPos(window, (vidmode.width() - pWidth.get(0))/2, (vidmode.height() - pHeight.get(0))/2);
 		}
-		else{
-			screenImgB = new BufferedImage((int)(800*scale), (int)(600*scale), BufferedImage.TYPE_INT_ARGB);
-			g2d = (Graphics2D)screenImgB.getGraphics();
-		}
 		
-		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-		g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		glfwMakeContextCurrent(window);
 		
-		// Create test game screen
-		MainScreen testScreen = new MainScreen();
-		testScreen.init(g2d);
+		// Vsync
+		glfwSwapInterval(1);
 		
-		// Set up screen manager
-		screenManager = new ScreenManager();
-		screenManager.setScreen(testScreen);
+		glfwShowWindow(window);
+		
+		ScreenManager.init();
+		ScreenManager.setScreen(ScreenManager.scrnMain);
+		ScreenManager.initScreen();
 	}
 	
 	public void run(){
-		
 		init();
+		loop();
 		
-		boolean running = true;
+		// Cleanup
+		glfwFreeCallbacks(window);
+		glfwDestroyWindow(window);
+		
+		glfwTerminate();
+		glfwSetErrorCallback(null).free();
+	}
+	
+	private void loop(){
+		
+		GL.createCapabilities();
+		
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, 800*scale, 600*scale, 0, 1, -1);
+		
+		glClearColor(0, 0, 0, 0);
+		glMatrixMode(GL_MODELVIEW);
 		
 		// Timing
 		double lastLoopTime = System.nanoTime();
@@ -79,17 +117,14 @@ public class GameThread extends JPanel implements Runnable{
 		int frameCount = 0;
 		fps = 60;
 		
-		while(running){
+		while(!glfwWindowShouldClose(window)){
 			// Timing
 			long startTime = System.nanoTime();
 			lastLoopTime = startTime;
 			
 			// Game logic and drawing
 			update();
-			draw();
-			
-			drawFPS();
-			drawToScreen();
+			render();
 			
 			frameCount++;
 			
@@ -100,6 +135,7 @@ public class GameThread extends JPanel implements Runnable{
 				fps = frameCount;
 				frameCount = 0;
 				lastSecondTime = currentSecond;
+				System.out.println("FPS: " + fps);
 			}
 			
 			// Timing
@@ -115,33 +151,16 @@ public class GameThread extends JPanel implements Runnable{
 	}
 	
 	private void update(){
-		screenManager.update();
+		glfwPollEvents();
+		
+		ScreenManager.update();
 	}
 	
-	private void draw(){
-		screenManager.draw();
-	}
-	
-	private void drawFPS(){
-		g2d.setColor(Color.WHITE);
+	private void render(){
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		if(fps <= 57)
-			g2d.setColor(Color.RED);
-		
-		String f = Integer.toString(fps);
-		
-		g2d.drawString(f, (796 - f.length()*5)*scale, 596*scale);
-	}
-	
-	private void drawToScreen(){
-		// Draw bufferedimage to the screen
-		Graphics g = getGraphics();
-		
-		if(Settings.useHardwareAcceleration())
-			g.drawImage(screenImg, 0, 0, (int)(800*scale), (int)(600*scale), null);
-		else
-			g.drawImage(screenImgB, 0, 0, (int)(800*scale), (int)(600*scale), null);
-		
-		g.dispose();
+		ScreenManager.render();
+        
+		glfwSwapBuffers(window);
 	}
 }

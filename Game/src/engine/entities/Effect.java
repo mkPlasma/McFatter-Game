@@ -1,7 +1,6 @@
 package engine.entities;
 
 import engine.graphics.Renderer;
-import engine.graphics.Sprite;
 
 public class Effect extends MovableEntity{
 	
@@ -40,14 +39,14 @@ public class Effect extends MovableEntity{
 		time++;
 	}
 	
-	public void draw(Renderer r){
+	public void render(){
 		if(!visible)
 			return;
 		
 		if(frame.spriteAlign())
 			frame.getSprite().rotate(dir + 90);
 		
-		r.render(frame.getSprite(), time, x, y);
+		Renderer.render(frame.getSprite(), time, x, y);
 	}
 	
 }

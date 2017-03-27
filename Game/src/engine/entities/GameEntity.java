@@ -1,7 +1,5 @@
 package engine.entities;
 
-import engine.graphics.Renderer;
-
 public abstract class GameEntity{
 	
 	protected float x, y;
@@ -30,7 +28,7 @@ public abstract class GameEntity{
 	public abstract void onCreate();
 	public abstract void onDestroy();
 	public abstract void update();
-	public abstract void draw(Renderer r);
+	public abstract void render();
 	
 	public void setX(float x){
 		this.x = x;

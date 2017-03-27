@@ -1,6 +1,5 @@
 package content;
 
-import engine.entities.BulletFrame;
 import engine.entities.EntityFrame;
 import engine.graphics.Animation;
 import engine.graphics.Sprite;
@@ -58,7 +57,7 @@ public class EffectSheet{
 		else
 			sprite = new Sprite(path, color*size, type*size, size, size, new Animation(Animation.ANIM_ROTATION, 1, new float[]{rotation}));
 		
-		sprite = SpriteCache.cacheSprite(sprite);
+		sprite = SpriteCache.cache(sprite);
 		
 		return sprite;
 	}

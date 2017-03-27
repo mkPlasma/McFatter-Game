@@ -89,7 +89,7 @@ public class BulletSheet{
 		else
 			sprite = new Sprite(path, color*size, type*size, size, size, new Animation(Animation.ANIM_ROTATION, 1, new float[]{rotation}));
 		
-		sprite = SpriteCache.cacheSprite(sprite);
+		sprite = SpriteCache.cache(sprite);
 		
 		return sprite;
 	}
@@ -99,7 +99,9 @@ public class BulletSheet{
 			case TYPE_SCALE: case TYPE_STAR4: case TYPE_CRYSTAL: case TYPE_MISSILE: case TYPE_PLUS: case TYPE_WALL:
 			case TYPE_SCALE_DARK: case TYPE_STAR4_DARK: case TYPE_CRYSTAL_DARK: case TYPE_MISSILE_DARK: case TYPE_PLUS_DARK: case TYPE_WALL_DARK:
 				return 3;
-			case TYPE_ORB_M: case TYPE_MINE: case TYPE_ORB_M_DARK: case TYPE_MINE_DARK: case TYPE_LASER:
+			case TYPE_ORB_M: case TYPE_ORB_M_DARK:
+				return 4;
+			case TYPE_MINE: case TYPE_MINE_DARK: case TYPE_LASER:
 				return 5;
 		}
 		

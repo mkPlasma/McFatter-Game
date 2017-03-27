@@ -1,12 +1,14 @@
 package engine.entities;
 
-import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 import content.BulletSheet;
 import engine.KeyboardListener;
 import engine.graphics.Renderer;
+
+import static engine.KeyboardListener.*;
+import static org.lwjgl.glfw.GLFW.*;
 
 public class Player extends GameEntity{
 	
@@ -35,34 +37,33 @@ public class Player extends GameEntity{
 	
 	public void update(){
 		
-		
 		// Keypresses
 		
 		// Movement
-		if(KeyboardListener.isKeyPressed(KeyEvent.VK_RIGHT))
+		if(isKeyDown(GLFW_KEY_RIGHT))
 			x += speed;
-		else if(KeyboardListener.isKeyPressed(KeyEvent.VK_LEFT))
+		else if(isKeyDown(GLFW_KEY_LEFT))
 			x -= speed;
-		if(KeyboardListener.isKeyPressed(KeyEvent.VK_DOWN))
+		if(isKeyDown(GLFW_KEY_DOWN))
 			y += speed;
-		else if(KeyboardListener.isKeyPressed(KeyEvent.VK_UP))
+		else if(isKeyDown(GLFW_KEY_UP))
 			y -= speed;
 		
 		
 		// Focusing
-		if(KeyboardListener.isKeyPressed(KeyEvent.VK_SHIFT))
+		if(isKeyDown(GLFW_KEY_RIGHT_SHIFT) || isKeyDown(GLFW_KEY_LEFT_SHIFT))
 			focused = true;
-		else if(KeyboardListener.isKeyReleased(KeyEvent.VK_SHIFT))
+		else if(isKeyUp(GLFW_KEY_RIGHT_SHIFT) || isKeyUp(GLFW_KEY_LEFT_SHIFT))
 			focused = false;
 		
 		// Firing
-		if(KeyboardListener.isKeyPressed(KeyEvent.VK_Z))
+		if(isKeyDown(GLFW_KEY_Z))
 			firing = true;
-		else if(KeyboardListener.isKeyReleased(KeyEvent.VK_Z))
+		else if(isKeyUp(GLFW_KEY_Z))
 			firing = false;
 		
-
-		if(KeyboardListener.isKeyPressed(KeyEvent.VK_X) && bombCooldown == 0)
+		
+		if(isKeyDown(GLFW_KEY_X) && bombCooldown == 0)
 			bomb();
 		
 		// Movement borders
@@ -118,8 +119,8 @@ public class Player extends GameEntity{
 		bombCooldown = 120;
 	}
 	
-	public void draw(Renderer r){
-		r.drawCircle((int)x - 3, (int)y - 3, 6, 6, Color.RED);
+	public void render(){
+		Renderer.drawRectangle(x, y, 6, 6);
 	}
 	
 	public void onCreate(){

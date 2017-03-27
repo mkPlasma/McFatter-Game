@@ -1,18 +1,16 @@
-package engine;
+package engine.screens;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.util.ArrayList;
 
-import com.sun.glass.events.KeyEvent;
+import org.lwjgl.glfw.GLFW;
 
 import content.TestMission;
+import engine.KeyboardListener;
 import engine.entities.Bullet;
 import engine.entities.Effect;
 import engine.entities.EffectGenerator;
 import engine.entities.Enemy;
 import engine.entities.Laser;
-import engine.graphics.Renderer;
 
 public class MainScreen extends GameScreen{
 	
@@ -27,57 +25,32 @@ public class MainScreen extends GameScreen{
 	private boolean paused;
 	private int pauseTime;
 	
-	public void init(Graphics2D g2d){
-		
+	public void init(){
 		enemyBullets = new ArrayList<Bullet>();
 		playerBullets = new ArrayList<Bullet>();
 		enemies = new ArrayList<Enemy>();
 		effects = new ArrayList<Effect>();
 		
-		r = new Renderer(g2d);
-		
 		time = 0;
 		paused = false;
 		
 		// Temporary test
-		gs = new TestMission(r);
+		gs = new TestMission();
 		gs.init();
-		
-		//enemies.add(new Enemy(400, 200));
-		
-		// Obsolete pattern instruction test
-		/*
-		InstructionSet inst = new InstructionSet(1);
-		inst.add(new BulletInstruction(null, 0, BulletInstruction.SET_POS, new double[]{400, 150}));
-		inst.add(new BulletInstruction(null, 0, BulletInstruction.CONST_DIR_SPD, new double[]{0, 2}));
-		base = new Bullet(inst, Bullet.TYPE_ORB_L, 0);
-		
-		pset = new InstructionSet(InstructionSet.INST_PATTERN);
-		pset.add(new PatternInstruction(0, PatternInstruction.PATTERN_SPIRAL_STACKED, new double[]{24, 5, 0, 15, -1, 5, 1}, base));
-		*/
 	}
 	
 	
 	public void update(){
 		
-		if(KeyboardListener.isKeyPressed(KeyEvent.VK_ESCAPE) && time > pauseTime + 30){
+		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_ESCAPE) && time > pauseTime + 30){
 			paused = !paused;
 			pauseTime = time;
 		}
 		
-		if(!paused){
+		if(!paused)
 			updateGameStage();
-		}
 		
 		time++;
-		
-		// Obsolete pattern instruction test
-		//pset.run();
-		//addBullets(pset.getBullets());
-		
-		//base.getInstructionSet().set(new BulletInstruction(base, 0, BulletInstruction.SET_DIR, new double[]{Math.atan2(player.getY() - 150, player.getX() - 400)}), 0);
-		//base.getInstructionSet().init();
-		
 	}
 	
 	private void updateGameStage(){
@@ -257,11 +230,7 @@ public class MainScreen extends GameScreen{
 	
 	
 	
-	public void draw(){
-		if(paused)
-			return;
-		
-		r.drawRectangle(0, 0, 800, 600, Color.BLACK);
+	public void render(){
 		
 		drawGameStage();
 		
@@ -271,12 +240,12 @@ public class MainScreen extends GameScreen{
 	}
 	
 	private void drawGameStage(){
-		gs.draw();
+		gs.render();
 	}
 	
 	private void drawBullets(){
 		for(int i = 0; i < enemyBullets.size(); i++){
-			enemyBullets.get(i).draw(r);
+			enemyBullets.get(i).render();
 			
 			// Laser collision debug
 			/*
@@ -311,16 +280,16 @@ public class MainScreen extends GameScreen{
 		}
 		
 		for(int i = 0; i < playerBullets.size(); i++)
-			playerBullets.get(i).draw(r);
+			playerBullets.get(i).render();
 	}
 
 	private void drawEnemies(){
 		for(int i = 0; i < enemies.size(); i++)
-			enemies.get(i).draw(r);
+			enemies.get(i).render();
 	}
 	
 	private void drawEffects(){
 		for(int i = 0; i < effects.size(); i++)
-			effects.get(i).draw(r);
+			effects.get(i).render();
 	}
 }
