@@ -8,8 +8,8 @@ public class Laser extends Bullet{
 	private int length, width;
 	private float scx, scy;
 	
-	public Laser(MovementInstruction inst, BulletFrame frame){
-		super(inst, frame);
+	public Laser(BulletFrame frame, MovementInstruction inst){
+		super(frame, inst);
 		
 		visible = true;
 		
@@ -21,8 +21,8 @@ public class Laser extends Bullet{
 		onCreate();
 	}
 	
-	public Laser(InstructionSet inst, BulletFrame frame){
-		super(inst, frame);
+	public Laser(BulletFrame frame, InstructionSet inst){
+		super(frame, inst);
 		
 		visible = true;
 		
@@ -34,8 +34,8 @@ public class Laser extends Bullet{
 		onCreate();
 	}
 	
-	public Laser(float x, float y, float dir, float spd, int length, int width, BulletFrame frame){
-		super(x, y, dir, spd, frame);
+	public Laser(BulletFrame frame, float x, float y, float dir, float spd, int length, int width){
+		super(frame, x, y, dir, spd);
 		
 		visible = true;
 
@@ -48,8 +48,8 @@ public class Laser extends Bullet{
 		onCreate();
 	}
 	
-	public Laser(float x, float y, float dir, float spd, int length, int width, BulletFrame frame, int damage){
-		super(x, y, dir, spd, frame, damage, 0);
+	public Laser(BulletFrame frame, float x, float y, float dir, float spd, int length, int width, int damage){
+		super(frame, x, y, dir, spd, damage, 0);
 		
 		visible = true;
 		
@@ -85,7 +85,7 @@ public class Laser extends Bullet{
 		scx = ((float)width)/((float)frame.getSprite().getWidth());
 		scy = ((float)length)/((float)frame.getSprite().getHeight());
 		
-		r.render(frame.getSprite(), time, (int)(x + (length/2)*Math.cos(Math.toRadians(dir))), (int)(y + (length/2)*Math.sin(Math.toRadians(dir))), 1, dir + 90, scx, scy);
+		//r.render(frame.getSprite(), time, (int)(x + (length/2)*Math.cos(Math.toRadians(dir))), (int)(y + (length/2)*Math.sin(Math.toRadians(dir))), 1, dir + 90, scx, scy);
 	}
 	
 	public void onCreate(){
@@ -194,10 +194,10 @@ public class Laser extends Bullet{
 	}
 	
 	public int getHitboxSize(){
-		return (int)(scx*frame.getHitboxSize());
+		return (int)(scx*((BulletFrame)frame).getHitboxSize());
 	}
 	
 	public int getHBLengthCrop(){
-		return (int)(length - length*frame.getHBLengthCrop());
+		return (int)(length - length*((BulletFrame)frame).getHBLengthCrop());
 	}
 }

@@ -24,9 +24,6 @@ public class Bullet extends MovableEntity{
 	protected byte attr[] = new byte[2];
 	
 	
-	// Holds sprite data and hitbox size
-	protected BulletFrame frame;
-	
 	// Player shots only
 	protected int damage, dmgReduce;
 	
@@ -36,7 +33,7 @@ public class Bullet extends MovableEntity{
 	// If true, bullet will not be updated
 	protected boolean paused;
 	
-	public Bullet(MovementInstruction inst, BulletFrame frame){
+	public Bullet(BulletFrame frame, MovementInstruction inst){
 		//super();
 		
 		visible = true;
@@ -50,7 +47,7 @@ public class Bullet extends MovableEntity{
 		onCreate();
 	}
 	
-	public Bullet(InstructionSet inst, BulletFrame frame){
+	public Bullet(BulletFrame frame, InstructionSet inst){
 		//super();
 		
 		visible = true;
@@ -64,7 +61,7 @@ public class Bullet extends MovableEntity{
 		onCreate();
 	}
 	
-	public Bullet(float x, float y, float dir, float spd, BulletFrame frame){
+	public Bullet(BulletFrame frame, float x, float y, float dir, float spd){
 		//super(x, y);
 		
 		visible = true;
@@ -79,7 +76,7 @@ public class Bullet extends MovableEntity{
 		onCreate();
 	}
 	
-	public Bullet(float x, float y, float dir, float spd, BulletFrame frame, int damage, int dmgReduce){
+	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, int damage, int dmgReduce){
 		//super(x, y);
 		
 		visible = true;
@@ -98,12 +95,12 @@ public class Bullet extends MovableEntity{
 	}
 	
 	public void onCreate(){
-		frame.getSprite().addUser();
+		getSprite().addUser();
 	}
 	
 	public void onDestroy(){
 		remove = true;
-		frame.getSprite().removeUser();
+		getSprite().removeUser();
 		
 		InstructionSet inst = new InstructionSet(InstructionSet.INST_MOVABLE);
 		inst.add(new MovementInstruction(null, 0, MovementInstruction.ENT_EFFECT, MovementInstruction.SET_POS, new float[]{x, y}));
@@ -115,7 +112,7 @@ public class Bullet extends MovableEntity{
 		Sprite s = new Sprite("Game/res/img/bullets/01.png", 0, 0, 32, 32, a);
 		s = SpriteCache.cache(s);
 		
-		EntityFrame f = new EntityFrame(0, s, false, 0);
+		EntityFrame f = new EntityFrame(0, s, false, 0, false);
 		
 		Effect e = new Effect(inst, f);
 		
@@ -149,36 +146,18 @@ public class Bullet extends MovableEntity{
 		time++;
 	}
 	
-	public void render(){
-		
-		if(!visible)
-			return;
-		
-		float rotation = 0;
-		
-		if(frame.spriteAlign())
-			rotation = dir + 90;
-		
-		rotation += time*spd*frame.spriteRotationBySpd();
-		
-		frame.getSprite().setRotation(rotation);
-		Renderer.render(frame.getSprite(), time, x, y);
-		
-		// Draw hitbox
-		
-		//int hitboxSize = frame.getHitboxSize();
-		//r.drawCircle((int)(x - (hitboxSize)), (int)(y - (hitboxSize)), (int)hitboxSize*2, (int)hitboxSize*2, Color.RED);
-	}
-	
-	
-	public void setBulletFrame(BulletFrame frame){
+	public void setFrame(BulletFrame frame){
 		this.frame = frame;
 	}
 	
-	public BulletFrame getBulletFrame(){
-		return frame;
+	public BulletFrame getFrame(){
+		return (BulletFrame)frame;
 	}
-
+	
+	public int getHitboxSize(){
+		return ((BulletFrame)frame).getHitboxSize();
+	}
+	
 	
 	public void setAttributes(byte[] attr){
 		this.attr = attr;

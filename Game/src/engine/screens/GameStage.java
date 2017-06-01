@@ -7,10 +7,13 @@ public abstract class GameStage{
 	
 	protected final int type;
 	
+	protected final MainScreen screen;
+	
 	protected int time;
 	
-	public GameStage(int type){
+	public GameStage(int type, MainScreen screen){
 		this.type = type;
+		this.screen = screen;
 	}
 	
 	public abstract void init();

@@ -46,7 +46,7 @@ public class Effect extends MovableEntity{
 		if(frame.spriteAlign())
 			frame.getSprite().rotate(dir + 90);
 		
-		Renderer.render(frame.getSprite(), time, x, y);
+		//Renderer.render(frame.getSprite(), time, x, y);
 	}
 	
 }

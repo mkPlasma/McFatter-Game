@@ -1,5 +1,11 @@
 package engine.graphics;
 
+import static org.lwjgl.opengl.GL11.GL_RGBA;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glGenTextures;
+import static org.lwjgl.opengl.GL11.glTexImage2D;
 import static org.lwjgl.stb.STBImage.stbi_load_from_memory;
 
 import java.io.File;
@@ -12,7 +18,7 @@ import java.nio.channels.FileChannel;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
 
-import static org.lwjgl.opengl.GL11.*;
+import engine.entities.GameEntity;
 
 public class Sprite{
 	
@@ -44,7 +50,7 @@ public class Sprite{
 	// 1 - Top right
 	// 2 - Bottom right
 	// 3 - Bottom left
-	private float[][] texCoords;
+	private float[] texCoords;
 	
 	private float rotation = 0;
 	private float scaleX = 1, scaleY = 1;
@@ -86,13 +92,23 @@ public class Sprite{
 		
 		loaded = true;
 	}
-	
+
 	public Sprite(String path, int x, int y, int width, int height){
 		this.path = path;
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
+	}
+	
+	public Sprite(String path, int x, int y, int width, int height, float scale){
+		this.path = path;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+		scaleX = scale;
+		scaleY = scale;
 	}
 	
 	public Sprite(String path, int x, int y, int width, int height, Animation anim){
@@ -144,14 +160,15 @@ public class Sprite{
 		texID = glGenTextures();
 		glBindTexture(GL_TEXTURE_2D, texID);
 		
+		/*
 		if(this.comp == 3){
 			if((texWidth & 3) != 0)
 				glPixelStorei(GL_UNPACK_ALIGNMENT, 2 - (texWidth & 1));
 			
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
 		}
-		else
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture);
+		else*/
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture);
 		
 		genTextureCoords();
 	}
@@ -178,16 +195,16 @@ public class Sprite{
 		float top =		(float)y/(float)texHeight;
 		float bottom =	((float)y + (float)height)/(float)texHeight;
 		
-		texCoords = new float[][]{
-			{left,  top},
-			{right, top},
-			{right, bottom},
-			{left,  bottom}
+		texCoords = new float[]{
+			left,  top,
+			right, top,
+			right, bottom,
+			left,  bottom
 		};
 	}
 	
 	// Returns a modified sprite for the animation at the given time
-	public Sprite animate(int time){
+	public Sprite animate(int time, GameEntity e){
 		
 		if(anim == null)
 			return this;
@@ -196,6 +213,7 @@ public class Sprite{
 		
 		for(Animation a:spr.getAnimations()){
 			a.setSprite(spr);
+			a.setEntity(e);
 			a.update(time);
 		}
 		
@@ -208,36 +226,41 @@ public class Sprite{
 		if(sprite == null)
 			return false;
 		
-		// Check if all animations are equal
-		Animation[] a = sprite.getAnimations();
+		if(sprite.path.equalsIgnoreCase(path) &&
+			sprite.x == x &&
+			sprite.y == y &&
+			sprite.width == width &&
+			sprite.height == height &&
+			sprite.rotation == rotation &&
+			sprite.scaleX == scaleX &&
+			sprite.scaleY == scaleY &&
+			sprite.alpha == alpha){
 		
-		// Return false if one is null
-		if((a == null && anim != null) || (a != null && anim == null))
-			return false;
-		
-		if(a != null && anim != null){
-			// Return false if they don't have the same amount
-			if(a.length != anim.length)
+			// Check if all animations are equal
+			Animation[] a = sprite.getAnimations();
+			
+			// Return false if one is null
+			if((a == null && anim != null) || (a != null && anim == null))
 				return false;
 			
-			// Check if equal
-			for(int i = 0; i < sprite.getAnimations().length; i++)
-				if(a[i] != anim[i])
+			if(a != null && anim != null){
+				// Return false if they don't have the same amount
+				if(a.length != anim.length)
 					return false;
+				
+				// Check if equal
+				for(int i = 0; i < sprite.getAnimations().length; i++)
+					if(a[i].isEqual(anim[i]))
+						return false;
+			}
+			
+			return true;
 		}
 		
-		return	sprite.path.equals(path) &&
-				sprite.x == x &&
-				sprite.y == y &&
-				sprite.width == width &&
-				sprite.height == height &&
-				sprite.rotation == rotation &&
-				sprite.scaleX == scaleX &&
-				sprite.scaleY == scaleY &&
-				sprite.alpha == alpha;
+		return false;
 	}
 	
-	public float[][] getTextureCoords(){
+	public float[] getTextureCoords(){
 		return texCoords;
 	}
 	
@@ -335,9 +358,13 @@ public class Sprite{
 	public void setWidth(int width){
 		this.width = width;
 	}
-	
+
 	public int getWidth(){
 		return width;
+	}
+	
+	public float getScaledWidth(){
+		return width*scaleX;
 	}
 	
 	public void setHeight(int height){
@@ -346,6 +373,10 @@ public class Sprite{
 	
 	public int getHeight(){
 		return height;
+	}
+	
+	public float getScaledHeight(){
+		return height*scaleY;
 	}
 	
 	public void setDimensions(int[] dim){
@@ -367,6 +398,16 @@ public class Sprite{
 	
 	public float getRotation(){
 		return rotation;
+	}
+	
+	public void setScale(float scale){
+		scaleX = scale;
+		scaleY = scale;
+	}
+	
+	public void setScale(float scaleX, float scaleY){
+		this.scaleX = scaleX;
+		this.scaleY = scaleY;
 	}
 	
 	public void setScaleX(float scaleX){

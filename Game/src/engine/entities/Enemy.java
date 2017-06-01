@@ -1,32 +1,31 @@
 package engine.entities;
 
-import java.awt.Color;
-
-import engine.graphics.Renderer;
-
 public class Enemy extends MovableEntity{
 	
 	private final int hitboxSize;
 	
 	// Whether entity can collide
-	protected boolean collisions = true;
+	private boolean collisions = true;
 	
 	private int health;
 	private int hpmax;
 	
-	public Enemy(InstructionSet inst){
+	public Enemy(EnemyFrame frame, InstructionSet inst){
 		super();
 		
-		setVisible(true);
+		visible = true;
+		
+		this.frame = frame;
 		
 		inst.setEntity(this);
 		this.inst = inst;
 		inst.init();
 		
-		hitboxSize = 8;
 		
+		hitboxSize = 8;
 		hpmax = 50000;
 		health = hpmax;
+		
 		
 		onCreate();
 	}
@@ -37,31 +36,24 @@ public class Enemy extends MovableEntity{
 		time++;
 	}
 	
-	public void render(){
-		
-		if(!visible)
-			return;
-		
-		Renderer.drawRectangle(x, y, hitboxSize, hitboxSize);
-		
-		// Health bar (temporary)
-		//Renderer.drawRectangle(10, 10, 780, 10, Color.DARK_GRAY);
-		//Renderer.drawRectangle(10, 10, (int)(780*((double)health/(double)hpmax)), 10, Color.GREEN);
-	}
-	
 	public void onCreate(){
 		
 	}
 	
 	public void onDestroy(){
-		
+		remove = true;
 	}
 	
 	public void damage(int damage){
 		health -= damage;
 		
 		if(health <= 0)
-			remove = true;
+			onDestroy();
+	}
+	
+	
+	public EnemyFrame getFrame(){
+		return (EnemyFrame)frame;
 	}
 	
 	public int getHealth(){

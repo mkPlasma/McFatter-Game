@@ -1,14 +1,12 @@
 package engine.entities;
 
-import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-
-import content.BulletSheet;
-import engine.KeyboardListener;
-import engine.graphics.Renderer;
-
 import static engine.KeyboardListener.*;
 import static org.lwjgl.glfw.GLFW.*;
+
+import java.util.ArrayList;
+
+import content.BulletList;
+import engine.graphics.Renderer;
 
 public class Player extends GameEntity{
 	
@@ -21,6 +19,8 @@ public class Player extends GameEntity{
 	private int speed;
 	private boolean focused, firing, bombing;
 	
+	private BulletFrame shot;
+	
 	// Timer variables counts up for timing shots/bombs
 	private int shotCooldown = 0, bombCooldown = 0;
 	
@@ -31,6 +31,7 @@ public class Player extends GameEntity{
 		super(x, y);
 		
 		bullets = new ArrayList<Bullet>();
+		shot = BulletList.get(BulletList.TYPE_MISSILE, BulletList.COLOR_RED);
 		
 		onCreate();
 	}
@@ -90,8 +91,8 @@ public class Player extends GameEntity{
 	}
 	
 	private void fire(){
-		bullets.add(new Bullet(x - 5, y, 270, 15, BulletSheet.get(BulletSheet.TYPE_MISSILE, BulletSheet.COLOR_RED), 500, 5));
-		bullets.add(new Bullet(x + 5, y, 270, 15, BulletSheet.get(BulletSheet.TYPE_MISSILE, BulletSheet.COLOR_RED), 500, 5));
+		bullets.add(new Bullet(shot, x - 5, y, 270, 15, 500, 5));
+		bullets.add(new Bullet(shot, x + 5, y, 270, 15, 500, 5));
 		shotCooldown = 4;
 	}
 	
@@ -117,10 +118,6 @@ public class Player extends GameEntity{
 		}
 		*/
 		bombCooldown = 120;
-	}
-	
-	public void render(){
-		Renderer.drawRectangle(x, y, 6, 6);
 	}
 	
 	public void onCreate(){

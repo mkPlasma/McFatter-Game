@@ -1,5 +1,8 @@
 package engine.graphics;
 
+import engine.entities.GameEntity;
+import engine.entities.MovableEntity;
+
 public class Animation{
 	
 	// Class stores a sprite and animates it by changing certain properties
@@ -8,8 +11,12 @@ public class Animation{
 	================================================================
 	ANIM_ROTATION
 	[inc]
+	ANIM_ROTATION_BY_SPD
+	[inc, fac]
 	
 	Increments by [inc] every [time] frames
+	Multiplies by speed*fac if BY_SPD
+	
 	
 	
 	ANIM_SCALE, ANIM_ALPHA
@@ -17,6 +24,7 @@ public class Animation{
 	
 	Increments by [inc] every [time] frames
 	Stops at [min] or [max] values
+	
 	
 	
 	ANIM_SET_SPRITE
@@ -30,11 +38,12 @@ public class Animation{
 	
 	public static final int
 		ANIM_ROTATION =			0,
-		ANIM_SCALE =			1,
-		ANIM_SCALE_X =			2,
-		ANIM_SCALE_Y =			3,
-		ANIM_ALPHA =			4,
-		ANIM_SET_SPRITE =		5;
+		ANIM_ROTATION_BY_SPD =	1,
+		ANIM_SCALE =			2,
+		ANIM_SCALE_X =			3,
+		ANIM_SCALE_Y =			4,
+		ANIM_ALPHA =			5,
+		ANIM_SET_SPRITE =		6;
 	
 	
 	// Time increment to run the animation on
@@ -44,7 +53,9 @@ public class Animation{
 	private final float[] args;
 	
 	private Sprite spr;
-
+	
+	private GameEntity e;
+	
 	public Animation(int type, int inc, float[] args){
 		this.type = type;
 		this.tInc = inc;
@@ -71,8 +82,12 @@ public class Animation{
 		int m = (int)Math.floor(time/tInc);
 		
 		// Rotation
-		if(type == ANIM_ROTATION)
-			spr.rotate(m*args[0]);
+		if(type == ANIM_ROTATION || type == ANIM_ROTATION_BY_SPD){
+			if(type == ANIM_ROTATION_BY_SPD)
+				spr.rotate(m*args[0]*((MovableEntity)e).getSpd());
+			else
+				spr.rotate(m*args[0]);
+		}
 		
 		// Scale X
 		if(type == ANIM_SCALE || type == ANIM_SCALE_X){
@@ -143,6 +158,10 @@ public class Animation{
 		return	anim.getType() == type &&
 				anim.getArgs() == args &&
 				anim.getSprite().isEqual(spr);
+	}
+	
+	public void setEntity(GameEntity e){
+		this.e = e;
 	}
 	
 	public int getType(){

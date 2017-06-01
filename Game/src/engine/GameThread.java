@@ -47,6 +47,12 @@ public class GameThread implements Runnable{
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 		
+		// Set OpenGL context
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		
 		// Create window
 		scale = Settings.getWindowScale();
 		Renderer.updateScale();
@@ -63,7 +69,7 @@ public class GameThread implements Runnable{
 			IntBuffer pHeight = stack.mallocInt(1);
 			
 			glfwGetWindowSize(window, pWidth, pHeight);
-
+			
 			// Get monitor
 			GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 			
@@ -77,6 +83,9 @@ public class GameThread implements Runnable{
 		glfwSwapInterval(1);
 		
 		glfwShowWindow(window);
+		
+		
+		GL.createCapabilities();
 		
 		ScreenManager.init();
 		ScreenManager.setScreen(ScreenManager.scrnMain);
@@ -97,14 +106,7 @@ public class GameThread implements Runnable{
 	
 	private void loop(){
 		
-		GL.createCapabilities();
-		
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(0, 800*scale, 600*scale, 0, 1, -1);
-		
 		glClearColor(0, 0, 0, 0);
-		glMatrixMode(GL_MODELVIEW);
 		
 		// Timing
 		double lastLoopTime = System.nanoTime();

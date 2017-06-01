@@ -11,6 +11,7 @@ import engine.entities.Effect;
 import engine.entities.EffectGenerator;
 import engine.entities.Enemy;
 import engine.entities.Laser;
+import engine.graphics.Renderer;
 
 public class MainScreen extends GameScreen{
 	
@@ -20,7 +21,7 @@ public class MainScreen extends GameScreen{
 	private ArrayList<Enemy> enemies;
 	private ArrayList<Effect> effects;
 	
-	private int time;
+	private int time, rTime;
 	
 	private boolean paused;
 	private int pauseTime;
@@ -32,10 +33,13 @@ public class MainScreen extends GameScreen{
 		effects = new ArrayList<Effect>();
 		
 		time = 0;
+		rTime = 0;
 		paused = false;
 		
+		Renderer.init();
+		
 		// Temporary test
-		gs = new TestMission();
+		gs = new TestMission(this);
 		gs.init();
 	}
 	
@@ -154,7 +158,7 @@ public class MainScreen extends GameScreen{
 					}
 				}
 				else{
-					if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) < ((Mission)gs).getPlayer().getHitboxSize() + b.getBulletFrame().getHitboxSize()){
+					if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) < ((Mission)gs).getPlayer().getHitboxSize() + b.getHitboxSize()){
 						//player.death();
 						b.onDestroy();
 					}
@@ -175,7 +179,7 @@ public class MainScreen extends GameScreen{
 					if(b.collisionsEnabled()){
 						final float bpos[] = b.getPos();
 						
-						if(Math.hypot(epos[0] - bpos[0], epos[1] - bpos[1]) < e.getHitboxSize() + b.getBulletFrame().getHitboxSize()){
+						if(Math.hypot(epos[0] - bpos[0], epos[1] - bpos[1]) < e.getHitboxSize() + b.getHitboxSize()){
 							e.damage(b.getDamage());
 							b.onDestroy();
 						}
@@ -234,9 +238,15 @@ public class MainScreen extends GameScreen{
 		
 		drawGameStage();
 		
+		ArrayList<Bullet> li = new ArrayList<Bullet>(enemyBullets);
+		li.addAll(playerBullets);
+		
 		drawEnemies();
 		drawBullets();
-		drawEffects();
+		//drawEffects();
+		
+		if(!paused)
+			rTime++;
 	}
 	
 	private void drawGameStage(){
@@ -244,52 +254,22 @@ public class MainScreen extends GameScreen{
 	}
 	
 	private void drawBullets(){
-		for(int i = 0; i < enemyBullets.size(); i++){
-			enemyBullets.get(i).render();
-			
-			// Laser collision debug
-			/*
-			if(enemyBullets.get(i) instanceof Laser){
-				final float[] ppos = ((Mission)gs).getPlayer().getPos();
-				final float bpos[] = enemyBullets.get(i).getPos();
-				
-				// angle between laser/player
-				float ang = (float)(Math.atan2(bpos[1] - ppos[1], bpos[0] - ppos[0]) - Math.toRadians(enemyBullets.get(i).getDir()));
-				
-				// distance between laser/player
-				float d = (float)Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]);
-				
-				// perpendicular distance
-				float d2 = -(float)(d*Math.cos(ang));
-				
-				if(d2 < 0)
-					d2 = 0;
-				if(d2 > ((Laser)enemyBullets.get(i)).getLength())
-					d2 = ((Laser)enemyBullets.get(i)).getLength();
-				
-				// angle to laser
-				float ang2 = (float)Math.toRadians(enemyBullets.get(i).getDir());
-
-				final float[] p = {(float)(bpos[0] + d2*Math.cos(ang2)), (float)(bpos[1] + d2*Math.sin(ang2))};
-				//final float[] p = {(float)(ppos[0] + d2*Math.cos(ang2)), (float)(ppos[1] + d2*Math.sin(ang2))};
-				
-				r.drawLine((int)ppos[0], (int)ppos[1], (int)bpos[0], (int)bpos[1], Color.RED);
-				r.drawLine((int)ppos[0], (int)ppos[1], (int)p[0], (int)p[1], Color.GREEN);
-				r.drawLine((int)bpos[0], (int)bpos[1], (int)p[0], (int)p[1], Color.BLUE);
-			}*/
-		}
-		
-		for(int i = 0; i < playerBullets.size(); i++)
-			playerBullets.get(i).render();
+		Renderer.renderBullets(playerBullets, rTime);
+		Renderer.renderBullets(enemyBullets, rTime);
 	}
 
 	private void drawEnemies(){
-		for(int i = 0; i < enemies.size(); i++)
-			enemies.get(i).render();
+		Renderer.renderEnemies(enemies, rTime);
 	}
 	
 	private void drawEffects(){
 		for(int i = 0; i < effects.size(); i++)
 			effects.get(i).render();
+	}
+	
+	
+	
+	public ArrayList<Enemy> getEnemies(){
+		return enemies;
 	}
 }

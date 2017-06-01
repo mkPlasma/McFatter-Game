@@ -13,13 +13,15 @@ public class EntityFrame{
 	// If true, sprite will rotate to the direction it's moving in
 	private final boolean spriteAlign;
 	
-	// Rotate according to speed
-	private final float spriteRotationBySpd;
+	// Rotation
+	private final float spriteRotation;
+	private final boolean spriteRotationBySpd;
 	
-	public EntityFrame(int type, Sprite sprite, boolean spriteAlign, float spriteRotationBySpd){
+	public EntityFrame(int type, Sprite sprite, boolean spriteAlign, float spriteRotation, boolean spriteRotationBySpd){
 		this.type = type;
 		this.sprite = sprite;
 		this.spriteAlign = spriteAlign;
+		this.spriteRotation = spriteRotation;
 		this.spriteRotationBySpd = spriteRotationBySpd;
 	}
 	
@@ -35,7 +37,11 @@ public class EntityFrame{
 		return spriteAlign;
 	}
 	
-	public float spriteRotationBySpd(){
+	public float getSpriteRotation(){
+		return spriteRotation;
+	}
+	
+	public boolean getSpriteRotationBySpd(){
 		return spriteRotationBySpd;
 	}
 }

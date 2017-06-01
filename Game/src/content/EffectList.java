@@ -5,7 +5,7 @@ import engine.graphics.Animation;
 import engine.graphics.Sprite;
 import engine.graphics.SpriteCache;
 
-public class EffectSheet{
+public class EffectList{
 	
 	// Generates and caches EntityFrame objects for effects
 	
@@ -23,7 +23,7 @@ public class EffectSheet{
 			if(cache[i].getType() == type)
 				return cache[i];
 		
-		cache[index] = new EntityFrame(type, getSprite(type, color), getSpriteAlign(type), getSpriteRotationBySpd(type));
+		cache[index] = new EntityFrame(type, getSprite(type, color), getSpriteAlign(type), getSpriteRotation(type), getSpriteRotationBySpd(type));
 		index++;
 		
 		return cache[index - 1];
@@ -81,8 +81,8 @@ public class EffectSheet{
 		}*/
 	}
 	
-	public static float getSpriteRotationBySpd(byte type){
-		return 0;
+	public static boolean getSpriteRotationBySpd(byte type){
+		return false;
 		//return	type == TYPE_MINE		||
 		//		type == TYPE_MINE_DARK;
 	}

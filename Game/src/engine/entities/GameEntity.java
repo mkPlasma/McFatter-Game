@@ -1,5 +1,7 @@
 package engine.entities;
 
+import engine.graphics.Sprite;
+
 public abstract class GameEntity{
 	
 	protected float x, y;
@@ -10,6 +12,9 @@ public abstract class GameEntity{
 	
 	// Whether entity is drawn or not
 	protected boolean visible;
+	
+	// Stores a template of sprites and animations
+	protected EntityFrame frame;
 	
 	public GameEntity(){
 		
@@ -28,7 +33,15 @@ public abstract class GameEntity{
 	public abstract void onCreate();
 	public abstract void onDestroy();
 	public abstract void update();
-	public abstract void render();
+	
+	
+	public EntityFrame getFrame(){
+		return frame;
+	}
+	
+	public Sprite getSprite(){
+		return frame.getSprite();
+	}
 	
 	public void setX(float x){
 		this.x = x;

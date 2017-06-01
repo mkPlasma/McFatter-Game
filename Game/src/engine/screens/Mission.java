@@ -14,8 +14,8 @@ public abstract class Mission extends GameStage{
 	protected ArrayList<Enemy> enemies;
 	protected Player player;
 	
-	public Mission(){
-		super(TYPE_MISSION);
+	public Mission(MainScreen screen){
+		super(TYPE_MISSION, screen);
 	}
 	
 	
