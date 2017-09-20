@@ -1,12 +1,20 @@
 package engine.entities;
 
-import static engine.KeyboardListener.*;
-import static org.lwjgl.glfw.GLFW.*;
+import static engine.KeyboardListener.isKeyDown;
+import static engine.KeyboardListener.isKeyUp;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_SHIFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_X;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_Z;
 
 import java.util.ArrayList;
 
 import content.BulletList;
-import engine.graphics.Renderer;
+import engine.graphics.Animation;
 
 public class Player extends GameEntity{
 	
@@ -31,7 +39,7 @@ public class Player extends GameEntity{
 		super(x, y);
 		
 		bullets = new ArrayList<Bullet>();
-		shot = BulletList.get(BulletList.TYPE_MISSILE, BulletList.COLOR_RED);
+		shot = BulletList.get(BulletList.TYPE_PLUS, BulletList.COLOR_RED);
 		
 		onCreate();
 	}

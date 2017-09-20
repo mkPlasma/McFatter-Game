@@ -73,6 +73,10 @@ public abstract class GameEntity{
 		return new float[]{x, y};
 	}
 	
+	public int getTime(){
+		return time;
+	}
+	
 	public boolean remove(){
 		return remove;
 	}

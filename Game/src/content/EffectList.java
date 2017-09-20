@@ -55,7 +55,7 @@ public class EffectList{
 		if(rotation == 0)
 			sprite = new Sprite(path, color*size, type*size, size, size);
 		else
-			sprite = new Sprite(path, color*size, type*size, size, size, new Animation(Animation.ANIM_ROTATION, 1, new float[]{rotation}));
+			sprite = new Sprite(path, color*size, type*size, size, size, new Animation(Animation.ANIM_ROTATION, 1, false, new float[]{rotation}));
 		
 		sprite = SpriteCache.cache(sprite);
 		

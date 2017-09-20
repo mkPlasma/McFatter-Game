@@ -148,7 +148,8 @@ public class Renderer{
 			
 			GameEntity e = el.get(i);
 			
-			Sprite s = e.getSprite().animate(time, e);
+			// Get animated sprite
+			Sprite s = e.getSprite().animate(e.getTime(), time, e);
 			
 			float[] c = {e.getX(), e.getY()};
 			float[] v = getVertexCoords(c[0], c[1], s.getScaledWidth(), s.getScaledHeight());

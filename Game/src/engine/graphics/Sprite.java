@@ -204,7 +204,7 @@ public class Sprite{
 	}
 	
 	// Returns a modified sprite for the animation at the given time
-	public Sprite animate(int time, GameEntity e){
+	public Sprite animate(int time, int syncTime, GameEntity e){
 		
 		if(anim == null)
 			return this;
@@ -214,10 +214,29 @@ public class Sprite{
 		for(Animation a:spr.getAnimations()){
 			a.setSprite(spr);
 			a.setEntity(e);
-			a.update(time);
+			a.update(a.sync() ? syncTime : time);
 		}
 		
 		return spr;
+	}
+	
+	
+	// Adds an animation to the list
+	public void addAnimation(Animation a){
+		
+		if(anim != null){
+			Animation[] temp = new Animation[anim.length + 1];
+			
+			for(int i = 0; i < anim.length; i++){
+				temp[i] = anim[i];
+			}
+			
+			temp[temp.length - 1] = a;
+			
+			anim = temp.clone();
+		}else{
+			anim = new Animation[]{a};
+		}
 	}
 	
 	// Return true if two sprites are the same, used in SpriteCache

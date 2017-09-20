@@ -10,12 +10,12 @@ public class Bullet extends MovableEntity{
 	public static final byte
 		BOUNCE_LEFT =			0b0000001,
 		BOUNCE_RIGHT =			0b0000010,
-		BOUNCE_TOP =			0b0000100,
+		BOUNCE_TOP =				0b0000100,
 		BOUNCE_BOTTOM =			0b0001000,
 		BOUNCE_SIDES =			BOUNCE_LEFT | BOUNCE_RIGHT,
 		BOUNCE_SIDES_TOP =		BOUNCE_SIDES | BOUNCE_TOP,
-		BOUNCE_ALL =			BOUNCE_SIDES_TOP | BOUNCE_BOTTOM,
-		BOUNCE_SPRITE_SIZE =	0b1000000;
+		BOUNCE_ALL =				BOUNCE_SIDES_TOP | BOUNCE_BOTTOM,
+		BOUNCE_SPRITE_SIZE =		0b1000000;
 		
 	
 	// Bullet attributes
@@ -102,12 +102,14 @@ public class Bullet extends MovableEntity{
 		remove = true;
 		getSprite().removeUser();
 		
+		
+		// Temporary
 		InstructionSet inst = new InstructionSet(InstructionSet.INST_MOVABLE);
 		inst.add(new MovementInstruction(null, 0, MovementInstruction.ENT_EFFECT, MovementInstruction.SET_POS, new float[]{x, y}));
 		inst.add(new MovementInstruction(null, 0, MovementInstruction.ENT_EFFECT, MovementInstruction.CONST_DIR_SPD, new float[]{-dir, 5}));
 		inst.add(new MovementInstruction(null, 50, MovementInstruction.ENT_EFFECT, MovementInstruction.DESTROY, null));
 		
-		Animation[] a = new Animation[]{new Animation(Animation.ANIM_ALPHA, 1, -.02f, 0, 1), new Animation(Animation.ANIM_SCALE, 1, -.02f, 0, 1)};
+		Animation[] a = new Animation[]{new Animation(Animation.ANIM_ALPHA, 1, false, -.02f, 0, 1), new Animation(Animation.ANIM_SCALE, 1, false, -.02f, 0, 1)};
 		
 		Sprite s = new Sprite("Game/res/img/bullets/01.png", 0, 0, 32, 32, a);
 		s = SpriteCache.cache(s);

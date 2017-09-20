@@ -39,15 +39,19 @@ public class Animation{
 	public static final int
 		ANIM_ROTATION =			0,
 		ANIM_ROTATION_BY_SPD =	1,
-		ANIM_SCALE =			2,
+		ANIM_SCALE =				2,
 		ANIM_SCALE_X =			3,
 		ANIM_SCALE_Y =			4,
-		ANIM_ALPHA =			5,
+		ANIM_ALPHA =				5,
 		ANIM_SET_SPRITE =		6;
 	
 	
 	// Time increment to run the animation on
 	private int tInc;
+	
+	// Sync animations with each other
+	// If true, it uses a global time rather than the entity time
+	private final boolean sync;
 	
 	private final int type;
 	private final float[] args;
@@ -56,21 +60,24 @@ public class Animation{
 	
 	private GameEntity e;
 	
-	public Animation(int type, int inc, float[] args){
+	public Animation(int type, int timeInc, boolean sync, float[] args){
 		this.type = type;
-		this.tInc = inc;
+		this.tInc = timeInc;
+		this.sync = sync;
 		this.args = args;
 	}
 	
-	public Animation(int type, int inc, float aInc, float min, float max){
+	public Animation(int type, int timeInc, boolean sync, float inc, float min, float max){
 		this.type = type;
-		this.tInc = inc;
-		args = new float[]{aInc, min, max};
+		this.tInc = timeInc;
+		this.sync = sync;
+		args = new float[]{inc, min, max};
 	}
 	
-	public Animation(int inc, int xStart, int yStart, int xInc, int yInc, int xEnd, int yEnd, int xReturn, int yReturn){
+	public Animation(int timeInc, boolean sync, int xStart, int yStart, int xInc, int yInc, int xEnd, int yEnd, int xReturn, int yReturn){
 		type = ANIM_SET_SPRITE;
-		this.tInc = inc;
+		this.tInc = timeInc;
+		this.sync = sync;
 		args = new float[]{xStart, yStart, xInc, yInc, xEnd, yEnd, xReturn, yReturn};
 	}
 	
@@ -166,6 +173,10 @@ public class Animation{
 	
 	public int getType(){
 		return type;
+	}
+	
+	public boolean sync(){
+		return sync;
 	}
 	
 	public float[] getArgs(){

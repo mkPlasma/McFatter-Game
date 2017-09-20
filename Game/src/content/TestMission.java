@@ -2,7 +2,6 @@ package content;
 
 import java.util.ArrayList;
 
-import engine.Script;
 import engine.entities.Bullet;
 import engine.entities.Enemy;
 import engine.entities.EnemyFrame;
@@ -31,11 +30,8 @@ public class TestMission extends Mission{
 		
 		enemies.add(new Enemy(new EnemyFrame(), inst));
 		
-		script = new Script("hello");
 	}
 	
-	
-	Script script;
 	
 	int counter, counter2;
 	int cn;
