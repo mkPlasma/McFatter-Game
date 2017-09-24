@@ -1,5 +1,18 @@
 package engine.screens;
 
+/*
+ * 		GameStage.java
+ * 		
+ * 		Purpose:	Container for a stage, run in MainScreen.
+ * 		Notes:		Either a mission or cutscene.
+ * 		
+ * 		Children:	Mission.java
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public abstract class GameStage{
 	
 	public static final int TYPE_MISSION = 0,

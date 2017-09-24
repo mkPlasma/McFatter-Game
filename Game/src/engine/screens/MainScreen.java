@@ -13,6 +13,18 @@ import engine.entities.Enemy;
 import engine.entities.Laser;
 import engine.graphics.Renderer;
 
+/*
+ * 		MainScreen.java
+ * 		
+ * 		Purpose:	Controls the main game screen.
+ * 		Notes:		Any gameplay or cutscenes will be
+ * 					processed by this class.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class MainScreen extends GameScreen{
 	
 	private GameStage gs;

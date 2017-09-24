@@ -2,11 +2,28 @@ package engine.entities;
 
 import engine.graphics.Sprite;
 
+/*
+ * 		GameEntity.java
+ * 		
+ * 		Purpose:	Generic abstract game entity.
+ * 		Notes:		
+ * 		
+ * 		Children: Player.java, MovableEntity.java
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public abstract class GameEntity{
 	
+	// Position
 	protected float x, y;
+	
+	// Time in frames since entity's spawn
+	// Must be ticked in the update method
 	protected int time;
-
+	
 	// If true, the entity will be deleted
 	protected boolean remove;
 	

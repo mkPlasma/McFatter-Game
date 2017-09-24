@@ -2,6 +2,22 @@ package engine.graphics;
 
 import java.util.ArrayList;
 
+/*
+ * 		SpriteCache.java
+ * 		
+ * 		Purpose:	Caches sprites.
+ * 		Notes:		Be sure to always cache your sprites!
+ * 					Not caching sprites could result in
+ * 					ridiculous lag and memory usage.
+ * 					
+ * 					Use cache(s), which automatically returns
+ * 					a loaded (or previously cached) sprite object.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class SpriteCache{
 	
 	private static short maxSize = 512;

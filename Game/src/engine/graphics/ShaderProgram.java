@@ -8,6 +8,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/*
+ * 		ShaderProgram.java
+ * 		
+ * 		Purpose:	GLSL shader program.
+ * 		Notes:		Should not need to be changed.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class ShaderProgram{
 	
 	int program, vShader, fShader;

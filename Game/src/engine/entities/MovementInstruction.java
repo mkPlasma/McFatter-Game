@@ -1,5 +1,20 @@
 package engine.entities;
 
+/*
+ * 		MovementInstruction.java
+ * 		
+ * 		Purpose:	Instruction for MovableEntities.
+ * 		Notes:		When run, sets one or more properties
+ * 					of the entity, such as direction or acceleration.
+ * 					
+ * 					Also includes certain entity-specific properties
+ * 					such as bullet bouncing or laser size.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class MovementInstruction extends Instruction{
 	
 	// Class controls movements and arguments of enemies and bullets

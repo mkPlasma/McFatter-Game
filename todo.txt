@@ -1,0 +1,29 @@
+		
+		Please place any to-do programming tasks here.
+		Keep all to-dos in this file to keep things organized.
+		
+		======================================================
+	
+	1.	Implement Lua scripting, then capability to program and run Missions
+		in external Lua files.
+		
+	2.	Make instructions be able to respond to cetain events, like a bullet
+		hitting the screen edge.
+		Could be implemented in Lua scripting?
+		
+	3.	Need a proper IO class to load (and eventually write to) external files.
+		
+	4.	Sound/Music players
+		
+	5.	PlayerFrame or similar to differentiate player character/shot types,
+		and upgrade system
+		
+	6.	Make certain things non-static (SpriteCache, ScreenManager)
+		
+		
+		
+		
+		
+		Completed Tasks
+		
+		======================================================

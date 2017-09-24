@@ -1,6 +1,16 @@
 package engine.entities;
 
-import engine.graphics.Renderer;
+/*
+ * 		Effect.java
+ * 		
+ * 		Purpose:	Effect objects, drawn to screen
+ * 		Notes:		Not completely implemented, effects do
+ * 					not render and cannot be generated easily.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
 
 public class Effect extends MovableEntity{
 	

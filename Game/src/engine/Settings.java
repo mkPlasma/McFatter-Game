@@ -1,22 +1,21 @@
 package engine;
 
+/*
+ * 		Settings.java
+ * 		
+ * 		Purpose:	Holds certain global variables.
+ * 		Notes:		May be replaced by external definitions.
+ * 					Will probably still keep variables after loading them.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				9/24
+ * 		Changes:			Removed hardwareAcceleration, unnecessary
+ */
 public class Settings{
-	
-	// If true, use VolatileImage rather than BufferedImage
-	// VolatileImage is faster in some cases
-	private static boolean hardwareAcceleration = true;
 	
 	// Scale of window/resolution
 	// Default 800x600
 	private static float windowScale = 1.5f;
-	
-	public static void setHardwareAcceleration(boolean hwa){
-		hardwareAcceleration = hwa;
-	}
-	
-	public static boolean useHardwareAcceleration(){
-		return hardwareAcceleration;
-	}
 	
 	public static void setWindowScale(float windowScale){
 		Settings.windowScale = windowScale;

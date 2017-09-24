@@ -2,10 +2,19 @@ package engine.entities;
 
 import java.util.ArrayList;
 
+/*
+ * 		EffectGenerator.java
+ * 		
+ * 		Purpose:	Generates a certain effect, like an explosion or particle trail.
+ * 		Notes:		Currently unfinished. Will be able to create
+ * 					one or more effect objects simultaneously.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class EffectGenerator{
-	
-	// Creates effects which will be added to a screen
-	// Includes presets for effects as well
 	
 	private static ArrayList<Effect> effects = new ArrayList<Effect>();
 	

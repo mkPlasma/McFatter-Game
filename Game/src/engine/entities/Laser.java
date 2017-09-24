@@ -2,6 +2,17 @@ package engine.entities;
 
 import engine.graphics.Renderer;
 
+/*
+ * 		Laser.java
+ * 		
+ * 		Purpose:	Solid laser object.
+ * 		Notes:		Implement curvy lasers?
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class Laser extends Bullet{
 	
 	// Laser size

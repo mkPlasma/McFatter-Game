@@ -20,16 +20,25 @@ import org.lwjgl.stb.STBImage;
 
 import engine.entities.GameEntity;
 
+/*
+ * 		Sprite.java
+ * 		
+ * 		Purpose:	Holds an image and certain properties, such as scale or alpha
+ * 		Notes:		Several entities may share one sprite to reduce memory use.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class Sprite{
-	
-	// Stores texture object and misc properties (scale, alpha, etc)
 	
 	/* 
 	 * Do not load sprites directly. Instead use:
 	 * 
 	 * sprite = SpriteCache.cache(sprite);
 	 * 
-	 * This will place the sprite in the cache and return an loaded instance of the sprite.
+	 * This will place the sprite in the cache and return a loaded instance of the sprite.
 	*/
 	
 	// Path of spritesheet

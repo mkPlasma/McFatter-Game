@@ -8,6 +8,18 @@ import engine.entities.Enemy;
 import engine.entities.Player;
 import engine.graphics.Renderer;
 
+/*
+ * 		Mission.java
+ * 		
+ * 		Purpose:	Abstract game mission.
+ * 		Notes:		Bullets, enemies, bosses, and gameplay
+ * 					will be handled here.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public abstract class Mission extends GameStage{
 	
 	protected ArrayList<Bullet> bullets;

@@ -1,5 +1,16 @@
 package engine.entities;
 
+/*
+ * 		InstructionSet.java
+ * 		
+ * 		Purpose:	Stores and runs a set of instructions.
+ * 		Notes:		Used to define bullet, enemy, and effect movement patterns.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class InstructionSet{
 	
 	private Instruction[] inst;

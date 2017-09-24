@@ -2,11 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="Game/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LWGJL3"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LuaJava">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/Users/code17/Desktop/eclipse/lib/luajava"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/LWJGL"/>
 	<classpathentry kind="output" path="Game/bin"/>
 </classpath>

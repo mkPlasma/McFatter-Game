@@ -2,18 +2,26 @@ package engine.entities;
 
 import engine.graphics.Sprite;
 
+/*
+ * 		BulletFrame.java
+ * 		
+ * 		Purpose:	Holds bullet data, such as sprite, hitboxSize, etc.
+ * 					Essentially, stores a bullet preset.
+ * 		Notes:		Used by Lasers as well.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class BulletFrame extends EntityFrame{
-	
-	// Stores information about the bullet including sprite and hitbox size
-	// Used to create bullet presets
-	// Ultimately, all the settings depend on the sprite type
 	
 	// Bullet color
 	private final int color;
 	
 	private final int hitboxSize;
 	
-	// Crops the hitbox at the ends of lasers
+	// Crops the hitbox at the ends of lasers, value should be >0 and <1
 	private final float hbLengthCrop;
 	
 	public BulletFrame(int type, int color, Sprite sprite, int hitboxSize, float hbLengthCrop, boolean spriteAlign, float spriteRotation, boolean spriteRotationBySpd){

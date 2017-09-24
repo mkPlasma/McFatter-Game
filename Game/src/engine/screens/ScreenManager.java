@@ -1,5 +1,16 @@
 package engine.screens;
 
+/*
+ * 		ScreenManager.java
+ * 		
+ * 		Purpose:	Holds instances of various game screens.
+ * 		Notes:		
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class ScreenManager{
 	
 	// Active screen

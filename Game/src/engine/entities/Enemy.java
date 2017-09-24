@@ -1,5 +1,20 @@
 package engine.entities;
 
+/*
+ * 		Enemy.java
+ * 		
+ * 		Purpose:	Enemy entity.
+ * 		Notes:		Does not fire its own shots. This will be handled
+ * 					by scripting.
+ * 					
+ * 					Instead, it is simply an entity that can move around
+ * 					and be shot by the player.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class Enemy extends MovableEntity{
 	
 	private final int hitboxSize;

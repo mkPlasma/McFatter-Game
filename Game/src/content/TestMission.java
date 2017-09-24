@@ -11,6 +11,17 @@ import engine.entities.Player;
 import engine.screens.MainScreen;
 import engine.screens.Mission;
 
+/*
+ * 		TestMission.java
+ * 		
+ * 		Purpose:	Temporary mission for testing bullets, collisions, etc.
+ * 		Notes:		Will be replaced by external definitions.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class TestMission extends Mission{
 	
 	public TestMission(MainScreen screen){

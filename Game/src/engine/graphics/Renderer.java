@@ -18,6 +18,17 @@ import engine.entities.Enemy;
 import engine.entities.GameEntity;
 import engine.entities.MovableEntity;
 
+/*
+ * 		Renderer.java
+ * 		
+ * 		Purpose:	Renders game objects.
+ * 		Notes:		
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class Renderer{
 	
 	// Resolution scale
@@ -39,80 +50,6 @@ public class Renderer{
 	}
 	
 	// Render functions
-	
-	/*
-	public static void renderBullets(ArrayList<Bullet> bli, int time){
-		
-		if(bli == null || bli.size() == 0)
-			return;
-		
-		bulletShader.use();
-		
-		ArrayList<Bullet> bl = new ArrayList<Bullet>();
-		
-		for(int i = 0; i < bli.size(); i++)
-			if(bli.get(i).isVisible())
-				bl.add(bli.get(i));
-		
-		int n = bl.size();
-		float[] vertices = new float[n*16];
-		float[] rotations = new float[n*12];
-		
-		for(int i = 0; i < bl.size(); i++){
-			
-			Bullet b = bl.get(i);
-			
-			Sprite s = b.getSprite().animate(time, b);
-			
-			float[] c = {b.getX(), b.getY()};
-			float[] v = getVertexCoords(c[0], c[1], s.getScaledWidth(), s.getScaledHeight());
-			float[] t = s.getTextureCoords();
-			
-			float r = s.getRotation() + (b.getFrame().spriteAlign() ? b.getDir() + 90 : 0);
-			
-			// Fill vertices
-			// x, y, textureX, textureY
-			for(int j = 0; j < 4; j++){
-				vertices[i*16 + j*4]		= v[j*2];
-				vertices[i*16 + j*4 + 1]	= v[j*2 + 1];
-				vertices[i*16 + j*4 + 2]	= t[j*2];
-				vertices[i*16 + j*4 + 3]	= t[j*2 + 1];
-
-				rotations[i*12 + j*3]		= c[0];
-				rotations[i*12 + j*3 + 1]	= c[1];
-				rotations[i*12 + j*3 + 2]	= (float)Math.toRadians(r);
-			}
-		}
-		
-		int[] vao = genQuadVAO(vertices, rotations);
-		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glBindTexture(GL_TEXTURE_2D, bl.get(0).getSprite().getTextureID());
-		
-		
-		glBindVertexArray(vao[0]);
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
-		glEnable(GL_BLEND);
-		
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		
-		glDrawElements(GL_TRIANGLES, vertices.length, GL_UNSIGNED_INT, 0);
-		
-		glDisable(GL_BLEND);
-		glDisableVertexAttribArray(1);
-		glDisableVertexAttribArray(0);
-		glBindVertexArray(0);
-		
-		
-		// Delete VAO
-		for(int i = 1; i < vao.length; i++)
-			glDeleteBuffers(i);
-		
-		glDeleteVertexArrays(vao[0]);
-	}
-	*/
 
 	public static void renderBullets(ArrayList<Bullet> bli, int time){
 		illumiShader.use();

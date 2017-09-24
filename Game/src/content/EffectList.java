@@ -5,6 +5,17 @@ import engine.graphics.Animation;
 import engine.graphics.Sprite;
 import engine.graphics.SpriteCache;
 
+/*
+ * 		EffectList.java
+ * 		
+ * 		Purpose:	Generates EntityFrame objects for creating effects. Currently unused.
+ * 		Notes:		Will be replaced by external definitions.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class EffectList{
 	
 	// Generates and caches EntityFrame objects for effects

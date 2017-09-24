@@ -1,9 +1,20 @@
 package engine.entities;
 
+/*
+ * 		Instruction.java
+ * 		
+ * 		Purpose:	Holds an instruction for what an entity should do.
+ * 		Notes:		Currently only used for movement. Probably will not
+ * 					be used for anything else.
+ * 		
+ * 		Children: MovementInstruction.java
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public abstract class Instruction{
-	
-	// Instruction class will hold data of how things should behave
-	// This includes enemies and bullets
 	
 	// Time will control when the instruction is run
 	// Time in frames from start of instruction set execution

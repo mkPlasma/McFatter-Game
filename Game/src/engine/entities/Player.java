@@ -16,6 +16,20 @@ import java.util.ArrayList;
 import content.BulletList;
 import engine.graphics.Animation;
 
+/*
+ * 		Player.java
+ * 		
+ * 		Purpose:	Player class.
+ * 		Notes:		Will need a PlayerFrame or similar class
+ * 					to differentiate player character/shot types.
+ * 					
+ * 					Also needs upgrade functionality.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class Player extends GameEntity{
 	
 	

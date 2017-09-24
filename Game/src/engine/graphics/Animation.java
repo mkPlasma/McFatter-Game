@@ -3,9 +3,18 @@ package engine.graphics;
 import engine.entities.GameEntity;
 import engine.entities.MovableEntity;
 
+/*
+ * 		Animation.java
+ * 		
+ * 		Purpose:	Holds a single animation.
+ * 		Notes:		Includes rotations, scaling, and spritesheet animation
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class Animation{
-	
-	// Class stores a sprite and animates it by changing certain properties
 	
 	/* Args reference
 	================================================================
@@ -83,6 +92,9 @@ public class Animation{
 	
 	// Use time from entity
 	// This will allow several different objects to use the same animation object but have different timings
+	
+	// For sync = true, use global time
+	
 	public void update(int time){
 		
 		// Multiplies the animation effect

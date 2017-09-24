@@ -5,6 +5,17 @@ import engine.graphics.Animation;
 import engine.graphics.Sprite;
 import engine.graphics.SpriteCache;
 
+/*
+ * 		BulletList.java
+ * 		
+ * 		Purpose:	Generates BulletFrame objects for creating bullet patterns.
+ * 		Notes:		Will be replaced by external definitions.
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class BulletList{
 	
 	// Generates and caches BulletFrame objects

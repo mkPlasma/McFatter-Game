@@ -5,6 +5,19 @@ import engine.graphics.Renderer;
 import engine.graphics.Sprite;
 import engine.graphics.SpriteCache;
 
+/*
+ * 		Bullet.java
+ * 		
+ * 		Purpose:	Base bullet class.
+ * 		Notes:		
+ * 		
+ * 		Children:	Laser.java
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				
+ * 		Changes:			
+ */
+
 public class Bullet extends MovableEntity{
 	
 	public static final byte
