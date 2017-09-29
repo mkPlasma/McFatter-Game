@@ -13,7 +13,6 @@ import org.lwjgl.BufferUtils;
 
 import engine.Settings;
 import engine.entities.Bullet;
-import engine.entities.BulletFrame;
 import engine.entities.Enemy;
 import engine.entities.GameEntity;
 import engine.entities.MovableEntity;

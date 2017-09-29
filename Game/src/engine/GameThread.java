@@ -147,7 +147,7 @@ public class GameThread implements Runnable{
 				fps = frameCount;
 				frameCount = 0;
 				lastSecondTime = currentSecond;
-				System.out.println("FPS: " + fps);
+				//System.out.println("FPS: " + fps);
 			}
 			
 			// Timing

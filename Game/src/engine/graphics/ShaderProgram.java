@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import engine.IOFunctions;
+
 /*
  * 		ShaderProgram.java
  * 		
@@ -81,7 +83,7 @@ public class ShaderProgram{
 		String code = "";
 		
 		try{
-			code = new String(Files.readAllBytes(Paths.get("Game/res/shaders/" + path)));
+			code = IOFunctions.readToString("Game/res/shaders/" + path);
 		}
 		catch (IOException e){
 			e.printStackTrace();

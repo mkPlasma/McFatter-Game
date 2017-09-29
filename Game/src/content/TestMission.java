@@ -34,12 +34,11 @@ public class TestMission extends Mission{
 		bullets = new ArrayList<Bullet>();
 		enemies = new ArrayList<Enemy>();
 		
-		
-		
 		InstructionSet inst = new InstructionSet(InstructionSet.INST_MOVABLE);
 		inst.add(new MovementInstruction(null, 0, MovementInstruction.ENT_ENEMY, MovementInstruction.SET_POS, new float[]{400, 200}));
 		
 		enemies.add(new Enemy(new EnemyFrame(), inst));
+		
 		
 	}
 	
@@ -50,7 +49,7 @@ public class TestMission extends Mission{
 	
 	public void update(){
 		
-		testFire1();
+		//testFire1();
 		
 		/*
 		if(cn == 0){

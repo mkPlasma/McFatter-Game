@@ -18,6 +18,7 @@ import java.nio.channels.FileChannel;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
 
+import engine.IOFunctions;
 import engine.entities.GameEntity;
 
 /*
@@ -151,7 +152,7 @@ public class Sprite{
 		ByteBuffer t = null;
 		
 		try{
-			t = stbi_load_from_memory(readFile(path), w, h, comp, 0);
+			t = stbi_load_from_memory(IOFunctions.readToByteBuffer(path), w, h, comp, 0);
 			loaded = true;
 		}catch(IOException e){
 			e.printStackTrace();
@@ -180,21 +181,6 @@ public class Sprite{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture);
 		
 		genTextureCoords();
-	}
-	
-	private ByteBuffer readFile(String path) throws IOException{
-		FileInputStream fis = new FileInputStream(new File(path));
-		FileChannel fc = fis.getChannel();
-		
-		ByteBuffer buffer = BufferUtils.createByteBuffer((int)fc.size() + 1);
-		
-		while(fc.read(buffer) != -1);
-		
-		fis.close();
-		fc.close();
-		buffer.flip();
-		
-		return buffer;
 	}
 	
 	// Creates texture coordinates

@@ -1,0 +1,58 @@
+Variables
+==========
+
+First byte - opcode
+
+In second byte
+First two bits - data type
+	00 - int
+	01 - float
+	10 - boolean
+
+Third bit - sign
+
+Rest (21 bits) - data
+
+
+
+Keywords
+==========
+
+set
+
+if
+else
+break
+
+for
+while
+do
+
+function
+linear		do not branch
+return
+
+true
+false
+null
+
+wait
+
+
+
+
+Data types
+==========
+
+int
+double
+String
+
+Bullet
+Instruction
+InstructionSet
+
+Enemy
+Effect
+Sprite
+Animation
