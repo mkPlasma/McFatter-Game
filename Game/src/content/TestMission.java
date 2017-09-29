@@ -10,6 +10,8 @@ import engine.entities.MovementInstruction;
 import engine.entities.Player;
 import engine.screens.MainScreen;
 import engine.screens.Mission;
+import engine.script.DScript;
+import engine.script.ScriptCompiler;
 
 /*
  * 		TestMission.java
@@ -39,7 +41,7 @@ public class TestMission extends Mission{
 		
 		enemies.add(new Enemy(new EnemyFrame(), inst));
 		
-		
+		new ScriptCompiler().compile(new DScript(""));
 	}
 	
 	
