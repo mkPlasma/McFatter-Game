@@ -72,7 +72,7 @@ public class ScriptCompiler{
 		}
 		
 		// Print bytecode (debug)
-		//BytecodePrinter.printBytecode(bytecode, script.getFileName());
+		BytecodePrinter.printBytecode(bytecode, script.getFileName());
 		
 		// Set DScript object bytecode
 		long[] bytecodeArray = new long[bytecode.size()];
@@ -238,7 +238,7 @@ public class ScriptCompiler{
 		// Expressions
 		
 		String regex = "((" + sFalse +  ")|(" + sTrue + ")|(" + sFloat + ")|(" + sInt +
-			 ")|(\\w+)|(\\()|(\\))|\\+|\\-|\\*|/|%|(&&)|(\\|\\|)|<|>|(==)|(<=)|(>=))\\s*(.*)";
+			 ")|(\\w+)|(\\()|(\\))|\\+|\\-|\\*|/|%|!|(\\\\|\\\\|)|(&&)|<|>|(==)|(<=)|(>=))\\s*(.*)";
 		
 		// Group 1 - First token
 		// Group 14 - Other tokens
@@ -292,6 +292,9 @@ public class ScriptCompiler{
 			code = matcher.group(14);
 			matcher = pattern.matcher(code);
 			found = matcher.find();
+			
+			if(code.isEmpty())
+				found = false;
 		}
 		
 		if(operations.peek().equals("(") || operations.peek().equals(")")){
@@ -319,7 +322,7 @@ public class ScriptCompiler{
 			
 			// Set postfix operation/value
 			if(isOperation(t))
-				inst = setType(setOpcode(inst, getOpcode(t)), POSTFIX);
+				inst = getInstruction(getOpcode(t), ZERO, POSTFIX, lineNum, 0);
 			else
 				inst = setOpcode(processExpression(t, lineNum), getOpcode("postfix_val"));
 			

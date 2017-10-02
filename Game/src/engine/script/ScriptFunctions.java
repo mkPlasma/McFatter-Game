@@ -112,28 +112,28 @@ public class ScriptFunctions{
 	
 	// Creates an instruction
 	public static long getInstruction(byte opcode, byte variable, byte type, int lineNum, int data){
-		long instruction = 0;
+		long inst = 0;
 		
 		// Set operand
-		instruction |= toLong(opcode);
+		inst |= toLong(opcode);
 
 		// Shift, add value/variable switch
-		instruction <<= 1;
-		instruction |= toLong(variable);
+		inst <<= 1;
+		inst |= toLong(variable);
 		
 		// Shift, add type
-		instruction <<= 2;
-		instruction |= toLong(type);
+		inst <<= 2;
+		inst |= toLong(type);
 		
-		// Shift 4 to finish byte, then 2 bytes, assign line number
-		instruction <<= 21;
-		instruction |= toLong(lineNum);
+		// Shift 5 to finish byte, then 2 bytes, assign line number
+		inst <<= 21;
+		inst |= toLong(lineNum);
 		
 		// Assign data
-		instruction <<= 32;
-		instruction |= toLong(data);
+		inst <<= 32;
+		inst |= toLong(data);
 		
-		return instruction;
+		return inst;
 	}
 	
 	// Return instruction data

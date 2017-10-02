@@ -1,3 +1,2 @@
-set z = 2
-
-// Create error for set z = 2*
+set z = false + true
+// false + true

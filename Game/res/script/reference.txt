@@ -33,7 +33,7 @@ while
 do		?
 
 function
-task	branches, no return value
+task			branches, no return value
 return
 
 true

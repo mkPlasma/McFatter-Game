@@ -266,7 +266,7 @@ public class ScriptRunner{
 		boolean b2 = (boolean) o2;
 		
 		boolean result = false;
-
+		
 		// Operate
 		switch(op){
 			case "!":	result = !b1;		break;

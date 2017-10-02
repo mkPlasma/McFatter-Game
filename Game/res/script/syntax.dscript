@@ -4,17 +4,17 @@ set x = 0
 set y = "test"
 set z = false
 
-while z or x > 0 {
+while z || x > 0 {
     print(x);
 }
 
-for i in 0, 10 {		// int i = 0; i < 10; i++
+for i in 0, 10 {			// int i = 0; i < 10; i++
     for j in 1, 2, 20 {	// int j = 1; j < 20; j += 2
         print(i + " " + j)
     }
 }
 
-set array = {0, 2, 4}
+set array = [0, 1, 4]
 
 for i in array {
     print(i) // i is object in array

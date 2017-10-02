@@ -27,7 +27,6 @@ public class BytecodePrinter{
 			
 			String opcode = opcodes[getOpcode(inst)];
 			
-			
 			System.out.println(i + "\t" + getLineNum(inst) + "\t" + opcode + (opcode.length() < 8 ? "\t\t" : "\t") + getInfo(inst, opcode));
 		}
 	}
