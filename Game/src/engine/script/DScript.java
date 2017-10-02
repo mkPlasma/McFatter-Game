@@ -1,36 +1,38 @@
 package engine.script;
 
-import java.io.IOException;
-
-import engine.IOFunctions;
+/*
+ * 		DScript.java
+ * 		
+ * 		Purpose:	Holds DScript bytecode.
+ * 		Notes:		WIP
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				10/2
+ * 		Changes:			
+ */
 
 public class DScript{
-	
+
+	private long[] bytecode;
 	private final String path;
-	private String script;
 	
 	public DScript(String path){
 		this.path = path;
 	}
 	
-	public boolean loadScript(){
-		
-		try{
-			script = IOFunctions.readToString(path);
-		}
-		catch(IOException e){
-			e.printStackTrace();
-			return false;
-		}
-		
-		return true;
+	public void setBytecode(long[] bytecode){
+		this.bytecode = bytecode;
 	}
 	
-	public String getScript(){
-		return script;
+	public long[] getBytecode(){
+		return bytecode;
 	}
 	
 	public String getPath(){
 		return path;
+	}
+	
+	public String getFileName(){
+		return path.substring(path.lastIndexOf('/') + 1);
 	}
 }

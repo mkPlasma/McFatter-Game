@@ -4,15 +4,18 @@ Variables
 First byte - opcode
 
 In second byte
-	First two bits - data type
+	First bit - value (0)/variable (1)
+	
+	Next two bits - data type
 		00 - int
 		01 - float
 		10 - boolean
 		11 - object
-		
-	Third bit - sign
+	
 
-4 bytes - data
+Third/Fourth bytes - Line number
+
+Last four bytes - data (value/id)
 
 
 
@@ -27,15 +30,14 @@ break
 
 for
 while
-do
+do		?
 
 function
-linear		do not branch
+task	branches, no return value
 return
 
 true
 false
-null
 
 wait
 

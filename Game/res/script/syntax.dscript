@@ -1,37 +1,37 @@
-print("Hello World");
+print("Hello World")
 
-set x = 0;
-set y = "test";
-set z = false;
+set x = 0
+set y = "test"
+set z = false
 
 while z or x > 0 {
     print(x);
 }
 
-for i = 0..10 {			// int i = 0; i < 10; i++
-    for j = 1.2.20 {	// int j = 1; j < 20; j += 2
-        print(i + " " + j);
+for i in 0, 10 {		// int i = 0; i < 10; i++
+    for j in 1, 2, 20 {	// int j = 1; j < 20; j += 2
+        print(i + " " + j)
     }
 }
 
-set array = {0, 2, 4};
+set array = {0, 2, 4}
 
 for i in array {
-    print(i); // i is object in array
+    print(i) // i is object in array
 }
 
 for i, o in array {
-    print(i + " " + o); // i is index, o is object
-    break;
+    print(i + " " + o) // i is index, o is object
+    break
 }
 
-test();
-sum(1, 2);
+test()
+sum(1, 2)
 
-function test(){
-    print("test");
+task test(){
+    print("test")
 }
 
-linear function sum(a, b){
-    return a + b;
+function sum(a, b){
+    return a + b
 }

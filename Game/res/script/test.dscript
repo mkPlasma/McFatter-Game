@@ -1,6 +1,3 @@
-set x = 0
-set x=0
-set x
+set z = 2
 
-set
-set x=
+// Create error for set z = 2*
