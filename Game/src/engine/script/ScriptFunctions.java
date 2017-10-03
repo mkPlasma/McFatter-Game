@@ -61,12 +61,12 @@ public class ScriptFunctions{
 		"if",
 		"else",
 		"break",
-		
-		"for",
+
 		"while",
+		"for",
 		
 		"function",
-		"linear",
+		"task",
 		"return",
 		
 		"true",
