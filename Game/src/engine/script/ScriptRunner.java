@@ -23,6 +23,14 @@ public class ScriptRunner{
 	private DScript script;
 	
 	public void run(DScript script){
+
+		// Load bytecode
+		bytecode = script.getBytecode();
+		
+		if(bytecode == null){
+			System.err.println("\n" + script.getFileName() + " not compiled, not running");
+			return;
+		}
 		
 		haltRun = false;
 		this.script = script;
@@ -35,9 +43,6 @@ public class ScriptRunner{
 		variables.add(0);
 		
 		
-		// Load bytecode
-		bytecode = script.getBytecode();
-		
 		// Loop through
 		for(long inst:bytecode){
 			
@@ -49,11 +54,9 @@ public class ScriptRunner{
 			int lineNum = getLineNum(inst);
 			int data = getData(inst);
 			
-			// Postfix index
-			int pfs = postfix.size();
-			
 			boolean doSwitch = true;
 			
+			// Check operations first
 			if(isOperation(opcode)){
 				opcode = getOperation(opcode);
 				
@@ -63,6 +66,7 @@ public class ScriptRunner{
 				doSwitch = false;
 			}
 			
+			// Other checks
 			if(doSwitch){
 				switch(opcode){
 					
@@ -90,7 +94,11 @@ public class ScriptRunner{
 							}
 						}
 						break;
-						
+					
+					case "store":
+						variables.set(data, variables.get(0));
+						break;
+					
 					case "postfix_val":
 						
 						// Variables
@@ -119,6 +127,48 @@ public class ScriptRunner{
 						// Save to register
 						variables.set(0, postfix.get(0));
 						break;
+					
+					case "increment":{// Brackets required as not to leak o and n
+						Object o = variables.get(data);
+						
+						// Check type
+						if(!(o instanceof Integer) && !(o instanceof Float)){
+							runtimeError("Type mismatch", lineNum);
+							return;
+						}
+						
+						// Cast
+						float n = o instanceof Float ? (float) o : (float)((int) o);
+						
+						// Set data
+						if(o instanceof Float)
+							variables.set(data, n + 1);
+						else
+							variables.set(data, (int)n + 1);
+						
+						break;
+					}
+
+					case "decrement":{// Brackets required as not to leak o and n
+						Object o = variables.get(data);
+						
+						// Check type
+						if(!(o instanceof Integer) && !(o instanceof Float)){
+							runtimeError("Type mismatch", lineNum);
+							return;
+						}
+						
+						// Cast
+						float n = o instanceof Float ? (float) o : (float)((int) o);
+						
+						// Set data
+						if(o instanceof Float)
+							variables.set(data, n - 1);
+						else
+							variables.set(data, (int)n - 1);
+						
+						break;
+					}
 				}
 			}
 			
@@ -153,8 +203,10 @@ public class ScriptRunner{
 		boolean isNumber1 = (o1 instanceof Integer) || (o1 instanceof Float);
 		boolean isNumber2 = (o1 instanceof Integer) || (o1 instanceof Float);
 		
-		if(isNumber1 != isNumber2 || (!op.equals("==") && isNumberOp(op) != isNumber1))
+		if(isNumber1 != isNumber2 || (!op.equals("==") && isNumberOp(op) != isNumber1)){
 			runtimeError("Type mismatch", lineNum);
+			return;
+		}
 		
 		// If either is number/float
 		boolean isNumber = isNumber1 || isNumber2;
@@ -216,8 +268,10 @@ public class ScriptRunner{
 		// Number operation
 		if(isNumberOp(op) && !isBoolean){
 			
-			if((!(o1 instanceof Integer) && !(o1 instanceof Float)) || (!(o2 instanceof Integer) && !(o2 instanceof Float)))
+			if((!(o1 instanceof Integer) && !(o1 instanceof Float)) || (!(o2 instanceof Integer) && !(o2 instanceof Float))){
 				runtimeError("Type mismatch", lineNum);
+				return;
+			}
 			
 			// Result as number/boolean
 			float result = 0;
@@ -258,8 +312,10 @@ public class ScriptRunner{
 		}
 		
 		// Boolean operation
-		if(!isBoolean)
+		if(!isBoolean || isNumberOp(op)){
 			runtimeError("Type mismatch", lineNum);
+			return;
+		}
 		
 		// Cast
 		boolean b1 = (boolean) o1;
@@ -281,8 +337,8 @@ public class ScriptRunner{
 	// Create syntax error and halt compilation
 	private void runtimeError(String type, int lineNum){
 		try{
-			System.err.println("DScript runtime error:\n" + type + " in " + script.getFileName() + " on line " + lineNum +
-				":\n>> " + Files.readAllLines(Paths.get(script.getPath())).get(lineNum));
+			System.err.println("\nDScript runtime error:\n" + type + " in " + script.getFileName() + " on line " + lineNum +
+				":\n>> " + Files.readAllLines(Paths.get(script.getPath())).get(lineNum - 1));
 		}
 		catch(IOException e){
 			e.printStackTrace();
@@ -292,6 +348,6 @@ public class ScriptRunner{
 	
 	// Condition that should not occur, may produce incorrect results
 	private void runtimeWarning(String type, int lineNum){
-		System.err.println("DScript runtime warning:\n" + type + " in " + script.getFileName() + " on line " + lineNum);
+		System.err.println("\nDScript runtime warning:\n" + type + " in " + script.getFileName() + " on line " + lineNum);
 	}
 }

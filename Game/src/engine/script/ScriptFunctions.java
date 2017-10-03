@@ -136,6 +136,11 @@ public class ScriptFunctions{
 		return inst;
 	}
 	
+	// Shorter form
+	public static long getInstruction(byte opcode, int lineNum, int data){
+		return getInstruction(opcode, ZERO, ZERO, lineNum, data);
+	}
+	
 	// Return instruction data
 	
 	public static byte getOpcode(long inst){
@@ -286,8 +291,10 @@ public class ScriptFunctions{
 	public static int getPrecedence(String op){
 		switch(op){
 			case "*": case "/":
-				return 2;
+				return 3;
 			case "+": case "-":
+				return 2;
+			case "!":
 				return 1;
 			case "<": case ">": case "=": case "<=": case ">=": 
 				return 0;

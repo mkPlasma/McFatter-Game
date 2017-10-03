@@ -34,8 +34,11 @@ public class ScriptCompiler{
 	ArrayList<Long> bytecode;
 	
 	// Stores variables by name while compiling
-	private ArrayList<String> varList;
-
+	private ArrayList<String> variables;
+	
+	// Keep track of scope (brackets)
+	int scope = 0;
+	
 	private DScript script;
 	
 	public void compile(DScript script){
@@ -45,15 +48,33 @@ public class ScriptCompiler{
 		
 		// Initialize/reset lists
 		bytecode = new ArrayList<Long>();
-		varList = new ArrayList<String>();
-		
+		variables = new ArrayList<String>();
 		
 		// First variable reserved for register
-		varList.add("");
+		variables.add("");
 		
 		int lineNum = 1;
 		
 		// Load file and read line by line
+		// First readthrough to define functions and tasks
+		try(BufferedReader br = new BufferedReader(new FileReader(script.getPath()))){
+			for(String line; (line = br.readLine()) != null;){
+				line = removeComments(line.trim());
+				
+				if(!line.isEmpty())
+		    		processFunctions(line, lineNum);
+				
+				if(haltCompiler)
+					return;
+				
+				lineNum++;
+			}
+		}
+		catch(IOException e){
+			e.printStackTrace();
+		}
+
+		// Read again for all other operations
 		try(BufferedReader br = new BufferedReader(new FileReader(script.getPath()))){
 			for(String line; (line = br.readLine()) != null;){
 				line = removeComments(line.trim());
@@ -118,14 +139,79 @@ public class ScriptCompiler{
 		return line.substring(0, removed + i).trim();
 	}
 	
-	// Takes a line and returns opcode
-	private void processCode(String code, int lineNum){
+	// Define functions
+	private void processFunctions(String code, int lineNum){
 		
 		// Earliest delimiter index
 		int delimiterIndex = getDelimiterIndex(code);
 		
 		// Code up to/after delimiter
 		String partFirst = code.substring(0, delimiterIndex);
+		
+		// Only take functions and tasks
+		if(!partFirst.equals("function") && !partFirst.equals("task"))
+			return;
+		
+		String partSecond = code.substring(delimiterIndex);
+		
+		// Formatting code, check syntax errors
+		String regex;
+		Pattern pattern;
+		Matcher matcher;
+		
+		// Check keywords
+		if(partFirst.equals("function")){
+			// Function regex
+			regex = "\\s+(\\w+)\\((.*)\\)\\s*\\{";
+			
+			if(!partSecond.matches(regex)){
+				compilationError("Invalid function declaration", code, lineNum);
+				return;
+			}
+			
+			pattern = Pattern.compile(regex);
+			matcher = pattern.matcher(partSecond);
+			matcher.find();
+			
+			String func = matcher.group(1);
+			
+			System.out.println(func);
+			
+			return;
+		}
+		
+		compilationError("Undefined compilation error", code, lineNum);
+	}
+	
+	// Processes a single line
+	private void processCode(String code, int lineNum){
+		
+		// Check brackets to see whether still in function
+		if(scope > 0){
+			if(code.contains("{"))
+				scope++;
+			else if(code.contains("}"))
+				scope--;
+			
+			// Mismatched
+			if(scope < 0){
+				compilationError("Mismatched brackets", code, lineNum);
+				return;
+			}
+			else if(scope > 0)
+				return;
+		}
+		
+		// Earliest delimiter index
+		int delimiterIndex = getDelimiterIndex(code);
+		
+		// Code up to/after delimiter
+		String partFirst = code.substring(0, delimiterIndex);
+		
+		// Do not take functions/tasks
+		if(partFirst.equals("function") || partFirst.equals("task"))
+			scope++;
+		
 		String partSecond = code.substring(delimiterIndex);
 		
 		// Formatting code, check syntax errors
@@ -134,6 +220,56 @@ public class ScriptCompiler{
 		Pattern pattern;
 		Matcher matcher;
 		boolean first;
+		
+		
+		// Check for variables/function call first
+		
+		// Regex for variable with operation
+		regex1 = "(\\w+)\\s*(=|(\\+\\+)|(\\-\\-)|(\\+=)|(-=)|(\\*=)|(/=)|(%=))\\s*(.*)";
+		
+		if(code.matches(regex1)){
+			pattern = Pattern.compile(regex1);
+			matcher = pattern.matcher(code);
+			matcher.find();
+			
+			String var = matcher.group(1);
+			int i = variables.indexOf(var);
+			
+			if(i == -1){
+				compilationError("Undefined variable", code, lineNum);
+				return;
+			}
+			
+			// Operation
+			String op = matcher.group(2);
+			
+			// Increment and decrement
+			if(op.equals("++")){
+				bytecode.add(getInstruction(getOpcode("increment"), lineNum, i));
+				return;
+			}
+			else if(op.equals("--")){
+				bytecode.add(getInstruction(getOpcode("decrement"), lineNum, i));
+				return;
+			}
+			
+			
+			// Expression
+			String exp = matcher.group(10);
+			
+			// Add variable and operation to expression
+			// a *= 2 + 2 becomes a = a*(2 + 2)
+			if(!op.equals("="))
+				exp = var + op.replace("=", "") + "(" + exp + ")";
+			
+			// Add expression
+			bytecode.add(processExpression(exp, lineNum));
+			
+			// Store register value in variable
+			bytecode.add(getInstruction(getOpcode("store"), lineNum, i));
+			
+			return;
+		}
 		
 		// Check keywords
 		switch(partFirst){
@@ -156,7 +292,7 @@ public class ScriptCompiler{
 				}
 				
 				// Get regex match
-				matcher = pattern.matcher(code);
+				matcher = pattern.matcher(partSecond);
 				matcher.find();
 				
 				// Variable name
@@ -169,13 +305,13 @@ public class ScriptCompiler{
 				}
 				
 				// If variable already exists
-				if(varList.contains(var)){
+				if(variables.contains(var)){
 					compilationError("Duplicate variable", code, lineNum);
 					return;
 				}
 				
 				// Store variable during compilation
-				varList.add(var);
+				variables.add(var);
 				
 				// Initialize empty variable
 				if(first){
@@ -188,21 +324,38 @@ public class ScriptCompiler{
 				long inst = processExpression(exp, lineNum);
 				
 				// If single value then create var
-				if(getOpcode(inst) == getOpcode("none"))
+				if(getOpcode(inst) == ZERO)
 					bytecode.add(setOpcode(inst, getOpcode("create_var")));
 				
 				// Otherwise (if postfix) add instruction directly then create var from register
 				else{
-					bytecode.add(inst);
-					
 					// End postfix expression
-					bytecode.add(getInstruction(getOpcode("postfix_end"), VALUE, ZERO, lineNum, 0));
+					bytecode.add(inst);
 					
 					// Create variable
 					bytecode.add(getInstruction(getOpcode("create_var"), VARIABLE, ZERO, lineNum, 0));
 				}
 				
 				return;
+			
+			case "function":
+				// Function regex
+				regex1 = "\\s+(\\w+)\\((.*)\\)\\s*\\{";
+				
+				if(!partSecond.matches(regex1)){
+					compilationError("Invalid function declaration", code, lineNum);
+					return;
+				}
+				
+				pattern = Pattern.compile(regex1);
+				matcher = pattern.matcher(partSecond);
+				matcher.find();
+				
+				String func = matcher.group(1);
+				
+				System.out.println(func);
+				
+				break;
 		}
 		
 		compilationError("Undefined compilation error", code, lineNum);
@@ -218,27 +371,40 @@ public class ScriptCompiler{
 		
 		// Put function call check here
 		
+		// Variables
+		if(code.matches("\\w+") && !Character.isDigit(code.charAt(0))){
+			int i = variables.indexOf(code);
+			
+			// Check variable exists
+			if(i == -1){
+				compilationError("Undefined variable", code, lineNum);
+				return 0;
+			}
+			
+			return getInstruction(ZERO, VARIABLE, ZERO, lineNum, i);
+		}
 		
 		// Booleans
-		if(code.equals(sFalse))
-			return getInstruction(getOpcode("none"), VALUE, BOOLEAN, lineNum, 0);
+		else if(code.equals(sFalse))
+			return getInstruction(ZERO, VALUE, BOOLEAN, lineNum, 0);
 		else if(code.equals(sTrue))
-			return getInstruction(getOpcode("none"), VALUE, BOOLEAN, lineNum, 1);
+			return getInstruction(ZERO, VALUE, BOOLEAN, lineNum, 1);
 		
 		// Int
 		else if(code.matches(sInt))
-			return getInstruction(getOpcode("none"), VALUE, INT, lineNum, Integer.parseInt(code));
+			return getInstruction(ZERO, VALUE, INT, lineNum, Integer.parseInt(code));
 		
 		// Float
 		else if(code.matches(sFloat))
-			return getInstruction(getOpcode("none"), VALUE, FLOAT, lineNum, Float.floatToIntBits(Float.parseFloat(code)));
+			return getInstruction(ZERO, VALUE, FLOAT, lineNum, Float.floatToIntBits(Float.parseFloat(code)));
 		
 		
 		
 		// Expressions
 		
+		// Regex for values, variables, operations
 		String regex = "((" + sFalse +  ")|(" + sTrue + ")|(" + sFloat + ")|(" + sInt +
-			 ")|(\\w+)|(\\()|(\\))|\\+|\\-|\\*|/|%|!|(\\\\|\\\\|)|(&&)|<|>|(==)|(<=)|(>=))\\s*(.*)";
+			 ")|(\\w+)|(\\()|(\\))|\\+|-|\\*|/|%|!|(\\|\\|)|(&&)|<|>|(==)|(<=)|(>=))\\s*(.*)";
 		
 		// Group 1 - First token
 		// Group 14 - Other tokens
@@ -250,16 +416,33 @@ public class ScriptCompiler{
 		Stack<String> output = new Stack<String>();
 		Stack<String> operations = new Stack<String>();
 		
+		// Original code for diplaying errors
+		String codeOriginal = code;
+		
+		// Previous type
+		// 0 - none		1 - value	2 - op
+		int prev = 0;
+		
 		while(found){
 			
 			// Current token
 			String t = matcher.group(1);
 			
 			// If value/variable
-			if(t.equals(sFalse) || t.equals(sTrue) || t.matches(sInt) || t.matches(sFloat) || t.matches("\\w+"))
+			if(t.equals(sFalse) || t.equals(sTrue) || t.matches(sInt) || t.matches(sFloat) || t.matches("\\w+")){
 				output.push(t);
+				prev = 1;
+			}
 			
 			else if(isOperation(t)){
+				
+				// Check for 2 operations in a row
+				if(prev == 2){
+					compilationError("Invalid expression", codeOriginal, lineNum);
+					return 0;
+				}
+				
+				prev = 2;
 				
 				// Top operation is greater/equal precedence
 				while(!operations.isEmpty() && getPrecedence(operations.peek()) >= getPrecedence(t))
@@ -277,7 +460,7 @@ public class ScriptCompiler{
 				while(!operations.peek().equals("(")){
 					
 					if(operations.isEmpty()){
-						compilationError("Mismatched parenthesis", code, lineNum);
+						compilationError("Mismatched parenthesis", codeOriginal, lineNum);
 						return 0;
 					}
 					
@@ -297,8 +480,14 @@ public class ScriptCompiler{
 				found = false;
 		}
 		
+		if(operations.isEmpty()){
+			compilationError("Invalid expression", codeOriginal, lineNum);
+			return 0;
+		}
+			
+		
 		if(operations.peek().equals("(") || operations.peek().equals(")")){
-			compilationError("Mismatched parenthesis", code, lineNum);
+			compilationError("Mismatched parenthesis", codeOriginal, lineNum);
 			return 0;
 		}
 		
@@ -326,14 +515,11 @@ public class ScriptCompiler{
 			else
 				inst = setOpcode(processExpression(t, lineNum), getOpcode("postfix_val"));
 			
-			if(i == postfix.size() - 1)
-				return inst;
-			else
-				bytecode.add(inst);
+			bytecode.add(inst);
 		}
 		
-		compilationError("Undefined compilation error", code, lineNum);
-		return 0;
+		// End postfix expression
+		return getInstruction(getOpcode("postfix_end"), VALUE, ZERO, lineNum, 0);
 	}
 	
 	// Returns earliest delimiter index
@@ -354,7 +540,7 @@ public class ScriptCompiler{
 	
 	// Create syntax error and halt compilation
 	private void compilationError(String type, String line, int lineNum){
-		System.err.println("DScript compilation error:\n" + type + " in " + script.getFileName() + " on line " + lineNum + ":\n>> " + line);
+		System.err.println("\nDScript compilation error:\n" + type + " in " + script.getFileName() + " on line " + lineNum + ":\n>> " + line);
 		haltCompiler = true;
 	}
 }

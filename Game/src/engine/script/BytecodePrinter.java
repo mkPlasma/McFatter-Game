@@ -44,8 +44,8 @@ public class BytecodePrinter{
 		switch(opcode){
 			
 			// Add value/variable index
-			case "load": case "create_var": case "postfix_val": case "add": case "subtract": case "multiply": case "divide":
-			case "modulo": case "and": case "or": case "less": case "greater": case "equals": case "less_eq": case "greater_eq":
+			case "load": case "store": case "create_var": case "postfix_val": case "add": case "subtract": case "multiply": case "divide":
+			case "modulo": case "not": case "or": case "and": case "less": case "greater": case "equals": case "less_eq": case "greater_eq":
 				
 				if(isOperation(opcode) && type == POSTFIX){
 					info += "postfix";

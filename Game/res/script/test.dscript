@@ -1,2 +1,4 @@
-set z = false + true
-// false + true
+
+function test(){
+	
+}
