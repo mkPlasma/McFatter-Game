@@ -23,6 +23,7 @@ Keywords
 ==========
 
 set
+const
 
 if
 else

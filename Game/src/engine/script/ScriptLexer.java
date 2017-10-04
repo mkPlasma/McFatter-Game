@@ -25,7 +25,7 @@ public class ScriptLexer{
 	String rOperators = "\\+|-|\\*|/|%|!|(\\|\\|)|(&&)|<|>|(==)|(<=)|(>=)";
 	
 	// Assignment operators
-	String rAssignments = "=|(\\+\\+)|(\\-\\-)|(\\+=)|(-=)|(\\*=)|(/=)|(%=)";
+	String rAssignments = "=|(\\+\\+)|(--)|(\\+=)|(-=)|(\\*=)|(/=)|(%=)";
 	
 	// Identifiers
 	String rIdentifiers = "\\w+";
@@ -47,17 +47,22 @@ public class ScriptLexer{
 	String rNumDelim = "((" + rInt + ")|(" + rFloat + "))\\s*?(" + rDelimiters.replace("|\\.", "") + ")";
 	
 	
-	/* 	Format
+	/* 	Types
 	 * 	
-	 * 	i - int literal
-	 * 	f - float literal
-	 * 	s - string literal
+	 * 	k - keyword
+	 * 	o - operator
+	 * 	s - separator
 	 * 	
 	 * 	f - function/task
 	 * 	v - variable
+	 * 	
+	 * 	i - int literal
+	 * 	l - float literal
+	 * 	b - boolean literal
+	 * 	t - string literal
 	 */
 	
-	public String[] lex(DScript script){
+	public String[] analyze(DScript script){
 		
 		this.script = script;
 		
@@ -88,21 +93,22 @@ public class ScriptLexer{
 			e.printStackTrace();
 		}
 		
-		/*
-		System.out.println();
-		
-		for(int i = 0; i < tokens.size(); i++)
-			System.out.println(tokens.get(i));
-		*/
-		
 		// Check for syntax errors
 		checkTokens();
+		
+		if(haltCompiler)
+			return null;
 		
 		// Convert to array
 		String[] tokensArray = new String[tokens.size()];
 		
 		for(int i = 0; i < tokens.size(); i++)
 			tokensArray[i] = tokens.get(i);
+		
+		
+		// Print tokens (debug)
+		printTokens(tokensArray);
+		
 		
 		return tokensArray;
 	}
@@ -116,12 +122,16 @@ public class ScriptLexer{
 		Pattern pattern;
 		Matcher matcher;
 		
+		// Is in multi-line comment
+		boolean inComment = false;
+		
 		// Skip whitespace after token
 		boolean skipWhitespace = false;
 		
 		// Loop through line
 		for(int i = 0; i < line.length(); i++){
 			
+			// Add next characters until a match
 			token += line.charAt(i);
 			
 			// Add number literals directly
@@ -131,7 +141,7 @@ public class ScriptLexer{
 				matcher.find();
 				
 				// Add token
-				tokens.add(lineNum + (token.contains(".") ? "f:" : "i:") + matcher.group(1));
+				tokens.add(lineNum + (token.contains(".") ? "l:" : "i:") + matcher.group(1));
 				token = "";
 				
 				// Push back i as not to miss data
@@ -139,8 +149,34 @@ public class ScriptLexer{
 			}
 			
 			// Add operators, assignments, and separators directly
-			else if(token.matches(rOperators) || token.matches(rAssignments) || token.matches(rSeparators)){
-				tokens.add(lineNum + ":" + token);
+			else if(token.matches(rOperators) || token.matches(rAssignments)){
+				
+				// Check for assignment operators
+				if(token.matches(rOperators)){
+					if(i < line.length() - 1){
+						token += line.charAt(++i);
+						
+						// Comments defined here singe / is an operator
+						// Skip single line comments
+						if(token.matches("//"))
+							return;
+						
+						if(!token.matches(rOperators) && !token.matches(rAssignments)){
+							token = token.substring(0, token.length() - 1);
+							i--;
+						}
+					}
+				}
+				
+				tokens.add(lineNum + "o:" + token);
+				token = "";
+				
+				skipWhitespace = true;
+			}
+			
+			// Add assignments (= only) and separators directly
+			else if(token.matches(rSeparators)){
+				tokens.add(lineNum + "s:" + token);
 				token = "";
 				
 				skipWhitespace = true;
@@ -164,15 +200,19 @@ public class ScriptLexer{
 						
 						// Count backslashes to determine if quote is escaped
 						int b = 0;
-						for(int j = s.length() - 1; j > 0; j--)
+						
+						for(int j = s.length() - 1; j > 0; j--){
 							if(s.charAt(j) == '\\')
 								b++;
 							else
 								break;
+						}
 						
-						// If backslashes are odd, end
-						if(b == 0 || b % 2 == 1)
+						// If backslashes are even, end
+						if(b % 2 == 0)
 							break;
+						else
+							s += c;
 					}
 					
 					// Otherwise add to string
@@ -182,7 +222,7 @@ public class ScriptLexer{
 					i++;
 				}
 				
-				tokens.add(lineNum + "s:" + s);
+				tokens.add(lineNum + "t:" + s);
 				token = "";
 				
 				skipWhitespace = true;
@@ -205,7 +245,10 @@ public class ScriptLexer{
 				
 				// Check if reserved word
 				if(isReservedWord(token2)){
-					tokens.add(lineNum + ":" + token2);
+					if(token2.equals("true") || token2.equals("false"))
+						tokens.add(lineNum + "b:" + token2);
+					else
+						tokens.add(lineNum + "k:" + token2);
 				}
 				
 				// Add function
@@ -214,7 +257,7 @@ public class ScriptLexer{
 				}
 				
 				// Add variable
-				else {
+				else{
 					tokens.add(lineNum + "v:" + token2);
 				}
 				
@@ -226,8 +269,14 @@ public class ScriptLexer{
 			}
 			
 			// Finish if at end of line
-			if(i >= line.length() - 1)
+			if(i >= line.length() - 1){
+				
+				// Token should be empty after completing line
+				if(!token.isEmpty())
+					compilationError("Invalid syntax", line, lineNum);
+				
 				return;
+			}
 			
 			if(skipWhitespace){
 				while(Character.isWhitespace(line.charAt(++i)))
@@ -255,44 +304,129 @@ public class ScriptLexer{
 			
 			// Get token
 			String token = tokens.get(i);
+			char type = getType(token);
+			int lineNum = getLineNum(token);
 			
-			int in = token.indexOf(':');
+			// Get data only
+			token = getData(token);
 			
-			// Current type
-			char type = token.charAt(in - 1);
-			if(Character.isDigit(type)) type = '0';
+			if(i != 0){
+				last = tokens.get(i - 1);
+				
+				char lType = getType(last);
+				String lToken = getData(last);				
+				
+				// Syntax errors if certain tokens were expected
+				
+				// All keywords should be preceded by ; { or }
+				if(type == 'k' && !token.equals("const") && !token.equals("in")){
+					if(!lToken.equals(";") && !lToken.equals("{") && !lToken.equals("}") &&
+						!(token.equals("if") && lToken.equals("else"))){
+						compilationError("Expected ; { or } on previous line", token, lineNum);
+						return;
+					}
+				}
+				
+				// Variables/functions/literals should not come directly after one another
+				else if((type == 'v' || type == 'f' || type == 'i' || type == 'l' || type == 'b' || type == 't') &&
+					(lType == 'v' || lType == 'f' || lType == 'i' || lType == 'l' || lType == 'b' || lType == 't')){
+					compilationError("Expected operation", token, lineNum);
+					return;
+				}
 
-			// Line number string
-			String ln = token.substring(0, in);
-			ln = Character.isLetter(ln.charAt(ln.length() - 1)) ? ln.substring(0, ln.length() - 1) : ln;
-			
-			// Token
-			token = token.substring(in + 1);
-			
-			int lineNum = Integer.parseInt(ln);
-			
-			// Syntax errors if certain tokens were expected
-			switch(last){
-				case "set":
-					if(type != 'v'){
-						compilationError("Expected variable", token, lineNum);
+				// Operators require a value before them
+				else if(type == 'o' && !token.equals("++") && !token.equals("--") && !token.equals("!") && lType != 'v' &&
+					lType != 'f' && lType != 'i' && lType != 'l' && lType != 'b' && lType != 't' && !lToken.equals(")")){
+						compilationError("Expected value", token, lineNum);
 						return;
-					}
-					break;
-				case "else":
-					if(!token.equals("if") && !token.equals("{")){
-						compilationError("Expected \"if\" or {", token, lineNum);
+				}
+				else if(type == 'o' && (token.equals("++") || token.equals("--")) && lType != 'v'){
+					compilationError("Expected variable", token, lineNum);
+					return;
+				}
+				
+				// Operators require a value after them
+				if(lType == 'o' && !lToken.equals("++") && !lToken.equals("--") && type != 'v' && type != 'f' &&
+					type != 'i' && type != 'l' && type != 'b' && type != 't' && !token.equals("(") && !token.equals("!") &&
+					!(lToken.contains("=") && !lToken.equals("==") && token.equals("{"))){
+						compilationError("Expected value", token, lineNum);
 						return;
+				}
+				
+				// Keywords
+				if(lType == 'k'){
+					
+					switch(lToken){
+						case "set":
+							if(type != 'v' && !token.equals("const")){
+								compilationError("Expected identifier or const", token, lineNum);
+								return;
+							}
+							break;
+						
+						case "const":
+							if(type != 'v'){
+								compilationError("Expected identifier", token, lineNum);
+								return;
+							}
+							break;
+						
+						case "else":
+							if(!token.equals("if") && !token.equals("{")){
+								compilationError("Expected \"if\" or {", token, lineNum);
+								return;
+							}
+							break;
+						
+						case "break":
+							if(!token.equals(";")){
+								compilationError("Expected ;", token, lineNum);
+								return;
+							}
+							break;
+						
+						case "if": case "while": case "for":
+							if(!token.equals("(")){
+								compilationError("Expected (", token, lineNum);
+								return;
+							}
+							break;
+						
+						case "in":
+							if(type != 'v' && type != 'f' && type != 'i' && type != 'l'){
+								compilationError("Expected numerical value", token, lineNum);
+								return;
+							}
+							break;
+						
+						case "function": case "task":
+							if(type != 'f'){
+								compilationError("Expected " + last + " declaration", token, lineNum);
+								return;
+							}
+							break;
+						
+						case "return":
+							if(!token.equals(";") && type != 'v' && type != 'f'){
+								if(type != 'v' && type != 'f'){
+									compilationError("Expected value", token, lineNum);
+									return;
+								}
+								
+								compilationError("Expected ;", token, lineNum);
+								return;
+							}
+							break;
+						
+						case "wait":
+							if(type != 'i' && type != 'l' && type != 'v' && type != 'f'){
+								compilationError("Expected value", token, lineNum);
+								return;
+							}
+							break;
 					}
-					break;
-				case "break":
-					if(!token.equals(";")){
-						compilationError("Expected ;", token, lineNum);
-						return;
-					}
+				}
 			}
-			
-			last = token;
 			
 			// Check brackets
 			bracketsChanged = true;
@@ -314,26 +448,73 @@ public class ScriptLexer{
 						compilationError("Unclosed bracket", token, lineNum);
 				}
 			}
-			
-			/*
-			switch(token){
-				case "set":		nextExpected = "variable";	continue;
-				case "else":		nextExpected = "if | {";		continue;
-				case "break"	:	nextExpected = ";";			continue;
-				
-				case "if": case"while": case "for":	nextExpected = "(";	continue;
-				case "function": case "task":	nextExpected = "function";		continue;
-				case "return":	nextExpected = "; | variable | function";
-				
-				case "wait":		nextExpected = "; | int | variable";
-			}
-			*/
 		}
+	}
+	
+	// Get token line num
+	private int getLineNum(String token){
+		return Integer.parseInt(token.substring(0, token.indexOf(':') - 1));
+	}
+	
+	// Get token type
+	private char getType(String token){
+		return token.charAt(token.indexOf(':') - 1);
+	}
+	
+	// Get token data
+	private String getData(String token){
+		return token.substring(token.indexOf(':') + 1);
 	}
 	
 	// Create syntax error and halt compilation
 	private void compilationError(String type, String line, int lineNum){
 		System.err.println("\nDScript compilation error:\n" + type + " in " + script.getFileName() + " on line " + lineNum + ":\n>> " + line);
 		haltCompiler = true;
+	}
+
+	/* 	Types
+	 * 	
+	 * 	k - keyword
+	 * 	o - operator
+	 * 	s - separator
+	 * 	
+	 * 	f - function/task
+	 * 	v - variable
+	 * 	
+	 * 	i - int literal
+	 * 	l - float literal
+	 * 	b - boolean literal
+	 * 	t - string literal
+	 */
+	
+	// Print tokens (debug)
+	private void printTokens(String[] tokens){
+		
+		System.out.println("\nPrinting lexical tokens of " + script.getFileName() + ":\n");
+		
+		for(String t:tokens){
+			String type = "keyword";
+			
+			switch(getType(t)){
+				case 'o':	type = "operator";		break;
+				case 's':	type = "separator";		break;
+				case 'f':	type = "function/task";	break;
+				case 'v':	type = "variable";		break;
+				case 'i':	type = "int";			break;
+				case 'l':	type = "float";			break;
+				case 'b':	type = "boolean";		break;
+				case 't':	type = "string";		break;
+			}
+			
+			String lineNum = Integer.toString(getLineNum(t)) + ":\t";
+			
+			if(lineNum.length() == 3)
+				lineNum += "\t";
+			
+			if(type.length() < 8)
+				type += "\t";
+			
+			System.out.println("Line " + lineNum + type + "\t" + getData(t));
+		}
 	}
 }

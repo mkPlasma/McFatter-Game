@@ -44,7 +44,7 @@ public class TestMission extends Mission{
 		
 		DScript script = new DScript("Game/res/script/test.dscript");
 		
-		new ScriptLexer().lex(script);
+		new ScriptLexer().analyze(script);
 		
 		//new ScriptCompiler().compile(script);
 		//new ScriptRunner().run(script);

@@ -23,7 +23,7 @@ public class ScriptFunctions{
 		"load",				// Load a value into register
 		"store",			// Store register into variable
 		"create_var",		// Creates a new variable and sets its value
-		//"delete_var",		// Deletes variable
+		"delete_var",		// Deletes variable
 		"postfix_val",		// Declare postfix value
 		"postfix_end",		// End a postfix expression and save result in register
 		
@@ -57,6 +57,7 @@ public class ScriptFunctions{
 	
 	public static final String[] reservedWords = {
 		"set",
+		"const",//
 		
 		"if",
 		"else",
@@ -64,13 +65,14 @@ public class ScriptFunctions{
 
 		"while",
 		"for",
+		"in",//
 		
 		"function",
 		"task",
 		"return",
 		
-		"true",
-		"false",
+		"true",//
+		"false",//
 		
 		"wait",
 	};

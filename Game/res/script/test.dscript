@@ -1,1 +1,60 @@
-break
+print("Hello World");
+
+set x = 0;
+x++;
+x--;
+x += 2;
+x /= 4;
+
+set y = "test";
+set z = false;
+set e = ((2 + 3) - 1) > (6*12/3)) && !false;
+
+if(e){
+	print("e");
+}
+else if(!z){
+	print("z");
+}
+else{
+	print("none");
+}
+
+while(z || x >= 0){
+	set a = 0;
+	set c = 0;
+	
+    print(x);
+}
+
+for(i in 0, 10){			// int i = 0; i < 10; i++
+    for(j in 1, 2, 20){		// int j = 1; j < 20; j += 2
+        print(i + " " + j);
+    }
+}
+
+set array = {0, 1, 4};
+
+for(i in array){
+    print(i) // i is object in array
+}
+
+for(i, o in array){
+    print(i + " " + o); // i is index, o is object
+    break;
+}
+
+set a = 0;
+
+test();
+sum(1, 2);
+
+task test(){
+    print("test");
+}
+
+function sum(a, b){
+    return a + b;
+}
+
+wait 30;
