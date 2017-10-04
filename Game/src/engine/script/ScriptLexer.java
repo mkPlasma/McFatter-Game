@@ -62,7 +62,7 @@ public class ScriptLexer{
 	 * 	t - string literal
 	 */
 	
-	public String[] analyze(DScript script){
+	public void analyze(DScript script){
 		
 		this.script = script;
 		
@@ -84,7 +84,7 @@ public class ScriptLexer{
 		    			process(line, lineNum);
 				
 				if(haltCompiler)
-					return null;
+					return;
 				
 				lineNum++;
 			}
@@ -97,7 +97,7 @@ public class ScriptLexer{
 		checkTokens();
 		
 		if(haltCompiler)
-			return null;
+			return;
 		
 		// Convert to array
 		String[] tokensArray = new String[tokens.size()];
@@ -109,8 +109,8 @@ public class ScriptLexer{
 		// Print tokens (debug)
 		printTokens(tokensArray);
 		
-		
-		return tokensArray;
+		// Set tokens
+		script.setTokens(tokensArray);
 	}
 	
 	// Process line into tokens
@@ -121,9 +121,6 @@ public class ScriptLexer{
 		
 		Pattern pattern;
 		Matcher matcher;
-		
-		// Is in multi-line comment
-		boolean inComment = false;
 		
 		// Skip whitespace after token
 		boolean skipWhitespace = false;
@@ -355,7 +352,6 @@ public class ScriptLexer{
 				
 				// Keywords
 				if(lType == 'k'){
-					
 					switch(lToken){
 						case "set":
 							if(type != 'v' && !token.equals("const")){
@@ -431,11 +427,11 @@ public class ScriptLexer{
 			// Check brackets
 			bracketsChanged = true;
 			if(token.equals("("))	brackets[0]++;
-			if(token.equals(")"))	brackets[0]--;
-			if(token.equals("{"))	brackets[1]++;
-			if(token.equals("}"))	brackets[1]--;
-			if(token.equals("["))	brackets[2]++;
-			if(token.equals("]"))	brackets[2]--;
+			else if(token.equals(")"))	brackets[0]--;
+			else if(token.equals("{"))	brackets[1]++;
+			else if(token.equals("}"))	brackets[1]--;
+			else if(token.equals("["))	brackets[2]++;
+			else if(token.equals("]"))	brackets[2]--;
 			else	 bracketsChanged = false;
 			
 			if(bracketsChanged){
@@ -451,41 +447,11 @@ public class ScriptLexer{
 		}
 	}
 	
-	// Get token line num
-	private int getLineNum(String token){
-		return Integer.parseInt(token.substring(0, token.indexOf(':') - 1));
-	}
-	
-	// Get token type
-	private char getType(String token){
-		return token.charAt(token.indexOf(':') - 1);
-	}
-	
-	// Get token data
-	private String getData(String token){
-		return token.substring(token.indexOf(':') + 1);
-	}
-	
 	// Create syntax error and halt compilation
 	private void compilationError(String type, String line, int lineNum){
 		System.err.println("\nDScript compilation error:\n" + type + " in " + script.getFileName() + " on line " + lineNum + ":\n>> " + line);
 		haltCompiler = true;
 	}
-
-	/* 	Types
-	 * 	
-	 * 	k - keyword
-	 * 	o - operator
-	 * 	s - separator
-	 * 	
-	 * 	f - function/task
-	 * 	v - variable
-	 * 	
-	 * 	i - int literal
-	 * 	l - float literal
-	 * 	b - boolean literal
-	 * 	t - string literal
-	 */
 	
 	// Print tokens (debug)
 	private void printTokens(String[] tokens){

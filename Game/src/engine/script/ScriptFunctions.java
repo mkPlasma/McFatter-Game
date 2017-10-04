@@ -93,6 +93,25 @@ public class ScriptFunctions{
 							 REG1 = 0, REG2 = 1,
 							 ZERO = 0;
 	
+	// Token functions
+	
+	// Get token line num
+	public static int getLineNum(String token){
+		return Integer.parseInt(token.substring(0, token.indexOf(':') - 1));
+	}
+	
+	// Get token type
+	public static char getType(String token){
+		return token.charAt(token.indexOf(':') - 1);
+	}
+	
+	// Get token data
+	public static String getData(String token){
+		return token.substring(token.indexOf(':') + 1);
+	}
+	
+	
+	
 	// Return index of bytecode
 	public static byte getOpcode(String opcode){
 		
