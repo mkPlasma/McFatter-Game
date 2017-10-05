@@ -69,23 +69,56 @@ public class ScriptParser{
 	
 	// Process tokens into bytecode
 	private void process(){
+		
+		// Error if next expected doesn't match
+		String[] nextExpected = null;
+		
+		// Keep track of brackets
+		// { ( [
+		int[] brackets = new int[3];
+		
 		for(int i = 0; i < tokens.length; i++){
 			
 			// Is first/last token
 			//boolean tFirst = i == 0;
 			//boolean tLast = i == tokens.length - 1;
-			
-			// Current, previous, next tokens
-			String tCur = tokens[i];
 			//String tPrev = !tFirst ? tokens[i - 1] : null;
 			//String tNext = !tLast ? tokens[i + 1] : null;
 			
-			// Keep track of brackets
-			// { ( [
-			int[] brackets = new int[3];
+			// Current token
+			String tCur = tokens[i];
 			
 			int lineNum = getLineNum(tCur);
 			int typeCurrent = getType(tCur);
+			
+			// Matched string in nextExpected
+			boolean matched = false;
+			
+			if(nextExpected != null){
+				for(String s:nextExpected){
+					if(getData(tCur).equals(s)){
+						matched = true;
+						break;
+					}
+				}
+			}
+			else matched = true;
+			
+			if(!matched){
+				String s = nextExpected[0];
+
+				if(s.equals("k"))		s = "keyword";
+				else if(s.equals("o"))	s = "operator";
+				else if(s.equals("s"))	s = "separator";
+				else if(s.equals("f"))	s = "function/task";
+				else if(s.equals("v"))	s = "variable";
+				else if(s.equals("i"))	s = "int";
+				else if(s.equals("l"))	s = "float";
+				else if(s.equals("b"))	s = "boolean";
+				else if(s.equals("t"))	s = "string";
+				
+				compilationError("Expected " + s, lineNum);
+			}
 			
 			tCur = getData(tCur);
 			
@@ -97,9 +130,22 @@ public class ScriptParser{
 							states.push("set");	// create_var
 							states.push("var");	// Add to variables arraylist
 							continue;
+						
+						case "const":
+							if(statesPeek("var")){
+								nextExpected = new String[]{"v"};
+								
+								// Add const before var
+								String t = states.pop();
+								states.push("const");
+								states.push(t);
+								continue;
+							}
+							compilationError("Invalid token \"const\"", lineNum);
+							return;
 					}
 					
-					break;
+					continue;
 				
 				// Operators
 				case 'o':
@@ -107,20 +153,25 @@ public class ScriptParser{
 					// Assignment
 					switch(tCur){
 						case "=":
+							nextExpected = null;
 							states.push("exp"); // Expression
 							continue;
 					}
 					
 					// Add opeerator to expression
-					if(statesPeek("exp"))
+					if(statesPeek("exp")){
 						expression.add(tCur);
+						continue;
+					}
 					
-					break;
+					continue;
 				
 				// Separators
 				case 's':
 					switch(tCur){
 						case ";":
+							nextExpected = null;
+							
 							// Default variable init
 							if(statesPeek("set")){
 								bytecode.add(getInstruction(getOpcode("create_var"), VALUE, INT, lineNum, ZERO));
@@ -130,16 +181,19 @@ public class ScriptParser{
 							// If at the end of an expression, parse
 							if(statesPeek("exp")){
 								parseExpression(lineNum);
+								continue;
 							}
 							continue;
 						case "(": case ")":
-							if(statesPeek("exp"))
+							if(statesPeek("exp")){
 								expression.add(tCur);
+								continue;
+							}
 							
 							
 							continue;
 					}
-					break;
+					continue;
 				
 				// Functions/tasks
 				case 'f':
@@ -150,33 +204,42 @@ public class ScriptParser{
 				case 'v':
 					// Add to variables arraylist
 					if(statesPeek("var")){
-						variables.add(tCur);
+						nextExpected = null;
 						states.pop();
+						
+						// Make constant
+						if(statesPeek("const")){
+							tCur = "c:" + tCur;
+							states.pop();
+						}
+						
+						variables.add(tCur);
+						continue;
 					}
-					else if(statesPeek("exp")){
+					
+					// Add to expression
+					if(statesPeek("exp")){
 						expression.add(tCur);
+						continue;
 					}
-					break;
+					continue;
 				
 				// Value literals
 				case 'i': case 'l': case 'b':
-
-					int lInt = Integer.parseInt(tCur);
-					float lFloat = Float.parseFloat(tCur);
-					boolean lBoolean = Boolean.parseBoolean(tCur);
 					
 					// Set variable
 					if(statesPeek("exp")){
-						if(typeCurrent == 'i') expression.add(lInt);
-						if(typeCurrent == 'l') expression.add(lFloat);
-						if(typeCurrent == 'b') expression.add(lBoolean);
+						if(typeCurrent == 'i') expression.add(Integer.parseInt(tCur));
+						if(typeCurrent == 'l') expression.add(Float.parseFloat(tCur));
+						if(typeCurrent == 'b') expression.add(Boolean.parseBoolean(tCur));
+						continue;
 					}
-					break;
+					continue;
 				
 				// String literals
 				case 't':
 					
-					break;
+					continue;
 			}
 		}
 	}
@@ -194,7 +257,20 @@ public class ScriptParser{
 			Object current = expression.get(i);
 			long inst = 0;
 			
-			if(current instanceof Integer) inst = getInstruction(getOpcode("postfix_val"), VALUE, INT, lineNum, (int)current);
+			if(current instanceof Integer)	inst = getInstruction(getOpcode("postfix_val"), VALUE, INT, lineNum, (int)current);
+			if(current instanceof Float)		inst = getInstruction(getOpcode("postfix_val"), VALUE, FLOAT, lineNum, Float.floatToIntBits((float)current));
+			if(current instanceof Boolean)	inst = getInstruction(getOpcode("postfix_val"), VALUE, BOOLEAN, lineNum, (boolean)current ? 1 : 0);
+			
+			// If single value
+			if(expression.size() == 1){
+				switch(statesPeek()){
+					case "exp":
+						inst = setOpcode(inst, getOpcode("create_var"));
+					break;
+				}
+				
+				bytecode.add(inst);
+			}
 		}
 	}
 	

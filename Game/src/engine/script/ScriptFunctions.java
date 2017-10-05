@@ -58,6 +58,7 @@ public class ScriptFunctions{
 	public static final String[] reservedWords = {
 		"set",
 		"const",
+		"global",
 		
 		"if",
 		"else",

@@ -182,7 +182,7 @@ public class ScriptLexer{
 				skipWhitespace = true;
 			}
 			
-			// Add assignments (= only) and separators directly
+			// Add separators directly
 			else if(token.matches(rSeparators)){
 				tokens.add(lineNum + "s:" + token);
 				token = "";
@@ -327,9 +327,36 @@ public class ScriptLexer{
 				// Syntax errors if certain tokens were expected
 				
 				// All keywords should be preceded by ; { or }
-				if(type == 'k' && !token.equals("const") && !token.equals("in")){
-					if(!lToken.equals(";") && !lToken.equals("{") && !lToken.equals("}") &&
-						!(token.equals("if") && lToken.equals("else"))){
+				if(type == 'k'){
+					if(token.equals("if")){
+						if(!lToken.equals("else")){
+							compilationError("Expected \"else\"", token, lineNum);
+							return;
+						}
+						continue;
+					}
+					if(token.equals("const")){
+						if(!lToken.equals("set")){
+							compilationError("Expected \"set\"", token, lineNum);
+							return;
+						}
+						continue;
+					}
+					if(token.equals("global")){
+						if(!lToken.equals("set")){
+							compilationError("Expected \"set\"", token, lineNum);
+							return;
+						}
+						continue;
+					}
+					if(token.equals("in")){
+						if(lType != 'v'){
+							compilationError("Expected variable", token, lineNum);
+							return;
+						}
+						continue;
+					}
+					if(!lToken.equals(";") && !lToken.equals("{") && !lToken.equals("}")){
 						compilationError("Expected ; { or } on previous line", token, lineNum);
 						return;
 					}
@@ -369,49 +396,49 @@ public class ScriptLexer{
 								compilationError("Expected identifier or const", token, lineNum);
 								return;
 							}
-							break;
+							continue;
 						
-						case "const":
+						case "const": case "global":
 							if(type != 'v'){
 								compilationError("Expected identifier", token, lineNum);
 								return;
 							}
-							break;
+							continue;
 						
 						case "else":
 							if(!token.equals("if") && !token.equals("{")){
 								compilationError("Expected \"if\" or {", token, lineNum);
 								return;
 							}
-							break;
+							continue;
 						
 						case "break":
 							if(!token.equals(";")){
 								compilationError("Expected ;", token, lineNum);
 								return;
 							}
-							break;
+							continue;
 						
 						case "if": case "while": case "for":
 							if(!token.equals("(")){
 								compilationError("Expected (", token, lineNum);
 								return;
 							}
-							break;
+							continue;
 						
 						case "in":
 							if(type != 'v' && type != 'f' && type != 'i' && type != 'l'){
 								compilationError("Expected numerical value", token, lineNum);
 								return;
 							}
-							break;
+							continue;
 						
 						case "function": case "task":
 							if(type != 'f'){
 								compilationError("Expected " + last + " declaration", token, lineNum);
 								return;
 							}
-							break;
+							continue;
 						
 						case "return":
 							if(!token.equals(";") && type != 'v' && type != 'f'){
@@ -423,14 +450,14 @@ public class ScriptLexer{
 								compilationError("Expected ;", token, lineNum);
 								return;
 							}
-							break;
+							continue;
 						
 						case "wait":
 							if(type != 'i' && type != 'l' && type != 'v' && type != 'f'){
 								compilationError("Expected value", token, lineNum);
 								return;
 							}
-							break;
+							continue;
 					}
 				}
 			}
