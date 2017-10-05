@@ -57,7 +57,7 @@ public class ScriptFunctions{
 	
 	public static final String[] reservedWords = {
 		"set",
-		"const",//
+		"const",
 		
 		"if",
 		"else",
@@ -65,14 +65,14 @@ public class ScriptFunctions{
 
 		"while",
 		"for",
-		"in",//
+		"in",
 		
 		"function",
 		"task",
 		"return",
 		
-		"true",//
-		"false",//
+		"true",
+		"false",
 		
 		"wait",
 	};

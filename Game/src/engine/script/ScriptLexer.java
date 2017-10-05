@@ -9,6 +9,17 @@ import java.util.regex.Pattern;
 
 import static engine.script.ScriptFunctions.*;
 
+/*
+ * 		ScriptLexer.java
+ * 		
+ * 		Purpose:	Parses DScript script into lexical tokens.
+ * 		Notes:		WIP
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				10/4
+ * 		Changes:			
+ */
+
 public class ScriptLexer{
 	
 	private DScript script;
@@ -107,7 +118,7 @@ public class ScriptLexer{
 		
 		
 		// Print tokens (debug)
-		printTokens(tokensArray);
+		//printTokens(tokensArray);
 		
 		// Set tokens
 		script.setTokens(tokensArray);
@@ -290,7 +301,7 @@ public class ScriptLexer{
 	public void checkTokens(){
 		
 		// Keep track of brackets
-		// ( { [
+		// { ( [
 		int[] brackets = new int[3];
 		boolean bracketsChanged;
 		
@@ -330,7 +341,7 @@ public class ScriptLexer{
 					compilationError("Expected operation", token, lineNum);
 					return;
 				}
-
+				
 				// Operators require a value before them
 				else if(type == 'o' && !token.equals("++") && !token.equals("--") && !token.equals("!") && lType != 'v' &&
 					lType != 'f' && lType != 'i' && lType != 'l' && lType != 'b' && lType != 't' && !lToken.equals(")")){
@@ -426,10 +437,10 @@ public class ScriptLexer{
 			
 			// Check brackets
 			bracketsChanged = true;
-			if(token.equals("("))	brackets[0]++;
-			else if(token.equals(")"))	brackets[0]--;
-			else if(token.equals("{"))	brackets[1]++;
-			else if(token.equals("}"))	brackets[1]--;
+				 if(token.equals("{"))	brackets[0]++;
+			else if(token.equals("}"))	brackets[0]--;
+			else if(token.equals("("))	brackets[1]++;
+			else if(token.equals(")"))	brackets[1]--;
 			else if(token.equals("["))	brackets[2]++;
 			else if(token.equals("]"))	brackets[2]--;
 			else	 bracketsChanged = false;
