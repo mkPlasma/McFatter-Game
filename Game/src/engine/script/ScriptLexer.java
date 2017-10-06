@@ -31,31 +31,33 @@ public class ScriptLexer{
 	
 	
 	// Regexes
-
+	
+	public static final String
+	
 	// Operators
-	String rOperators = "\\+|-|\\*|/|%|!|(\\|\\|)|(&&)|<|>|(==)|(<=)|(>=)";
+	rOperators = "\\+|-|\\*|/|%|!|(\\|\\|)|(&&)|<|>|(==)|(<=)|(>=)",
 	
 	// Assignment operators
-	String rAssignments = "=|(\\+\\+)|(--)|(\\+=)|(-=)|(\\*=)|(/=)|(%=)";
+	rAssignments = "=|(\\+\\+)|(--)|(\\+=)|(-=)|(\\*=)|(/=)|(%=)",
 	
 	// Identifiers
-	String rIdentifiers = "\\w+";
+	rIdentifiers = "\\w+",
 	
 	// Numbers
-	String rInt = "\\d+";
-	String rFloat = "\\d+\\.\\d+";
+	rInt = "\\d+",
+	rFloat = "\\d+\\.\\d+",
 	
 	// Separators
-	String rSeparators = "\\(|\\)|\\{|\\}|\\[|\\]|,|\\.|;";
+	rSeparators = "\\(|\\)|\\{|\\}|\\[|\\]|,|\\.|;",
 	
 	// Delimiters
-	String rDelimiters = rOperators + "|" + rAssignments + "|(\\s+" + rIdentifiers + ")|" + rSeparators;
+	rDelimiters = rOperators + "|" + rAssignments + "|(\\s+" + rIdentifiers + ")|" + rSeparators,
 	
 	// Word + delimiters
-	String rWordDelim = "(" + rIdentifiers + ")\\s*?(" + rDelimiters + ")";
+	rWordDelim = "(" + rIdentifiers + ")\\s*?(" + rDelimiters + ")",
 	
 	// Number literal + delimiters (remove period delimiter for floats)
-	String rNumDelim = "((" + rInt + ")|(" + rFloat + "))\\s*?(" + rDelimiters.replace("|\\.", "") + ")";
+	rNumDelim = "((" + rInt + ")|(" + rFloat + "))\\s*?(" + rDelimiters.replace("|\\.", "") + ")";
 	
 	
 	/* 	Types
@@ -327,7 +329,7 @@ public class ScriptLexer{
 				// Syntax errors if certain tokens were expected
 				
 				// All keywords should be preceded by ; { or }
-				if(type == 'k'){
+				if(type == 'k' && !token.equals("global")){
 					if(token.equals("if")){
 						if(!lToken.equals("else")){
 							compilationError("Expected \"else\"", token, lineNum);
@@ -336,13 +338,6 @@ public class ScriptLexer{
 						continue;
 					}
 					if(token.equals("const")){
-						if(!lToken.equals("set")){
-							compilationError("Expected \"set\"", token, lineNum);
-							return;
-						}
-						continue;
-					}
-					if(token.equals("global")){
 						if(!lToken.equals("set")){
 							compilationError("Expected \"set\"", token, lineNum);
 							return;
@@ -383,7 +378,7 @@ public class ScriptLexer{
 				// Operators require a value after them
 				if(lType == 'o' && !lToken.equals("++") && !lToken.equals("--") && type != 'v' && type != 'f' &&
 					type != 'i' && type != 'l' && type != 'b' && type != 't' && !token.equals("(") && !token.equals("!") &&
-					!(lToken.contains("=") && !lToken.equals("==") && token.equals("{"))){
+					!token.equals("global") && !(lToken.contains("=") && !lToken.equals("==") && token.equals("{"))){// Exception for array initializers
 						compilationError("Expected value", token, lineNum);
 						return;
 				}

@@ -77,6 +77,9 @@ public class ScriptParser{
 		// { ( [
 		int[] brackets = new int[3];
 		
+		// Scope assigned to variables
+		int scope = 0;
+		
 		for(int i = 0; i < tokens.length; i++){
 			
 			// Is first/last token
@@ -96,7 +99,7 @@ public class ScriptParser{
 			
 			if(nextExpected != null){
 				for(String s:nextExpected){
-					if(getData(tCur).equals(s)){
+					if(getData(tCur).equals(s) || (s.length() == 1 && getType(tCur) == s.charAt(0))){
 						matched = true;
 						break;
 					}
@@ -143,6 +146,11 @@ public class ScriptParser{
 							}
 							compilationError("Invalid token \"const\"", lineNum);
 							return;
+						
+						case "global":
+							nextExpected = new String[]{"v"};
+							states.push("global");
+							break;
 					}
 					
 					continue;
@@ -187,6 +195,7 @@ public class ScriptParser{
 						case "(": case ")":
 							if(statesPeek("exp")){
 								expression.add(tCur);
+								states.pop();
 								continue;
 							}
 							
@@ -209,19 +218,80 @@ public class ScriptParser{
 						
 						// Make constant
 						if(statesPeek("const")){
-							tCur = "c:" + tCur;
+							tCur = scope + "c:" + tCur;
 							states.pop();
 						}
+						else
+							tCur = scope + ":" + tCur;
 						
 						variables.add(tCur);
 						continue;
 					}
+
+					// Variable + scope + is constant
+					String var = null;
+					
+					// Variable name only
+					String varName = null;
+					
+					// Get variable (exclude register)
+					for(int j = 1; j < variables.size(); j++){
+						// Variable
+						String v = variables.get(j);
+						int ind = v.indexOf(':') + 1;
+						
+						// Name
+						String vn = v.substring(0, ind);
+						// Scope
+						
+						int sc = Integer.parseInt(v.substring(0, ind - 1).replace("c", ""));
+						
+						if(v.equals(tCur)){
+							// If global
+							if(sc == 0){
+								var = v;
+								varName = vn;
+								
+								// Break if global was requested
+								if(statesPeek("global")){
+									states.pop();
+									break;
+								}
+							}
+							// Otherwise if correct scope
+							else if(sc == scope){
+								var = v;
+								varName = vn;
+								break;
+							}
+						}
+					}
+					
+					// If not created
+					if(var == null){
+						compilationError("Variable " + tCur + " is not defined", lineNum);
+						return;
+					}
+					
+					// Is variable a constant
+					boolean constant = var.charAt(var.indexOf(':') - 1) == 'c';
+					
+					// Assignment
+					if(states.isEmpty()){
+						// If constant
+						if(constant){
+							compilationError("Variable " + varName + " is constant", lineNum);
+							return;
+						}
+						
+					}
 					
 					// Add to expression
 					if(statesPeek("exp")){
-						expression.add(tCur);
+						expression.add(var);
 						continue;
 					}
+					
 					continue;
 				
 				// Value literals
@@ -252,26 +322,100 @@ public class ScriptParser{
 			return;
 		}
 		
+		// If single value
+		if(expression.size() == 1){
+			
+			long inst = getValueInst(expression.get(0), lineNum);
+			
+			switch(statesPeek()){
+				case "exp":
+					inst = setOpcode(inst, getOpcode("create_var"));
+				break;
+			}
+			
+			bytecode.add(inst);
+			return;
+		}
+		
+		// Postfix stacks
+		Stack<Object> output = new Stack<Object>();
+		Stack<String> operators = new Stack<String>();
+		
+		// Convert to postfix
 		for(int i = 0; i < expression.size(); i++){
+			Object obj = expression.get(i);
 			
-			Object current = expression.get(i);
-			long inst = 0;
+			// Operations
+			if(obj instanceof String && isOperation((String)obj)){
+				while(!operators.isEmpty() && getPrecedence(operators.peek()) >= getPrecedence((String)obj)){
+					output.push(operators.pop());
+				}
+				operators.push((String)obj);
+				continue;
+			}
 			
-			if(current instanceof Integer)	inst = getInstruction(getOpcode("postfix_val"), VALUE, INT, lineNum, (int)current);
-			if(current instanceof Float)		inst = getInstruction(getOpcode("postfix_val"), VALUE, FLOAT, lineNum, Float.floatToIntBits((float)current));
-			if(current instanceof Boolean)	inst = getInstruction(getOpcode("postfix_val"), VALUE, BOOLEAN, lineNum, (boolean)current ? 1 : 0);
-			
-			// If single value
-			if(expression.size() == 1){
-				switch(statesPeek()){
-					case "exp":
-						inst = setOpcode(inst, getOpcode("create_var"));
-					break;
+			// Parenthesis
+			if(obj instanceof String && (((String)obj).equals("(") || ((String)obj).equals(")"))){
+				
+				if(((String)obj).equals("("))
+					operators.push((String)obj);
+				else{
+					while(!operators.isEmpty() && operators.peek() != "("){
+						output.push(operators.pop());
+					}
+					if(operators.isEmpty()){
+						compilationError("Mismatched parenthesis", lineNum);
+						return;
+					}
+					
+					operators.pop();
 				}
 				
-				bytecode.add(inst);
+				continue;
 			}
+			
+			// Literals/variables
+			output.push(obj);
 		}
+		
+		if(operators.peek().equals("(") || operators.peek().equals(")")){
+			compilationError("Mismatched parenthesis", lineNum);
+			return;
+		}
+		
+		Object[] expression = output.toArray();
+		
+		// Reverse
+		/*
+		for(int i = 0; i < expression.length/2; i++){
+			Object tmp = expression[i];
+			expression[i] = expression[expression.length - i - 1];
+			expression[expression.length - i - 1] = tmp;
+		}
+		*/
+		
+		for(Object obj:expression){
+			// Operation
+			if(obj instanceof String && isOperation((String)obj))
+				bytecode.add(getInstruction(getOpcode((String)obj), ZERO, POSTFIX, lineNum, 0));
+			else
+				bytecode.add(getValueInst(obj, lineNum));
+		}
+	}
+	
+	// Returns instruction for single value
+	private long getValueInst(Object obj, int lineNum){
+		long inst = 0;
+		
+		// Value literals
+		if(obj instanceof Integer)		inst = getInstruction(getOpcode("postfix_val"), VALUE, INT, lineNum, (int)obj);
+		else if(obj instanceof Float)	inst = getInstruction(getOpcode("postfix_val"), VALUE, FLOAT, lineNum, Float.floatToIntBits((float)obj));
+		else if(obj instanceof Boolean)	inst = getInstruction(getOpcode("postfix_val"), VALUE, BOOLEAN, lineNum, (boolean)obj ? 1 : 0);
+		
+		// Variable
+		else if(obj instanceof String)	inst = getInstruction(getOpcode("postfix_val"), VALUE, INT, lineNum, (int)obj);
+		
+		return inst;
 	}
 	
 	// Peek states stack
