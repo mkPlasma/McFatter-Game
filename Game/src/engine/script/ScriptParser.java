@@ -46,6 +46,11 @@ public class ScriptParser{
 		this.script = script;
 		tokens = script.getTokens();
 		
+		if(tokens == null){
+			System.err.println("\n" + script.getFileName() + " not lexed, not parsing");
+			return;
+		}
+		
 		// Initialize/reset lists
 		bytecode = new ArrayList<Long>();
 		expression = new ArrayList<Object>();
@@ -60,11 +65,22 @@ public class ScriptParser{
 		// Process into bytecode
 		process();
 		
+		if(haltCompiler)
+			return;
+		
 		// Print bytecode (debug)
 		BytecodePrinter.printBytecode(bytecode, script.getFileName());
 		
 		// Clear tokens after
 		script.clearTokens();
+		
+		// Convert to array
+		long[] bytecodeArray = new long[bytecode.size()];
+		
+		for(int i = 0; i < bytecode.size(); i++)
+			bytecodeArray[i] = bytecode.get(i);
+		
+		script.setBytecode(bytecodeArray);
 	}
 	
 	// Process tokens into bytecode
@@ -92,14 +108,17 @@ public class ScriptParser{
 			String tCur = tokens[i];
 			
 			int lineNum = getLineNum(tCur);
-			int typeCurrent = getType(tCur);
+			int type = getType(tCur);
+			
+			// Data
+			String token = getData(tCur);
 			
 			// Matched string in nextExpected
 			boolean matched = false;
 			
 			if(nextExpected != null){
 				for(String s:nextExpected){
-					if(getData(tCur).equals(s) || (s.length() == 1 && getType(tCur) == s.charAt(0))){
+					if(token.equals(s) || (s.length() == 1 && type == s.charAt(0))){
 						matched = true;
 						break;
 					}
@@ -122,13 +141,13 @@ public class ScriptParser{
 				
 				compilationError("Expected " + s, lineNum);
 			}
+
+			nextExpected = null;
 			
-			tCur = getData(tCur);
-			
-			switch(typeCurrent){
+			switch(type){
 				// Keywords
 				case 'k':
-					switch(tCur){
+					switch(token){
 						case "set":
 							states.push("set");	// create_var
 							states.push("var");	// Add to variables arraylist
@@ -159,16 +178,15 @@ public class ScriptParser{
 				case 'o':
 					
 					// Assignment
-					switch(tCur){
+					switch(token){
 						case "=":
-							nextExpected = null;
 							states.push("exp"); // Expression
 							continue;
 					}
 					
 					// Add opeerator to expression
 					if(statesPeek("exp")){
-						expression.add(tCur);
+						expression.add(token);
 						continue;
 					}
 					
@@ -176,13 +194,12 @@ public class ScriptParser{
 				
 				// Separators
 				case 's':
-					switch(tCur){
+					switch(token){
 						case ";":
-							nextExpected = null;
-							
 							// Default variable init
 							if(statesPeek("set")){
 								bytecode.add(getInstruction(getOpcode("create_var"), VALUE, INT, lineNum, ZERO));
+								states.pop();
 								continue;
 							}
 							
@@ -194,8 +211,7 @@ public class ScriptParser{
 							continue;
 						case "(": case ")":
 							if(statesPeek("exp")){
-								expression.add(tCur);
-								states.pop();
+								expression.add(token);
 								continue;
 							}
 							
@@ -211,28 +227,13 @@ public class ScriptParser{
 				
 				// Variables
 				case 'v':
-					// Add to variables arraylist
-					if(statesPeek("var")){
-						nextExpected = null;
-						states.pop();
-						
-						// Make constant
-						if(statesPeek("const")){
-							tCur = scope + "c:" + tCur;
-							states.pop();
-						}
-						else
-							tCur = scope + ":" + tCur;
-						
-						variables.add(tCur);
-						continue;
-					}
-
 					// Variable + scope + is constant
 					String var = null;
 					
 					// Variable name only
 					String varName = null;
+					
+					boolean existsInScope = false;
 					
 					// Get variable (exclude register)
 					for(int j = 1; j < variables.size(); j++){
@@ -241,14 +242,31 @@ public class ScriptParser{
 						int ind = v.indexOf(':') + 1;
 						
 						// Name
-						String vn = v.substring(0, ind);
-						// Scope
+						String vn = v.substring(ind);
 						
+						// Scope
 						int sc = Integer.parseInt(v.substring(0, ind - 1).replace("c", ""));
 						
-						if(v.equals(tCur)){
-							// If global
-							if(sc == 0){
+						if(token.equals(vn)){
+							// Otherwise if correct scope
+							if(sc == scope){
+								var = v;
+								varName = vn;
+								existsInScope = true;
+								
+								if(statesPeek("global")){
+									if(sc != 0){
+										compilationError("Global variable " + vn + " is not defined", lineNum);
+										return;
+									}
+									else
+										states.pop();
+								}
+								
+								break;
+							}
+							// Otherwise if global
+							else if(sc == 0){
 								var = v;
 								varName = vn;
 								
@@ -258,18 +276,37 @@ public class ScriptParser{
 									break;
 								}
 							}
-							// Otherwise if correct scope
-							else if(sc == scope){
-								var = v;
-								varName = vn;
-								break;
-							}
 						}
+					}
+					
+					// Add to variables arraylist
+					if(statesPeek("var")){
+						
+						if(existsInScope){
+							compilationError("Duplicate variable " + token, lineNum);
+							return;
+						}
+						
+						// Pop "var"
+						states.pop();
+						
+						// Make constant
+						if(statesPeek("const")){
+							token = scope + "c:" + token;
+							states.pop();
+						}
+						else
+							token = scope + ":" + token;
+						
+						nextExpected = new String[]{"=", ";"};
+						
+						variables.add(token);
+						continue;
 					}
 					
 					// If not created
 					if(var == null){
-						compilationError("Variable " + tCur + " is not defined", lineNum);
+						compilationError("Variable " + token + " is not defined", lineNum);
 						return;
 					}
 					
@@ -283,7 +320,6 @@ public class ScriptParser{
 							compilationError("Variable " + varName + " is constant", lineNum);
 							return;
 						}
-						
 					}
 					
 					// Add to expression
@@ -299,9 +335,9 @@ public class ScriptParser{
 					
 					// Set variable
 					if(statesPeek("exp")){
-						if(typeCurrent == 'i') expression.add(Integer.parseInt(tCur));
-						if(typeCurrent == 'l') expression.add(Float.parseFloat(tCur));
-						if(typeCurrent == 'b') expression.add(Boolean.parseBoolean(tCur));
+						if(type == 'i') expression.add(Integer.parseInt(token));
+						if(type == 'l') expression.add(Float.parseFloat(token));
+						if(type == 'b') expression.add(Boolean.parseBoolean(token));
 						continue;
 					}
 					continue;
@@ -333,6 +369,8 @@ public class ScriptParser{
 				break;
 			}
 			
+			states.pop();	// Pop "exp"
+			expression.clear();
 			bytecode.add(inst);
 			return;
 		}
@@ -360,7 +398,7 @@ public class ScriptParser{
 				if(((String)obj).equals("("))
 					operators.push((String)obj);
 				else{
-					while(!operators.isEmpty() && operators.peek() != "("){
+					while(!operators.isEmpty() && !operators.peek().equals("(")){
 						output.push(operators.pop());
 					}
 					if(operators.isEmpty()){
@@ -378,21 +416,18 @@ public class ScriptParser{
 			output.push(obj);
 		}
 		
+		expression.clear();
+		
 		if(operators.peek().equals("(") || operators.peek().equals(")")){
 			compilationError("Mismatched parenthesis", lineNum);
 			return;
 		}
 		
+		while(!operators.isEmpty())
+			output.push(operators.pop());
+
+		// Convert to bytecode
 		Object[] expression = output.toArray();
-		
-		// Reverse
-		/*
-		for(int i = 0; i < expression.length/2; i++){
-			Object tmp = expression[i];
-			expression[i] = expression[expression.length - i - 1];
-			expression[expression.length - i - 1] = tmp;
-		}
-		*/
 		
 		for(Object obj:expression){
 			// Operation
@@ -400,6 +435,18 @@ public class ScriptParser{
 				bytecode.add(getInstruction(getOpcode((String)obj), ZERO, POSTFIX, lineNum, 0));
 			else
 				bytecode.add(getValueInst(obj, lineNum));
+		}
+		
+		// End expression
+		bytecode.add(getInstruction(getOpcode("postfix_end"), ZERO, ZERO, lineNum, 0));
+		
+		states.pop();	// Pop "exp"
+		
+		switch(statesPeek()){
+			case "set":
+				// Create variable from register
+				bytecode.add(getInstruction(getOpcode("create_var"), VARIABLE, ZERO, lineNum, 0));
+				return;
 		}
 	}
 	
@@ -413,7 +460,7 @@ public class ScriptParser{
 		else if(obj instanceof Boolean)	inst = getInstruction(getOpcode("postfix_val"), VALUE, BOOLEAN, lineNum, (boolean)obj ? 1 : 0);
 		
 		// Variable
-		else if(obj instanceof String)	inst = getInstruction(getOpcode("postfix_val"), VALUE, INT, lineNum, (int)obj);
+		else if(obj instanceof String)	inst = getInstruction(getOpcode("postfix_val"), VARIABLE, INT, lineNum, variables.indexOf(obj));
 		
 		return inst;
 	}
@@ -439,7 +486,7 @@ public class ScriptParser{
 	// Create syntax error and halt compilation
 	private void compilationError(String type, int lineNum){
 		try{
-			System.err.println("\nDScript compilation error:\n" + type + " in " + script.getFileName() + " on line " + lineNum +
+			System.err.println("\nDScript compilation error (parser):\n" + type + " in " + script.getFileName() + " on line " + lineNum +
 				":\n>> " + Files.readAllLines(Paths.get(script.getPath())).get(lineNum - 1));
 		}
 		catch(IOException e){

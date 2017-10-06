@@ -64,6 +64,7 @@ public class ScriptLexer{
 	 * 	
 	 * 	k - keyword
 	 * 	o - operator
+	 *  a - assignment operator
 	 * 	s - separator
 	 * 	
 	 * 	f - function/task
@@ -162,23 +163,22 @@ public class ScriptLexer{
 			else if(token.matches(rOperators) || token.matches(rAssignments)){
 				
 				// Check for assignment operators
-				if(token.matches(rOperators)){
-					if(i < line.length() - 1){
-						token += line.charAt(++i);
-						
-						// Comments defined here singe / is an operator
-						// Skip single line comments
-						if(token.matches("//"))
-							return;
-						
-						if(!token.matches(rOperators) && !token.matches(rAssignments)){
-							token = token.substring(0, token.length() - 1);
-							i--;
-						}
+				if(i < line.length() - 1){
+					// Try adding extra character
+					token += line.charAt(++i);
+					
+					// Comments defined here because single / is an operator
+					if(token.matches("//"))
+						return;
+					
+					// If match fails with extra character, revert
+					if(!token.matches(rOperators) && !token.matches(rAssignments)){
+						token = token.substring(0, token.length() - 1);
+						i--;
 					}
 				}
 				
-				tokens.add(lineNum + "o:" + token);
+				tokens.add(lineNum + (token.matches(rOperators) ? 'o' : 'a') + ":" + token);
 				token = "";
 				
 				skipWhitespace = true;
@@ -308,7 +308,11 @@ public class ScriptLexer{
 		boolean bracketsChanged;
 		
 		// Last token
-		String last = "";
+		String lToken = null;
+		
+		// Require certain tokens
+		String[] lastExpected = null;
+		String[] nextExpected = null;
 		
 		for(int i = 0; i < tokens.size(); i++){
 			
@@ -320,142 +324,151 @@ public class ScriptLexer{
 			// Get data only
 			token = getData(token);
 			
-			if(i != 0){
-				last = tokens.get(i - 1);
-				
-				char lType = getType(last);
-				String lToken = getData(last);				
-				
-				// Syntax errors if certain tokens were expected
-				
-				// All keywords should be preceded by ; { or }
-				if(type == 'k' && !token.equals("global")){
-					if(token.equals("if")){
-						if(!lToken.equals("else")){
-							compilationError("Expected \"else\"", token, lineNum);
-							return;
-						}
-						continue;
-					}
-					if(token.equals("const")){
-						if(!lToken.equals("set")){
-							compilationError("Expected \"set\"", token, lineNum);
-							return;
-						}
-						continue;
-					}
-					if(token.equals("in")){
-						if(lType != 'v'){
-							compilationError("Expected variable", token, lineNum);
-							return;
-						}
-						continue;
-					}
-					if(!lToken.equals(";") && !lToken.equals("{") && !lToken.equals("}")){
-						compilationError("Expected ; { or } on previous line", token, lineNum);
-						return;
-					}
-				}
-				
-				// Variables/functions/literals should not come directly after one another
-				else if((type == 'v' || type == 'f' || type == 'i' || type == 'l' || type == 'b' || type == 't') &&
-					(lType == 'v' || lType == 'f' || lType == 'i' || lType == 'l' || lType == 'b' || lType == 't')){
-					compilationError("Expected operation", token, lineNum);
-					return;
-				}
-				
-				// Operators require a value before them
-				else if(type == 'o' && !token.equals("++") && !token.equals("--") && !token.equals("!") && lType != 'v' &&
-					lType != 'f' && lType != 'i' && lType != 'l' && lType != 'b' && lType != 't' && !lToken.equals(")")){
-						compilationError("Expected value", token, lineNum);
-						return;
-				}
-				else if(type == 'o' && (token.equals("++") || token.equals("--")) && lType != 'v'){
-					compilationError("Expected variable", token, lineNum);
-					return;
-				}
-				
-				// Operators require a value after them
-				if(lType == 'o' && !lToken.equals("++") && !lToken.equals("--") && type != 'v' && type != 'f' &&
-					type != 'i' && type != 'l' && type != 'b' && type != 't' && !token.equals("(") && !token.equals("!") &&
-					!token.equals("global") && !(lToken.contains("=") && !lToken.equals("==") && token.equals("{"))){// Exception for array initializers
-						compilationError("Expected value", token, lineNum);
-						return;
-				}
-				
-				// Keywords
-				if(lType == 'k'){
-					switch(lToken){
-						case "set":
-							if(type != 'v' && !token.equals("const")){
-								compilationError("Expected identifier or const", token, lineNum);
-								return;
-							}
-							continue;
-						
-						case "const": case "global":
-							if(type != 'v'){
-								compilationError("Expected identifier", token, lineNum);
-								return;
-							}
-							continue;
-						
-						case "else":
-							if(!token.equals("if") && !token.equals("{")){
-								compilationError("Expected \"if\" or {", token, lineNum);
-								return;
-							}
-							continue;
-						
-						case "break":
-							if(!token.equals(";")){
-								compilationError("Expected ;", token, lineNum);
-								return;
-							}
-							continue;
-						
-						case "if": case "while": case "for":
-							if(!token.equals("(")){
-								compilationError("Expected (", token, lineNum);
-								return;
-							}
-							continue;
-						
-						case "in":
-							if(type != 'v' && type != 'f' && type != 'i' && type != 'l'){
-								compilationError("Expected numerical value", token, lineNum);
-								return;
-							}
-							continue;
-						
-						case "function": case "task":
-							if(type != 'f'){
-								compilationError("Expected " + last + " declaration", token, lineNum);
-								return;
-							}
-							continue;
-						
-						case "return":
-							if(!token.equals(";") && type != 'v' && type != 'f'){
-								if(type != 'v' && type != 'f'){
-									compilationError("Expected value", token, lineNum);
-									return;
-								}
-								
-								compilationError("Expected ;", token, lineNum);
-								return;
-							}
-							continue;
-						
-						case "wait":
-							if(type != 'i' && type != 'l' && type != 'v' && type != 'f'){
-								compilationError("Expected value", token, lineNum);
-								return;
-							}
-							continue;
+			// Matched string in nextExpected
+			boolean matched = false;
+			
+			if(nextExpected != null){
+				for(String s:nextExpected){
+					if(token.equals(s) || (s.length() == 1 && type == s.charAt(0))){
+						matched = true;
+						break;
 					}
 				}
 			}
+			else matched = true;
+			
+			if(!matched){
+				String s = nextExpected[0];
+				
+				if(s.equals("k"))		s = "keyword";
+				else if(s.equals("o"))	s = "operator";
+				else if(s.equals("s"))	s = "separator";
+				else if(s.equals("f"))	s = "function/task";
+				else if(s.equals("v"))	s = "variable";
+				else if(s.equals("i"))	s = "int";
+				else if(s.equals("l"))	s = "float";
+				else if(s.equals("b"))	s = "boolean";
+				else if(s.equals("t"))	s = "string";
+				
+				compilationError("Expected " + s + " after", token, lineNum);
+			}
+			
+			nextExpected = null;
+			
+			// Set expected values
+			switch(type){
+				// Keyword
+				case 'k':
+					lastExpected = new String[]{";", "{", "}", ""};
+					
+					switch(token){
+						case "set":
+							nextExpected = new String[]{"v", "const"};
+							break;
+						case "const":
+							lastExpected = new String[]{"set"};
+							nextExpected = new String[]{"v"};
+							break;
+						case "global":
+							lastExpected = new String[]{";", "{", "}", "(", ",", "o"};
+							nextExpected = new String[]{"v"};
+							break;
+						case "if":
+							lastExpected = new String[]{";", "{", "}", "else"};
+							nextExpected = new String[]{"("};
+							break;
+						case "else":
+							nextExpected = new String[]{"{", "if"};
+							break;
+						case "break":
+							nextExpected = new String[]{";"};
+							break;
+						case "while": case "for":
+							nextExpected = new String[]{"("};
+							break;
+						case "in":
+							lastExpected = new String[]{"v"};
+							nextExpected = new String[]{"i", "l", "v", "f"};
+							break;
+						case "function": case "task":
+							nextExpected = new String[]{"f"};
+							break;
+						case "return":
+							nextExpected = new String[]{"v", ";", "f", "i", "l", "b", "t"};
+							break;
+						case "wait":
+							nextExpected = new String[]{"i", "l", "v", "f", ";"};
+							break;
+					}
+					break;
+				
+				// Operator
+				case 'o':
+					break;
+				
+				// Assignment operator
+				case 'a':
+					break;
+				
+				// Separator
+				case 's':
+					break;
+				
+				// Function/task
+				case 'f':
+					break;
+				
+				// Variable
+				case 'v':
+					break;
+				
+				// Value literals
+				case 'i': case 'l': case 'b':
+					break;
+				
+				// String
+				case 't':
+					break;
+			}
+			
+			
+			
+			
+			// Matched string in lastExpected
+			if(i != 0){
+				matched = false;
+				
+				if(lastExpected != null){
+					for(String s:lastExpected){
+						if(getData(lToken).equals(s) || (s.length() == 1 && type == s.charAt(0))){
+							matched = true;
+							break;
+						}
+					}
+				}
+				else matched = true;
+				
+				if(!matched){
+					String s = lastExpected[0];
+					
+					if(s.equals("k"))		s = "keyword";
+					else if(s.equals("o"))	s = "operator";
+					else if(s.equals("s"))	s = "separator";
+					else if(s.equals("f"))	s = "function/task";
+					else if(s.equals("v"))	s = "variable";
+					else if(s.equals("i"))	s = "int";
+					else if(s.equals("l"))	s = "float";
+					else if(s.equals("b"))	s = "boolean";
+					else if(s.equals("t"))	s = "string";
+					
+					compilationError("Expected " + s + " before", token, lineNum);
+				}
+				
+				lastExpected = null;
+			}
+			
+			lToken = tokens.get(i);
+			
 			
 			// Check brackets
 			bracketsChanged = true;
@@ -482,7 +495,7 @@ public class ScriptLexer{
 	
 	// Create syntax error and halt compilation
 	private void compilationError(String type, String line, int lineNum){
-		System.err.println("\nDScript compilation error:\n" + type + " in " + script.getFileName() + " on line " + lineNum + ":\n>> " + line);
+		System.err.println("\nDScript compilation error (lexer):\n" + type + " in " + script.getFileName() + " on line " + lineNum + ":\n>> " + line);
 		haltCompiler = true;
 	}
 	
@@ -496,6 +509,7 @@ public class ScriptLexer{
 			
 			switch(getType(t)){
 				case 'o':	type = "operator";		break;
+				case 'a':	type = "assignment";		break;
 				case 's':	type = "separator";		break;
 				case 'f':	type = "function/task";	break;
 				case 'v':	type = "variable";		break;
