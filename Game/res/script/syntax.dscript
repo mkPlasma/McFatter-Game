@@ -8,7 +8,7 @@ x /= 4;
 
 set y = "test";
 set z = false;
-set e = ((2 + 3) - 1) > (6*12/3)) && !false;
+set e = ((2 + 3) - 1) > (6*12/3) && !false;
 
 if(e){
 	print("e");

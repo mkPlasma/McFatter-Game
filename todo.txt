@@ -4,19 +4,16 @@
 		
 		======================================================
 	
-	1.	Implement Lua scripting, then capability to program and run Missions
-		in external Lua files.
+	1.	Finish DScript
 		
-	2.	Make instructions be able to respond to cetain events, like a bullet
-		hitting the screen edge.
-		Could be implemented in Lua scripting?
+	2.	Fix Windows graphical glitching
 		
-	3.	Need a proper IO class to load (and eventually write to) external files.
+	3.	XML definitions for bullets, effects, missions, etc.
 		
 	4.	Sound/Music players
 		
-	5.	PlayerFrame or similar to differentiate player character/shot types,
-		and upgrade system
+	5.	PlayerFrame or similar to differentiate player
+		character/shot types (DScript?), and upgrade system
 		
 	6.	Make certain things non-static (SpriteCache, ScreenManager)
 		

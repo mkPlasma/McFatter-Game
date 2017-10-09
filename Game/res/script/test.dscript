@@ -1,1 +1,5 @@
-set x = 5;
+set x;
+
+for(i in 0, 2, 10){
+	x += i;
+}

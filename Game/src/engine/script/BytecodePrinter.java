@@ -19,7 +19,7 @@ public class BytecodePrinter{
 	
 	public static void printBytecode(ArrayList<Long> bytecode, String fileName){
 		
-		System.out.println("\nPrinting bytecode of " + fileName + ":\n");
+		System.out.println("\nPrinting bytecode of " + fileName + "(" + (bytecode.size()*8) + " bytes):\n");
 		
 		for(int i = 0; i < bytecode.size(); i++){
 			
@@ -40,43 +40,37 @@ public class BytecodePrinter{
 		int data = getData(inst);
 		
 		String info = "";
+		//case "load": case "store": case "create_var": case "delete_var": case "postfix_val": case "increment": case "decrement":
 		
-		switch(opcode){
+		// Variable number
+		if(var || opcode.equals("store") || opcode.equals("create_var") || opcode.equals("delete_var")
+			|| opcode.equals("increment") || opcode.equals("decrement")){
 			
-			// Add value/variable index
-			case "load": case "store": case "create_var": case "postfix_val": case "add": case "subtract": case "multiply": case "divide":
-			case "modulo": case "not": case "or": case "and": case "less": case "greater": case "equals": case "less_eq": case "greater_eq":
-				
-				if(isOperation(opcode) && type == POSTFIX){
-					info += "postfix";
+			if(data == 0)
+				info += "register";
+			else{
+				info += "variable #" + data;
+				if(type == 4)
+					info += " (object)";
+			}
+		}
+		
+		// While loop
+		else if(opcode.equals("while") || opcode.equals("end_while"))
+			info += "loop #" + data;
+		
+		// Literal value
+		else if(opcode.equals("load") || opcode.equals("exp_val")){
+			switch(type){
+				case 0: // int
+					info += data;
 					break;
-				}
-				
-				if(var){
-					if(data == 0)
-						info += "register";
-					else{
-						info += "variable #" + data;
-						if(type == 4)
-							info += " (object)";
-					}
+				case 1: // float
+					info += Float.intBitsToFloat(data);
 					break;
-				}
-				else{
-					switch(type){
-						case 0: // int
-							info += data;
-							break;
-						case 1: // float
-							info += Float.intBitsToFloat(data);
-							break;
-						case 2: // boolean
-							info += data == 1 ? "true" : "false";
-							break;
-					}
-				}
-				
-				break;
+				case 2: // boolean
+					info += data == 1 ? "true" : "false";
+			}
 		}
 		
 		return info;

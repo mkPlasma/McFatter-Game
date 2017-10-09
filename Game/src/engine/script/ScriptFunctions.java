@@ -7,7 +7,7 @@ package engine.script;
  * 		Notes:		WIP
  * 		
  * 		Last modified by:	Daniel
- * 		Date:				10/2
+ * 		Date:				10/9
  * 		Changes:			
  */
 
@@ -22,10 +22,10 @@ public class ScriptFunctions{
 		// Memory
 		"load",				// Load a value into register
 		"store",			// Store register into variable
-		"create_var",		// Creates a new variable and sets its value
+		"create_var",		// Creates a new variable
 		"delete_var",		// Deletes variable
-		"postfix_val",		// Declare postfix value
-		"postfix_end",		// End a postfix expression and save result in register
+		"exp_val",			// Declare expression value
+		"exp_end",			// End expression and save result in register
 		
 		// Arithmetic
 		"add",				// Adds value to register
@@ -48,11 +48,21 @@ public class ScriptFunctions{
 		"less_eq",			// 
 		"greater_eq",		// 
 		
+		// Control
+		"end",				// Close current block
+		"if",				// Branches into block if register is true
+		"else",				// Branches into block if previous if did not run
+		"else_if",			// Else if based on register
+		"else_ahead",		// Store doElse value until else_if is reached
+		"end_else_if",		// Same as end, also skips following else_if/else blocks
+		"while",			// Return point for end_while, branches with if
+		"end_while",		// Loops back to while
+		
 		// Functions
-		"param",			// Set function parameter
+		"set_param",		// Set function parameter
+		"get_param",		// Get function parameter
 		"call_func",		// Call function with set parameters
 		"call_bif",			// Call built-in function
-		
 	};
 	
 	public static final String[] reservedWords = {
@@ -89,7 +99,7 @@ public class ScriptFunctions{
 		"less", "greater", "equals", "less_eq", "greater_eq",
 	};
 	
-	public static final byte INT = 0, FLOAT = 1, BOOLEAN = 2, OBECT = 3, POSTFIX = 3,
+	public static final byte INT = 0, FLOAT = 1, BOOLEAN = 2, OBECT = 3,
 							 VALUE = 0, VARIABLE = 1,
 							 REG1 = 0, REG2 = 1,
 							 ZERO = 0;
@@ -133,11 +143,11 @@ public class ScriptFunctions{
 	}
 	
 	// Creates an instruction
-	public static long getInstruction(byte opcode, byte variable, byte type, int lineNum, int data){
+	public static long getInstruction(String opcode, byte variable, byte type, int lineNum, int data){
 		long inst = 0;
 		
 		// Set operand
-		inst |= toLong(opcode);
+		inst |= toLong(getOpcode(opcode));
 
 		// Shift, add value/variable switch
 		inst <<= 1;
@@ -158,9 +168,21 @@ public class ScriptFunctions{
 		return inst;
 	}
 	
-	// Shorter form
-	public static long getInstruction(byte opcode, int lineNum, int data){
+	// Shorter forms
+	public static long getInstruction(String opcode, byte variable, int lineNum, int data){
+		return getInstruction(opcode, variable, ZERO, lineNum, data);
+	}
+	
+	public static long getInstruction(String opcode, int lineNum, int data){
 		return getInstruction(opcode, ZERO, ZERO, lineNum, data);
+	}
+
+	public static long getInstruction(String opcode, byte type, int lineNum){
+		return getInstruction(opcode, ZERO, type, lineNum, 0);
+	}
+	
+	public static long getInstruction(String opcode, int lineNum){
+		return getInstruction(opcode, ZERO, ZERO, lineNum, 0);
 	}
 	
 	// Return instruction data
@@ -194,14 +216,14 @@ public class ScriptFunctions{
 	
 	// Modify instruction data
 	
-	public static long setOpcode(long inst, byte opcode){
+	public static long setOpcode(long inst, String opcode){
 		
 		// Clear first byte
 		inst <<= 8;
 		inst >>>= 8;
 		
 		// Set first byte
-		inst |= ((long)opcode) << 56;
+		inst |= ((long)getOpcode(opcode)) << 56;
 		
 		return inst;
 	}

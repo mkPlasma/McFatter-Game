@@ -13,11 +13,11 @@ import static engine.script.ScriptFunctions.*;
  * 		ScriptLexer.java
  * 		
  * 		Purpose:	Parses DScript script into lexical tokens.
- * 		Notes:		WIP
+ * 		Notes:		Sets up script for parsing and checks most syntax errors.
  * 		
  * 		Last modified by:	Daniel
- * 		Date:				10/4
- * 		Changes:			
+ * 		Date:				10/6
+ * 		Changes:			Finished
  */
 
 public class ScriptLexer{
@@ -75,6 +75,7 @@ public class ScriptLexer{
 	 * 	b - boolean literal
 	 * 	t - string literal
 	 */
+	
 	
 	public void analyze(DScript script){
 		
@@ -178,7 +179,7 @@ public class ScriptLexer{
 					}
 				}
 				
-				tokens.add(lineNum + (token.matches(rOperators) ? 'o' : 'a') + ":" + token);
+				tokens.add(lineNum + (token.matches(rOperators) ? "o" : "a") + ":" + token);
 				token = "";
 				
 				skipWhitespace = true;
@@ -283,7 +284,7 @@ public class ScriptLexer{
 				
 				// Token should be empty after completing line
 				if(!token.isEmpty())
-					compilationError("Invalid syntax", line, lineNum);
+					compilationError("Invalid syntax (missing semicolon?)", line, lineNum);
 				
 				return;
 			}
@@ -314,6 +315,9 @@ public class ScriptLexer{
 		String[] lastExpected = null;
 		String[] nextExpected = null;
 		
+		// Accept at beginning of file
+		boolean lastExpectedStrict = true;
+		
 		for(int i = 0; i < tokens.size(); i++){
 			
 			// Get token
@@ -339,18 +343,13 @@ public class ScriptLexer{
 			
 			if(!matched){
 				String s = nextExpected[0];
+				String s1 = getTypeName(s.charAt(0));
 				
-				if(s.equals("k"))		s = "keyword";
-				else if(s.equals("o"))	s = "operator";
-				else if(s.equals("s"))	s = "separator";
-				else if(s.equals("f"))	s = "function/task";
-				else if(s.equals("v"))	s = "variable";
-				else if(s.equals("i"))	s = "int";
-				else if(s.equals("l"))	s = "float";
-				else if(s.equals("b"))	s = "boolean";
-				else if(s.equals("t"))	s = "string";
+				if(s1 != null)
+					s = s1;
 				
-				compilationError("Expected " + s + " after", token, lineNum);
+				compilationError("Expected " + s + " after", getData(lToken), lineNum);
+				return;
 			}
 			
 			nextExpected = null;
@@ -359,7 +358,8 @@ public class ScriptLexer{
 			switch(type){
 				// Keyword
 				case 'k':
-					lastExpected = new String[]{";", "{", "}", ""};
+					lastExpected = new String[]{";", "{", "}"};
+					lastExpectedStrict = false;
 					
 					switch(token){
 						case "set":
@@ -368,17 +368,21 @@ public class ScriptLexer{
 						case "const":
 							lastExpected = new String[]{"set"};
 							nextExpected = new String[]{"v"};
+							lastExpectedStrict = true;
 							break;
 						case "global":
-							lastExpected = new String[]{";", "{", "}", "(", ",", "o"};
+							lastExpected = new String[]{";", "{", "}", "(", "[", ",", "o", "a"};
 							nextExpected = new String[]{"v"};
+							lastExpectedStrict = true;
 							break;
 						case "if":
 							lastExpected = new String[]{";", "{", "}", "else"};
 							nextExpected = new String[]{"("};
 							break;
 						case "else":
+							lastExpected = new String[]{"}"};
 							nextExpected = new String[]{"{", "if"};
+							lastExpectedStrict = true;
 							break;
 						case "break":
 							nextExpected = new String[]{";"};
@@ -389,12 +393,13 @@ public class ScriptLexer{
 						case "in":
 							lastExpected = new String[]{"v"};
 							nextExpected = new String[]{"i", "l", "v", "f"};
+							lastExpectedStrict = true;
 							break;
 						case "function": case "task":
 							nextExpected = new String[]{"f"};
 							break;
 						case "return":
-							nextExpected = new String[]{"v", ";", "f", "i", "l", "b", "t"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", ";"};
 							break;
 						case "wait":
 							nextExpected = new String[]{"i", "l", "v", "f", ";"};
@@ -404,30 +409,103 @@ public class ScriptLexer{
 				
 				// Operator
 				case 'o':
+					lastExpected = new String[]{"v", "f", "i", "l", "b", ")", "]"};
+					nextExpected = new String[]{"v", "f", "i", "l", "b", "(", "global"};
+					
+					if(token.equals("!")){
+						lastExpected = new String[]{"||", "&&", "==", "(", "{", "=", ","};
+						nextExpected = new String[]{"v", "f", "b", "(", "global"};
+					}
+					else if(token.equals("||") || token.equals("&&")){
+						lastExpected = new String[]{"v", "f", "i", "l", "b", ")", "]"};
+						nextExpected = new String[]{"v", "f", "i", "l", "b", "(", "!", "global"};
+					}
+					else if(token.equals("==")){
+						lastExpected = new String[]{"v", "f", "i", "l", "b", "t", ")", "]"};
+						nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "!", "global"};
+					}
+					else if(token.equals("+")){
+						lastExpected = new String[]{"v", "f", "i", "l", "b", "t", ")", "]"};
+						nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "global"};
+					}
+					
 					break;
 				
 				// Assignment operator
 				case 'a':
+					lastExpected = new String[]{"v", "]"};
+					nextExpected = new String[]{"v", "f", "i", "l", "b", ")", "global"};
+					
+					if(token.equals("="))
+						nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "{", "(", "!", "global"};
+					
+					else if(token.equals("+="))
+						nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "global"};
+					
+					else if(token.equals("++") || token.equals("--"))
+						nextExpected = new String[]{";"};
+					
 					break;
 				
 				// Separator
 				case 's':
+					switch(token){
+						case "(":
+							lastExpected = new String[]{"o", "a", "f", "(", "if", "while", "for"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", ")", "!", "global"};
+							break;
+						case ")":
+							lastExpected = new String[]{"v", "i", "l", "b", "t", "(", ")", "]"};
+							nextExpected = new String[]{"o", "{", ";", ",", ")"};
+							break;
+						case "{":
+							lastExpected = new String[]{")", "=", "else", "return", "in"};
+							break;
+						case "[":
+							lastExpected = new String[]{"v"};
+							nextExpected = new String[]{"v", "f", "i", "global"};
+							break;
+						case "]":
+							lastExpected = new String[]{"v", "i", ")"};
+							nextExpected = new String[]{"a", "o", ")", "]", ";"};
+							break;
+						case ",":
+							lastExpected = new String[]{"v", "i", "l", "b", "t", ")", "]"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "!"};
+							break;
+						case ".":
+							lastExpected = new String[]{"v"};
+							nextExpected = new String[]{"f"};
+							break;
+						case ";":
+							lastExpected = new String[]{"v", "i", "l", "b", "t", "}", ")", "]", "++", "--", "break", "return"};
+							break;
+					}
 					break;
 				
 				// Function/task
 				case 'f':
+					lastExpected = new String[]{"function", "task", "o", "a", ";", ",", "{", "}", "(", "[", ".", "in", "return", "wait"};
+					nextExpected = new String[]{"("};
+					lastExpectedStrict = false;
 					break;
 				
 				// Variable
 				case 'v':
+					lastExpected = new String[]{"o", "a", ";", ",", "{", "}", "(", "[", "set", "const", "global", "in", "return", "wait"};
+					nextExpected = new String[]{"a", "o", ";", ",", "}", ")", "]", ".", "in"};
 					break;
 				
 				// Value literals
 				case 'i': case 'l': case 'b':
+					lastExpected = new String[]{"o", "a", ",", "{", "(", "[", "in", "return", "wait"};
+					nextExpected = new String[]{"o", ";", ",", "}", ")", "]"};
 					break;
 				
 				// String
 				case 't':
+					lastExpected = new String[]{"=", "+", "+=", "{", "(", "return"};
+					nextExpected = new String[]{"+", ",", ";", "}", ")"};
 					break;
 			}
 			
@@ -440,7 +518,7 @@ public class ScriptLexer{
 				
 				if(lastExpected != null){
 					for(String s:lastExpected){
-						if(getData(lToken).equals(s) || (s.length() == 1 && type == s.charAt(0))){
+						if(getData(lToken).equals(s) || (s.length() == 1 && getType(lToken) == s.charAt(0))){
 							matched = true;
 							break;
 						}
@@ -450,21 +528,27 @@ public class ScriptLexer{
 				
 				if(!matched){
 					String s = lastExpected[0];
+					String s1 = getTypeName(s.charAt(0));
 					
-					if(s.equals("k"))		s = "keyword";
-					else if(s.equals("o"))	s = "operator";
-					else if(s.equals("s"))	s = "separator";
-					else if(s.equals("f"))	s = "function/task";
-					else if(s.equals("v"))	s = "variable";
-					else if(s.equals("i"))	s = "int";
-					else if(s.equals("l"))	s = "float";
-					else if(s.equals("b"))	s = "boolean";
-					else if(s.equals("t"))	s = "string";
+					if(s1 != null)
+						s = s1;
 					
 					compilationError("Expected " + s + " before", token, lineNum);
+					return;
 				}
 				
 				lastExpected = null;
+				lastExpectedStrict = true;
+			}
+			else if(lastExpectedStrict){
+				String s = lastExpected[0];
+				String s1 = getTypeName(s.charAt(0));
+				
+				if(s1 != null)
+					s = s1;
+				
+				compilationError("Expected " + s + " before", token, lineNum);
+				return;
 			}
 			
 			lToken = tokens.get(i);
@@ -482,8 +566,7 @@ public class ScriptLexer{
 			
 			if(bracketsChanged){
 				for(int j:brackets){
-					// If closed before opened or
-					// Unclosed at end
+					// If closed before opened or unclosed at end
 					if(j < 0)
 						compilationError("Extra close bracket", token, lineNum);
 					else if(i == tokens.size() - 1 && j > 0)
@@ -491,6 +574,23 @@ public class ScriptLexer{
 				}
 			}
 		}
+	}
+	
+	// Return type name
+	private String getTypeName(char type){
+		switch(type){
+			case 'o':	return "operator";
+			case 'a':	return "assignment";
+			case 's':	return "separator";
+			case 'f':	return "function/task";
+			case 'v':	return "variable";
+			case 'i':	return "int";
+			case 'l':	return "float";
+			case 'b':	return "boolean";
+			case 't':	return "string";
+		}
+		
+		return null;
 	}
 	
 	// Create syntax error and halt compilation
@@ -505,19 +605,7 @@ public class ScriptLexer{
 		System.out.println("\nPrinting lexical tokens of " + script.getFileName() + ":\n");
 		
 		for(String t:tokens){
-			String type = "keyword";
-			
-			switch(getType(t)){
-				case 'o':	type = "operator";		break;
-				case 'a':	type = "assignment";		break;
-				case 's':	type = "separator";		break;
-				case 'f':	type = "function/task";	break;
-				case 'v':	type = "variable";		break;
-				case 'i':	type = "int";			break;
-				case 'l':	type = "float";			break;
-				case 'b':	type = "boolean";		break;
-				case 't':	type = "string";		break;
-			}
+			String type = getTypeName(getType(t));
 			
 			String lineNum = Integer.toString(getLineNum(t)) + ":\t";
 			

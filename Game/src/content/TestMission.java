@@ -12,6 +12,7 @@ import engine.screens.MainScreen;
 import engine.screens.Mission;
 import engine.script.DScript;
 import engine.script.ScriptCompiler;
+import engine.script.ScriptRunner;
 
 /*
  * 		TestMission.java
@@ -45,8 +46,8 @@ public class TestMission extends Mission{
 		DScript script = new DScript("Game/res/script/test.dscript");
 		
 		new ScriptCompiler().compile(script);
+		new ScriptRunner().run(script);
 		
-		//new ScriptRunner().run(script);
 		System.exit(0);
 	}
 	

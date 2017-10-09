@@ -7,22 +7,38 @@ import java.util.ArrayList;
 
 import static engine.script.ScriptFunctions.*;
 
+/*
+ * 		ScriptRunner.java
+ * 		
+ * 		Purpose:	Runs DScript bytecode.
+ * 		Notes:		WIP
+ * 		
+ * 		Last modified by:	Daniel
+ * 		Date:				current
+ * 		Changes:			
+ */
+
 public class ScriptRunner{
 	
 	// Stops script
 	private boolean haltRun = false;
 	
+	// Used for undefined/deleted variables
+	// Switch to (byte)0 to save memory
+	private final Object NULL = null;
+	
 	// Variables
-	private ArrayList<Object> variables;
+	private Object[] variables;
 	
 	// Used to evaluate postfix expressions
-	private ArrayList<Object> postfix;
+	private ArrayList<Object> expression;
 	
 	private long[] bytecode;
 	
 	private DScript script;
 	
 	public void run(DScript script){
+		this.script = script;
 
 		// Load bytecode
 		bytecode = script.getBytecode();
@@ -33,157 +49,290 @@ public class ScriptRunner{
 		}
 		
 		haltRun = false;
-		this.script = script;
 		
-		// Initialize/reset variables/postfix
-		variables = new ArrayList<Object>();
-		postfix = new ArrayList<Object>();
+		// Initialize/reset exoression
+		expression = new ArrayList<Object>();
 		
-		// Add register
-		variables.add(0);
 		
+		// Account for register
+		int varCount = 1;
+		
+		// Add as many variables as necessary
+		for(long inst:bytecode)
+			if(opcodes[getOpcode(inst)].equals("create_var"))
+				varCount++;
+		
+		variables = new Object[varCount];
+		
+		for(int i = 0; i < variables.length; i++)
+			variables[i] = NULL;
+		
+		// Go into else block
+		boolean doElse = false;
+		boolean resetDoElse = false;
+		boolean elseAhead = false;
 		
 		// Loop through
-		for(long inst:bytecode){
+		for(int i = 0; i < bytecode.length; i++){
 			
 			// Instruction properties
-			
+			long inst = bytecode[i];
 			String opcode = opcodes[getOpcode(inst)];
 			boolean isVar = isVariable(inst);
-			byte type = getType(inst);
 			int lineNum = getLineNum(inst);
 			int data = getData(inst);
 			
-			boolean doSwitch = true;
+			// Set doElse to false after one loop
+			// Preserve if elseAhead
+			if(!elseAhead){
+				if(resetDoElse)
+					doElse = false;
+				resetDoElse = doElse;
+			}
+			else
+				resetDoElse = false;
 			
 			// Check operations first
 			if(isOperation(opcode)){
 				opcode = getOperation(opcode);
 				
-				if(type == POSTFIX) postfixOperation(opcode, lineNum);
-				else operation(opcode, isVar, type, data, lineNum);
+				//if(type == POSTFIX)
+				operate(opcode, lineNum);
+				//else operation(opcode, isVar, type, data, lineNum);
 				
-				doSwitch = false;
+				if(haltRun)
+					return;
+				
+				continue;
 			}
 			
 			// Other checks
-			if(doSwitch){
-				switch(opcode){
+			switch(opcode){
+				
+				
+				
+				case "none":
+					runtimeWarning("Opcode \"none\" found", lineNum);
+					continue;
+				
+				
+				
+				case "load":
+					if(isVar)
+						variables[0] = variables[data];
 					
-					case "none":
-						runtimeWarning("Opcode \"none\" found", lineNum);
-						break;
-						
-					case "create_var":
-						
-						// Variables
-						if(isVar)
-							variables.add(variables.get(data));
-						
-						// Single values
-						else{
-							switch(getType(inst)){
-								case INT:
-									variables.add(data);
-									break;
-								case FLOAT:
-									variables.add(Float.intBitsToFloat(data));
-									break;
-								case BOOLEAN:
-									variables.add(data == 1);
-							}
+					else{
+						switch(getType(inst)){
+							case INT:
+								variables[0] = data;
+								continue;
+							case FLOAT:
+								variables[0] = Float.intBitsToFloat(data);
+								continue;
+							case BOOLEAN:
+								variables[0] = data == 1;
+								continue;
 						}
-						break;
-					
-					case "store":
-						variables.set(data, variables.get(0));
-						break;
-					
-					case "postfix_val":
-						
-						// Variables
-						if(isVar)
-							postfix.add(variables.get(data));
-						
-						// Single values
-						else{
-							switch(getType(inst)){
-								case INT:
-									postfix.add(data);
-									break;
-								case FLOAT:
-									postfix.add(Float.intBitsToFloat(data));
-									break;
-								case BOOLEAN:
-									postfix.add(data == 1);
-							}
-						}
-						break;
-					
-					case "postfix_end":
-						if(postfix.size() != 1)
-							runtimeWarning("Postfix stack size " + postfix.size() + " on expression end", lineNum);
-						
-						// Save to register
-						variables.set(0, postfix.get(0));
-						break;
-					
-					case "increment":{// Brackets required as not to leak o and n
-						Object o = variables.get(data);
-						
-						// Check type
-						if(!(o instanceof Integer) && !(o instanceof Float)){
-							runtimeError("Type mismatch", lineNum);
-							return;
-						}
-						
-						// Cast
-						float n = o instanceof Float ? (float) o : (float)((int) o);
-						
-						// Set data
-						if(o instanceof Float)
-							variables.set(data, n + 1);
-						else
-							variables.set(data, (int)n + 1);
-						
-						break;
 					}
-
-					case "decrement":{// Brackets required as not to leak o and n
-						Object o = variables.get(data);
-						
-						// Check type
-						if(!(o instanceof Integer) && !(o instanceof Float)){
-							runtimeError("Type mismatch", lineNum);
-							return;
+					continue;
+				
+				
+				
+				case "store":
+					variables[data] = variables[0];
+					continue;
+				
+				
+				
+				case "create_var":
+					variables[data] = 0;
+					continue;
+				
+				
+				
+				case "delete_var":
+					variables[data] = NULL;
+					continue;
+				
+				
+				
+				case "exp_val":
+					
+					// Variables
+					if(isVar)
+						expression.add(variables[data]);
+					
+					// Single values
+					else{
+						switch(getType(inst)){
+							case INT:
+								expression.add(data);
+								continue;
+							case FLOAT:
+								expression.add(Float.intBitsToFloat(data));
+								continue;
+							case BOOLEAN:
+								expression.add(data == 1);
+								continue;
 						}
-						
-						// Cast
-						float n = o instanceof Float ? (float) o : (float)((int) o);
-						
-						// Set data
-						if(o instanceof Float)
-							variables.set(data, n - 1);
-						else
-							variables.set(data, (int)n - 1);
-						
-						break;
 					}
+					continue;
+				
+				
+				
+				case "exp_end":
+					if(expression.size() != 1){
+						runtimeWarning("Expression stack size " + expression.size() + " on expression end", lineNum);
+						return;
+					}
+					
+					// Save to register
+					variables[0] = expression.get(0);
+					expression.clear();
+					continue;
+				
+				
+				
+				case "increment":{// Brackets required as not to leak o and n
+					Object o = variables[data];
+					
+					// Check type
+					if(!(o instanceof Integer) && !(o instanceof Float)){
+						runtimeError("Type mismatch", lineNum);
+						return;
+					}
+					
+					// Cast
+					float n = o instanceof Float ? (float) o : (float)((int) o);
+					
+					// Set data
+					if(o instanceof Float)
+						variables[data] = n + 1;
+					else
+						variables[data] = (int)n + 1;
+					
+					continue;
+				}
+				
+				
+				
+				case "decrement":{// Brackets required as not to leak o and n
+					Object o = variables[data];
+					
+					// Check type
+					if(!(o instanceof Integer) && !(o instanceof Float)){
+						runtimeError("Type mismatch", lineNum);
+						return;
+					}
+					
+					// Cast
+					float n = o instanceof Float ? (float) o : (float)((int) o);
+					
+					// Set data
+					if(o instanceof Float)
+						variables[data] = n - 1;
+					else
+						variables[data] = (int)n - 1;
+					
+					continue;
+				}
+				
+				
+				
+				case "if": case "else_if":
+					if(!(variables[0] instanceof Boolean)){
+						runtimeError("Type mismatch", lineNum);
+						return;
+					}
+					
+					boolean elseIf = opcode.equals("else_if");
+					
+					// Reset elseAhead
+					if(elseIf)
+						elseAhead = false;
+					
+					// Continue if true, skip to end if false
+					if(!(boolean)variables[0] || (elseIf && !doElse)){
+						i = skipToEnd(i, false);
+						doElse = true;
+					}
+					
+					continue;
+				
+				case "else":
+					if(!doElse)
+						i = skipToEnd(i, false);
+					continue;
+				
+				case "else_ahead":
+					elseAhead = true;
+					continue;
+				
+				case "end_else_if":
+					// Skip past else/else if statements
+					i = skipToEnd(i, true);
+					continue;
+				
+				case "end_while":{
+					
+					int whileNum = data;
+					int whileNumC = 0;
+					String op2 = "";
+					
+					// Loop back to while
+					while(!op2.equals("while") || whileNumC != whileNum){
+						i--;
+						op2 = opcodes[getOpcode(bytecode[i])];
+						whileNumC = getData(bytecode[i]);
+					}
+					
+					continue;
 				}
 			}
-			
-			if(haltRun)
-				return;
 		}
 		
 		System.out.println("\nResults of " + script.getFileName() + ":\n");
 		
-		for(int i = 0; i < variables.size(); i++)
-			System.out.println((i == 0 ? "Register" : "Variable " + i) + ": " + variables.get(i));
+		for(int i = 0; i < variables.length; i++)
+			System.out.println((i == 0 ? "Register" : "Variable " + i) + ": " + variables[i]);
 		
 	}
 	
+	// Skip to end of block, returns new i
+	private int skipToEnd(int i, boolean skipElseIf){
+		int depth = 1;
+		
+		while(depth > 0 && i < bytecode.length - 1){
+			i++;
+			String opcode = opcodes[getOpcode(bytecode[i])];
+			
+			if(opcode.equals("if") || opcode.equals("else") || opcode.equals("else_if") ||
+			   opcode.equals("function"))
+				depth++;
+			else if(opcode.equals("end") || opcode.equals("end_while")){
+				depth--;
+				
+				// Skip other else if/else statements
+				if(skipElseIf && i < bytecode.length - 1){
+					String op2 = opcodes[getOpcode(bytecode[i + 1])];
+					
+					if(op2.equals("else")){
+						i += 2;
+						depth++;
+					}
+					else if(op2.equals("else_ahead")){
+						while(!opcodes[getOpcode(bytecode[++i])].equals("else_if"));
+						depth++;
+					}
+				}
+			}
+		}
+		
+		return i;
+	}
+	
 	// Single operation on register
+	/*
 	private void operation(String op, boolean isVar, byte type, int data, int lineNum){
 		
 		// Operands
@@ -245,23 +394,24 @@ public class ScriptRunner{
 		else
 			variables.set(0, (int)result);
 	}
+	*/
 	
 	// Postfix expression operation
-	private void postfixOperation(String op, int lineNum){
+	private void operate(String op, int lineNum){
 		
-		int pfs = postfix.size();
+		int expSize = expression.size();
 		
 		boolean isSingleOp = op.equals("!");
 		
 		// Get operands
-		Object o1 = postfix.get(pfs - (isSingleOp ? 1 : 2));
-		Object o2 = postfix.get(pfs - 1);
+		Object o1 = expression.get(expSize - (isSingleOp ? 1 : 2));
+		Object o2 = expression.get(expSize - 1);
 		
 		// Remove last two elements
-		postfix.remove(pfs - 1);
+		expression.remove(expSize - 1);
 		
 		if(!isSingleOp)
-			postfix.remove(pfs - 2);
+			expression.remove(expSize - 2);
 		
 		boolean isBoolean = o1 instanceof Boolean || o2 instanceof Boolean;
 		
@@ -301,12 +451,12 @@ public class ScriptRunner{
 			if(!useBool){
 				// Treat as float if data is lost when casting to int
 				if(result != (int)result)
-					postfix.add(result);
+					expression.add(result);
 				else
-					postfix.add((int)result);
+					expression.add((int)result);
 			}
 			else
-				postfix.add(resultBool);
+				expression.add(resultBool);
 			
 			return;
 		}
@@ -331,14 +481,14 @@ public class ScriptRunner{
 			case "==":	result = b1 == b2;	break;
 		}
 		
-		postfix.add(result);
+		expression.add(result);
 	}
 	
 	// Create syntax error and halt compilation
 	private void runtimeError(String type, int lineNum){
 		try{
 			System.err.println("\nDScript runtime error:\n" + type + " in " + script.getFileName() + " on line " + lineNum +
-				":\n>> " + Files.readAllLines(Paths.get(script.getPath())).get(lineNum - 1));
+				":\n>> " + Files.readAllLines(Paths.get(script.getPath())).get(lineNum - 1).trim());
 		}
 		catch(IOException e){
 			e.printStackTrace();
