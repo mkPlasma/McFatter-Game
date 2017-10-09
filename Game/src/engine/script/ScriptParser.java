@@ -32,8 +32,11 @@ public class ScriptParser{
 	
 	// Store expression while processing
 	private ArrayList<Object> expression;
+	
+	// For loop properties
 	private Object[] forExpressions;
 	int numForExpressions;
+	boolean forLess;
 	
 	// Stores variables by name while compiling
 	private ArrayList<String> variables;
@@ -301,6 +304,15 @@ public class ScriptParser{
 									return;
 								}
 								
+								if(numForExpressions == 1){
+									Object o = expression.get(0);
+									
+									// If counter is negative
+									if((o instanceof Integer && ((int)o) < 0) || (o instanceof Float && ((float)o) < 0) ||
+										(o instanceof String) && ((String)o).equals("-"))
+										forLess = true;
+								}
+								
 								// Store expression
 								forExpressions[numForExpressions] = parseExpression(lineNum);
 								numForExpressions++;
@@ -392,11 +404,12 @@ public class ScriptParser{
 									int forVarIndex = variables.indexOf(forVar);
 									
 									// Add variable expression
-									if(numForExpressions == 3){
-										ArrayList<Long> bc = (ArrayList<Long>)forExpressions[numForExpressions];
+									if(numForExpressions == 2){
+										ArrayList<Long> bc = (ArrayList<Long>)forExpressions[1];
 										
 										bc.add(0, getInstruction("exp_val", VARIABLE, lineNum, forVarIndex));
-										bc.add(bc.size() - 2, getInstruction("add", lineNum));
+										bc.add(bc.size() - 1, getInstruction("add", lineNum));
+										bc.add(bc.size(), getInstruction("store", lineNum, forVarIndex));
 										
 										bytecode.addAll(bc);
 									}
@@ -442,6 +455,7 @@ public class ScriptParser{
 									// End if/while condition
 									if((statesPeek("cond_if", 1) || statesPeek("cond_while", 1))){
 										boolean cIf = statesPeek("cond_if", 1);
+										boolean elseIf = statesPeek("else", 2);
 										
 										bytecode.addAll(parseExpression(lineNum));
 										requireAfter = "{";
@@ -450,6 +464,8 @@ public class ScriptParser{
 											states.push("if_body");
 										else
 											states.push("while_body");
+										
+										bytecode.add(getInstruction(elseIf ? "else_if" : "if", lineNum));
 										
 										continue;
 									}
@@ -461,6 +477,10 @@ public class ScriptParser{
 											return;
 										}
 										
+										// Unless specified, loop for i < num
+										if(numForExpressions != 2)
+											forLess = true;
+										
 										// Store expression
 										forExpressions[numForExpressions] = parseExpression(lineNum);
 										
@@ -468,9 +488,6 @@ public class ScriptParser{
 										forVar = createVar;
 										variables.add(createVar);
 										bytecode.add(getInstruction("create_var", lineNum, variables.size() - 1));
-										
-										//for(Object o:forExpressions)
-										//	System.out.println(o);
 										
 										// Assign
 										if(numForExpressions > 0){
@@ -486,7 +503,7 @@ public class ScriptParser{
 										
 										// Add comparison to expression
 										bc.add(0, getInstruction("exp_val", VARIABLE, lineNum, variables.size() - 1));
-										bc.add(bc.size() - 1, getInstruction("less", lineNum));
+										bc.add(bc.size() - 1, getInstruction(forLess ? "less" : "greater", lineNum));
 										
 										// Add comparison
 										bytecode.addAll(bc);
@@ -725,22 +742,16 @@ public class ScriptParser{
 					// Pop "if"
 					states.pop();
 					
-					boolean doElse = statesPeek("else");
-					
 					// Pop "else"
-					if(doElse)
+					if(statesPeek("else"))
 						states.pop();
-					
-					bc.add(getInstruction(doElse ? "else_if" : "if", lineNum));
 					
 					return bc;
 				
 				// While loop condition
 				case "cond_while":
 					// Branch with if, loop back with while
-					bc.add(getInstruction("if", lineNum, loopNum));
 					states.pop();
-					
 					return bc;
 				
 				// For loop argument
@@ -840,14 +851,13 @@ public class ScriptParser{
 		for(Object obj:expression){
 			// Operation
 			if(obj instanceof String && isOperation((String)obj))
-				bytecode.add(getInstruction((String)obj, lineNum));
+				bc.add(getInstruction((String)obj, lineNum));
 			else
-				bytecode.add(getValueInst(obj, lineNum));
+				bc.add(getValueInst(obj, lineNum));
 		}
 		
 		// End expression
-		bytecode.add(getInstruction("exp_end", lineNum));
-		
+		bc.add(getInstruction("exp_end", lineNum));
 		
 		
 		
@@ -859,22 +869,16 @@ public class ScriptParser{
 				// Pop "if"
 				states.pop();
 				
-				boolean doElse = statesPeek("else");
-				
 				// Pop "else"
-				if(doElse)
+				if(statesPeek("else"))
 					states.pop();
-				
-				bc.add(getInstruction(doElse ? "else_if" : "if", lineNum));
 				
 				return bc;
 			
 			// While loop condition
 			case "cond_while":
 				// Branch with if, loop back with while
-				bytecode.add(getInstruction("if", lineNum, loopNum));
 				states.pop();
-				
 				return bc;
 			
 			// For loop argument

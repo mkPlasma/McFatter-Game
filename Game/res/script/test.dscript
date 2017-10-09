@@ -1,5 +1,7 @@
-set x;
+set num = 5;
 
-for(i in 0, 2, 10){
-	x += i;
+set result = 1;
+
+if(num < result){
+	
 }
