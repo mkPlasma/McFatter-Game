@@ -42,6 +42,10 @@ public class ScriptParser{
 	private ArrayList<String> variables;
 	private String createVar, forVar;
 	
+	// Store functions by name
+	private ArrayList<String> functions;
+	private int funcArgs = 0;
+	
 	// Loop index
 	private int loopNum;
 	
@@ -66,6 +70,7 @@ public class ScriptParser{
 		forExpressions = new Object[3];
 		states = new Stack<String>();
 		variables = new ArrayList<String>();
+		functions = new ArrayList<String>();
 		
 		numForExpressions = 0;
 		loopNum = 0;
@@ -75,8 +80,10 @@ public class ScriptParser{
 		
 		haltCompiler = false;
 		
+		// Define functions
+		process(true);
 		// Process into bytecode
-		process();
+		process(false);
 		
 		if(haltCompiler)
 			return;
@@ -99,7 +106,7 @@ public class ScriptParser{
 	@SuppressWarnings("unchecked")
 	
 	// Process tokens into bytecode
-	private void process(){
+	private void process(boolean functionDef){
 		
 		// Keep track of brackets
 		// { ( [
@@ -136,6 +143,11 @@ public class ScriptParser{
 			
 			// Data
 			String token = getData(tCur);
+			
+			
+			// Check only function definitions
+			if(functionDef && !token.equals("function") && !statesPeek("func_args") && !statesPeek("func_body"))
+				continue;
 			
 			if(requireAfter != null && !token.equals(requireAfter)){
 				compilationError("Expected " + requireAfter, lineNum);
@@ -188,7 +200,7 @@ public class ScriptParser{
 							if(statesPeek("else"))
 								bytecode.add(getInstruction("else_ahead", lineNum));
 							
-							states.push("cond_if");
+							states.push("if_cond");
 							continue;
 						
 						case "else":
@@ -204,14 +216,14 @@ public class ScriptParser{
 							loopNum = loopTotal;
 							loopTotal++;
 							
-							states.push("cond_while");
+							states.push("while_cond");
 							bytecode.add(getInstruction("while", lineNum, loopNum));
 							continue;
 						
 						case "for":
 							loopNum = loopTotal;
 							loopTotal++;
-							states.push("for");
+							states.push("for_args");
 							continue;
 						
 						case "in":
@@ -222,6 +234,11 @@ public class ScriptParser{
 							
 							// For argument expression
 							states.push("exp");
+							continue;
+						
+						case "function":
+							states.push("func_def");
+							funcArgs = 0;
 							continue;
 					}
 					
@@ -298,7 +315,7 @@ public class ScriptParser{
 						
 						case ",":
 							// For loop argument
-							if(statesPeek("exp") && statesPeek("for", 1)){
+							if(statesPeek("exp") && statesPeek("for_args", 1)){
 								if(numForExpressions > 2){
 									compilationError("For loop has at most 3 arguments", lineNum);
 									return;
@@ -320,6 +337,14 @@ public class ScriptParser{
 								states.add("exp");
 								
 								continue;
+							}
+							
+							// Function arguments
+							else if(statesPeek("func_args")){
+								// Define parameter
+								variables.add(createVar);
+								bytecode.add(getInstruction("get_param", lineNum, variables.size() - 1));
+								funcArgs++;
 							}
 							
 							compilationErrorIV(token, lineNum);
@@ -345,7 +370,7 @@ public class ScriptParser{
 								}
 								
 								else if(!statesPeek("") && !statesPeek("else") && !statesPeek("if_body") &&
-									!statesPeek("while_body") && !statesPeek("for_body")){
+									!statesPeek("while_body") && !statesPeek("for_body") && !statesPeek("func_body")){
 									compilationErrorIV(token, lineNum);
 									return;
 								}
@@ -439,11 +464,11 @@ public class ScriptParser{
 							else	 brackets[1]--;
 							
 							// if/while condition
-							if(open && (statesPeek("cond_if") || statesPeek("cond_while"))){
+							if(open && (statesPeek("if_cond") || statesPeek("while_cond"))){
 								states.push("exp");
 								continue;
 							}
-							else if(open && statesPeek("for")){
+							else if(open && (statesPeek("for_args") || statesPeek("func_args"))){
 								states.push("var");
 							}
 							
@@ -453,8 +478,8 @@ public class ScriptParser{
 								if(!open && brackets[1] == 0){
 									
 									// End if/while condition
-									if((statesPeek("cond_if", 1) || statesPeek("cond_while", 1))){
-										boolean cIf = statesPeek("cond_if", 1);
+									if((statesPeek("if_cond", 1) || statesPeek("while_cond", 1))){
+										boolean cIf = statesPeek("if_cond", 1);
 										boolean elseIf = statesPeek("else", 2);
 										
 										bytecode.addAll(parseExpression(lineNum));
@@ -471,7 +496,7 @@ public class ScriptParser{
 									}
 									
 									// For loop argument
-									else if(statesPeek("for", 1)){
+									else if(statesPeek("for_args", 1)){
 										if(numForExpressions > 2){
 											compilationError("For loop has at most 3 arguments", lineNum);
 											return;
@@ -523,6 +548,29 @@ public class ScriptParser{
 								continue;
 							}
 							
+							System.out.println(token);
+							
+							// Function arguments
+							if(!open && brackets[1] == 0 && statesPeek("func_args")){
+								
+								// Check if args are empty
+								if(!getData(tokens[i - 1]).equals("(")){
+									// Define parameter
+									variables.add(createVar);
+									bytecode.add(getInstruction("get_param", lineNum, variables.size() - 1));
+								}
+								else
+									funcArgs = 0;
+								
+								// Add number of args
+								functions.set(functions.size() - 1, functions.get(functions.size() - 1) + ":" + funcArgs);
+								
+								requireAfter = "{";
+								
+								states.pop();
+								states.push("func_body");
+							}
+							
 							continue;
 					}
 					continue;
@@ -531,15 +579,17 @@ public class ScriptParser{
 				
 				// Function/task call
 				case 'f':
-					if(inBrackets){
+					if(inBrackets || !statesPeek("func_def")){
 						compilationErrorIV(token, lineNum);
 						return;
 					}
 					
-					if(scope != 0){
-						compilationError("Function must be defined globally", lineNum);
-						return;
-					}
+					// Add function
+					functions.add(scope + ":" + token);
+					bytecode.add(getInstruction("func", lineNum, functions.size() - 1));
+					
+					states.pop();
+					states.push("func_args");
 					
 					break;
 				
@@ -642,8 +692,10 @@ public class ScriptParser{
 							states.pop();
 						}
 						else{
-							if(statesPeek("for"))
+							if(statesPeek("for_args"))
 								requireAfter = "in";
+							else if(statesPeek("func_args"))
+								requireAfter = ",";
 							
 							token = scope + ":" + token;
 						}
@@ -666,7 +718,7 @@ public class ScriptParser{
 						continue;
 					}
 					
-					if(!states.isEmpty() && !statesPeek("if_body") && !statesPeek("while_body") && !statesPeek("for_body")){
+					if(!states.isEmpty() && !statesPeek("if_body") && !statesPeek("while_body") && !statesPeek("for_body") && !statesPeek("func_body")){
 						compilationErrorIV(token, lineNum);
 						return;
 					}
@@ -710,6 +762,9 @@ public class ScriptParser{
 					continue;
 			}
 		}
+		
+		if(functionDef)
+			BytecodePrinter.printBytecode(bytecode, "functions");
 	}
 	
 	// Parse expression, convert to postfix
@@ -728,7 +783,7 @@ public class ScriptParser{
 		// If single value
 		if(expression.size() == 1){
 			
-			if(statesPeek("for"))
+			if(statesPeek("for_args"))
 				bc.add(getValueInst(expression.get(0), lineNum));
 			else
 				bc.add(setOpcode(getValueInst(expression.get(0), lineNum), "load"));
@@ -738,7 +793,7 @@ public class ScriptParser{
 			switch(statesPeek()){
 				
 				// If statement condition
-				case "cond_if":
+				case "if_cond":
 					// Pop "if"
 					states.pop();
 					
@@ -749,13 +804,13 @@ public class ScriptParser{
 					return bc;
 				
 				// While loop condition
-				case "cond_while":
+				case "while_cond":
 					// Branch with if, loop back with while
 					states.pop();
 					return bc;
 				
 				// For loop argument
-				case "for":
+				case "for_args":
 					bc.add(getInstruction("exp_end", lineNum));
 					return bc;
 				
@@ -865,7 +920,7 @@ public class ScriptParser{
 		switch(statesPeek()){
 			
 			// If statement condition
-			case "cond_if":
+			case "if_cond":
 				// Pop "if"
 				states.pop();
 				
@@ -876,13 +931,13 @@ public class ScriptParser{
 				return bc;
 			
 			// While loop condition
-			case "cond_while":
+			case "while_cond":
 				// Branch with if, loop back with while
 				states.pop();
 				return bc;
 			
 			// For loop argument
-			case "for":
+			case "for_args":
 				return bc;
 			
 			// Creating variable
