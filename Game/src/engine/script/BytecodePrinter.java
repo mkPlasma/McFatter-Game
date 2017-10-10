@@ -59,6 +59,10 @@ public class BytecodePrinter{
 		else if(opcode.equals("while") || opcode.equals("end_while"))
 			info += "loop #" + data;
 		
+		// Function
+		else if(opcode.equals("function") || opcode.equals("call_func"))
+			info += "function #" + data;
+		
 		// Literal value
 		else if(opcode.equals("load") || opcode.equals("exp_val")){
 			switch(type){
