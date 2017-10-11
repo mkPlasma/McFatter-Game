@@ -121,6 +121,10 @@ public class ScriptParser{
 		
 		// Define functions
 		process(true);
+		
+		if(haltCompiler)
+			return;
+		
 		// Process into bytecode
 		process(false);
 		
@@ -165,7 +169,7 @@ public class ScriptParser{
 		ArrayList<Integer> scopeParent = new ArrayList<Integer>();
 		
 		// Error if required token is not found
-		String requireAfter = null;
+		String[] requireAfter = null;
 		
 		// Allow else keyword after if/else if statement
 		boolean allowElse = false;
@@ -207,9 +211,18 @@ public class ScriptParser{
 					continue;
 			}
 			
-			if(requireAfter != null && !token.equals(requireAfter)){
-				compilationError("Expected " + requireAfter, lineNum);
-				return;
+			if(requireAfter != null){
+				boolean matched = false;
+				
+				for(String s:requireAfter){
+					if(token.equals(s))
+						matched = true;
+				}
+				
+				if(!matched){
+					compilationError("Expected " + requireAfter[0], lineNum);
+					return;
+				}
 			}
 			
 			requireAfter = null;
@@ -383,6 +396,7 @@ public class ScriptParser{
 						
 						case ",":
 							// For loop argument
+							
 							if(statesPeek("exp")){
 								if(statesPeek("for_args", 1)){
 									if(tmpExp.get(tmpExpInd).size() > 2){
@@ -425,6 +439,8 @@ public class ScriptParser{
 									}
 									
 									states.push("exp");
+									
+									continue;
 								}
 							}
 							
@@ -435,6 +451,10 @@ public class ScriptParser{
 								bytecode.add(getInstruction("create_var", lineNum, variables.size() - 1));
 								bytecode.add(getInstruction("get_param", lineNum));
 								funcArgs++;
+								
+								states.push("var");
+								
+								continue;
 							}
 							
 							compilationErrorIV(token, lineNum);
@@ -487,7 +507,7 @@ public class ScriptParser{
 									int ind = v.indexOf(':') + 1;
 									int sc = Integer.parseInt(v.substring(0, ind - 1).replace("c", ""));
 									
-									if(sc == scope && !forVars.isEmpty() && !v.equals(forVars.get(forLoopNum)))
+									if(sc == scope && (forVars.isEmpty() || (!forVars.isEmpty() && !v.equals(forVars.get(forLoopNum)))))
 										bytecode.add(getInstruction("delete_var", lineNum, j));
 								}
 								
@@ -564,13 +584,19 @@ public class ScriptParser{
 							if(open) brackets[1]++;
 							else	 brackets[1]--;
 							
+							System.out.println(token + " " + statesPeek());
+							
 							// if/while condition
 							if(open && (statesPeek("if_cond") || statesPeek("while_cond"))){
 								states.push("exp");
 								continue;
 							}
 							else if(open && (statesPeek("for_args") || statesPeek("func_args"))){
-								states.push("var");
+								if(statesPeek("func_call", 1))
+									states.push("exp");
+								else
+									states.push("var");
+								continue;
 							}
 							
 							if(statesPeek("exp")){
@@ -584,7 +610,7 @@ public class ScriptParser{
 										boolean elseIf = statesPeek("else", 2);
 										
 										bytecode.addAll(parseExpression(lineNum));
-										requireAfter = "{";
+										requireAfter = new String[]{"{"};
 										
 										if(cIf)
 											states.push("if_body");
@@ -646,7 +672,7 @@ public class ScriptParser{
 										// Add branch
 										bytecode.add(getInstruction("if", lineNum));
 										
-										requireAfter = "{";
+										requireAfter = new String[]{"{"};
 										
 										states.pop();
 										states.push("for_body");
@@ -670,7 +696,16 @@ public class ScriptParser{
 										}
 									}
 									
-									states.pop();
+									// No args
+									else{
+										expressions.get(expDepth).clear();
+										
+										// Pop "exp" and "func_args"
+										states.pop();
+										states.pop();
+									}
+									
+									// Pop "func_call"
 									states.pop();
 									
 									// Get function
@@ -738,72 +773,74 @@ public class ScriptParser{
 							}
 							
 							// Function definition arguments
-							if(!open && brackets[1] == 0 && (statesPeek("var") || statesPeek("exp")) && statesPeek("func_args", 1)){
+							if(!open && brackets[1] == 0 && statesPeek("func_args")){
 								
-								// Pop "var" and "func_args"
-								states.pop();
+								// Pop "func_args"
 								states.pop();
 								
-								// Function declaration
-								if(statesPeek("func_def")){
+								if(!statesPeek("func_def")){
+									compilationError("Invalid function definition", lineNum);
+									return;
+								}
+								
+								// Pop "func_def"
+								states.pop();
+								
+								// Check if args are empty
+								if(!getData(tokens[i - 1]).equals("(")){
+									// Define parameter
+									variables.add(createVar);
+									bytecode.add(getInstruction("create_var", lineNum, variables.size() - 1));
+									bytecode.add(getInstruction("get_param", lineNum));
+								}
+								else
+									funcArgs = 0;
+								
+								// Add number of args
+								functions.set(functions.size() - 1, functions.get(functions.size() - 1) + ":" + funcArgs);
+								
+								// Check if function exists (exclude current function)
+								for(int j = 0; j < functions.size() - 1; j++){
+									// Variable
+									String f = variables.get(j);
+									int ind = f.indexOf(':') + 1;
 									
-									// Check if args are empty
-									if(!getData(tokens[i - 1]).equals("(")){
-										// Define parameter
-										variables.add(createVar);
-										bytecode.add(getInstruction("create_var", lineNum, variables.size() - 1));
-										bytecode.add(getInstruction("get_param", lineNum));
-									}
-									else
-										funcArgs = 0;
+									// Name + arg count
+									String fn = f.substring(ind);
 									
-									// Add number of args
-									functions.set(functions.size() - 1, functions.get(functions.size() - 1) + ":" + funcArgs);
+									// Scope
+									int sc = Integer.parseInt(f.substring(0, ind - 1));
 									
-									// Check if function exists (exclude current function)
-									for(int j = 0; j < functions.size() - 1; j++){
-										// Variable
-										String f = variables.get(j);
-										int ind = f.indexOf(':') + 1;
+									if(functions.get(functions.size() - 1).equals(fn)){
 										
-										// Name + arg count
-										String fn = f.substring(ind);
+										// Check if in scope
+										boolean inScope = sc == scope;
+										int last = scope;
 										
-										// Scope
-										int sc = Integer.parseInt(f.substring(0, ind - 1));
-										
-										if(functions.get(functions.size() - 1).equals(fn)){
+										// Check if in parent
+										if(!inScope){
+											int sc2 = last == 0 ? 0 : scopeParent.get(last - 1);
 											
-											// Check if in scope
-											boolean inScope = sc == scope;
-											int last = scope;
-											
-											// Check if in parent
-											if(!inScope){
-												int sc2 = last == 0 ? 0 : scopeParent.get(last - 1);
+											while(sc2 != 0){
+												sc2 = last == 0 ? 0 : scopeParent.get(last - 1);
 												
-												while(sc2 != 0){
-													sc2 = last == 0 ? 0 : scopeParent.get(last - 1);
-													
-													if(sc2 == sc){
-														inScope = true;
-														break;
-													}
-													last = sc2;
+												if(sc2 == sc){
+													inScope = true;
+													break;
 												}
-											}
-											
-											if(inScope){
-												compilationError("Duplicate function", lineNum);
-												return;
+												last = sc2;
 											}
 										}
+										
+										if(inScope){
+											compilationError("Duplicate function", lineNum);
+											return;
+										}
 									}
-									
-									requireAfter = "{";
-									states.pop();
-									states.push("func_body");
 								}
+								
+								requireAfter = new String[]{"{"};
+								states.push("func_body");
 							}
 							
 							continue;
@@ -850,7 +887,6 @@ public class ScriptParser{
 						
 						states.push("func_call");
 						states.push("func_args");
-						states.push("exp");
 					}
 					
 					continue;
@@ -956,13 +992,13 @@ public class ScriptParser{
 						else{
 							// For loop variable
 							if(statesPeek("for_args")){
-								requireAfter = "in";
+								requireAfter = new String[]{"in"};
 								token = (scope + 1) + ":" + token;
 							}
 							
 							// Function definition parameter
 							else if(statesPeek("func_args") && statesPeek("func_def", 1)){
-								requireAfter = ",";
+								requireAfter = new String[]{",", ")"};
 								token = (scope + 1) + ":" + token;
 							}
 							else{

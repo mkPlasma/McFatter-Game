@@ -64,7 +64,6 @@ public class ScriptFunctions{
 		"get_param",		// Store function parameter into register
 		"function",			// Function jump location
 		"call_func",		// Call function with set parameters
-		"call_bif",			// Call built-in function
 	};
 	
 	public static final String[] reservedWords = {

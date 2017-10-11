@@ -1,11 +1,23 @@
 package engine.script;
 
+import static engine.script.ScriptFunctions.BOOLEAN;
+import static engine.script.ScriptFunctions.FLOAT;
+import static engine.script.ScriptFunctions.INT;
+import static engine.script.ScriptFunctions.getData;
+import static engine.script.ScriptFunctions.getLineNum;
+import static engine.script.ScriptFunctions.getOpcode;
+import static engine.script.ScriptFunctions.getOperation;
+import static engine.script.ScriptFunctions.getType;
+import static engine.script.ScriptFunctions.isNumberOp;
+import static engine.script.ScriptFunctions.isOperation;
+import static engine.script.ScriptFunctions.isVariable;
+import static engine.script.ScriptFunctions.opcodes;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-
-import static engine.script.ScriptFunctions.*;
+import java.util.Stack;
 
 /*
  * 		ScriptRunner.java
@@ -31,7 +43,14 @@ public class ScriptRunner{
 	private Object[] variables;
 	
 	// Used to evaluate postfix expressions
-	private ArrayList<Object> expression;
+	private ArrayList<ArrayList<Object>> expressions;
+	private int curExp;
+	
+	// Function points
+	private ArrayList<Integer> functions;
+	
+	// Store return points for function calls
+	private Stack<Integer> returnPoints;
 	
 	private long[] bytecode;
 	
@@ -51,16 +70,25 @@ public class ScriptRunner{
 		haltRun = false;
 		
 		// Initialize/reset exoression
-		expression = new ArrayList<Object>();
-		
+		expressions = new ArrayList<ArrayList<Object>>();
+		expressions.add(new ArrayList<Object>());
+		curExp = 0;
+
+		functions = new ArrayList<Integer>();
+		returnPoints = new Stack<Integer>();
 		
 		// Account for register
 		int varCount = 1;
 		
-		// Add as many variables as necessary
-		for(long inst:bytecode)
-			if(opcodes[getOpcode(inst)].equals("create_var"))
+		// Add variables, find functions
+		for(int i = 0; i < bytecode.length; i++){
+			String op = opcodes[getOpcode(bytecode[i])];
+			
+			if(op.equals("create_var"))
 				varCount++;
+			else if(op.equals("function"))
+				functions.add(i);
+		}
 		
 		variables = new Object[varCount];
 		
@@ -81,6 +109,8 @@ public class ScriptRunner{
 			boolean isVar = isVariable(inst);
 			int lineNum = getLineNum(inst);
 			int data = getData(inst);
+			
+			//System.out.println(opcode);
 			
 			// Set doElse to false after one loop
 			// Preserve if elseAhead
@@ -160,19 +190,19 @@ public class ScriptRunner{
 					
 					// Variables
 					if(isVar)
-						expression.add(variables[data]);
+						expressions.get(curExp).add(variables[data]);
 					
 					// Single values
 					else{
 						switch(getType(inst)){
 							case INT:
-								expression.add(data);
+								expressions.get(curExp).add(data);
 								continue;
 							case FLOAT:
-								expression.add(Float.intBitsToFloat(data));
+								expressions.get(curExp).add(Float.intBitsToFloat(data));
 								continue;
 							case BOOLEAN:
-								expression.add(data == 1);
+								expressions.get(curExp).add(data == 1);
 								continue;
 						}
 					}
@@ -181,14 +211,14 @@ public class ScriptRunner{
 				
 				
 				case "exp_end":
-					if(expression.size() != 1){
-						runtimeWarning("Expression stack size " + expression.size() + " on expression end", lineNum);
+					if(expressions.get(curExp).size() != 1){
+						runtimeWarning("Expression stack size " + expressions.get(curExp).size() + " on expression end", lineNum);
 						return;
 					}
 					
 					// Save to register
-					variables[0] = expression.get(0);
-					expression.clear();
+					variables[0] = expressions.get(curExp).get(0);
+					expressions.get(curExp).clear();
 					continue;
 				
 				
@@ -288,6 +318,35 @@ public class ScriptRunner{
 					
 					continue;
 				}
+				
+				// Skip function definitions
+				case "function":
+					i = skipToEnd(i, false);
+					continue;
+				
+				case "call_func":
+					// Use new expression
+					expressions.add(new ArrayList<Object>());
+					curExp++;
+					
+					// Add return point
+					returnPoints.push(i);
+					
+					// Jump to function
+					i = functions.get(data);
+					
+					continue;
+				
+				// End instruction should be reached only at the end of a function
+				// It is skipped by if/else if statements
+				case "end":
+					// Remove expression
+					expressions.remove(curExp);
+					curExp--;
+					
+					// Return
+					i = returnPoints.pop();
+					continue;
 			}
 		}
 		
@@ -331,87 +390,22 @@ public class ScriptRunner{
 		return i;
 	}
 	
-	// Single operation on register
-	/*
-	private void operation(String op, boolean isVar, byte type, int data, int lineNum){
-		
-		// Operands
-		Object o1 = variables.get(0);
-		Object o2 = data;
-		
-		if(!isVar){
-			if(type == FLOAT)
-				o2 = Float.intBitsToFloat(data);
-			else if(type == BOOLEAN)
-				o2 = data == 1;
-		}
-		else
-			o2 = variables.get(data);
-		
-		// If each is number
-		boolean isNumber1 = (o1 instanceof Integer) || (o1 instanceof Float);
-		boolean isNumber2 = (o1 instanceof Integer) || (o1 instanceof Float);
-		
-		if(isNumber1 != isNumber2 || (!op.equals("==") && isNumberOp(op) != isNumber1)){
-			runtimeError("Type mismatch", lineNum);
-			return;
-		}
-		
-		// If either is number/float
-		boolean isNumber = isNumber1 || isNumber2;
-		
-		// Result stored if number, set immediately if boolean
-		float result = 0;
-		
-		// Integers need to be cast to int first then float
-		float n1 = o1 instanceof Float ? (float) o1 : (float)((int) o1);
-		float n2 = o2 instanceof Float ? (float) o2 : (float)((int) o2);
-		boolean b1 = (boolean) o1;
-		boolean b2 = (boolean) o2;
-		
-		switch(op){
-			case "+":	result = n1 + n2;			break;
-			case "-":	result = n1 - n2;			break;
-			case "*":	result = n1 * n2;			break;
-			case "/":	result = n1 / n2;			break;
-			case "%":	result = n1 % n2;			break;
-			case "!":	variables.set(0, !b1);		return;
-			case "||":	variables.set(0, b1 || b2);	return;
-			case "&&":	variables.set(0, b1 && b2);	return;
-			case "<":	variables.set(0, n1 < n2);	return;
-			case ">":	variables.set(0, n1 > n2);	return;
-			case "<=":	variables.set(0, n1 <= n2);	return;
-			case ">=":	variables.set(0, n1 >= n2);	return;
-			case "==":
-				if(isNumber) variables.set(0, n1 == n2);
-				else variables.set(0, b1 == b2);
-				return;
-		}
-		
-		// Treat as float if data is lost when casting to int
-		if(result != (int)result)
-			variables.set(0, result);
-		else
-			variables.set(0, (int)result);
-	}
-	*/
-	
 	// Postfix expression operation
 	private void operate(String op, int lineNum){
 		
-		int expSize = expression.size();
+		int expSize = expressions.get(curExp).size();
 		
 		boolean isSingleOp = op.equals("!");
 		
 		// Get operands
-		Object o1 = expression.get(expSize - (isSingleOp ? 1 : 2));
-		Object o2 = expression.get(expSize - 1);
+		Object o1 = expressions.get(curExp).get(expSize - (isSingleOp ? 1 : 2));
+		Object o2 = expressions.get(curExp).get(expSize - 1);
 		
 		// Remove last two elements
-		expression.remove(expSize - 1);
+		expressions.get(curExp).remove(expSize - 1);
 		
 		if(!isSingleOp)
-			expression.remove(expSize - 2);
+			expressions.get(curExp).remove(expSize - 2);
 		
 		boolean isBoolean = o1 instanceof Boolean || o2 instanceof Boolean;
 		
@@ -451,12 +445,12 @@ public class ScriptRunner{
 			if(!useBool){
 				// Treat as float if data is lost when casting to int
 				if(result != (int)result)
-					expression.add(result);
+					expressions.get(curExp).add(result);
 				else
-					expression.add((int)result);
+					expressions.get(curExp).add((int)result);
 			}
 			else
-				expression.add(resultBool);
+				expressions.get(curExp).add(resultBool);
 			
 			return;
 		}
@@ -481,7 +475,7 @@ public class ScriptRunner{
 			case "==":	result = b1 == b2;	break;
 		}
 		
-		expression.add(result);
+		expressions.get(curExp).add(result);
 	}
 	
 	// Create syntax error and halt compilation

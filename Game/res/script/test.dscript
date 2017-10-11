@@ -1,7 +1,6 @@
 
-function incX(){
-	set x;
-	x++;
+function incX(a, b){
+	set x = a + b;
 }
 
-incX();
+incX(1, 2);
