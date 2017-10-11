@@ -151,7 +151,7 @@ public class ScriptRunner{
 				
 				
 				case "delete_var":
-					variables[data] = NULL;
+					//variables[data] = NULL;
 					continue;
 				
 				

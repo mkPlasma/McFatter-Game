@@ -26,6 +26,7 @@ public class ScriptFunctions{
 		"delete_var",		// Deletes variable
 		"exp_val",			// Declare expression value
 		"exp_end",			// End expression and save result in register
+		"exp_inc",			// Create new expression, used by function calls in expressions
 		
 		// Arithmetic
 		"add",				// Adds value to register
@@ -61,7 +62,7 @@ public class ScriptFunctions{
 		// Functions
 		"set_param",		// Set function parameter
 		"get_param",		// Store function parameter into register
-		"function",		// Function jump location
+		"function",			// Function jump location
 		"call_func",		// Call function with set parameters
 		"call_bif",			// Call built-in function
 	};
@@ -337,7 +338,7 @@ public class ScriptFunctions{
 		switch(op){
 			case "*": case "/":
 				return 3;
-			case "+": case "-":
+			case "+": case "-": case "%":
 				return 2;
 			case "!":
 				return 1;

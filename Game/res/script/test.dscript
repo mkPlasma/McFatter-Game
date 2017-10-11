@@ -1,6 +1,4 @@
 
-set x;
-
 function incX(){
 	set x;
 	x++;
