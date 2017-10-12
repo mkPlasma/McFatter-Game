@@ -44,7 +44,7 @@ public class BytecodePrinter{
 		
 		// Variable number
 		if(var || opcode.equals("store") || opcode.equals("create_var") || opcode.equals("delete_var")
-			|| opcode.equals("increment") || opcode.equals("decrement")){
+			|| opcode.equals("increment") || opcode.equals("decrement") || opcode.equals("get_param")){
 			
 			if(data == 0)
 				info += "register";

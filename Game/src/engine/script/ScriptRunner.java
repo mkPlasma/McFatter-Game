@@ -1,22 +1,13 @@
 package engine.script;
 
-import static engine.script.ScriptFunctions.BOOLEAN;
-import static engine.script.ScriptFunctions.FLOAT;
-import static engine.script.ScriptFunctions.INT;
-import static engine.script.ScriptFunctions.getData;
-import static engine.script.ScriptFunctions.getLineNum;
-import static engine.script.ScriptFunctions.getOpcode;
-import static engine.script.ScriptFunctions.getOperation;
-import static engine.script.ScriptFunctions.getType;
-import static engine.script.ScriptFunctions.isNumberOp;
-import static engine.script.ScriptFunctions.isOperation;
-import static engine.script.ScriptFunctions.isVariable;
-import static engine.script.ScriptFunctions.opcodes;
+import static engine.script.ScriptFunctions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Stack;
 
 /*
@@ -49,6 +40,9 @@ public class ScriptRunner{
 	// Function points
 	private ArrayList<Integer> functions;
 	
+	// Function parameters
+	private Queue<Object> funcParams;
+	
 	// Store return points for function calls
 	private Stack<Integer> returnPoints;
 	
@@ -75,6 +69,7 @@ public class ScriptRunner{
 		curExp = 0;
 
 		functions = new ArrayList<Integer>();
+		funcParams = new LinkedList<Object>();
 		returnPoints = new Stack<Integer>();
 		
 		// Account for register
@@ -335,6 +330,14 @@ public class ScriptRunner{
 					// Jump to function
 					i = functions.get(data);
 					
+					continue;
+				
+				case "set_param":
+					funcParams.add(variables[0]);
+					continue;
+				
+				case "get_param":
+					variables[data] = funcParams.remove();
 					continue;
 				
 				// End instruction should be reached only at the end of a function

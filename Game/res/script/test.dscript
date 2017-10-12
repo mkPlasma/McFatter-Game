@@ -1,6 +1,13 @@
 
-function incX(a, b){
-	set x = a + b;
+function test(a, b, c){
+	set x = (a + b);
+	
+	if(c){
+		x *= 2;
+	}
 }
 
-incX(1, 2);
+function test(x, y, z){
+}
+
+test(5 + 2, 5, false);
