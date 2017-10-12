@@ -174,8 +174,8 @@ public class ScriptParser{
 		for(int i = 0; i < tokens.length; i++){
 			
 			// Skip defined functions
-			if(funcSkip.size() > (fSkipNum*2)){
-				if(!functionDef && i == funcSkip.get(fSkipNum*2)){
+			if(!functionDef){
+				while(funcSkip.size() > fSkipNum*2 && i == funcSkip.get(fSkipNum*2)){
 					while(++i != funcSkip.get((fSkipNum*2) + 1));
 					fSkipNum++;
 					
@@ -193,15 +193,15 @@ public class ScriptParser{
 			// Data
 			String token = getData(tCur);
 			
-			
 			// Check only function definitions
-			if(functionDef && !inFunction){
+			if(functionDef){
 				if(token.equals("function"))
 					inFunction = true;
-				else
+				else if(!inFunction)
 					continue;
 			}
 			
+			// Check if required token was found
 			if(requireAfter != null){
 				boolean matched = false;
 				
@@ -686,13 +686,16 @@ public class ScriptParser{
 									else{
 										expressions.peek().clear();
 										
-										// Pop "exp" and "func_args"
-										states.pop();
+										// Pop "exp"
 										states.pop();
 									}
 									
-									// Pop "func_call"
+									// Pop "func_args" and "func_call"
 									states.pop();
+									states.pop();
+									
+									for(int j = states.size() - 1; j > -1; j--)
+										System.out.print(states.get(j));
 									
 									// Get function
 									String func = funcNames.pop() + ":" + funcParams.pop();
@@ -703,8 +706,6 @@ public class ScriptParser{
 										// Variable
 										String f = functions.get(j);
 										int ind = f.indexOf(':') + 1;
-										
-										System.out.println(f);
 										
 										// Name + arg count
 										String fn = f.substring(ind);
@@ -788,7 +789,10 @@ public class ScriptParser{
 									funcArgs = 0;
 								
 								// Add number of args
-								functions.set(functions.size() - 1, functions.get(functions.size() - 1) + ":" + funcArgs);
+								String func = functions.get(functions.size() - 1) + ":" + funcArgs;
+								functions.set(functions.size() - 1, func);
+								
+								func = func.substring(func.indexOf(':') + 1);
 								
 								// Check if function exists (exclude current function)
 								for(int j = 0; j < functions.size() - 1; j++){
@@ -796,15 +800,13 @@ public class ScriptParser{
 									String f = functions.get(j);
 									int ind = f.indexOf(':') + 1;
 									
-									System.out.println(f);
-									
 									// Name + arg count
 									String fn = f.substring(ind);
 									
 									// Scope
 									int sc = Integer.parseInt(f.substring(0, ind - 1));
 									
-									if(functions.get(functions.size() - 1).equals(fn)){
+									if(func.equals(fn)){
 										
 										// Check if in scope
 										boolean inScope = sc == scope;
@@ -848,7 +850,7 @@ public class ScriptParser{
 						compilationErrorIV(token, lineNum);
 						return;
 					}
-
+					
 					// Add function
 					if(statesPeek("func_def")){
 						functions.add(scope + ":" + token);
@@ -984,13 +986,13 @@ public class ScriptParser{
 							// For loop variable
 							if(statesPeek("for_args")){
 								requireAfter = new String[]{"in"};
-								token = (scope + 1) + ":" + token;
+								token = (scopeHighest + 1) + ":" + token;
 							}
 							
 							// Function definition parameter
 							else if(statesPeek("func_args") && statesPeek("func_def", 1)){
 								requireAfter = new String[]{",", ")"};
-								token = (scope + 1) + ":" + token;
+								token = (scopeHighest + 1) + ":" + token;
 							}
 							else{
 								token = scope + ":" + token;

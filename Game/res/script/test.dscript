@@ -7,7 +7,9 @@ function test(a, b, c){
 	}
 }
 
-function test(x, y, z){
+function test(x, y){
+	set b = x*x*x*y*y*y*x*x*x*x*x*x*x;
 }
 
 test(5 + 2, 5, false);
+test(2, 2);
