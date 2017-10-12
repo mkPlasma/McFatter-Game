@@ -34,8 +34,7 @@ public class ScriptRunner{
 	private Object[] variables;
 	
 	// Used to evaluate postfix expressions
-	private ArrayList<ArrayList<Object>> expressions;
-	private int curExp;
+	private Stack<ArrayList<Object>> expressions;
 	
 	// Function points
 	private ArrayList<Integer> functions;
@@ -45,6 +44,9 @@ public class ScriptRunner{
 	
 	// Store return points for function calls
 	private Stack<Integer> returnPoints;
+	
+	// Return value for functions
+	private Object returnValue;
 	
 	private long[] bytecode;
 	
@@ -64,9 +66,8 @@ public class ScriptRunner{
 		haltRun = false;
 		
 		// Initialize/reset exoression
-		expressions = new ArrayList<ArrayList<Object>>();
-		expressions.add(new ArrayList<Object>());
-		curExp = 0;
+		expressions = new Stack<ArrayList<Object>>();
+		expressions.push(new ArrayList<Object>());
 
 		functions = new ArrayList<Integer>();
 		funcParams = new LinkedList<Object>();
@@ -185,19 +186,19 @@ public class ScriptRunner{
 					
 					// Variables
 					if(isVar)
-						expressions.get(curExp).add(variables[data]);
+						expressions.peek().add(variables[data]);
 					
 					// Single values
 					else{
 						switch(getType(inst)){
 							case INT:
-								expressions.get(curExp).add(data);
+								expressions.peek().add(data);
 								continue;
 							case FLOAT:
-								expressions.get(curExp).add(Float.intBitsToFloat(data));
+								expressions.peek().add(Float.intBitsToFloat(data));
 								continue;
 							case BOOLEAN:
-								expressions.get(curExp).add(data == 1);
+								expressions.peek().add(data == 1);
 								continue;
 						}
 					}
@@ -206,14 +207,14 @@ public class ScriptRunner{
 				
 				
 				case "exp_end":
-					if(expressions.get(curExp).size() != 1){
-						runtimeWarning("Expression stack size " + expressions.get(curExp).size() + " on expression end", lineNum);
+					if(expressions.peek().size() != 1){
+						runtimeWarning("Expression stack size " + expressions.peek().size() + " on expression end", lineNum);
 						return;
 					}
 					
 					// Save to register
-					variables[0] = expressions.get(curExp).get(0);
-					expressions.get(curExp).clear();
+					variables[0] = expressions.peek().get(0);
+					expressions.peek().clear();
 					continue;
 				
 				
@@ -321,8 +322,7 @@ public class ScriptRunner{
 				
 				case "call_func":
 					// Use new expression
-					expressions.add(new ArrayList<Object>());
-					curExp++;
+					expressions.push(new ArrayList<Object>());
 					
 					// Add return point
 					returnPoints.push(i);
@@ -342,13 +342,16 @@ public class ScriptRunner{
 				
 				// End instruction should be reached only at the end of a function
 				// It is skipped by if/else if statements
-				case "end":
+				case "end": case "return_void":
 					// Remove expression
-					expressions.remove(curExp);
-					curExp--;
+					expressions.pop();
 					
 					// Return
 					i = returnPoints.pop();
+					continue;
+				
+				case "return":
+					
 					continue;
 			}
 		}
@@ -396,19 +399,19 @@ public class ScriptRunner{
 	// Postfix expression operation
 	private void operate(String op, int lineNum){
 		
-		int expSize = expressions.get(curExp).size();
+		int expSize = expressions.peek().size();
 		
 		boolean isSingleOp = op.equals("!");
 		
 		// Get operands
-		Object o1 = expressions.get(curExp).get(expSize - (isSingleOp ? 1 : 2));
-		Object o2 = expressions.get(curExp).get(expSize - 1);
+		Object o1 = expressions.peek().get(expSize - (isSingleOp ? 1 : 2));
+		Object o2 = expressions.peek().get(expSize - 1);
 		
 		// Remove last two elements
-		expressions.get(curExp).remove(expSize - 1);
+		expressions.peek().remove(expSize - 1);
 		
 		if(!isSingleOp)
-			expressions.get(curExp).remove(expSize - 2);
+			expressions.peek().remove(expSize - 2);
 		
 		boolean isBoolean = o1 instanceof Boolean || o2 instanceof Boolean;
 		
@@ -448,12 +451,12 @@ public class ScriptRunner{
 			if(!useBool){
 				// Treat as float if data is lost when casting to int
 				if(result != (int)result)
-					expressions.get(curExp).add(result);
+					expressions.peek().add(result);
 				else
-					expressions.get(curExp).add((int)result);
+					expressions.peek().add((int)result);
 			}
 			else
-				expressions.get(curExp).add(resultBool);
+				expressions.peek().add(resultBool);
 			
 			return;
 		}
@@ -478,7 +481,7 @@ public class ScriptRunner{
 			case "==":	result = b1 == b2;	break;
 		}
 		
-		expressions.get(curExp).add(result);
+		expressions.peek().add(result);
 	}
 	
 	// Create syntax error and halt compilation

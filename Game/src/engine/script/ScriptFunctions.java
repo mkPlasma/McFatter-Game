@@ -60,10 +60,12 @@ public class ScriptFunctions{
 		"end_while",		// Loops back to while
 		
 		// Functions
-		"set_param",		// Set function parameter
-		"get_param",		// Store function parameter into register
 		"function",			// Function jump location
 		"call_func",		// Call function with set parameters
+		"set_param",		// Set function parameter
+		"get_param",		// Store function parameter into register
+		"return",		// Returns register value
+		"return_void",	// Return no value
 	};
 	
 	public static final String[] reservedWords = {

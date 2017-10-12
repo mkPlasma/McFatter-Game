@@ -1,15 +1,6 @@
 
-function test(a, b, c){
-	set x = (a + b);
-	
-	if(c){
-		x *= 2;
-	}
+function test(){
+	return 2;
 }
 
-function test(x, y){
-	set b = x*x*x*y*y*y*x*x*x*x*x*x*x;
-}
-
-test(5 + 2, 5, false);
-test(2, 2);
+set x = test();

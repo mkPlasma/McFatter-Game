@@ -33,6 +33,17 @@ public class ScriptParser{
 	// Store expression while processing
 	private Stack<ArrayList<Object>> expressions;
 	
+	// Scope assigned to variables
+	int scope;
+	int scopeDepth;
+	
+	// Used for calculating current scope
+	ArrayList<Integer> scopePrev = new ArrayList<Integer>();
+	int scopeHighest;
+	
+	// Keep track of which scope is in which
+	ArrayList<Integer> scopeParent = new ArrayList<Integer>();
+	
 	// Temp bytecode expression storage for for loops
 	// For loop -> Argument -> Expression bytecode
 	private ArrayList<ArrayList<ArrayList<Long>>> tmpExp;
@@ -64,6 +75,9 @@ public class ScriptParser{
 	private int funcArgs;
 	private int fSkipNum;
 	
+	// Keep track of loops
+	int loopTotal;
+	
 	// Loop index
 	private int loopNum;
 	private int forLoopNum;
@@ -84,7 +98,7 @@ public class ScriptParser{
 		}
 		
 		// Initialize/reset lists
-		bytecode	= new ArrayList<Long>();
+		bytecode		= new ArrayList<Long>();
 		expressions	= new Stack<ArrayList<Object>>();
 		tmpExp		= new ArrayList<ArrayList<ArrayList<Long>>>();
 		states		= new Stack<String>();
@@ -95,12 +109,17 @@ public class ScriptParser{
 		funcBc		= new Stack<ArrayList<Long>>();
 		funcBrackets= new Stack<Integer>();
 		funcParams	= new Stack<Integer>();
-		funcSkip	= new ArrayList<Integer>();
+		funcSkip		= new ArrayList<Integer>();
+
+		scope = 0;
+		scopeDepth = 0;
+		scopeHighest = 0;
 		
 		tmpExpInd = -1;
 		
 		loopNum = 0;
 		forLoopNum = -1;
+		loopTotal = 0;
 		
 		funcArgs = 0;
 		fSkipNum = 0;
@@ -148,26 +167,12 @@ public class ScriptParser{
 		// { ( [
 		int[] brackets = new int[3];
 		
-		// Scope assigned to variables
-		int scope = 0;
-		
-		// Used for calculating current scope
-		ArrayList<Integer> scopePrev = new ArrayList<Integer>();
-		int scopeHighest = 0;
-		int scopeDepth = 0;
-		
-		// Keep track of which scope is in which
-		ArrayList<Integer> scopeParent = new ArrayList<Integer>();
-		
 		// Error if required token is not found
 		String[] requireAfter = null;
 		
 		// Allow else keyword after if/else if statement
 		boolean allowElse = false;
 		boolean resetAllowElse = false;
-		
-		// Keep track of loops
-		int loopTotal = 0;
 		
 		boolean inFunction = false;
 		
@@ -312,6 +317,23 @@ public class ScriptParser{
 							funcArgs = 0;
 							funcSkip.add(i);
 							continue;
+						
+						case "return":
+							boolean inFunc = false;
+							
+							for(int j = 0; j < states.size(); j++)
+								if(states.get(j).equals("func_body"))
+									inFunc = true;
+							
+							if(!inFunc){
+								compilationError("Return must be in function", lineNum);
+								return;
+							}
+							
+							states.push("return");
+							states.push("exp");
+							
+							continue;
 					}
 					
 					continue;
@@ -380,6 +402,17 @@ public class ScriptParser{
 							
 							// If at the end of an expression, parse
 							if(statesPeek("exp")){
+								
+								// Void return statement
+								if(statesPeek("return", 1) && expressions.peek().isEmpty()){
+									bytecode.add(getInstruction("return_void", lineNum));
+									
+									// Pop "exp" and "return"
+									states.pop();
+									states.pop();
+									continue;
+								}
+								
 								bytecode.addAll(parseExpression(lineNum));
 								continue;
 							}
@@ -671,9 +704,15 @@ public class ScriptParser{
 								// Function call
 								if(!open && (!funcBrackets.isEmpty() && funcBrackets.peek() == brackets[1]) &&
 									statesPeek("func_args", 1) && statesPeek("func_call", 2)){
-									
-									// Check if no args
-									if(!getData(tokens[i - 1]).equals("(")){
+
+									// No args
+									if(expressions.peek().isEmpty()){
+										expressions.peek().clear();
+										
+										// Pop "exp"
+										states.pop();
+									}
+									else{
 										if(expressions.size() == 1)
 											bytecode.addAll(parseExpression(lineNum));
 										else
@@ -682,20 +721,9 @@ public class ScriptParser{
 										funcParams.push(funcParams.pop() + 1);
 									}
 									
-									// No args
-									else{
-										expressions.peek().clear();
-										
-										// Pop "exp"
-										states.pop();
-									}
-									
 									// Pop "func_args" and "func_call"
 									states.pop();
 									states.pop();
-									
-									for(int j = states.size() - 1; j > -1; j--)
-										System.out.print(states.get(j));
 									
 									// Get function
 									String func = funcNames.pop() + ":" + funcParams.pop();
@@ -716,7 +744,7 @@ public class ScriptParser{
 										if(func.equals(fn)){
 											
 											// Check if in scope
-											boolean inScope = sc == scope;
+											boolean inScope = sc == scope || sc == 0;
 											int last = scope;
 											
 											// Check if in parent
@@ -764,7 +792,14 @@ public class ScriptParser{
 							}
 							
 							// Function definition arguments
-							if(!open && brackets[1] == 0 && statesPeek("func_args")){
+							if(!open && brackets[1] == 0 && (statesPeek("func_args") || (statesPeek("var") && statesPeek("func_args", 1)))){
+								
+								// If no args
+								boolean empty = statesPeek("var");
+								
+								// Pop "var"
+								if(empty)
+									states.pop();
 								
 								// Pop "func_args"
 								states.pop();
@@ -777,16 +812,16 @@ public class ScriptParser{
 								// Pop "func_def"
 								states.pop();
 								
-								// Check if args are empty
-								if(!getData(tokens[i - 1]).equals("(")){
+								// No args
+								if(empty)
+									funcArgs = 0;
+								else{
 									// Define parameter
 									variables.add(createVar);
 									bytecode.add(getInstruction("create_var", lineNum, variables.size() - 1));
 									bytecode.add(getInstruction("get_param", lineNum, variables.size() - 1));
 									funcArgs++;
 								}
-								else
-									funcArgs = 0;
 								
 								// Add number of args
 								String func = functions.get(functions.size() - 1) + ":" + funcArgs;
@@ -809,7 +844,7 @@ public class ScriptParser{
 									if(func.equals(fn)){
 										
 										// Check if in scope
-										boolean inScope = sc == scope;
+										boolean inScope = sc == scope || sc == 0;
 										int last = scope;
 										
 										// Check if in parent
@@ -1161,12 +1196,14 @@ public class ScriptParser{
 						return bc;
 					}
 					
-					// If function call is in expression
-					//if(expDepth > 0)
-						
-					
 					bc.add(getInstruction("set_param", lineNum));
 					
+					return bc;
+				
+				// Return value
+				case "return":
+					bc.add(getInstruction("return", lineNum));
+					states.pop();
 					return bc;
 			}
 			
@@ -1240,8 +1277,10 @@ public class ScriptParser{
 				bc.add(getInstruction((String)obj, lineNum));
 			
 			// Function call placeholder
-			else if(obj instanceof String && ((String)obj).charAt(0) == '@')
+			else if(obj instanceof String && ((String)obj).charAt(0) == '@'){
 				bc.addAll(funcBc.pop());
+				bc.add(getInstruction("exp_val", lineNum));
+			}
 			
 			// Literals/variables
 			else
@@ -1316,6 +1355,12 @@ public class ScriptParser{
 					
 				bc.add(getInstruction("set_param", lineNum));
 				
+				return bc;
+			
+			// Return value
+			case "return":
+				bc.add(getInstruction("return", lineNum));
+				states.pop();
 				return bc;
 		}
 
