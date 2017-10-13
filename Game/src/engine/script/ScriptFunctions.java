@@ -25,8 +25,10 @@ public class ScriptFunctions{
 		"create_var",		// Creates a new variable
 		"delete_var",		// Deletes variable
 		"exp_val",			// Declare expression value
+		"exp_val_r",			// Expression value from function return
 		"exp_end",			// End expression and save result in register
 		"exp_inc",			// Create new expression, used by function calls in expressions
+		"exp_dec",			// Remove expression
 		
 		// Arithmetic
 		"add",				// Adds value to register

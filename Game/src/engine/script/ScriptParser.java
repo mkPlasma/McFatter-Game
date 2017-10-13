@@ -419,9 +419,9 @@ public class ScriptParser{
 							continue;
 						
 						case ",":
-							// For loop argument
-							
 							if(statesPeek("exp")){
+								
+								// For loop argument
 								if(statesPeek("for_args", 1)){
 									if(tmpExp.get(tmpExpInd).size() > 2){
 										compilationError("For loop has at most 3 arguments", lineNum);
@@ -455,8 +455,11 @@ public class ScriptParser{
 									
 									if(expressions.size() == 1)
 										bytecode.addAll(parseExpression(lineNum));
-									else
-										funcBc.peek().addAll(parseExpression(lineNum));
+									else{
+										// Must do this otherwise funcBc.peek() will be the wrong item
+										ArrayList<Long> bc = parseExpression(lineNum);
+										funcBc.peek().addAll(bc);
+									}
 									
 									funcParams.push(funcParams.pop() + 1);
 									
@@ -707,7 +710,7 @@ public class ScriptParser{
 
 									// No args
 									if(expressions.peek().isEmpty()){
-										expressions.peek().clear();
+										expressions.pop();
 										
 										// Pop "exp"
 										states.pop();
@@ -715,8 +718,11 @@ public class ScriptParser{
 									else{
 										if(expressions.size() == 1)
 											bytecode.addAll(parseExpression(lineNum));
-										else
-											funcBc.peek().addAll(parseExpression(lineNum));
+										else{
+											// Must do this otherwise funcBc.peek() will be the wrong item
+											ArrayList<Long> bc = parseExpression(lineNum);
+											funcBc.peek().addAll(bc);
+										}
 										
 										funcParams.push(funcParams.pop() + 1);
 									}
@@ -780,6 +786,8 @@ public class ScriptParser{
 										funcBc.peek().add(getInstruction("call_func", lineNum, funcIndex));
 										expressions.pop();
 									}
+									
+									//BytecodePrinter.printBytecode(funcBc.peek(), "");
 									
 									funcBrackets.pop();
 									
@@ -900,10 +908,11 @@ public class ScriptParser{
 						if(statesPeek("exp")){
 							// Add placeholder in expression
 							// Later replaced by function call bytecode
-							expressions.peek().add("@" + expressions.size());
+							expressions.peek().add("@");
 							
 							funcBc.push(new ArrayList<Long>());
 							
+							// Use new expression for paramters
 							expressions.add(new ArrayList<Object>());
 						}
 						
@@ -1104,7 +1113,9 @@ public class ScriptParser{
 	// Parse expression, convert to postfix
 	private ArrayList<Long> parseExpression(int lineNum){
 		
-		if(expressions.peek().isEmpty()){
+		ArrayList<Object> exp = expressions.peek();
+		
+		if(exp.isEmpty()){
 			compilationError("Invalid expression", lineNum);
 			return null;
 		}
@@ -1115,29 +1126,29 @@ public class ScriptParser{
 		ArrayList<Long> bc = new ArrayList<Long>();
 		
 		// Check if single negative number
-		if(expressions.peek().size() == 3){
-			if(expressions.peek().get(0) instanceof Integer && (int)expressions.peek().get(0) == 0 &&
-				expressions.peek().get(1) instanceof String && ((String)expressions.peek().get(1)).equals("-")){
+		if(exp.size() == 3){
+			if(exp.get(0) instanceof Integer && (int)exp.get(0) == 0 &&
+				exp.get(1) instanceof String && ((String)exp.get(1)).equals("-")){
 				
-				Object obj = expressions.peek().get(2);
-				expressions.peek().clear();
+				Object obj = exp.get(2);
+				exp.clear();
 				
 				if(obj instanceof Integer)
-					expressions.peek().add(-(int)obj);
+					exp.add(-(int)obj);
 				else
-					expressions.peek().add(-(float)obj);
+					exp.add(-(float)obj);
 			}
 		}
 		
 		// If single value
-		if(expressions.peek().size() == 1){
+		if(exp.size() == 1 && !(exp.get(0) instanceof String && ((String)exp.get(0)).charAt(0) == '@')){
 			
 			if(statesPeek("for_args"))
-				bc.add(getValueInst(expressions.peek().get(0), lineNum));
+				bc.add(getValueInst(exp.get(0), lineNum));
 			else
-				bc.add(setOpcode(getValueInst(expressions.peek().get(0), lineNum), "load"));
+				bc.add(setOpcode(getValueInst(exp.get(0), lineNum), "load"));
 			
-			expressions.peek().clear();
+			exp.clear();
 			
 			switch(statesPeek()){
 				
@@ -1220,8 +1231,8 @@ public class ScriptParser{
 		Stack<String> operators = new Stack<String>();
 		
 		// Convert to postfix
-		for(int i = 0; i < expressions.peek().size(); i++){
-			Object obj = expressions.peek().get(i);
+		for(int i = 0; i < exp.size(); i++){
+			Object obj = exp.get(i);
 			
 			// Operations
 			if(obj instanceof String && isOperation((String)obj)){
@@ -1257,7 +1268,7 @@ public class ScriptParser{
 			output.push(obj);
 		}
 		
-		expressions.peek().clear();
+		exp.clear();
 		
 		if(!operators.isEmpty() && (operators.peek().equals("(") || operators.peek().equals(")"))){
 			compilationError("Mismatched parenthesis", lineNum);
@@ -1272,6 +1283,7 @@ public class ScriptParser{
 		Object[] expression = output.toArray();
 		
 		for(Object obj:expression){
+			
 			// Operation
 			if(obj instanceof String && isOperation((String)obj))
 				bc.add(getInstruction((String)obj, lineNum));
@@ -1279,7 +1291,7 @@ public class ScriptParser{
 			// Function call placeholder
 			else if(obj instanceof String && ((String)obj).charAt(0) == '@'){
 				bc.addAll(funcBc.pop());
-				bc.add(getInstruction("exp_val", lineNum));
+				bc.add(getInstruction("exp_val_r", lineNum));
 			}
 			
 			// Literals/variables
@@ -1350,8 +1362,10 @@ public class ScriptParser{
 				}
 				
 				// If function call is in expression
-				if(expressions.size() > 1)
-					bc.add(getInstruction("exp_inc", lineNum));
+				if(expressions.size() > 1){
+					bc.add(0, getInstruction("exp_inc", lineNum));
+					bc.add(getInstruction("exp_dec", lineNum));
+				}
 					
 				bc.add(getInstruction("set_param", lineNum));
 				

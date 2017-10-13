@@ -1,6 +1,10 @@
 
-function test(){
+function test(x, y){
+	return x + y;
+}
+
+function test2(){
 	return 2;
 }
 
-set x = test();
+set x = 1 + test(test2(), 3);

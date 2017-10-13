@@ -40,7 +40,7 @@ public class ScriptRunner{
 	private ArrayList<Integer> functions;
 	
 	// Function parameters
-	private Queue<Object> funcParams;
+	private Stack<Queue<Object>> funcParams;
 	
 	// Store return points for function calls
 	private Stack<Integer> returnPoints;
@@ -70,7 +70,7 @@ public class ScriptRunner{
 		expressions.push(new ArrayList<Object>());
 
 		functions = new ArrayList<Integer>();
-		funcParams = new LinkedList<Object>();
+		funcParams = new Stack<Queue<Object>>();
 		returnPoints = new Stack<Integer>();
 		
 		// Account for register
@@ -105,8 +105,6 @@ public class ScriptRunner{
 			boolean isVar = isVariable(inst);
 			int lineNum = getLineNum(inst);
 			int data = getData(inst);
-			
-			//System.out.println(opcode);
 			
 			// Set doElse to false after one loop
 			// Preserve if elseAhead
@@ -206,6 +204,29 @@ public class ScriptRunner{
 				
 				
 				
+				case "exp_val_r":
+					if(returnValue == null){
+						runtimeError("Null or void return value", lineNum);
+						return;
+					}
+					
+					expressions.peek().add(returnValue);
+					continue;
+				
+				
+				
+				case "exp_inc":
+					expressions.push(new ArrayList<Object>());
+					continue;
+				
+				
+				
+				case "exp_dec":
+					expressions.pop();
+					continue;
+				
+				
+				
 				case "exp_end":
 					if(expressions.peek().size() != 1){
 						runtimeWarning("Expression stack size " + expressions.peek().size() + " on expression end", lineNum);
@@ -214,7 +235,10 @@ public class ScriptRunner{
 					
 					// Save to register
 					variables[0] = expressions.peek().get(0);
+					
+					// Clear expression
 					expressions.peek().clear();
+					
 					continue;
 				
 				
@@ -333,24 +357,35 @@ public class ScriptRunner{
 					continue;
 				
 				case "set_param":
-					funcParams.add(variables[0]);
+					// New parameters
+					if(funcParams.isEmpty())
+						funcParams.push(new LinkedList<Object>());
+					
+					funcParams.peek().add(variables[0]);
 					continue;
 				
 				case "get_param":
-					variables[data] = funcParams.remove();
+					variables[data] = funcParams.peek().remove();
+					
+					// Remove once all parameters are taken
+					if(funcParams.peek().isEmpty())
+						funcParams.pop();
+					
 					continue;
 				
 				// End instruction should be reached only at the end of a function
 				// It is skipped by if/else if statements
-				case "end": case "return_void":
+				case "end": case "return_void": case "return":
 					// Remove expression
 					expressions.pop();
 					
 					// Return
 					i = returnPoints.pop();
-					continue;
-				
-				case "return":
+					
+					if(opcode.equals("return"))
+						returnValue = variables[0];
+					else
+						returnValue = null;
 					
 					continue;
 			}
