@@ -412,27 +412,32 @@ public class ScriptLexer{
 					lastExpected = new String[]{"v", "f", "i", "l", ")", "]"};
 					nextExpected = new String[]{"v", "f", "i", "l", "(", "global", "-"};
 					
-					if(token.equals("!")){
-						lastExpected = new String[]{"||", "&&", "==", "(", "{", "=", ","};
-						nextExpected = new String[]{"v", "f", "b", "(", "global"};
-					}
-					else if(token.equals("||") || token.equals("&&")){
-						lastExpected = new String[]{"v", "f", "i", "l", "b", ")", "]"};
-						nextExpected = new String[]{"v", "f", "i", "l", "b", "(", "!", "-", "global"};
-					}
-					else if(token.equals("==")){
-						lastExpected = new String[]{"v", "f", "i", "l", "b", "t", ")", "]"};
-						nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "!", "-", "global"};
-					}
-					else if(token.equals("+")){
-						lastExpected = new String[]{"v", "f", "i", "l", "t", ")", "]"};
-						nextExpected = new String[]{"v", "f", "i", "l", "t", "(", "global"};
-					}
-					else if(token.equals("-")){
-						lastExpected = new String[]{"v", "o", "a", "f", "i", "l", ",", "(", ")", "[", "]", "return", "wait"};
-						nextExpected = new String[]{"v", "f", "i", "l", "(", "global"};
-					}
+					switch(token){
+						case "!":
+							lastExpected = new String[]{"||", "&&", "==", "(", "{", "=", ","};
+							nextExpected = new String[]{"v", "f", "b", "(", "global"};
+							break;
+						
+						case "||": case "&&":
+							lastExpected = new String[]{"v", "f", "i", "l", "b", ")", "]"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "(", "!", "-", "global"};
+							break;
+						
+						case "==":
+							lastExpected = new String[]{"v", "f", "i", "l", "b", "t", ")", "]"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "!", "-", "global"};
+							break;
 					
+						case "+":
+							lastExpected = new String[]{"v", "f", "i", "l", "t", ")", "]"};
+							nextExpected = new String[]{"v", "f", "i", "l", "t", "(", "global"};
+							break;
+					
+						case "-":
+							lastExpected = new String[]{"v", "o", "a", "f", "i", "l", ",", "(", ")", "[", "]", "return", "wait"};
+							nextExpected = new String[]{"v", "f", "i", "l", "(", "global"};
+						break;
+					}
 					break;
 				
 				// Assignment operator
@@ -440,14 +445,19 @@ public class ScriptLexer{
 					lastExpected = new String[]{"v", "]"};
 					nextExpected = new String[]{"v", "f", "i", "l", "b", ")", "-", "global"};
 					
-					if(token.equals("="))
-						nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "{", "(", "!", "-", "global"};
+					switch(token){
+						case "=":
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "{", "(", "!", "-", "global"};
+							break;
 					
-					else if(token.equals("+="))
-						nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "-", "global"};
+						case "+=":
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "-", "global"};
+							break;
 					
-					else if(token.equals("++") || token.equals("--"))
-						nextExpected = new String[]{";"};
+						case "++": case "--":
+							nextExpected = new String[]{";"};
+							break;
+					}
 					
 					break;
 				
@@ -478,7 +488,7 @@ public class ScriptLexer{
 							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "!", "-", "global"};
 							break;
 						case ".":
-							lastExpected = new String[]{"v"};
+							lastExpected = new String[]{"v", ")"};
 							nextExpected = new String[]{"f"};
 							break;
 						case ";":
@@ -497,7 +507,7 @@ public class ScriptLexer{
 				// Variable
 				case 'v':
 					lastExpected = new String[]{"o", "a", ";", ",", "{", "}", "(", "[", "set", "const", "global", "in", "return", "wait"};
-					nextExpected = new String[]{"o", "a", ";", ",", "}", ")", "]", ".", "in"};
+					nextExpected = new String[]{"o", "a", ";", ",", "}", ")", "[", "]", ".", "in"};
 					break;
 				
 				// Value literals
@@ -543,15 +553,22 @@ public class ScriptLexer{
 					return;
 				}
 				
-				// Add 0 before - if necessary, e.g. set x = -1; -> set x = 0-1;
-				else if(getData(token).equals("-")){
+				// Change to single negative number
+				if(getData(token).equals("-")){
 					if((lType == 'o' || lType == 'a' || lData.equals(",") || lData.equals("(") ||
 						lData.equals("[") || lData.equals("return") || lData.equals("wait"))){
-						// Add zero
-						tokens.add(i, lineNum + "i:0");
 						
-						// Skip checking zero
-						i++;
+						// Remove -
+						tokens.remove(i);
+						
+						// Set number to negative
+						String t = tokens.get(i);
+						String t2 = t.substring(0, t.indexOf(':') + 1);
+						t = getData(t);
+						
+						tokens.set(i, t2 + '-' + t);
+						
+						i--;
 					}
 				}
 				
@@ -597,6 +614,7 @@ public class ScriptLexer{
 	// Return type name
 	private String getTypeName(char type){
 		switch(type){
+			case 'k':	return "keyword";
 			case 'o':	return "operator";
 			case 'a':	return "assignment";
 			case 's':	return "separator";

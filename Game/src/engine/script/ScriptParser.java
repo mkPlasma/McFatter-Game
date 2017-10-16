@@ -33,17 +33,6 @@ public class ScriptParser{
 	// Store expression while processing
 	private Stack<ArrayList<Object>> expressions;
 	
-	// Scope assigned to variables
-	int scope;
-	int scopeDepth;
-	
-	// Used for calculating current scope
-	ArrayList<Integer> scopePrev = new ArrayList<Integer>();
-	int scopeHighest;
-	
-	// Keep track of which scope is in which
-	ArrayList<Integer> scopeParent = new ArrayList<Integer>();
-	
 	// Temp bytecode expression storage for for loops
 	// For loop -> Argument -> Expression bytecode
 	private ArrayList<ArrayList<ArrayList<Long>>> tmpExp;
@@ -70,10 +59,11 @@ public class ScriptParser{
 	// Count function parameters
 	private Stack<Integer> funcParams;
 	
-	// Skip functions after defining
-	private ArrayList<Integer> funcSkip;
+	// Number of arguments in function definition
 	private int funcArgs;
-	private int fSkipNum;
+	
+	// Array bytecode holder
+	private Stack<ArrayList<Long>> arrayBc;
 	
 	// Keep track of loops
 	int loopTotal;
@@ -98,7 +88,7 @@ public class ScriptParser{
 		}
 		
 		// Initialize/reset lists
-		bytecode		= new ArrayList<Long>();
+		bytecode	= new ArrayList<Long>();
 		expressions	= new Stack<ArrayList<Object>>();
 		tmpExp		= new ArrayList<ArrayList<ArrayList<Long>>>();
 		states		= new Stack<String>();
@@ -109,11 +99,7 @@ public class ScriptParser{
 		funcBc		= new Stack<ArrayList<Long>>();
 		funcBrackets= new Stack<Integer>();
 		funcParams	= new Stack<Integer>();
-		funcSkip		= new ArrayList<Integer>();
-
-		scope = 0;
-		scopeDepth = 0;
-		scopeHighest = 0;
+		arrayBc		= new Stack<ArrayList<Long>>();
 		
 		tmpExpInd = -1;
 		
@@ -122,20 +108,24 @@ public class ScriptParser{
 		loopTotal = 0;
 		
 		funcArgs = 0;
-		fSkipNum = 0;
-		
-		// First variable reserved for register
-		variables.add("");
 		
 		expressions.add(new ArrayList<Object>());
 		
 		haltCompiler = false;
+
+		// First variable reserved for register
+		variables.add("");
 		
 		// Define functions
 		process(true);
 		
 		if(haltCompiler)
 			return;
+		
+		// Remove bytecode and variables from function definition
+		bytecode.clear();
+		variables.clear();
+		variables.add("");
 		
 		// Process into bytecode
 		process(false);
@@ -160,8 +150,6 @@ public class ScriptParser{
 	
 	// Process tokens into bytecode
 	private void process(boolean functionDef){
-
-		// TODO: make read global variables before function
 		
 		// Keep track of brackets
 		// { ( [
@@ -174,20 +162,30 @@ public class ScriptParser{
 		boolean allowElse = false;
 		boolean resetAllowElse = false;
 		
-		boolean inFunction = false;
+		boolean allowSquareBracket = false;
+		boolean resetAllowSquareBracket = false;
+		
+		boolean allowDot = false;
+		boolean resetAllowDot = false;
+		
+		// Variable being added to expression
+		String expVar = null;
+		
+		// Index of function definition
+		int funcNum = 0;
+		
+		// Scope assigned to variables
+		int scope = 0;
+		int scopeDepth = 0;
+		
+		// Used for calculating current scope
+		ArrayList<Integer> scopePrev = new ArrayList<Integer>();
+		int scopeHighest = 0;
+		
+		// Keep track of which scope is in which
+		ArrayList<Integer> scopeParent = new ArrayList<Integer>();
 		
 		for(int i = 0; i < tokens.length; i++){
-			
-			// Skip defined functions
-			if(!functionDef){
-				while(funcSkip.size() > fSkipNum*2 && i == funcSkip.get(fSkipNum*2)){
-					while(++i != funcSkip.get((fSkipNum*2) + 1));
-					fSkipNum++;
-					
-					if(i >= tokens.length)
-						return;
-				}
-			}
 			
 			// Current token
 			String tCur = tokens[i];
@@ -197,14 +195,6 @@ public class ScriptParser{
 			
 			// Data
 			String token = getData(tCur);
-			
-			// Check only function definitions
-			if(functionDef){
-				if(token.equals("function"))
-					inFunction = true;
-				else if(!inFunction)
-					continue;
-			}
 			
 			// Check if required token was found
 			if(requireAfter != null){
@@ -223,9 +213,22 @@ public class ScriptParser{
 			
 			requireAfter = null;
 			
-			if(resetAllowElse)
-				allowElse = false;
+			
+			// Check if not array item
+			if(expVar != null && !token.equals("[")){
+				expressions.peek().add(expVar);
+				expVar = null;
+			}
+			
+			
+			if(resetAllowElse) allowElse = false;
 			resetAllowElse = allowElse;
+			
+			if(resetAllowSquareBracket) allowSquareBracket = false;
+			resetAllowSquareBracket = allowSquareBracket;
+			
+			if(resetAllowDot) allowDot = false;
+			resetAllowDot = allowDot;
 			
 			// Within () or []
 			boolean inBrackets = brackets[1] != 0 || brackets[2] != 0;
@@ -241,7 +244,7 @@ public class ScriptParser{
 				// Keywords
 				case 'k':
 					if(!stAccept && !token.equals("global") && !token.equals("in")){
-						compilationErrorIV(token, lineNum);
+						compilationErrorIT(token, lineNum);
 						return;
 					}
 					
@@ -259,7 +262,7 @@ public class ScriptParser{
 								states.push(t);
 								continue;
 							}
-							compilationErrorIV(token, lineNum);
+							compilationErrorIT(token, lineNum);
 							return;
 						
 						case "global":
@@ -304,7 +307,7 @@ public class ScriptParser{
 						
 						case "in":
 							if(brackets[2] != 0){
-								compilationErrorIV(token, lineNum);
+								compilationErrorIT(token, lineNum);
 								return;
 							}
 							
@@ -315,17 +318,10 @@ public class ScriptParser{
 						case "function":
 							states.push("func_def");
 							funcArgs = 0;
-							funcSkip.add(i);
 							continue;
 						
 						case "return":
-							boolean inFunc = false;
-							
-							for(int j = 0; j < states.size(); j++)
-								if(states.get(j).equals("func_body"))
-									inFunc = true;
-							
-							if(!inFunc){
+							if(!states.contains("func_body")){
 								compilationError("Return must be in function", lineNum);
 								return;
 							}
@@ -348,7 +344,7 @@ public class ScriptParser{
 						expressions.peek().add(token);
 						continue;
 					}
-					compilationErrorIV(token, lineNum);
+					compilationErrorIT(token, lineNum);
 					return;
 				
 				
@@ -356,7 +352,7 @@ public class ScriptParser{
 				// Assignment operators
 				case 'a':
 					if(inBrackets || statesPeek("exp") || (!statesPeek("assign") && !statesPeek("create"))){
-						compilationErrorIV(token, lineNum);
+						compilationErrorIT(token, lineNum);
 						return;
 					}
 					
@@ -388,7 +384,7 @@ public class ScriptParser{
 					switch(token){
 						case ";":
 							if(inBrackets){
-								compilationErrorIV(token, lineNum);
+								compilationErrorIT(token, lineNum);
 								return;
 							}
 							
@@ -433,7 +429,7 @@ public class ScriptParser{
 										
 										// If counter is negative
 										if((o instanceof Integer && ((int)o) < 0) || (o instanceof Float && ((float)o) < 0) ||
-											(o instanceof String) && ((String)o).equals("-"))
+											(o instanceof String) && o.equals("-"))
 											forLess = true;
 									}
 									
@@ -467,6 +463,13 @@ public class ScriptParser{
 									
 									continue;
 								}
+								
+								// Array item
+								else if(statesPeek("array", 1)){
+									arrayBc.peek().addAll(parseExpression(lineNum));
+									states.push("exp");
+									continue;
+								}
 							}
 							
 							// Function arguments
@@ -482,8 +485,7 @@ public class ScriptParser{
 								continue;
 							}
 							
-							compilationErrorIV(token, lineNum);
-							
+							compilationErrorIT(token, lineNum);
 							return;
 						
 						case "{": case "}":
@@ -496,7 +498,24 @@ public class ScriptParser{
 							// Set scope/close block
 							if(open){
 								// Array
-								if(statesPeek("create") || statesPeek("assign")){}
+								if(statesPeek("exp")){
+									
+									if(statesPeek("array", 1)){
+										compilationError("Cannot place array inside array", lineNum);
+										return;
+									}
+									
+									// Placeholder for bytecode
+									expressions.peek().add("#");
+									
+									// Use new expression for paramters
+									expressions.add(new ArrayList<Object>());
+									arrayBc.push(new ArrayList<Long>());
+										
+									states.add("array");
+									states.add("exp");
+									continue;
+								}
 								
 								// Else
 								else if(statesPeek("else")){
@@ -505,7 +524,7 @@ public class ScriptParser{
 								}
 								else if(!statesPeek("") && !statesPeek("else") && !statesPeek("if_body") &&
 									!statesPeek("while_body") && !statesPeek("for_body") && !statesPeek("func_body")){
-									compilationErrorIV(token, lineNum);
+									compilationErrorIT(token, lineNum);
 									return;
 								}
 								
@@ -526,6 +545,16 @@ public class ScriptParser{
 								scopeDepth++;
 							}
 							else{
+								
+								// Array end
+								if(statesPeek("exp") && statesPeek("array", 1)){
+									arrayBc.peek().addAll(parseExpression(lineNum));
+									arrayBc.peek().add(getInstruction("array_end", lineNum));
+									expressions.pop();
+									states.pop();
+									continue;
+								}
+								
 								// Delete variables created in this scope
 								for(int j = 1; j < variables.size(); j++){
 									String v = variables.get(j);
@@ -591,11 +620,8 @@ public class ScriptParser{
 									forVars.remove(forVars.size() - 1);
 								}
 								else{
-									if(statesPeek("func_body")){
-										inFunction = false;
-										funcSkip.add(i + 1);
+									if(statesPeek("func_body"))
 										states.pop();
-									}
 									
 									bytecode.add(getInstruction("end", lineNum));
 								}
@@ -710,8 +736,6 @@ public class ScriptParser{
 
 									// No args
 									if(expressions.peek().isEmpty()){
-										expressions.pop();
-										
 										// Pop "exp"
 										states.pop();
 									}
@@ -734,60 +758,64 @@ public class ScriptParser{
 									// Get function
 									String func = funcNames.pop() + ":" + funcParams.pop();
 									
-									int funcIndex = -1;
+									// Check if is built in function
+									int funcIndex = getBuiltInFunctionIndex(func);
+									boolean builtIn = funcIndex != -1;
 									
-									for(int j = 0; j < functions.size(); j++){
-										// Variable
-										String f = functions.get(j);
-										int ind = f.indexOf(':') + 1;
-										
-										// Name + arg count
-										String fn = f.substring(ind);
-										
-										// Scope
-										int sc = Integer.parseInt(f.substring(0, ind - 1));
-										
-										if(func.equals(fn)){
+									// If not, check defined functions
+									if(funcIndex == -1){
+										for(int j = 0; j < functions.size(); j++){
+											// Variable
+											String f = functions.get(j);
+											int ind = f.indexOf(':') + 1;
 											
-											// Check if in scope
-											boolean inScope = sc == scope || sc == 0;
-											int last = scope;
+											// Name + arg count
+											String fn = f.substring(ind);
 											
-											// Check if in parent
-											if(!inScope){
-												int sc2 = last == 0 ? 0 : scopeParent.get(last - 1);
+											// Scope
+											int sc = Integer.parseInt(f.substring(0, ind - 1));
+											
+											if(func.equals(fn)){
 												
-												while(sc2 != 0){
-													sc2 = last == 0 ? 0 : scopeParent.get(last - 1);
+												// Check if in scope
+												boolean inScope = sc == scope || sc == 0;
+												int last = scope;
+												
+												// Check if in parent
+												if(!inScope){
+													int sc2 = last == 0 ? 0 : scopeParent.get(last - 1);
 													
-													if(sc2 == sc){
-														inScope = true;
-														break;
+													while(sc2 != 0){
+														sc2 = last == 0 ? 0 : scopeParent.get(last - 1);
+														
+														if(sc2 == sc){
+															inScope = true;
+															break;
+														}
+														last = sc2;
 													}
-													last = sc2;
 												}
-											}
-											
-											if(inScope){
-												funcIndex = j;
-												break;
+												
+												if(inScope){
+													funcIndex = j;
+													break;
+												}
 											}
 										}
 									}
 									
-									if(funcIndex == -1){
-										compilationError("Undefined function", lineNum);
+									// Do not check if functions are being defined
+									if(funcIndex == -1 && !functionDef){
+										compilationError("Undefined function (wrong parameter count/scope?)", lineNum);
 										return;
 									}
 									
 									if(expressions.size() == 1)
-										bytecode.add(getInstruction("call_func", lineNum, funcIndex));
+										bytecode.add(getInstruction(builtIn ? "call_func_b" : "call_func", lineNum, funcIndex));
 									else{
-										funcBc.peek().add(getInstruction("call_func", lineNum, funcIndex));
+										funcBc.peek().add(getInstruction(builtIn ? "call_func_b" : "call_func", lineNum, funcIndex));
 										expressions.pop();
 									}
-									
-									//BytecodePrinter.printBytecode(funcBc.peek(), "");
 									
 									funcBrackets.pop();
 									
@@ -831,11 +859,23 @@ public class ScriptParser{
 									funcArgs++;
 								}
 								
+								requireAfter = new String[]{"{"};
+								states.push("func_body");
+
+								// Add to functions list only if defining
+								if(!functionDef)
+									continue;
+								
 								// Add number of args
 								String func = functions.get(functions.size() - 1) + ":" + funcArgs;
 								functions.set(functions.size() - 1, func);
 								
 								func = func.substring(func.indexOf(':') + 1);
+								
+								if(getBuiltInFunctionIndex(func) != -1){
+									compilationError("Duplicate built-in function", lineNum);
+									return;
+								}
 								
 								// Check if function exists (exclude current function)
 								for(int j = 0; j < functions.size() - 1; j++){
@@ -876,12 +916,33 @@ public class ScriptParser{
 										}
 									}
 								}
-								
-								requireAfter = new String[]{"{"};
-								states.push("func_body");
 							}
 							
 							continue;
+						
+						case "[": case "]":
+							
+							open = token.equals("[");
+							
+							if(open){
+								if(!allowSquareBracket){
+									compilationErrorIT(token, lineNum);
+									return;
+								}
+								
+								if(statesPeek("exp"))
+									expressions.add(new ArrayList<Object>());
+								
+								bytecode.add(getInstruction("array_load", lineNum, variables.indexOf(expVar)));
+								states.push("array_elem");
+								states.push("exp");
+							}
+							else{
+								bytecode.addAll(parseExpression(lineNum));
+							}
+							
+							continue;
+						
 					}
 					continue;
 				
@@ -890,41 +951,44 @@ public class ScriptParser{
 				// Function/task call
 				case 'f':
 					if(!stAccept && !statesPeek("func_def") && !statesPeek("exp")){
-						compilationErrorIV(token, lineNum);
+						compilationErrorIT(token, lineNum);
 						return;
 					}
 					
 					// Add function
 					if(statesPeek("func_def")){
-						functions.add(scope + ":" + token);
-						bytecode.add(getInstruction("function", lineNum, functions.size() - 1));
+						if(functionDef)
+							functions.add(scope + ":" + token);
+						
+						bytecode.add(getInstruction("function", lineNum, funcNum));
+						funcNum++;
 						
 						states.push("func_args");
+						continue;
 					}
 					
 					// Function call
-					else{
-						// If in expression
-						if(statesPeek("exp")){
-							// Add placeholder in expression
-							// Later replaced by function call bytecode
-							expressions.peek().add("@");
-							
-							funcBc.push(new ArrayList<Long>());
-							
-							// Use new expression for paramters
-							expressions.add(new ArrayList<Object>());
-						}
+					
+					// If in expression
+					if(statesPeek("exp")){
+						// Add placeholder in expression
+						// Later replaced by function call bytecode
+						expressions.peek().add("@");
 						
-						funcNames.push(token);
+						funcBc.push(new ArrayList<Long>());
 						
-						funcBrackets.push(brackets[1]);
-						
-						funcParams.push(0);
-						
-						states.push("func_call");
-						states.push("func_args");
+						// Use new expression for paramters
+						expressions.add(new ArrayList<Object>());
 					}
+					
+					funcNames.push(token);
+					
+					funcBrackets.push(brackets[1]);
+					
+					funcParams.push(0);
+					
+					states.push("func_call");
+					states.push("func_args");
 					
 					continue;
 				
@@ -1057,12 +1121,14 @@ public class ScriptParser{
 					
 					// Add to expression
 					if(statesPeek("exp")){
-						expressions.peek().add(var);
+						// Store variable before adding to check for array item
+						allowSquareBracket = true;
+						expVar = var;
 						continue;
 					}
 					
 					if(!states.isEmpty() && !statesPeek("if_body") && !statesPeek("while_body") && !statesPeek("for_body") && !statesPeek("func_body")){
-						compilationErrorIV(token, lineNum);
+						compilationErrorIT(token, lineNum);
 						return;
 					}
 					
@@ -1094,20 +1160,19 @@ public class ScriptParser{
 						continue;
 					}
 					
-					compilationErrorIV(token, lineNum);
+					compilationErrorIT(token, lineNum);
 					return;
 				
 				
 				
 				// String literals
 				case 't':
-					
-					continue;
+				
 			}
 		}
 		
-		//if(functionDef)
-		//	BytecodePrinter.printBytecode(bytecode, "functions");
+		if(states.size() > 0)
+			System.err.println("\nDScript parser warning:\nStates stack size of " + states.size() + " after parsing");
 	}
 	
 	// Parse expression, convert to postfix
@@ -1115,20 +1180,21 @@ public class ScriptParser{
 		
 		ArrayList<Object> exp = expressions.peek();
 		
+		// Generated bytecode
+		ArrayList<Long> bc = new ArrayList<Long>();
+		
 		if(exp.isEmpty()){
-			compilationError("Invalid expression", lineNum);
-			return null;
+			compilationError("Empty expression", lineNum);
+			return bc;
 		}
 		
 		states.pop();	// Pop "exp"
 		
-		// Generated bytecode
-		ArrayList<Long> bc = new ArrayList<Long>();
 		
 		// Check if single negative number
 		if(exp.size() == 3){
 			if(exp.get(0) instanceof Integer && (int)exp.get(0) == 0 &&
-				exp.get(1) instanceof String && ((String)exp.get(1)).equals("-")){
+				exp.get(1) instanceof String && exp.get(1).equals("-")){
 				
 				Object obj = exp.get(2);
 				exp.clear();
@@ -1140,13 +1206,33 @@ public class ScriptParser{
 			}
 		}
 		
-		// If single value
-		if(exp.size() == 1 && !(exp.get(0) instanceof String && ((String)exp.get(0)).charAt(0) == '@')){
+		// If single value (exclude placeholders)
+		if(exp.size() == 1){
 			
-			if(statesPeek("for_args"))
-				bc.add(getValueInst(exp.get(0), lineNum));
-			else
-				bc.add(setOpcode(getValueInst(exp.get(0), lineNum), "load"));
+			Object obj = exp.get(0);
+			
+			boolean getValue = true;
+			
+			// Placeholders
+			if(obj instanceof String){
+				char c = ((String)obj).charAt(0);
+				
+				if(c == '@'){
+					getValue = false;
+					bc.addAll(funcBc.pop());
+				}
+				else if(c == '#'){
+					getValue = false;
+					bc.addAll(arrayBc.pop());
+				}
+			}
+			
+			if(getValue){
+				if(statesPeek("for_args"))
+					bc.add(getValueInst(obj, lineNum));
+				else
+					bc.add(setOpcode(getValueInst(obj, lineNum), "load"));
+			}
 			
 			exp.clear();
 			
@@ -1216,6 +1302,17 @@ public class ScriptParser{
 					bc.add(getInstruction("return", lineNum));
 					states.pop();
 					return bc;
+				
+				// Array item
+				case "array":
+					bc.add(getInstruction("array_val", lineNum));
+					return bc;
+				
+				// Get array element
+				case "array_elem":
+					bc.add(getInstruction("array_elem", lineNum));
+					states.pop();
+					return bc;
 			}
 			
 			bc.clear();
@@ -1244,9 +1341,9 @@ public class ScriptParser{
 			}
 			
 			// Parenthesis
-			if(obj instanceof String && (((String)obj).equals("(") || ((String)obj).equals(")"))){
+			if(obj instanceof String && (obj.equals("(") || obj.equals(")"))){
 				
-				if(((String)obj).equals("("))
+				if(obj.equals("("))
 					operators.push((String)obj);
 				else{
 					while(!operators.isEmpty() && !operators.peek().equals("(")){
@@ -1268,8 +1365,6 @@ public class ScriptParser{
 			output.push(obj);
 		}
 		
-		exp.clear();
-		
 		if(!operators.isEmpty() && (operators.peek().equals("(") || operators.peek().equals(")"))){
 			compilationError("Mismatched parenthesis", lineNum);
 			bc.clear();
@@ -1285,22 +1380,33 @@ public class ScriptParser{
 		for(Object obj:expression){
 			
 			// Operation
-			if(obj instanceof String && isOperation((String)obj))
+			if(obj instanceof String && isOperation((String)obj)){
 				bc.add(getInstruction((String)obj, lineNum));
-			
-			// Function call placeholder
-			else if(obj instanceof String && ((String)obj).charAt(0) == '@'){
+				continue;
+			}
+				
+				// Function call placeholder
+			if(obj instanceof String && ((String)obj).charAt(0) == '@'){
 				bc.addAll(funcBc.pop());
 				bc.add(getInstruction("exp_val_r", lineNum));
+				continue;
+			}
+			
+			// Array placeholder
+			if(obj instanceof String && ((String)obj).charAt(0) == '#'){
+				bc.addAll(arrayBc.pop());
+				bc.add(getInstruction("exp_val", VARIABLE, lineNum, 0));
+				continue;
 			}
 			
 			// Literals/variables
-			else
-				bc.add(getValueInst(obj, lineNum));
+			bc.add(getValueInst(obj, lineNum));
 		}
 		
 		// End expression
 		bc.add(getInstruction("exp_end", lineNum));
+		
+		exp.clear();
 		
 		
 		
@@ -1366,7 +1472,7 @@ public class ScriptParser{
 					bc.add(0, getInstruction("exp_inc", lineNum));
 					bc.add(getInstruction("exp_dec", lineNum));
 				}
-					
+				
 				bc.add(getInstruction("set_param", lineNum));
 				
 				return bc;
@@ -1374,6 +1480,29 @@ public class ScriptParser{
 			// Return value
 			case "return":
 				bc.add(getInstruction("return", lineNum));
+				states.pop();
+				return bc;
+			
+			// Array item
+			case "array":
+				// If array is in expression
+				if(expressions.size() > 1){
+					bc.add(0, getInstruction("exp_inc", lineNum));
+					bc.add(getInstruction("exp_dec", lineNum));
+				}
+				
+				bc.add(getInstruction("array_val", lineNum));
+				return bc;
+			
+			// Get array element
+			case "array_elem":
+				// If in expression
+				if(expressions.size() > 1){
+					bc.add(0, getInstruction("exp_inc", lineNum));
+					bc.add(getInstruction("exp_dec", lineNum));
+				}
+				
+				bc.add(getInstruction("array_elem", lineNum));
 				states.pop();
 				return bc;
 		}
@@ -1426,7 +1555,7 @@ public class ScriptParser{
 		haltCompiler = true;
 	}
 	
-	private void compilationErrorIV(String token, int lineNum){
+	private void compilationErrorIT(String token, int lineNum){
 		compilationError("Invalid token \"" + token + "\"", lineNum);
 	}
 }

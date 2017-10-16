@@ -3,11 +3,10 @@ package engine.script;
 import static engine.script.ScriptFunctions.*;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Stack;
 
 /*
@@ -30,20 +29,11 @@ public class ScriptRunner{
 	// Switch to (byte)0 to save memory
 	private final Object NULL = null;
 	
-	// Variables
-	private Object[] variables;
-	
 	// Used to evaluate postfix expressions
 	private Stack<ArrayList<Object>> expressions;
 	
-	// Function points
-	private ArrayList<Integer> functions;
-	
 	// Function parameters
-	private Stack<Queue<Object>> funcParams;
-	
-	// Store return points for function calls
-	private Stack<Integer> returnPoints;
+	private Stack<Object> funcParams;
 	
 	// Return value for functions
 	private Object returnValue;
@@ -65,20 +55,32 @@ public class ScriptRunner{
 		
 		haltRun = false;
 		
-		// Initialize/reset exoression
+		// Variables
+		Object[] variables;
+		
+		// Function points
+		ArrayList<Integer> functions = new ArrayList<Integer>();
+		
+		// Store return points for function calls
+		Stack<Integer> returnPoints = new Stack<Integer>();
+		
+		// Current array
+		ArrayList<Object> array = new ArrayList<Object>();
+		
+		// Element taken from array
+		ArrayList<Object> arrayRef = new ArrayList<Object>();
+		
+		// Initialize/reset lists
 		expressions = new Stack<ArrayList<Object>>();
 		expressions.push(new ArrayList<Object>());
-
-		functions = new ArrayList<Integer>();
-		funcParams = new Stack<Queue<Object>>();
-		returnPoints = new Stack<Integer>();
+		funcParams = new Stack<Object>();
 		
 		// Account for register
 		int varCount = 1;
 		
 		// Add variables, find functions
 		for(int i = 0; i < bytecode.length; i++){
-			String op = opcodes[getOpcode(bytecode[i])];
+			String op = getOpcodeName(bytecode[i]);
 			
 			if(op.equals("create_var"))
 				varCount++;
@@ -101,7 +103,7 @@ public class ScriptRunner{
 			
 			// Instruction properties
 			long inst = bytecode[i];
-			String opcode = opcodes[getOpcode(inst)];
+			String opcode = getOpcodeName(inst);
 			boolean isVar = isVariable(inst);
 			int lineNum = getLineNum(inst);
 			int data = getData(inst);
@@ -120,9 +122,7 @@ public class ScriptRunner{
 			if(isOperation(opcode)){
 				opcode = getOperation(opcode);
 				
-				//if(type == POSTFIX)
 				operate(opcode, lineNum);
-				//else operation(opcode, isVar, type, data, lineNum);
 				
 				if(haltRun)
 					return;
@@ -175,7 +175,7 @@ public class ScriptRunner{
 				
 				
 				case "delete_var":
-					//variables[data] = NULL;
+					variables[data] = NULL;
 					continue;
 				
 				
@@ -215,18 +215,6 @@ public class ScriptRunner{
 				
 				
 				
-				case "exp_inc":
-					expressions.push(new ArrayList<Object>());
-					continue;
-				
-				
-				
-				case "exp_dec":
-					expressions.pop();
-					continue;
-				
-				
-				
 				case "exp_end":
 					if(expressions.peek().size() != 1){
 						runtimeWarning("Expression stack size " + expressions.peek().size() + " on expression end", lineNum);
@@ -241,6 +229,68 @@ public class ScriptRunner{
 					
 					continue;
 				
+				
+				
+				case "exp_inc":
+					expressions.push(new ArrayList<Object>());
+					continue;
+				
+				
+				
+				case "exp_dec":
+					expressions.pop();
+					continue;
+				
+				
+				
+				case "array_val":
+					array.add(variables[0]);
+					continue;
+				
+				
+				
+				case "array_end":
+					variables[0] = array.clone();
+					array.clear();
+					continue;
+				
+				
+				
+				case "array_load":{
+					Object o = variables[data];
+					
+					if(!(o instanceof ArrayList)){
+						runtimeError("Variable is not an array", lineNum);
+						return;
+					}
+					
+					arrayRef = (ArrayList<Object>)o;
+					continue;
+				}
+				
+				
+				
+				case "array_elem":{
+					Object o = variables[0];
+					
+					// Get item in index
+					if(o instanceof Integer){
+						int n = (int)o;
+						
+						if(n < 0)
+							n = arrayRef.size() - n;
+						
+						if(n > 0 && n < arrayRef.size()){
+							variables[0] = arrayRef.get(n);
+							continue;
+						}
+					}
+					
+					// Otherwise get index of item (or -1 if not in array)
+					variables[0] = arrayRef.indexOf(o);
+					
+					continue;
+				}
 				
 				
 				case "increment":{// Brackets required as not to leak o and n
@@ -325,24 +375,27 @@ public class ScriptRunner{
 				
 				case "end_while":{
 					
-					int whileNum = data;
 					int whileNumC = 0;
 					String op2 = "";
 					
 					// Loop back to while
-					while(!op2.equals("while") || whileNumC != whileNum){
+					while(!op2.equals("while") || whileNumC != data){
 						i--;
-						op2 = opcodes[getOpcode(bytecode[i])];
+						op2 = getOpcodeName(bytecode[i]);
 						whileNumC = getData(bytecode[i]);
 					}
 					
 					continue;
 				}
 				
+				
+				
 				// Skip function definitions
 				case "function":
 					i = skipToEnd(i, false);
 					continue;
+				
+				
 				
 				case "call_func":
 					// Use new expression
@@ -356,22 +409,25 @@ public class ScriptRunner{
 					
 					continue;
 				
-				case "set_param":
-					// New parameters
-					if(funcParams.isEmpty())
-						funcParams.push(new LinkedList<Object>());
-					
-					funcParams.peek().add(variables[0]);
+				
+				
+				case "call_func_b":
+					builtInFunction(data, lineNum);
 					continue;
 				
-				case "get_param":
-					variables[data] = funcParams.peek().remove();
-					
-					// Remove once all parameters are taken
-					if(funcParams.peek().isEmpty())
-						funcParams.pop();
-					
+				
+				
+				case "set_param":
+					funcParams.push(variables[0]);
 					continue;
+				
+				
+				
+				case "get_param":
+					variables[data] = funcParams.pop();
+					continue;
+				
+				
 				
 				// End instruction should be reached only at the end of a function
 				// It is skipped by if/else if statements
@@ -386,15 +442,13 @@ public class ScriptRunner{
 						returnValue = variables[0];
 					else
 						returnValue = null;
-					
-					continue;
 			}
 		}
 		
-		System.out.println("\nResults of " + script.getFileName() + ":\n");
+		//System.out.println("\nResults of " + script.getFileName() + ":\n");
 		
-		for(int i = 0; i < variables.length; i++)
-			System.out.println((i == 0 ? "Register" : "Variable " + i) + ": " + variables[i]);
+		//for(int i = 0; i < variables.length; i++)
+		//	System.out.println((i == 0 ? "Register" : "Variable " + i) + ": " + variables[i]);
 		
 	}
 	
@@ -404,7 +458,7 @@ public class ScriptRunner{
 		
 		while(depth > 0 && i < bytecode.length - 1){
 			i++;
-			String opcode = opcodes[getOpcode(bytecode[i])];
+			String opcode = getOpcodeName(bytecode[i]);
 			
 			if(opcode.equals("if") || opcode.equals("else") || opcode.equals("else_if") ||
 			   opcode.equals("function"))
@@ -414,14 +468,14 @@ public class ScriptRunner{
 				
 				// Skip other else if/else statements
 				if(skipElseIf && i < bytecode.length - 1){
-					String op2 = opcodes[getOpcode(bytecode[i + 1])];
+					String op2 = getOpcodeName(bytecode[i + 1]);
 					
 					if(op2.equals("else")){
 						i += 2;
 						depth++;
 					}
 					else if(op2.equals("else_ahead")){
-						while(!opcodes[getOpcode(bytecode[++i])].equals("else_if"));
+						while(!getOpcodeName(bytecode[++i]).equals("else_if"));
 						depth++;
 					}
 				}
@@ -448,6 +502,50 @@ public class ScriptRunner{
 		if(!isSingleOp)
 			expressions.peek().remove(expSize - 2);
 		
+		// Check if only one is array
+		if(o1 instanceof ArrayList ^ o2 instanceof ArrayList){
+			runtimeError("Type mismatch", lineNum);
+			return;
+		}
+		
+		boolean isArray = o1 instanceof ArrayList;
+		
+		// Regular operations
+		if(!isArray){
+			expressions.peek().add(operate(op, o1, o2, lineNum));
+			return;
+		}
+		
+		// Array operations
+		
+		ArrayList<Object> a1 = (ArrayList<Object>)o1;
+		ArrayList<Object> a2 = (ArrayList<Object>)o2;
+		
+		int firstSize = a1.size();
+		int smallerSize = Math.min(a1.size(), a2.size());
+		
+		ArrayList<Object> result = new ArrayList<Object>();
+		
+		// Operate on each item
+		for(int i = 0; i < firstSize; i++){
+			
+			if(i < smallerSize)
+				result.add(operate(op, a1.get(i), a2.get(i), lineNum));
+			
+			// If first array was larger, copy remaining elements
+			else
+				result.add(a1.get(i));
+			
+			if(haltRun)
+				return;
+		}
+		
+		expressions.peek().add(result);
+	}
+	
+	// Single operation on two objects
+	private Object operate(String op, Object o1, Object o2, int lineNum){
+		
 		boolean isBoolean = o1 instanceof Boolean || o2 instanceof Boolean;
 		
 		// Number operation
@@ -455,12 +553,14 @@ public class ScriptRunner{
 			
 			if((!(o1 instanceof Integer) && !(o1 instanceof Float)) || (!(o2 instanceof Integer) && !(o2 instanceof Float))){
 				runtimeError("Type mismatch", lineNum);
-				return;
+				return null;
 			}
 			
 			// Result as number/boolean
 			float result = 0;
 			boolean resultBool = false;
+			
+			boolean bothFloats = o1 instanceof Float || o2 instanceof Float;
 			
 			// Set result as boolean
 			boolean useBool = false;
@@ -483,23 +583,20 @@ public class ScriptRunner{
 				case "<=":	resultBool = n1 >= n2;	useBool = true; break;
 			}
 			
-			if(!useBool){
-				// Treat as float if data is lost when casting to int
-				if(result != (int)result)
-					expressions.peek().add(result);
-				else
-					expressions.peek().add((int)result);
-			}
-			else
-				expressions.peek().add(resultBool);
+			if(useBool)
+				return resultBool;
 			
-			return;
+			// Treat as float if data is lost when casting to int
+			if(result != (int)result || bothFloats)
+				return result;
+			
+			return (int)result;
 		}
 		
 		// Boolean operation
 		if(!isBoolean || isNumberOp(op)){
 			runtimeError("Type mismatch", lineNum);
-			return;
+			return null;
 		}
 		
 		// Cast
@@ -516,7 +613,120 @@ public class ScriptRunner{
 			case "==":	result = b1 == b2;	break;
 		}
 		
-		expressions.peek().add(result);
+		return result;
+	}
+	
+	// Built in functions
+	private void builtInFunction(int index, int lineNum){
+		
+		// Check for type mismatch
+		if(!builtInFunctionTypeMatch(index, funcParams.toArray())){
+			runtimeError("Type mismatch", lineNum);
+			return;
+		}
+		
+		// Parameters
+		Object o1 = null;
+		Object o2 = null;
+		
+		if(funcParams.size() > 0){
+			o1 = funcParams.pop();
+			
+			if(funcParams.size() > 1)
+				o2 = funcParams.pop();
+		}
+		
+		// As ints/floats
+		boolean isFloat = o1 instanceof Float || o2 instanceof Float;
+		
+		int i1 = o1 instanceof Integer ? (int)o1 : 0;
+		int i2 = o2 instanceof Integer ? (int)o2 : 0;
+		
+		float f1 = o1 instanceof Float ? (float)o1 : 0;
+		float f2 = o2 instanceof Float ? (float)o2 : 0;
+		
+		if(isFloat){
+			f1 = o1 instanceof Integer ? i1 : f1;
+			f2 = o2 instanceof Integer ? i2 : f2;
+		}
+		
+		// No return value by default
+		returnValue = null;
+		
+		switch(getBuiltInFunctionName(index)){
+			case "print":
+				System.out.println(script.getFileName() + ": " + o1);
+				return;
+				
+			case "pi":
+				returnValue = (float)Math.PI;
+				return;
+				
+			case "abs":
+				if(!isFloat) returnValue = Math.abs(i1);
+				else		 returnValue = Math.abs(f1);
+				return;
+				
+			case "degrees":
+				if(!isFloat) returnValue = (float)Math.toDegrees(i1);
+				else		 returnValue = (float)Math.toDegrees(f1);
+				return;
+			
+			case "radians":
+				if(!isFloat) returnValue = (float)Math.toRadians(i1);
+				else		 returnValue = (float)Math.toRadians(f1);
+				return;
+			
+			case "sin":
+				if(!isFloat) returnValue = (float)Math.sin(Math.toRadians(i1));
+				else		 returnValue = (float)Math.sin(Math.toRadians(f1));
+				return;
+				
+			case "cos":
+				if(!isFloat) returnValue = (float)Math.cos(Math.toRadians(i1));
+				else		 returnValue = (float)Math.cos(Math.toRadians(f1));
+				return;
+				
+			case "tan":
+				if(!isFloat) returnValue = (float)Math.tan(Math.toRadians(i1));
+				else		 returnValue = (float)Math.tan(Math.toRadians(f1));
+				return;
+				
+			case "asin":
+				if(!isFloat) returnValue = (float)Math.toDegrees(Math.asin(i1));
+				else		 returnValue = (float)Math.toDegrees(Math.asin(f1));
+				return;
+				
+			case "acos":
+				if(!isFloat) returnValue = (float)Math.toDegrees(Math.acos(i1));
+				else		 returnValue = (float)Math.toDegrees(Math.acos(f1));
+				return;
+				
+			case "atan":
+				if(!isFloat) returnValue = (float)Math.toDegrees(Math.atan(i1));
+				else		 returnValue = (float)Math.toDegrees(Math.atan(f1));
+				return;
+				
+			case "atan2":
+				if(!isFloat) returnValue = (float)Math.toDegrees(Math.atan2(i1, i2));
+				else		 returnValue = (float)Math.toDegrees(Math.atan2(f1, f2));
+				return;
+				
+			case "pow":
+				if(!isFloat) returnValue = (float)Math.pow(i1, i2);
+				else		 returnValue = (float)Math.pow(f1, f2);
+				return;
+				
+			case "min":
+				if(!isFloat) returnValue = Math.min(i1, i2);
+				else		 returnValue = Math.min(f1, f2);
+				return;
+				
+			case "max":
+				if(!isFloat) returnValue = Math.max(i1, i2);
+				else		 returnValue = Math.max(f1, f2);
+				return;
+		}
 	}
 	
 	// Create syntax error and halt compilation

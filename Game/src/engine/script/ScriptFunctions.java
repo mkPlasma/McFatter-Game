@@ -7,28 +7,35 @@ package engine.script;
  * 		Notes:		WIP
  * 		
  * 		Last modified by:	Daniel
- * 		Date:				10/9
+ * 		Date:				current
  * 		Changes:			
  */
 
 public class ScriptFunctions{
 	
-	// Note: Registers are variables 0 and 1
-	// All operations are postfix if set to type object
+	// Note: Register is variable #0
 	
 	public static final String[] opcodes = {
-		"none",				// No oeration
+		"none",				// No operation
 		
 		// Memory
 		"load",				// Load a value into register
 		"store",			// Store register into variable
 		"create_var",		// Creates a new variable
 		"delete_var",		// Deletes variable
+		
+		// Expressions
 		"exp_val",			// Declare expression value
-		"exp_val_r",			// Expression value from function return
+		"exp_val_r",		// Expression value from function return
 		"exp_end",			// End expression and save result in register
 		"exp_inc",			// Create new expression, used by function calls in expressions
 		"exp_dec",			// Remove expression
+		
+		// Arrays
+		"array_val",		// Add register value into array
+		"array_end",		// End array, store in register
+		"array_load",		// Load array to get element
+		"array_elem",		// Get array element of index in register
 		
 		// Arithmetic
 		"add",				// Adds value to register
@@ -46,10 +53,10 @@ public class ScriptFunctions{
 		
 		// Comparisons
 		"less",				// Compares register with value, sets register
-		"greater",			// 
-		"equals",			// 
-		"less_eq",			// 
-		"greater_eq",		// 
+		"greater",			//
+		"equals",			//
+		"less_eq",			//
+		"greater_eq",		//
 		
 		// Control
 		"end",				// Close current block
@@ -63,11 +70,12 @@ public class ScriptFunctions{
 		
 		// Functions
 		"function",			// Function jump location
-		"call_func",		// Call function with set parameters
+		"call_func",		// Calls function with set parameters
+		"call_func_b",		// Calls built-in function
 		"set_param",		// Set function parameter
 		"get_param",		// Store function parameter into register
-		"return",		// Returns register value
-		"return_void",	// Return no value
+		"return",			// Returns register value
+		"return_void",		// Return no value
 	};
 	
 	public static final String[] reservedWords = {
@@ -94,7 +102,25 @@ public class ScriptFunctions{
 	};
 	
 	public static final String[] builtInFunctions = {
-		"print(a)",
+		
+		// General
+		"print:1",
+		
+		// Math
+		"pi:0",
+		"abs:1",
+		"degrees:1",
+		"radians:1",
+		"sin:1",
+		"cos:1",
+		"tan:1",
+		"ain:1",
+		"acos:1",
+		"atan:1",
+		"atan2:2",
+		"pow:2",
+		"min:2",
+		"max:2",
 	};
 	
 	public static final String[] operations = {
@@ -104,9 +130,8 @@ public class ScriptFunctions{
 		"less", "greater", "equals", "less_eq", "greater_eq",
 	};
 	
-	public static final byte INT = 0, FLOAT = 1, BOOLEAN = 2, OBECT = 3,
+	public static final byte INT = 0, FLOAT = 1, BOOLEAN = 2,
 							 VALUE = 0, VARIABLE = 1,
-							 REG1 = 0, REG2 = 1,
 							 ZERO = 0;
 	
 	// Token functions
@@ -134,7 +159,7 @@ public class ScriptFunctions{
 		// As name
 		for(short i = 0; i < opcodes.length; i++)
 			if(opcodes[i].equals(opcode))
-				return toByte(i);
+				return (byte)i;
 		
 		// As operation
 		return getOpcode(getOperation(opcode));
@@ -146,6 +171,48 @@ public class ScriptFunctions{
 				return true;
 		return false;
 	}
+	
+	
+	// Built in functions
+	
+	// Get index of name
+	public static int getBuiltInFunctionIndex(String func){
+		for(int i = 0; i < builtInFunctions.length; i++)
+			if(builtInFunctions[i].equals(func))
+				return i;
+		return -1;
+	}
+	
+	// Get name
+	public static String getBuiltInFunctionName(int index){
+		String name = builtInFunctions[index];
+		return name.substring(0, name.indexOf(':'));
+	}
+	
+	// Check for type mismatch
+	public static boolean builtInFunctionTypeMatch(int index, Object[] params){
+
+		Object o1 = null;
+		Object o2 = null;
+		
+		if(params.length > 0){
+			o1 = params[0];
+			
+			if(params.length > 1)
+				o2 = params[1];
+		}
+		
+		switch(builtInFunctions[index]){
+			case "abs": case "degrees": case "radians": case "sin": case "cos": case "tan": case "asin": case "acos": case "atan":
+				return o1 instanceof Integer || o1 instanceof Float;
+			
+			case "atan2": case "pow": case "min": case "max":
+				return (o1 instanceof Integer || o1 instanceof Float) && (o2 instanceof Integer || o2 instanceof Float);
+		}
+		
+		return true;
+	}
+	
 	
 	// Creates an instruction
 	public static long getInstruction(String opcode, byte variable, byte type, int lineNum, int data){
@@ -180,10 +247,6 @@ public class ScriptFunctions{
 	
 	public static long getInstruction(String opcode, int lineNum, int data){
 		return getInstruction(opcode, ZERO, ZERO, lineNum, data);
-	}
-
-	public static long getInstruction(String opcode, byte type, int lineNum){
-		return getInstruction(opcode, ZERO, type, lineNum, 0);
 	}
 	
 	public static long getInstruction(String opcode, int lineNum){
@@ -233,43 +296,16 @@ public class ScriptFunctions{
 		return inst;
 	}
 	
-	public static long setVariable(long inst, byte variable){
-		
-		// Clear bit
-		inst &= 0b1111111101111111111111111111111111111111111111111111111111111111l;
-		
-		// Set variable
-		inst |= ((toLong(variable) & 0b1) << 55);
-		
-		return inst;
-	}
-	
-	public static long setType(long inst, byte type){
-		
-		// Clear bits
-		inst &= 0b1111111110011111111111111111111111111111111111111111111111111111l;
-		
-		// Set type
-		inst |= ((toLong(type) & 0b11) << 53);
-		
-		return inst;
-	}
-	
-	
 	
 	
 	// Bit handling methods
 	
-	private static byte toByte(short s){
-		return (byte)(((byte)0)|s);
-	}
-	
 	private static long toLong(byte b){
-		return 0l | ((long)b) << 56 >>> 56;
+		return (long)b << 56 >>> 56;
 	}
 	
 	private static long toLong(int i){
-		return 0l | ((long)i << 32 >>> 32);
+		return (long)i << 32 >>> 32;
 	}
 	
 	
@@ -277,20 +313,8 @@ public class ScriptFunctions{
 	
 	// Operations
 	
-	public static boolean isNumber(long inst){
-		byte type = getType(inst);
-		return type == INT || type == FLOAT;
-	}
-	
 	public static boolean isNumberOp(String op){
 		for(int i = 0; i < 10; i++)
-			if(op.equals(operations[i]))
-				return true;
-		return false;
-	}
-	
-	public static boolean opReturnsNumber(String op){
-		for(int i = 0; i < 5; i++)
 			if(op.equals(operations[i]))
 				return true;
 		return false;

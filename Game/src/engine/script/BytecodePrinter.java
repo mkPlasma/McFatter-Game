@@ -29,6 +29,8 @@ public class BytecodePrinter{
 			
 			System.out.println(i + "\t" + getLineNum(inst) + "\t" + opcode + (opcode.length() < 8 ? "\t\t" : "\t") + getInfo(inst, opcode));
 		}
+		
+		System.out.println();
 	}
 	
 	private static String getInfo(long inst, String opcode){
@@ -40,7 +42,6 @@ public class BytecodePrinter{
 		int data = getData(inst);
 		
 		String info = "";
-		//case "load": case "store": case "create_var": case "delete_var": case "postfix_val": case "increment": case "decrement":
 		
 		// Variable number
 		if(var || opcode.equals("store") || opcode.equals("create_var") || opcode.equals("delete_var")
@@ -62,6 +63,9 @@ public class BytecodePrinter{
 		// Function
 		else if(opcode.equals("function") || opcode.equals("call_func"))
 			info += "function #" + data;
+		
+		else if(opcode.equals("call_func_b"))
+			info += getBuiltInFunctionName(data);
 		
 		// Literal value
 		else if(opcode.equals("load") || opcode.equals("exp_val")){
