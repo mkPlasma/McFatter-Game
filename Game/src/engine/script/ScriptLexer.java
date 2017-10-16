@@ -399,7 +399,7 @@ public class ScriptLexer{
 							nextExpected = new String[]{"f"};
 							break;
 						case "return":
-							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", ";", "!", "-"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", ";", "!", "-", "{"};
 							break;
 						case "wait":
 							nextExpected = new String[]{"i", "l", "v", "f", ";", "-"};
@@ -409,33 +409,33 @@ public class ScriptLexer{
 				
 				// Operator
 				case 'o':
-					lastExpected = new String[]{"v", "f", "i", "l", ")", "]"};
-					nextExpected = new String[]{"v", "f", "i", "l", "(", "global", "-"};
+					lastExpected = new String[]{"v", "f", "i", "l", ")", "]", "}"};
+					nextExpected = new String[]{"v", "f", "i", "l", "(", "{", "global", "-"};
 					
 					switch(token){
 						case "!":
 							lastExpected = new String[]{"||", "&&", "==", "(", "{", "=", ","};
-							nextExpected = new String[]{"v", "f", "b", "(", "global"};
+							nextExpected = new String[]{"v", "f", "b", "(", "{", "global"};
 							break;
 						
 						case "||": case "&&":
-							lastExpected = new String[]{"v", "f", "i", "l", "b", ")", "]"};
-							nextExpected = new String[]{"v", "f", "i", "l", "b", "(", "!", "-", "global"};
+							lastExpected = new String[]{"v", "f", "i", "l", "b", ")", "]", "}"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "(", "{", "!", "-", "global"};
 							break;
 						
 						case "==":
-							lastExpected = new String[]{"v", "f", "i", "l", "b", "t", ")", "]"};
-							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "!", "-", "global"};
+							lastExpected = new String[]{"v", "f", "i", "l", "b", "t", ")", "]", "}"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "{", "!", "-", "global"};
 							break;
 					
 						case "+":
-							lastExpected = new String[]{"v", "f", "i", "l", "t", ")", "]"};
-							nextExpected = new String[]{"v", "f", "i", "l", "t", "(", "global"};
+							lastExpected = new String[]{"v", "f", "i", "l", "t", ")", "]", "}"};
+							nextExpected = new String[]{"v", "f", "i", "l", "t", "(", "{", "global"};
 							break;
 					
 						case "-":
-							lastExpected = new String[]{"v", "o", "a", "f", "i", "l", ",", "(", ")", "[", "]", "return", "wait"};
-							nextExpected = new String[]{"v", "f", "i", "l", "(", "global"};
+							lastExpected = new String[]{"v", "o", "a", "f", "i", "l", ",", "(", ")", "[", "]", "}", "return", "wait"};
+							nextExpected = new String[]{"v", "f", "i", "l", "(", "{", "global"};
 						break;
 					}
 					break;
@@ -470,17 +470,17 @@ public class ScriptLexer{
 							break;
 						case ")":
 							lastExpected = new String[]{"v", "i", "l", "b", "t", "(", ")", "]"};
-							nextExpected = new String[]{"o", "{", ";", ",", ")"};
+							nextExpected = new String[]{"o", "{", ";", ",", ")", "[", "]"};
 							break;
 						case "{":
-							lastExpected = new String[]{")", "=", "else", "return", "in"};
+							lastExpected = new String[]{")", "o", "a", "else", "return", "in"};
 							break;
 						case "[":
-							lastExpected = new String[]{"v"};
+							lastExpected = new String[]{"v", "}", ")"};
 							nextExpected = new String[]{"v", "f", "i", "-", "global"};
 							break;
 						case "]":
-							lastExpected = new String[]{"v", "i", ")"};
+							lastExpected = new String[]{"v", "i", ")", "]"};
 							nextExpected = new String[]{"a", "o", ")", "]", ";"};
 							break;
 						case ",":

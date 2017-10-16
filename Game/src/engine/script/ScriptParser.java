@@ -50,8 +50,8 @@ public class ScriptParser{
 	// Function names when called
 	private Stack<String> funcNames;
 	
-	// Function call bytecode holder when in expression
-	private Stack<ArrayList<Long>> funcBc;
+	// Bytecode holder for functions/arrays in expression
+	private Stack<ArrayList<Long>> tempBc;
 	
 	// Number of parenthesis during function call
 	private Stack<Integer> funcBrackets;
@@ -61,9 +61,6 @@ public class ScriptParser{
 	
 	// Number of arguments in function definition
 	private int funcArgs;
-	
-	// Array bytecode holder
-	private Stack<ArrayList<Long>> arrayBc;
 	
 	// Keep track of loops
 	int loopTotal;
@@ -96,10 +93,9 @@ public class ScriptParser{
 		forVars		= new ArrayList<String>();
 		functions	= new ArrayList<String>();
 		funcNames	= new Stack<String>();
-		funcBc		= new Stack<ArrayList<Long>>();
+		tempBc		= new Stack<ArrayList<Long>>();
 		funcBrackets= new Stack<Integer>();
 		funcParams	= new Stack<Integer>();
-		arrayBc		= new Stack<ArrayList<Long>>();
 		
 		tmpExpInd = -1;
 		
@@ -213,12 +209,20 @@ public class ScriptParser{
 			
 			requireAfter = null;
 			
-			
 			// Check if not array item
 			if(expVar != null && !token.equals("[")){
 				expressions.peek().add(expVar);
 				expVar = null;
 			}
+			
+			System.out.println("\n\n" + token);
+			
+			for(int j = 0; j < expressions.size(); j++)
+				System.out.print(expressions.get(j));
+			System.out.println();
+			
+			for(int j = 0; j < states.size(); j++)
+				System.out.print(states.get(j) + " ");
 			
 			
 			if(resetAllowElse) allowElse = false;
@@ -454,7 +458,7 @@ public class ScriptParser{
 									else{
 										// Must do this otherwise funcBc.peek() will be the wrong item
 										ArrayList<Long> bc = parseExpression(lineNum);
-										funcBc.peek().addAll(bc);
+										tempBc.peek().addAll(bc);
 									}
 									
 									funcParams.push(funcParams.pop() + 1);
@@ -466,7 +470,7 @@ public class ScriptParser{
 								
 								// Array item
 								else if(statesPeek("array", 1)){
-									arrayBc.peek().addAll(parseExpression(lineNum));
+									tempBc.peek().addAll(parseExpression(lineNum));
 									states.push("exp");
 									continue;
 								}
@@ -510,8 +514,8 @@ public class ScriptParser{
 									
 									// Use new expression for paramters
 									expressions.add(new ArrayList<Object>());
-									arrayBc.push(new ArrayList<Long>());
-										
+									tempBc.push(new ArrayList<Long>());
+									
 									states.add("array");
 									states.add("exp");
 									continue;
@@ -548,8 +552,8 @@ public class ScriptParser{
 								
 								// Array end
 								if(statesPeek("exp") && statesPeek("array", 1)){
-									arrayBc.peek().addAll(parseExpression(lineNum));
-									arrayBc.peek().add(getInstruction("array_end", lineNum));
+									tempBc.peek().addAll(parseExpression(lineNum));
+									tempBc.peek().add(getInstruction("array_end", lineNum));
 									expressions.pop();
 									states.pop();
 									continue;
@@ -745,7 +749,7 @@ public class ScriptParser{
 										else{
 											// Must do this otherwise funcBc.peek() will be the wrong item
 											ArrayList<Long> bc = parseExpression(lineNum);
-											funcBc.peek().addAll(bc);
+											tempBc.peek().addAll(bc);
 										}
 										
 										funcParams.push(funcParams.pop() + 1);
@@ -813,8 +817,10 @@ public class ScriptParser{
 									if(expressions.size() == 1)
 										bytecode.add(getInstruction(builtIn ? "call_func_b" : "call_func", lineNum, funcIndex));
 									else{
-										funcBc.peek().add(getInstruction(builtIn ? "call_func_b" : "call_func", lineNum, funcIndex));
+										tempBc.peek().add(getInstruction(builtIn ? "call_func_b" : "call_func", lineNum, funcIndex));
 										expressions.pop();
+										
+										System.out.println(tempBc.peek());
 									}
 									
 									funcBrackets.pop();
@@ -930,15 +936,29 @@ public class ScriptParser{
 									return;
 								}
 								
-								if(statesPeek("exp"))
+								// Add placeholder
+								if(statesPeek("exp")){
+									expressions.peek().add("#");
 									expressions.add(new ArrayList<Object>());
+								}
 								
-								bytecode.add(getInstruction("array_load", lineNum, variables.indexOf(expVar)));
+								// Add new temp bytecode holder
+								tempBc.push(new ArrayList<Long>());
+								tempBc.peek().add(getInstruction("array_load", lineNum, variables.indexOf(expVar)));
+								
+								// Reset variable
+								expVar = null;
+								
 								states.push("array_elem");
 								states.push("exp");
 							}
+							// End expression and parse
 							else{
-								bytecode.addAll(parseExpression(lineNum));
+								// Must do this otherwise funcBc.peek() will be the wrong item
+								ArrayList<Long> bc = parseExpression(lineNum);
+								tempBc.peek().addAll(bc);
+								
+								expressions.pop();
 							}
 							
 							continue;
@@ -975,7 +995,7 @@ public class ScriptParser{
 						// Later replaced by function call bytecode
 						expressions.peek().add("@");
 						
-						funcBc.push(new ArrayList<Long>());
+						tempBc.push(new ArrayList<Long>());
 						
 						// Use new expression for paramters
 						expressions.add(new ArrayList<Object>());
@@ -1217,13 +1237,13 @@ public class ScriptParser{
 			if(obj instanceof String){
 				char c = ((String)obj).charAt(0);
 				
-				if(c == '@'){
+				if(c == '@' || c == '#'){
+					bc.addAll(tempBc.pop());
+					
+					if(c == '@')
+						bc.add(getInstruction("load_r", lineNum));
+					
 					getValue = false;
-					bc.addAll(funcBc.pop());
-				}
-				else if(c == '#'){
-					getValue = false;
-					bc.addAll(arrayBc.pop());
 				}
 			}
 			
@@ -1376,7 +1396,8 @@ public class ScriptParser{
 
 		// Convert to bytecode
 		Object[] expression = output.toArray();
-		
+
+		System.out.println("\nexpression");
 		for(Object obj:expression){
 			
 			// Operation
@@ -1385,18 +1406,23 @@ public class ScriptParser{
 				continue;
 			}
 				
-				// Function call placeholder
-			if(obj instanceof String && ((String)obj).charAt(0) == '@'){
-				bc.addAll(funcBc.pop());
-				bc.add(getInstruction("exp_val_r", lineNum));
-				continue;
-			}
-			
-			// Array placeholder
-			if(obj instanceof String && ((String)obj).charAt(0) == '#'){
-				bc.addAll(arrayBc.pop());
-				bc.add(getInstruction("exp_val", VARIABLE, lineNum, 0));
-				continue;
+			// Bytecode placeholder
+			if(obj instanceof String){
+				char c = ((String)obj).charAt(0);
+				
+				if(c == '@' || c == '#'){
+					bc.addAll(tempBc.pop());
+					
+					// Return value
+					if(c == '@')
+						bc.add(getInstruction("exp_val_r", lineNum));
+					
+					// Array value
+					else if(c == '#')
+						bc.add(getInstruction("exp_val", VARIABLE, lineNum, 0));
+					
+					continue;
+				}
 			}
 			
 			// Literals/variables

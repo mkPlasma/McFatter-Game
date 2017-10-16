@@ -162,6 +162,17 @@ public class ScriptRunner{
 				
 				
 				
+				case "load_r":
+					if(returnValue == null){
+						runtimeError("Null or void return value", lineNum);
+						return;
+					}
+					
+					variables[0] = returnValue;
+					continue;
+				
+				
+				
 				case "store":
 					variables[data] = variables[0];
 					continue;
@@ -277,10 +288,11 @@ public class ScriptRunner{
 					if(o instanceof Integer){
 						int n = (int)o;
 						
+						// Negative numbers refer to elements from end
 						if(n < 0)
-							n = arrayRef.size() - n;
+							n = arrayRef.size() + n;
 						
-						if(n > 0 && n < arrayRef.size()){
+						if(n >= 0 && n < arrayRef.size()){
 							variables[0] = arrayRef.get(n);
 							continue;
 						}

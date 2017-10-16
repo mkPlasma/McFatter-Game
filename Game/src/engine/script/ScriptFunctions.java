@@ -20,6 +20,7 @@ public class ScriptFunctions{
 		
 		// Memory
 		"load",				// Load a value into register
+		"load_r",			// Load return value into register
 		"store",			// Store register into variable
 		"create_var",		// Creates a new variable
 		"delete_var",		// Deletes variable
