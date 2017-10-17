@@ -192,7 +192,6 @@ public class ScriptRunner{
 				
 				
 				case "exp_val":
-					
 					// Variables
 					if(isVar)
 						expressions.peek().add(variables[data]);

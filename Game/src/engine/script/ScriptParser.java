@@ -213,7 +213,7 @@ public class ScriptParser{
 			requireAfter = null;
 			
 			// Check if not array item
-			if(expVar != null && !token.equals("[")){
+			if(expVar != null && !token.equals("[") && type != 'a'){
 				expressions.peek().add(expVar);
 				expVar = null;
 			}
@@ -362,6 +362,8 @@ public class ScriptParser{
 						compilationErrorIT(token, lineNum);
 						return;
 					}
+					
+					expVar = null;
 					
 					if(token.contains("=")){
 						
@@ -1407,7 +1409,7 @@ public class ScriptParser{
 					
 					// Get variable and pop
 					else{
-						int i = variables.indexOf(states.pop());
+						int i = variables.indexOf(st);
 						
 						// Store variable
 						bc.add(getInstruction("store", lineNum, i));
@@ -1623,17 +1625,42 @@ public class ScriptParser{
 					
 					// Add bytecode to set array element
 					bc.addAll(tempBc.pop());
+					
+					// If operation replace last instruction
+					if(isOperation(statesPeek())){
+						String op = states.pop();
+						bc.remove(bc.size() - 1);
+						
+						switch(op){
+							case "+":
+								bc.add(getInstruction("array_elem_a", lineNum));
+								break;
+							case "-":
+								bc.add(getInstruction("array_elem_u", lineNum));
+								break;
+							case "*":
+								bc.add(getInstruction("array_elem_m", lineNum));
+								break;
+							case "/":
+								bc.add(getInstruction("array_elem_d", lineNum));
+								break;
+							case "%":
+								bc.add(getInstruction("array_elem_o", lineNum));
+								break;
+						}
+					}
 				}
 				
 				// Get variable and pop
 				else{
-					int i = variables.indexOf(states.pop());
+					int i = variables.indexOf(st);
 					
 					// Store variable
 					bc.add(getInstruction("store", lineNum, i));
 				}
 				
 				return bc;
+			
 			
 			// Function call
 			case "func_args":

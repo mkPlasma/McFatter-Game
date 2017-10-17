@@ -1,4 +1,15 @@
 
-set a = 2^3;
+asdf(1, 2, 3);
 
-print(a);
+set x = 0;
+
+function asdf(a, b, c){
+  x += a;
+  
+  //print(a);
+  //print(b);
+  //print(c);
+}
+
+
+print(x);
