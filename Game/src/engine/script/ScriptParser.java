@@ -181,6 +181,9 @@ public class ScriptParser{
 		// Keep track of which scope is in which
 		ArrayList<Integer> scopeParent = new ArrayList<Integer>();
 		
+		// Swich array element bytecode placeholder
+		Stack<Boolean> arrayElemSwitch = new Stack<Boolean>();
+		
 		for(int i = 0; i < tokens.length; i++){
 			
 			// Current token
@@ -505,7 +508,7 @@ public class ScriptParser{
 								if(statesPeek("exp")){
 									
 									if(statesPeek("array", 1)){
-										compilationError("Cannot place array inside array", lineNum);
+										compilationError("Cannot add array to array", lineNum);
 										return;
 									}
 									
@@ -556,6 +559,8 @@ public class ScriptParser{
 									tempBc.peek().add(getInstruction("array_end", lineNum));
 									expressions.pop();
 									states.pop();
+									
+									allowSquareBracket = true;
 									continue;
 								}
 								
@@ -824,6 +829,7 @@ public class ScriptParser{
 									}
 									
 									funcBrackets.pop();
+									allowSquareBracket = true;
 									
 									continue;
 								}
@@ -936,15 +942,32 @@ public class ScriptParser{
 									return;
 								}
 								
+								// Add new temp bytecode holder
+								tempBc.push(new ArrayList<Long>());
+								
+								// Array variable
+								if(expVar != null){
+									tempBc.peek().add(getInstruction("array_load", lineNum, variables.indexOf(expVar)));
+									arrayElemSwitch.push(false);
+								}
+								
+								// Array direct/from function return
+								else{
+									// From function
+									if(getData(tokens[i - 1]).equals(")"))
+										tempBc.peek().add(getInstruction("load_r", lineNum));
+									
+									tempBc.peek().add(getInstruction("array_load", lineNum, 0));
+									
+									arrayElemSwitch.push(true);
+								}
+								
 								// Add placeholder
 								if(statesPeek("exp")){
-									expressions.peek().add("#");
+									expressions.peek().add(arrayElemSwitch.peek() ? "$" :"#");
 									expressions.add(new ArrayList<Object>());
 								}
 								
-								// Add new temp bytecode holder
-								tempBc.push(new ArrayList<Long>());
-								tempBc.peek().add(getInstruction("array_load", lineNum, variables.indexOf(expVar)));
 								
 								// Reset variable
 								expVar = null;
@@ -957,6 +980,12 @@ public class ScriptParser{
 								// Must do this otherwise funcBc.peek() will be the wrong item
 								ArrayList<Long> bc = parseExpression(lineNum);
 								tempBc.peek().addAll(bc);
+								
+								// Switch top 2 bytecode holders if referencing array directly or function call
+								if(arrayElemSwitch.pop()){
+									bc = tempBc.pop();
+									tempBc.add(tempBc.size() - 1, bc);
+								}
 								
 								expressions.pop();
 							}
@@ -1396,8 +1425,7 @@ public class ScriptParser{
 
 		// Convert to bytecode
 		Object[] expression = output.toArray();
-
-		System.out.println("\nexpression");
+		
 		for(Object obj:expression){
 			
 			// Operation
@@ -1410,8 +1438,11 @@ public class ScriptParser{
 			if(obj instanceof String){
 				char c = ((String)obj).charAt(0);
 				
-				if(c == '@' || c == '#'){
-					bc.addAll(tempBc.pop());
+				if(c == '@' || c == '#' || c == '$'){
+					
+					// Add bytecode
+					if(c != '$')
+						bc.addAll(tempBc.pop());
 					
 					// Return value
 					if(c == '@')
@@ -1420,6 +1451,16 @@ public class ScriptParser{
 					// Array value
 					else if(c == '#')
 						bc.add(getInstruction("exp_val", VARIABLE, lineNum, 0));
+					
+					// Array element after array or function call
+					else if(c == '$'){
+						// Need to remove exp_val
+						bc.remove(bc.size() - 1);
+						
+						// Add bytecode
+						bc.addAll(tempBc.pop());
+						bc.add(getInstruction("exp_val", VARIABLE, lineNum, 0));
+					}
 					
 					continue;
 				}

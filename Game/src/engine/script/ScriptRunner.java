@@ -3,7 +3,6 @@ package engine.script;
 import static engine.script.ScriptFunctions.*;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -42,6 +41,7 @@ public class ScriptRunner{
 	
 	private DScript script;
 	
+	@SuppressWarnings("unchecked")
 	public void run(DScript script){
 		this.script = script;
 
@@ -255,6 +255,11 @@ public class ScriptRunner{
 				
 				
 				case "array_val":
+					if(variables[0] instanceof ArrayList){
+						runtimeError("Cannot add array to array", lineNum);
+						return;
+					}
+					
 					array.add(variables[0]);
 					continue;
 				
@@ -498,6 +503,7 @@ public class ScriptRunner{
 	}
 	
 	// Postfix expression operation
+	@SuppressWarnings("unchecked")
 	private void operate(String op, int lineNum){
 		
 		int expSize = expressions.peek().size();
@@ -514,8 +520,8 @@ public class ScriptRunner{
 		if(!isSingleOp)
 			expressions.peek().remove(expSize - 2);
 		
-		// Check if only one is array
-		if(o1 instanceof ArrayList ^ o2 instanceof ArrayList){
+		// Check if second is array
+		if(!(o1 instanceof ArrayList) && o2 instanceof ArrayList){
 			runtimeError("Type mismatch", lineNum);
 			return;
 		}
@@ -530,23 +536,38 @@ public class ScriptRunner{
 		
 		// Array operations
 		
-		ArrayList<Object> a1 = (ArrayList<Object>)o1;
-		ArrayList<Object> a2 = (ArrayList<Object>)o2;
+		// Is second object array
+		boolean secondIsArray = o2 instanceof ArrayList;
 		
+		ArrayList<Object> a1 = (ArrayList<Object>)o1;
+		ArrayList<Object> a2 = null;
+
 		int firstSize = a1.size();
-		int smallerSize = Math.min(a1.size(), a2.size());
+		int smallerSize = 0;
+		
+		if(secondIsArray){
+			a2 = (ArrayList<Object>)o2;
+			smallerSize = Math.min(a1.size(), a2.size());
+		}
 		
 		ArrayList<Object> result = new ArrayList<Object>();
 		
 		// Operate on each item
 		for(int i = 0; i < firstSize; i++){
 			
-			if(i < smallerSize)
-				result.add(operate(op, a1.get(i), a2.get(i), lineNum));
+			// Both arrays
+			if(secondIsArray){
+				if(i < smallerSize)
+					result.add(operate(op, a1.get(i), a2.get(i), lineNum));
+				
+				// If first array was larger, copy remaining elements
+				else
+					result.add(a1.get(i));
+			}
 			
-			// If first array was larger, copy remaining elements
+			// First only is array
 			else
-				result.add(a1.get(i));
+				result.add(operate(op, a1.get(i), o2, lineNum));
 			
 			if(haltRun)
 				return;
@@ -591,8 +612,8 @@ public class ScriptRunner{
 				case "<":	resultBool = n1 < n2;	useBool = true; break;
 				case ">":	resultBool = n1 > n2;	useBool = true; break;
 				case "==":	resultBool = n1 == n2;	useBool = true; break;
-				case ">=":	resultBool = n1 <= n2;	useBool = true; break;
-				case "<=":	resultBool = n1 >= n2;	useBool = true; break;
+				case "<=":	resultBool = n1 <= n2;	useBool = true; break;
+				case ">=":	resultBool = n1 >= n2;	useBool = true; break;
 			}
 			
 			if(useBool)
