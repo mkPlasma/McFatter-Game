@@ -1,8 +1,4 @@
 
-function test(){
-	return {111, 222};
-}
-
-set a = test()[0 + 0];
+set a = 2^3;
 
 print(a);

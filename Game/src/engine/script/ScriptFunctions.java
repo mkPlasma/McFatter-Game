@@ -37,13 +37,20 @@ public class ScriptFunctions{
 		"array_end",		// End array, store in register
 		"array_load",		// Load array to get element
 		"array_elem",		// Get array element of index in register
+		"array_elem_s",	// Set array element to value of register
+		"array_elem_a",	// Add
+		"array_elem_u",	// Subtract
+		"array_elem_m",	// Multiply
+		"array_elem_d",	// Divide
+		"array_elem_o",	// Modulo
 		
 		// Arithmetic
-		"add",				// Adds value to register
-		"subtract",			// Subtracts value from register
-		"multiply",			// Multiplies register by value
-		"divide",			// Divides register by value
-		"modulo",			// Sets register remainder
+		"add",				// 
+		"subtract",			// 
+		"multiply",			// 
+		"divide",			// 
+		"modulo",			// 
+		"exponent",			// 
 		"increment",		// Increments register/variable
 		"decrement",		// Decrements register/variable
 		
@@ -125,9 +132,9 @@ public class ScriptFunctions{
 	};
 	
 	public static final String[] operations = {
-		"+", "-", "*", "/", "%", "<", ">", "==", "<=", ">=", "!", "||", "&&",
+		"+", "-", "*", "/", "%", "^", "<", ">", "==", "<=", ">=", "!", "||", "&&",
 		
-		"add", "subtract", "multiply", "divide", "modulo", "not", "or", "and",
+		"add", "subtract", "multiply", "divide", "modulo", "exponent", "not", "or", "and",
 		"less", "greater", "equals", "less_eq", "greater_eq",
 	};
 	
@@ -315,7 +322,7 @@ public class ScriptFunctions{
 	// Operations
 	
 	public static boolean isNumberOp(String op){
-		for(int i = 0; i < 10; i++)
+		for(int i = 0; i < 11; i++)
 			if(op.equals(operations[i]))
 				return true;
 		return false;
@@ -335,6 +342,7 @@ public class ScriptFunctions{
 			case "multiply":	return "*";
 			case "divide":		return "/";
 			case "modulo":		return "%";
+			case "exponent":		return "^";
 			case "not":			return "!";
 			case "or":			return "||";
 			case "and":			return "&&";
@@ -349,6 +357,7 @@ public class ScriptFunctions{
 			case "*":	return "multiply";
 			case "/":	return "divide";
 			case "%":	return "modulo";
+			case "^":	return "exponent";
 			case "!":	return "not";
 			case "||":	return "or";
 			case "&&":	return "and";
@@ -364,6 +373,8 @@ public class ScriptFunctions{
 	
 	public static int getPrecedence(String op){
 		switch(op){
+			case "^":
+				return 4;
 			case "*": case "/":
 				return 3;
 			case "+": case "-": case "%":

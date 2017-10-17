@@ -367,12 +367,33 @@ public class ScriptParser{
 						
 						// For +=, /=, etc.
 						if(!token.equals("=")){
-							// Add var name
-							expressions.peek().add(statesPeek(1));
-							// Add operation
-							expressions.peek().add(token.replace("=", ""));
+							
+							if(statesPeek("create")){
+								compilationErrorIT(token, lineNum);
+								return;
+							}
+							
+							// Array assign
+							if(statesPeek("assign_array_pre", 2))
+								states.add(states.size() - 3, token.replaceAll("=", ""));
+							
+							// Variable assign
+							else{
+								// Add var name
+								expressions.peek().add(statesPeek(1));
+								// Add operation
+								expressions.peek().add(token.replace("=", ""));
+							}
 						}
-
+						
+						if(statesPeek("assign_array_pre", 2)){
+							states.pop();
+							states.pop();
+							states.pop();
+							states.push("assign_array");
+							states.push("assign");
+						}
+						
 						states.push("exp"); // Expression
 						
 						continue;
@@ -945,35 +966,56 @@ public class ScriptParser{
 								// Add new temp bytecode holder
 								tempBc.push(new ArrayList<Long>());
 								
-								// Array variable
-								if(expVar != null){
-									tempBc.peek().add(getInstruction("array_load", lineNum, variables.indexOf(expVar)));
-									arrayElemSwitch.push(false);
-								}
-								
-								// Array direct/from function return
-								else{
-									// From function
-									if(getData(tokens[i - 1]).equals(")"))
-										tempBc.peek().add(getInstruction("load_r", lineNum));
-									
-									tempBc.peek().add(getInstruction("array_load", lineNum, 0));
-									
-									arrayElemSwitch.push(true);
-								}
-								
-								// Add placeholder
+								// Array element in expression
 								if(statesPeek("exp")){
+									// Array variable
+									if(expVar != null){
+										tempBc.peek().add(getInstruction("array_load", lineNum, variables.indexOf(expVar)));
+										arrayElemSwitch.push(false);
+									}
+									
+									// Array direct/from function return
+									else{
+										// From function
+										if(getData(tokens[i - 1]).equals(")"))
+											tempBc.peek().add(getInstruction("load_r", lineNum));
+										
+										tempBc.peek().add(getInstruction("array_load", lineNum, 0));
+										
+										arrayElemSwitch.push(true);
+									}
+									
+									// Add placeholder
 									expressions.peek().add(arrayElemSwitch.peek() ? "$" :"#");
 									expressions.add(new ArrayList<Object>());
 								}
 								
+								// Assign array element
+								else{
+									// Two required, one for element as a whole, second for expression inside
+									tempBc.push(new ArrayList<Long>());
+									
+									// Pop "assign"
+									states.pop();
+									
+									// Load variable array
+									tempBc.peek().add(getInstruction("array_load", VARIABLE, lineNum, variables.indexOf(states.pop())));
+									
+									states.push("assign_array_pre");
+									states.push("assign");
+									
+									expressions.add(new ArrayList<Object>());
+									
+									arrayElemSwitch.push(false);
+								}
 								
 								// Reset variable
 								expVar = null;
 								
 								states.push("array_elem");
 								states.push("exp");
+								
+								continue;
 							}
 							// End expression and parse
 							else{
@@ -1190,7 +1232,10 @@ public class ScriptParser{
 						compilationError("Variable " + varName + " is constant", lineNum);
 						return;
 					}
-
+					
+					allowSquareBracket = true;
+					expVar = var;
+					
 					states.push(var);
 					states.push("assign");
 					
@@ -1324,12 +1369,49 @@ public class ScriptParser{
 				case "assign":
 					// Pop "assign"
 					states.pop();
-
-					// Get variable and pop
-					int i = variables.indexOf(states.pop());
 					
-					// Store variable
-					bc.add(getInstruction("store", lineNum, i));
+					String st = states.pop();
+					
+					// Assign array element
+					if(st.equals("assign_array")){
+						// Store value of assigned expression
+						bc.add(getInstruction("array_val", lineNum));
+						
+						// Add bytecode to set array element
+						bc.addAll(tempBc.pop());
+						
+						// If operation replace last instruction
+						if(isOperation(statesPeek())){
+							String op = states.pop();
+							bc.remove(bc.size() - 1);
+							
+							switch(op){
+								case "+":
+									bc.add(getInstruction("array_elem_a", lineNum));
+									break;
+								case "-":
+									bc.add(getInstruction("array_elem_u", lineNum));
+									break;
+								case "*":
+									bc.add(getInstruction("array_elem_m", lineNum));
+									break;
+								case "/":
+									bc.add(getInstruction("array_elem_d", lineNum));
+									break;
+								case "%":
+									bc.add(getInstruction("array_elem_o", lineNum));
+									break;
+							}
+						}
+					}
+					
+					// Get variable and pop
+					else{
+						int i = variables.indexOf(states.pop());
+						
+						// Store variable
+						bc.add(getInstruction("store", lineNum, i));
+					}
 					
 					return bc;
 				
@@ -1359,8 +1441,23 @@ public class ScriptParser{
 				
 				// Get array element
 				case "array_elem":
-					bc.add(getInstruction("array_elem", lineNum));
+					
 					states.pop();
+					
+					// Assign array element
+					if(statesPeek("assign")){
+						bc.addAll(tempBc.pop());
+						bc.add(getInstruction("array_elem_s", lineNum));
+						
+						states.pop();
+						states.push("assign_array");
+						states.push("assign");
+					}
+					
+					// Array element in expression
+					else
+						bc.add(getInstruction("array_elem", lineNum));
+					
 					return bc;
 			}
 			
@@ -1517,11 +1614,24 @@ public class ScriptParser{
 				// Pop "assign"
 				states.pop();
 				
-				// Get variable and pop
-				int i = variables.indexOf(states.pop());
+				String st = states.pop();
 				
-				// Store variable
-				bc.add(getInstruction("store", lineNum, i));
+				// Assign array element
+				if(st.equals("assign_array")){
+					// Store value of assigned expression
+					bc.add(getInstruction("array_val", lineNum));
+					
+					// Add bytecode to set array element
+					bc.addAll(tempBc.pop());
+				}
+				
+				// Get variable and pop
+				else{
+					int i = variables.indexOf(states.pop());
+					
+					// Store variable
+					bc.add(getInstruction("store", lineNum, i));
+				}
 				
 				return bc;
 			
@@ -1560,17 +1670,26 @@ public class ScriptParser{
 				
 				bc.add(getInstruction("array_val", lineNum));
 				return bc;
-			
+				
 			// Get array element
 			case "array_elem":
-				// If in expression
-				if(expressions.size() > 1){
-					bc.add(0, getInstruction("exp_inc", lineNum));
-					bc.add(getInstruction("exp_dec", lineNum));
+				
+				states.pop();
+				
+				// Assign array element
+				if(statesPeek("assign")){
+					bc.addAll(tempBc.pop());
+					bc.add(getInstruction("array_elem_s", lineNum));
+					
+					states.pop();
+					states.push("assign_array");
+					states.push("assign");
 				}
 				
-				bc.add(getInstruction("array_elem", lineNum));
-				states.pop();
+				// Array element in expression
+				else
+					bc.add(getInstruction("array_elem", lineNum));
+				
 				return bc;
 		}
 

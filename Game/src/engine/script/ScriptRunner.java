@@ -310,6 +310,41 @@ public class ScriptRunner{
 				}
 				
 				
+				
+				case "array_elem_s": case "array_elem_a": case "array_elem_u": case "array_elem_m": case "array_elem_d": case "array_elem_o":{
+					
+					int ind = (int)variables[0];
+					
+					if(ind < 0 || ind >= arrayRef.size()){
+						runtimeError("Array index out of range", lineNum);
+						return;
+					}
+					
+					char c = opcode.charAt(opcode.length() - 1);
+					String op;
+					
+					switch(c){
+						case 'a':	op = "+";	break;
+						case 'u':	op = "-";	break;
+						case 'm':	op = "*";	break;
+						case 'd':	op = "/";	break;
+						case 'o':	op = "%";	break;
+						default:		op = "";		break;
+					}
+					
+					Object obj = array.get(array.size() - 1);
+					
+					if(!op.isEmpty()){
+						obj = operate(op, arrayRef.get(ind), obj, lineNum);
+					}
+					
+					arrayRef.set(ind, obj);
+					array.remove(array.size() - 1);
+					
+					continue;
+				}
+				
+				
 				case "increment":{// Brackets required as not to leak o and n
 					Object o = variables[data];
 					
@@ -609,6 +644,7 @@ public class ScriptRunner{
 				case "*":	result = n1 * n2;		break;
 				case "/":	result = n1 / n2;		break;
 				case "%":	result = n1 % n2;		break;
+				case "^":	result = (float)Math.pow(n1, n2);		break;
 				case "<":	resultBool = n1 < n2;	useBool = true; break;
 				case ">":	resultBool = n1 > n2;	useBool = true; break;
 				case "==":	resultBool = n1 == n2;	useBool = true; break;
