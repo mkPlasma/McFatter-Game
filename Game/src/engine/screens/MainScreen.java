@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.lwjgl.glfw.GLFW;
 
-import content.TestMission;
 import engine.KeyboardListener;
 import engine.entities.Bullet;
 import engine.entities.Effect;
@@ -27,7 +26,9 @@ import engine.graphics.Renderer;
 
 public class MainScreen extends GameScreen{
 	
-	private GameStage gs;
+	private GameStage stage;
+	
+	private Renderer r;
 	
 	private ArrayList<Bullet> enemyBullets, playerBullets;
 	private ArrayList<Enemy> enemies;
@@ -48,11 +49,12 @@ public class MainScreen extends GameScreen{
 		rTime = 0;
 		paused = false;
 		
-		Renderer.init();
+		r = new Renderer();
+		r.init();
 		
 		// Temporary test
-		gs = new TestMission(this);
-		gs.init();
+		stage = new Mission("Game/res/script/test.dscript");
+		stage.init();
 	}
 	
 	
@@ -70,21 +72,21 @@ public class MainScreen extends GameScreen{
 	}
 	
 	private void updateGameStage(){
-		gs.update();
 		
-		if(gs.getType() == GameStage.TYPE_MISSION){
-			Mission ms = (Mission)gs;
+		stage.update();
+		
+		if(stage instanceof Mission){
+			Mission ms = (Mission)stage;
 			
 			updateBullets();
 			updateEnemies();
-			ms.updatePlayer();
 			updateEffects();
-			
-			checkCollisions();
-			
+
 			addEnemies(ms.getEnemies());
 			addEnemyBullets(ms.getBullets());
 			addPlayerBullets(ms.getPlayerBullets());
+			
+			checkCollisions();
 			
 			addEffects(EffectGenerator.getEffects());
 		}
@@ -138,7 +140,7 @@ public class MainScreen extends GameScreen{
 	}
 	
 	private void checkCollisions(){
-		final float[] ppos = ((Mission)gs).getPlayer().getPos();
+		final float[] ppos = ((Mission)stage).getPlayer().getPos();
 		
 		// Enemy bullets
 		for(int i = 0; i < enemyBullets.size(); i++){
@@ -164,13 +166,13 @@ public class MainScreen extends GameScreen{
 					Laser l = (Laser)b;
 					int crop = l.getHBLengthCrop();
 					
-					if(d3 > crop && d3 < l.getLength() - crop && d2 < ((Mission)gs).getPlayer().getHitboxSize() + l.getHitboxSize()){
+					if(d3 > crop && d3 < l.getLength() - crop && d2 < ((Mission)stage).getPlayer().getHitboxSize() + l.getHitboxSize()){
 						//player.death();
 						b.onDestroy();
 					}
 				}
 				else{
-					if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) < ((Mission)gs).getPlayer().getHitboxSize() + b.getHitboxSize()){
+					if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) < ((Mission)stage).getPlayer().getHitboxSize() + b.getHitboxSize()){
 						//player.death();
 						b.onDestroy();
 					}
@@ -245,13 +247,10 @@ public class MainScreen extends GameScreen{
 	}
 	
 	
-	
+	int j = 0;
 	public void render(){
 		
 		drawGameStage();
-		
-		ArrayList<Bullet> li = new ArrayList<Bullet>(enemyBullets);
-		li.addAll(playerBullets);
 		
 		drawEnemies();
 		drawBullets();
@@ -262,16 +261,16 @@ public class MainScreen extends GameScreen{
 	}
 	
 	private void drawGameStage(){
-		gs.render();
+		stage.render();
 	}
 	
 	private void drawBullets(){
-		Renderer.renderBullets(playerBullets, rTime);
-		Renderer.renderBullets(enemyBullets, rTime);
+		r.renderBullets(playerBullets, rTime);
+		r.renderBullets(enemyBullets, rTime);
 	}
 
 	private void drawEnemies(){
-		Renderer.renderEnemies(enemies, rTime);
+		r.renderEnemies(enemies, rTime);
 	}
 	
 	private void drawEffects(){

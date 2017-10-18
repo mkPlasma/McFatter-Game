@@ -24,19 +24,16 @@ import engine.entities.MovableEntity;
  * 		Notes:		
  * 		
  * 		Last modified by:	Daniel
- * 		Date:				
+ * 		Date:				10/17
  * 		Changes:			
  */
 
 public class Renderer{
 	
-	// Resolution scale
-	private static float scale;
+	private ShaderProgram basicShader;
+	private ShaderProgram illumiShader;
 	
-	private static ShaderProgram basicShader;
-	private static ShaderProgram illumiShader;
-	
-	public static void init(){
+	public void init(){
 		basicShader = new ShaderProgram("basic", "basic");
 		basicShader.bindAttrib(0, "position");
 		basicShader.bindAttrib(1, "rotation");
@@ -50,17 +47,18 @@ public class Renderer{
 	
 	// Render functions
 
-	public static void renderBullets(ArrayList<Bullet> bli, int time){
+	public void renderBullets(ArrayList<Bullet> bli, int time){
 		illumiShader.use();
 		renderEntities(bli, time, true);
 	}
 	
-	public static void renderEnemies(ArrayList<Enemy> eli, int time){
+	public void renderEnemies(ArrayList<Enemy> eli, int time){
 		basicShader.use();
 		renderEntities(eli, time, false);
 	}
 
-	public static void renderEntities(ArrayList entityList, int time, boolean useRotations){
+	@SuppressWarnings("rawtypes")
+	public void renderEntities(ArrayList entityList, int time, boolean useRotations){
 		
 		if(entityList == null || entityList.size() == 0)
 			return;
@@ -117,15 +115,14 @@ public class Renderer{
 		
 		// Render
 		
-		int framebuffer = glGenBuffers();
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+		//int framebuffer = glGenBuffers();
+		//glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 		
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, el.get(0).getSprite().getTextureID());
 		
-		
-		glBindVertexArray(vao[0]);
+		//glBindVertexArray(vao[0]);
 		
 		glEnableVertexAttribArray(0);
 		if(useRotations)
@@ -134,7 +131,7 @@ public class Renderer{
 		
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		
+
 		glDrawElements(GL_TRIANGLES, vertices.length, GL_UNSIGNED_INT, 0);
 		
 		glDisable(GL_BLEND);
@@ -146,30 +143,30 @@ public class Renderer{
 		
 		glBindVertexArray(0);
 		
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		
 		// Delete VAO
 		for(int i = 1; i < vao.length; i++)
-			glDeleteBuffers(i);
+			glDeleteBuffers(vao[i]);
 		
 		glDeleteVertexArrays(vao[0]);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 	
-	private static int[] genQuadVAO(float[] vertices, float[] rotations){
+	private int[] genQuadVAO(float[] vertices, float[] rotations){
 		
 		int vao = glGenVertexArrays();
 		glBindVertexArray(vao);
-
+		
 		// Vertices
 		FloatBuffer vBuffer = BufferUtils.createFloatBuffer(vertices.length);
 		vBuffer.put(vertices);
 		vBuffer.flip();
 		int vbo = glGenBuffers();
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, vBuffer, GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 4, GL_FLOAT, true, 0, 0);
-		
+		glBufferData(GL_ARRAY_BUFFER, vBuffer, GL_DYNAMIC_DRAW);
+		glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
 		
 		int rts = 0;
 		
@@ -180,8 +177,8 @@ public class Renderer{
 			rBuffer.flip();
 			rts = glGenBuffers();
 			glBindBuffer(GL_ARRAY_BUFFER, rts);
-			glBufferData(GL_ARRAY_BUFFER, rBuffer, GL_STATIC_DRAW);
-			glVertexAttribPointer(1, 3, GL_FLOAT, true, 0, 0);
+			glBufferData(GL_ARRAY_BUFFER, rBuffer, GL_DYNAMIC_DRAW);
+			glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 		}
 		
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -202,16 +199,16 @@ public class Renderer{
 		eBuffer.flip();
 		int ebo = glGenBuffers();
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, eBuffer, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, eBuffer, GL_DYNAMIC_DRAW);
 		
-		glBindVertexArray(0);
+		//glBindVertexArray(0);
 		
 		if(rotations != null)
 			return new int[]{vao, vbo, rts, ebo};
 		return new int[]{vao, vbo, ebo};
 	}
 	
-	public static void drawRectangle(float x, float y, float w, float h){
+	public void drawRectangle(float x, float y, float w, float h){
 		
 		basicShader.use();
 		
@@ -251,19 +248,13 @@ public class Renderer{
 		
 		// Delete VAO
 		for(int i = 1; i < vao.length; i++)
-			glDeleteBuffers(i);
+			glDeleteBuffers(vao[i]);
 		
 		glDeleteVertexArrays(vao[0]);
 	}
 
 	// Returns normalized vertex coordinates
-	private static float[] getVertexCoords(float x, float y, float w, float h){
-		/*
-		float left =	((x - (w/2))/400) - 1;
-		float right =	((x + (w/2))/400) - 1;
-		float top =		-(((y - (h/2))/300) - 1);
-		float bottom =	-(((y + (h/2))/300) - 1);
-		*/
+	private float[] getVertexCoords(float x, float y, float w, float h){
 		float left =	x - w/2;
 		float right =	x + w/2;
 		float top =		y - h/2;
@@ -275,11 +266,5 @@ public class Renderer{
 			right, bottom,
 			left,  bottom
 		};
-	}
-	
-	// Gets window scale from settings
-	// Use on launch or when resolution is changed
-	public static void updateScale(){
-		scale = Settings.getWindowScale();
 	}
 }

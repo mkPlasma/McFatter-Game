@@ -20,21 +20,37 @@ import engine.graphics.Renderer;
  * 		Changes:			
  */
 
-public abstract class Mission extends GameStage{
+public class Mission extends GameStage{
 	
-	protected ArrayList<Bullet> bullets;
-	protected ArrayList<Enemy> enemies;
-	protected Player player;
+	private ArrayList<Bullet> bullets;
+	private ArrayList<Enemy> enemies;
+	private Player player;
 	
-	public Mission(MainScreen screen){
-		super(TYPE_MISSION, screen);
+	public Mission(String xmlPath){
+		super(xmlPath);
 	}
 	
+	public void init(){
+		super.init();
+		
+		player = new Player(400, 500);
+		
+		bullets = new ArrayList<Bullet>();		
+		enemies = new ArrayList<Enemy>();
+	}
 	
-	public void updatePlayer(){
+	public void update(){
 		player.update();
+		
+		runner.run();
+		
+		bullets.addAll(runner.getBullets());
 	}
-
+	
+	public void render(){
+		
+	}
+	
 	public ArrayList<Bullet> getPlayerBullets(){
 		return player.getBullets();
 	}

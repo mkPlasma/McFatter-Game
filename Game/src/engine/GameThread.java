@@ -4,19 +4,14 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 
-import engine.graphics.Renderer;
 import engine.screens.ScreenManager;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
-import org.lwjgl.BufferUtils;
-
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 /*
@@ -33,8 +28,6 @@ import java.nio.IntBuffer;
 public class GameThread implements Runnable{
 	
 	private long window;
-	
-	private GLFWKeyCallback keyCallback;
 	
 	// Resolution scale
 	private float scale;
@@ -65,14 +58,13 @@ public class GameThread implements Runnable{
 		
 		// Create window
 		scale = Settings.getWindowScale();
-		Renderer.updateScale();
 		
 		window = glfwCreateWindow((int)(800*scale), (int)(600*scale), "DSG", NULL, NULL);
 		
 		if(window == NULL)
 			throw new RuntimeException("Failed to create GLFW window");
 		
-		glfwSetKeyCallback(window, keyCallback = new KeyboardListener());
+		glfwSetKeyCallback(window, new KeyboardListener());
 		
 		try(MemoryStack stack = stackPush()){
 			IntBuffer pWidth = stack.mallocInt(1);
@@ -147,7 +139,7 @@ public class GameThread implements Runnable{
 				fps = frameCount;
 				frameCount = 0;
 				lastSecondTime = currentSecond;
-				//System.out.println("FPS: " + fps);
+				System.out.println("FPS: " + fps);
 			}
 			
 			// Timing

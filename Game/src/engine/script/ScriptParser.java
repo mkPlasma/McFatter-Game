@@ -130,7 +130,7 @@ public class ScriptParser{
 			return;
 		
 		// Print bytecode (debug)
-		BytecodePrinter.printBytecode(bytecode, script.getFileName());
+		//BytecodePrinter.printBytecode(bytecode, script.getFileName());
 		
 		// Clear tokens after
 		script.clearTokens();
@@ -213,20 +213,10 @@ public class ScriptParser{
 			requireAfter = null;
 			
 			// Check if not array item
-			if(expVar != null && !token.equals("[") && type != 'a'){
+			if(expVar != null && !token.equals("[") && !token.equals(".") && type != 'a'){
 				expressions.peek().add(expVar);
 				expVar = null;
 			}
-			
-			System.out.println("\n\n" + token);
-			
-			for(int j = 0; j < expressions.size(); j++)
-				System.out.print(expressions.get(j));
-			System.out.println();
-			
-			for(int j = 0; j < states.size(); j++)
-				System.out.print(states.get(j) + " ");
-			
 			
 			if(resetAllowElse) allowElse = false;
 			resetAllowElse = allowElse;
@@ -518,6 +508,35 @@ public class ScriptParser{
 							compilationErrorIT(token, lineNum);
 							return;
 						
+						case ".":
+							
+							if(!allowDot){
+								compilationErrorIT(token, lineNum);
+								return;
+							}
+							
+							// Dot after variable
+							if(expVar != null){
+								
+								// Pop "assign" and var name
+								if(statesPeek("assign")){
+									states.pop();
+									states.pop();
+								}
+								
+								bytecode.add(getInstruction("load", VARIABLE, lineNum, variables.indexOf(expVar)));
+								expVar = null;
+							}
+							
+							// Dot after function
+							else{
+								bytecode.add(getInstruction("load_r", lineNum));
+							}
+							
+							bytecode.add(getInstruction("dot", lineNum));
+							
+							continue;
+						
 						case "{": case "}":
 							boolean open = token.equals("{");
 
@@ -578,7 +597,15 @@ public class ScriptParser{
 								
 								// Array end
 								if(statesPeek("exp") && statesPeek("array", 1)){
-									tempBc.peek().addAll(parseExpression(lineNum));
+									
+									// Parse values if not empty
+									if(!expressions.peek().isEmpty())
+										tempBc.peek().addAll(parseExpression(lineNum));
+									
+									// Pop "exp"
+									else
+										states.pop();
+									
 									tempBc.peek().add(getInstruction("array_end", lineNum));
 									expressions.pop();
 									states.pop();
@@ -847,12 +874,11 @@ public class ScriptParser{
 									else{
 										tempBc.peek().add(getInstruction(builtIn ? "call_func_b" : "call_func", lineNum, funcIndex));
 										expressions.pop();
-										
-										System.out.println(tempBc.peek());
 									}
 									
 									funcBrackets.pop();
 									allowSquareBracket = true;
+									allowDot = true;
 									
 									continue;
 								}
@@ -1216,6 +1242,7 @@ public class ScriptParser{
 					if(statesPeek("exp")){
 						// Store variable before adding to check for array item
 						allowSquareBracket = true;
+						allowDot = true;
 						expVar = var;
 						continue;
 					}
@@ -1236,6 +1263,7 @@ public class ScriptParser{
 					}
 					
 					allowSquareBracket = true;
+					allowDot = true;
 					expVar = var;
 					
 					states.push(var);

@@ -16,8 +16,6 @@ public class ScriptCompiler{
 	private ScriptLexer lexer;
 	private ScriptParser parser;
 	
-	private DScript script;
-	
 	public ScriptCompiler(){
 		lexer = new ScriptLexer();
 		parser = new ScriptParser();

@@ -1,5 +1,9 @@
 package engine.screens;
 
+import engine.script.DScript;
+import engine.script.ScriptCompiler;
+import engine.script.ScriptRunner;
+
 /*
  * 		GameStage.java
  * 		
@@ -9,31 +13,31 @@ package engine.screens;
  * 		Children:	Mission.java
  * 		
  * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
+ * 		Date:				10/17
+ * 		Changes:			Added DScript
  */
 
 public abstract class GameStage{
 	
-	public static final int TYPE_MISSION = 0,
-		TYPE_CUTSCENE = 1;
-	
-	protected final int type;
-	
-	protected final MainScreen screen;
-	
+	// Currently used as dscript path
+	protected String xmlPath;
 	protected int time;
 	
-	public GameStage(int type, MainScreen screen){
-		this.type = type;
-		this.screen = screen;
+	protected ScriptRunner runner;
+	protected DScript script;
+	
+	public GameStage(String xmlPath){
+		this.xmlPath = xmlPath;
 	}
 	
-	public abstract void init();
+	public void init(){
+		script = new DScript(xmlPath);
+		new ScriptCompiler().compile(script);
+		
+		runner = new ScriptRunner(script);
+	}
+	
+	
 	public abstract void update();
 	public abstract void render();
-	
-	public int getType(){
-		return type;
-	}
 }

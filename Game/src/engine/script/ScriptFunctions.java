@@ -1,5 +1,7 @@
 package engine.script;
 
+import java.util.ArrayList;
+
 /*
  * 		ScriptFunctions.java
  * 		
@@ -37,12 +39,12 @@ public class ScriptFunctions{
 		"array_end",		// End array, store in register
 		"array_load",		// Load array to get element
 		"array_elem",		// Get array element of index in register
-		"array_elem_s",	// Set array element to value of register
-		"array_elem_a",	// Add
-		"array_elem_u",	// Subtract
-		"array_elem_m",	// Multiply
-		"array_elem_d",	// Divide
-		"array_elem_o",	// Modulo
+		"array_elem_s",		// Set array element to value of register
+		"array_elem_a",		// Add
+		"array_elem_u",		// Subtract
+		"array_elem_m",		// Multiply
+		"array_elem_d",		// Divide
+		"array_elem_o",		// Modulo
 		
 		// Arithmetic
 		"add",				// 
@@ -84,6 +86,7 @@ public class ScriptFunctions{
 		"get_param",		// Store function parameter into register
 		"return",			// Returns register value
 		"return_void",		// Return no value
+		"dot",				// Dot separator
 	};
 	
 	public static final String[] reservedWords = {
@@ -129,6 +132,15 @@ public class ScriptFunctions{
 		"pow:2",
 		"min:2",
 		"max:2",
+		
+		// Array
+		"length:d0",
+		"add:d1",
+		"remove:d0",
+		"remove:d1",
+		
+		// Bullet
+		"bullet:0",
 	};
 	
 	public static final String[] operations = {
@@ -186,7 +198,7 @@ public class ScriptFunctions{
 	// Get index of name
 	public static int getBuiltInFunctionIndex(String func){
 		for(int i = 0; i < builtInFunctions.length; i++)
-			if(builtInFunctions[i].equals(func))
+			if(builtInFunctions[i].replace(":d", ":").equals(func))
 				return i;
 		return -1;
 	}
@@ -195,6 +207,11 @@ public class ScriptFunctions{
 	public static String getBuiltInFunctionName(int index){
 		String name = builtInFunctions[index];
 		return name.substring(0, name.indexOf(':'));
+	}
+	
+	public static int getBuiltInFunctionParameterCount(int index){
+		String f = builtInFunctions[index].replaceAll(":d", ":");
+		return Integer.parseInt(f.substring(f.indexOf(':') + 1));
 	}
 	
 	// Check for type mismatch
@@ -210,15 +227,31 @@ public class ScriptFunctions{
 				o2 = params[1];
 		}
 		
-		switch(builtInFunctions[index]){
+		int p = getBuiltInFunctionParameterCount(index);
+		
+		switch(getBuiltInFunctionName(index)){
 			case "abs": case "degrees": case "radians": case "sin": case "cos": case "tan": case "asin": case "acos": case "atan":
 				return o1 instanceof Integer || o1 instanceof Float;
 			
 			case "atan2": case "pow": case "min": case "max":
 				return (o1 instanceof Integer || o1 instanceof Float) && (o2 instanceof Integer || o2 instanceof Float);
+			
+			case "length":
+				return o1 instanceof ArrayList;
+			
+			case "add":
+				return o1 instanceof ArrayList && !(o2 instanceof ArrayList);
+			
+			case "remove":
+				return o1 instanceof ArrayList && (p == 0 || o2 instanceof Integer);
 		}
 		
 		return true;
+	}
+	
+	// Function requires dot separator
+	public static boolean builtInFunctionDot(int index){
+		return builtInFunctions[index].contains(":d");
 	}
 	
 	
