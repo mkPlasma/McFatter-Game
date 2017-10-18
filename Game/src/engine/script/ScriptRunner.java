@@ -169,7 +169,6 @@ public class ScriptRunner{
 				case "load":
 					if(isVar)
 						variables[0] = variables[data];
-					
 					else{
 						switch(getType(inst)){
 							case INT:
@@ -909,9 +908,20 @@ public class ScriptRunner{
 				return;
 			}
 			
-			case "bullet":
-				bullets.add(new Bullet(BulletList.get(BulletList.TYPE_ORB_M, BulletList.COLOR_BLUE), 400, 200, (float)Math.random()*360, 5));
+			case "bullet":{
+				Object ox = funcParams.remove();
+				Object oy = funcParams.remove();
+				Object oDir = funcParams.remove();
+				Object oSpd = funcParams.remove();
+
+				float x = ox instanceof Float ? (float)ox : (float)(int)ox;
+				float y = oy instanceof Float ? (float)oy : (float)(int)oy;
+				float dir = oDir instanceof Float ? (float)oDir : (float)(int)oDir;
+				float spd = oSpd instanceof Float ? (float)oSpd : (float)(int)oSpd;
+				
+				bullets.add(new Bullet(BulletList.get((byte)i1, (byte)i2), x, y, dir, spd));
 				return;
+			}
 		}
 	}
 	

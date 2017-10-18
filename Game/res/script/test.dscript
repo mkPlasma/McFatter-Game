@@ -1,11 +1,1 @@
-
-set x;
-
-function test(x){
-  x += global x;
-  return x;
-}
-
-set y = test(1);
-
-print(y);
+bullet(_orb_m, _blue, 400, 200, 45, 5);

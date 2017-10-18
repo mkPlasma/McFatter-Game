@@ -74,7 +74,7 @@ public class MainScreen extends GameScreen{
 	private void updateGameStage(){
 		
 		stage.update();
-		System.exit(0);
+		//System.exit(0);
 		
 		if(stage instanceof Mission){
 			Mission ms = (Mission)stage;

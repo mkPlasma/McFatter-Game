@@ -140,7 +140,7 @@ public class ScriptFunctions{
 		"remove:d1",
 		
 		// Bullet
-		"bullet:0",
+		"bullet:6",
 	};
 	
 	public static final String[] operations = {
@@ -216,7 +216,12 @@ public class ScriptFunctions{
 	
 	// Check for type mismatch
 	public static boolean builtInFunctionTypeMatch(int index, Object[] params){
-
+		
+		int p = getBuiltInFunctionParameterCount(index);
+		
+		if(params.length != p)
+			return false;
+		
 		Object o1 = null;
 		Object o2 = null;
 		
@@ -226,8 +231,6 @@ public class ScriptFunctions{
 			if(params.length > 1)
 				o2 = params[1];
 		}
-		
-		int p = getBuiltInFunctionParameterCount(index);
 		
 		switch(getBuiltInFunctionName(index)){
 			case "abs": case "degrees": case "radians": case "sin": case "cos": case "tan": case "asin": case "acos": case "atan":
@@ -244,6 +247,18 @@ public class ScriptFunctions{
 			
 			case "remove":
 				return o1 instanceof ArrayList && (p == 0 || o2 instanceof Integer);
+			
+			case "bullet":
+				Object o3 = params[2];
+				Object o4 = params[2];
+				Object o5 = params[2];
+				Object o6 = params[2];
+				
+				return o1 instanceof Integer && o2 instanceof Integer &&
+					  (o3 instanceof Integer || o3 instanceof Float) &&
+					  (o4 instanceof Integer || o4 instanceof Float) &&
+					  (o5 instanceof Integer || o5 instanceof Float) &&
+					  (o6 instanceof Integer || o6 instanceof Float);
 		}
 		
 		return true;

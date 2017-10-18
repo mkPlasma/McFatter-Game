@@ -108,9 +108,10 @@ public class ScriptParser{
 		expressions.add(new ArrayList<Object>());
 		
 		haltCompiler = false;
-
+		
 		// First variable reserved for register
 		variables.add("");
+		addDefaultVars();
 		
 		// Define functions
 		process(true);
@@ -122,6 +123,7 @@ public class ScriptParser{
 		bytecode.clear();
 		variables.clear();
 		variables.add("");
+		addDefaultVars();
 		
 		// Process into bytecode
 		process(false);
@@ -142,6 +144,54 @@ public class ScriptParser{
 			bytecodeArray[i] = bytecode.get(i);
 		
 		script.setBytecode(bytecodeArray);
+	}
+	
+	// Adds built in variable definitions
+	private void addDefaultVars(){
+		
+		// Add to variables list first
+		variables.add("0c:_orb_m");
+		variables.add("0c:_scale");
+		variables.add("0c:_star4");
+		variables.add("0c:_crystal");
+		variables.add("0c:_missile");
+		variables.add("0c:_mine");
+		variables.add("0c:_plus");
+		variables.add("0c:_wall");
+		
+		variables.add("0c:_orb_m_d");
+		variables.add("0c:_scale_d");
+		variables.add("0c:_star4_d");
+		variables.add("0c:_crystal_d");
+		variables.add("0c:_missile_d");
+		variables.add("0c:_mine_d");
+		variables.add("0c:_plus_d");
+		variables.add("0c:_wall_d");
+		
+		variables.add("0c:_red");
+		variables.add("0c:_dark_red");
+		variables.add("0c:_orange");
+		variables.add("0c:_yellow");
+		variables.add("0c:_dark_yellow");
+		variables.add("0c:_green");
+		variables.add("0c:_dark_green");
+		variables.add("0c:_cyan");
+		variables.add("0c:_light_blue");
+		variables.add("0c:_blue");
+		variables.add("0c:_dark_blue");
+		variables.add("0c:_purple");
+		variables.add("0c:_pink");
+		variables.add("0c:_white");
+		variables.add("0c:_gray");
+		variables.add("0c:_black");
+		
+		for(int i = 0; i < 2; i++){
+			for(int j = 0; j < 16; j++){
+				bytecode.add(getInstruction("load", 0, j));
+				bytecode.add(getInstruction("create_var", 0, (i*16) + j + 1));
+				bytecode.add(getInstruction("store", 0, (i*16) + j + 1));
+			}
+		}
 	}
 	
 	// Process tokens into bytecode
