@@ -35,15 +35,6 @@ for(i in 0, 10){			// int i = 0; i < 10; i++
 
 set array = {0, 1, 4};
 
-for(i in array){
-    print(i); // i is object in array
-}
-
-for(i, o in array){
-    print(i + " " + o); // i is index, o is object
-    break;
-}
-
 set a = 0;
 
 test();

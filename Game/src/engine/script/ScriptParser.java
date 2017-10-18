@@ -99,9 +99,9 @@ public class ScriptParser{
 		
 		tmpExpInd = -1;
 		
-		loopNum = 0;
+		loopNum = -1;
 		forLoopNum = -1;
-		loopTotal = 0;
+		loopTotal = -1;
 		
 		funcArgs = 0;
 		
@@ -130,7 +130,7 @@ public class ScriptParser{
 			return;
 		
 		// Print bytecode (debug)
-		//BytecodePrinter.printBytecode(bytecode, script.getFileName());
+		BytecodePrinter.printBytecode(bytecode, script.getFileName());
 		
 		// Clear tokens after
 		script.clearTokens();
@@ -211,6 +211,18 @@ public class ScriptParser{
 			}
 			
 			requireAfter = null;
+
+			System.out.println();
+			System.out.println();
+			System.out.println();
+			System.out.println();
+			System.out.println(token);
+			System.out.println(states);
+			for(int j = 0; j < expressions.size(); j++)
+				System.out.print(expressions.get(j));
+			
+			if(!tempBc.isEmpty())
+				BytecodePrinter.printBytecode(tempBc.peek(), "tempbc " + tempBc.size());
 			
 			// Check if not array item
 			if(expVar != null && !token.equals("[") && !token.equals(".") && type != 'a'){
@@ -515,6 +527,11 @@ public class ScriptParser{
 								return;
 							}
 							
+							if(statesPeek("exp")){
+								expressions.peek().add("@");
+								tempBc.push(new ArrayList<Long>());
+							}
+							
 							// Dot after variable
 							if(expVar != null){
 								
@@ -524,16 +541,36 @@ public class ScriptParser{
 									states.pop();
 								}
 								
-								bytecode.add(getInstruction("load", VARIABLE, lineNum, variables.indexOf(expVar)));
+								long inst = getInstruction("load", VARIABLE, lineNum, variables.indexOf(expVar));
+								
+								if(statesPeek("exp"))
+									tempBc.peek().add(inst);
+								else
+									bytecode.add(inst);
+								
 								expVar = null;
 							}
 							
 							// Dot after function
 							else{
-								bytecode.add(getInstruction("load_r", lineNum));
+								long inst = getInstruction("load_r", lineNum);
+
+								if(statesPeek("exp"))
+									tempBc.peek().add(inst);
+								else
+									bytecode.add(inst);
 							}
 							
-							bytecode.add(getInstruction("dot", lineNum));
+							long inst = getInstruction("dot", lineNum);
+							
+							if(statesPeek("exp"))
+								tempBc.peek().add(inst);
+							else
+								bytecode.add(inst);
+							
+							states.push("dot");
+							
+							BytecodePrinter.printBytecode(tempBc.peek(), "dot " + tempBc.size());
 							
 							continue;
 						
@@ -799,7 +836,7 @@ public class ScriptParser{
 										states.pop();
 									}
 									else{
-										if(expressions.size() == 1)
+										if(expressions.size() == 1 && !statesPeek("dot"))
 											bytecode.addAll(parseExpression(lineNum));
 										else{
 											// Must do this otherwise funcBc.peek() will be the wrong item
@@ -820,6 +857,8 @@ public class ScriptParser{
 									// Check if is built in function
 									int funcIndex = getBuiltInFunctionIndex(func);
 									boolean builtIn = funcIndex != -1;
+									
+									System.out.println(func);
 									
 									// If not, check defined functions
 									if(funcIndex == -1){
@@ -869,7 +908,18 @@ public class ScriptParser{
 										return;
 									}
 									
-									if(expressions.size() == 1)
+									// After dot separator
+									if(statesPeek("dot")){
+										tempBc.peek().add(getInstruction("call_func_b", lineNum, funcIndex));
+										
+										ArrayList<Long> bc = tempBc.pop();
+										tempBc.peek().addAll(bc);
+
+										expressions.pop();
+										states.pop();
+									}
+									
+									else if(expressions.size() == 1)
 										bytecode.add(getInstruction(builtIn ? "call_func_b" : "call_func", lineNum, funcIndex));
 									else{
 										tempBc.peek().add(getInstruction(builtIn ? "call_func_b" : "call_func", lineNum, funcIndex));
@@ -1069,7 +1119,7 @@ public class ScriptParser{
 				
 				// Function/task call
 				case 'f':
-					if(!stAccept && !statesPeek("func_def") && !statesPeek("exp")){
+					if(!stAccept && !statesPeek("func_def") && !statesPeek("exp") && !statesPeek("dot")){
 						compilationErrorIT(token, lineNum);
 						return;
 					}
@@ -1089,10 +1139,11 @@ public class ScriptParser{
 					// Function call
 					
 					// If in expression
-					if(statesPeek("exp")){
+					if(statesPeek("exp") || statesPeek("dot")){
 						// Add placeholder in expression
 						// Later replaced by function call bytecode
-						expressions.peek().add("@");
+						if(statesPeek("exp"))
+							expressions.peek().add("@");
 						
 						tempBc.push(new ArrayList<Long>());
 						
@@ -1161,7 +1212,7 @@ public class ScriptParser{
 								var = v;
 								varName = vn;
 								
-								if(scope == 0 && !statesPeek("for_args", 1))
+								if(scope == 0 && !statesPeek("for_args", 1) && !statesPeek("func_args", 1))
 									existsInScope = true;
 								
 								// Break if global was requested
@@ -1344,8 +1395,12 @@ public class ScriptParser{
 				if(c == '@' || c == '#'){
 					bc.addAll(tempBc.pop());
 					
-					if(c == '@')
-						bc.add(getInstruction("load_r", lineNum));
+					if(c == '@'){
+						if(statesPeek("for_args"))
+							bc.add(getInstruction("exp_val_r", lineNum));
+						else
+							bc.add(getInstruction("load_r", lineNum));
+					}
 					
 					getValue = false;
 				}

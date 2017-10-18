@@ -528,7 +528,8 @@ public class ScriptRunner{
 						returnValue = variables[0];
 					else
 						returnValue = null;
-				
+					
+					continue;
 				
 				
 				case "dot":
@@ -773,7 +774,6 @@ public class ScriptRunner{
 			while(!tmp.isEmpty())
 				funcParams.add(tmp.remove());
 		}
-		
 		
 		// Check for type mismatch
 		if(!builtInFunctionTypeMatch(index, funcParams.toArray())){

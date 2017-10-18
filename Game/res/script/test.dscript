@@ -1,0 +1,11 @@
+
+set x;
+
+function test(x){
+  x += global x;
+  return x;
+}
+
+set y = test(1);
+
+print(y);
