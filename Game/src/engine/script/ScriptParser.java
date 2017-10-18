@@ -570,8 +570,6 @@ public class ScriptParser{
 							
 							states.push("dot");
 							
-							BytecodePrinter.printBytecode(tempBc.peek(), "dot " + tempBc.size());
-							
 							continue;
 						
 						case "{": case "}":
@@ -913,10 +911,15 @@ public class ScriptParser{
 										tempBc.peek().add(getInstruction("call_func_b", lineNum, funcIndex));
 										
 										ArrayList<Long> bc = tempBc.pop();
-										tempBc.peek().addAll(bc);
-
-										expressions.pop();
+										
 										states.pop();
+										
+										if(statesPeek("exp"))
+											tempBc.peek().addAll(bc);
+										else
+											bytecode.addAll(bc);
+										
+										expressions.pop();
 									}
 									
 									else if(expressions.size() == 1)
