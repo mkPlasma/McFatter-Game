@@ -73,7 +73,7 @@ public class MainScreen extends GameScreen{
 	}
 	
 	private void updateGameStage(){
-		//if(time < 5)
+		
 		stage.update();
 		//System.exit(0);
 		

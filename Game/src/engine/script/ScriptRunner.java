@@ -38,6 +38,9 @@ public class ScriptRunner{
 
 	// Variables
 	Object[] variables;
+
+	// Loop points
+	ArrayList<Integer> loops;
 	
 	// Function points
 	ArrayList<Integer> functions;
@@ -88,13 +91,14 @@ public class ScriptRunner{
 		haltRun = false;
 
 		// Initialize/reset lists
-		functions = new ArrayList<Integer>();
-		returnPoints = new Stack<Integer>();
-		array = new ArrayList<Object>();
-		arrayRef = new ArrayList<Object>();
-		expressions = new Stack<ArrayList<Object>>();
+		loops 			= new ArrayList<Integer>();
+		functions		= new ArrayList<Integer>();
+		returnPoints		= new Stack<Integer>();
+		array			= new ArrayList<Object>();
+		arrayRef			= new ArrayList<Object>();
+		expressions		= new Stack<ArrayList<Object>>();
 		expressions.push(new ArrayList<Object>());
-		funcParams = new Stack<Queue<Object>>();
+		funcParams		= new Stack<Queue<Object>>();
 		
 		funcParams.add(new LinkedList<Object>());
 		
@@ -103,12 +107,17 @@ public class ScriptRunner{
 		
 		// Add variables, find functions
 		for(int i = 0; i < bytecode.length; i++){
-			String op = getOpcodeName(bytecode[i]);
+			long inst = bytecode[i];
+			String op = getOpcodeName(inst);
 			
-			if(op.equals("create_var"))
+			if(getType(inst) == STRING)
+				i += getData(inst) + 1;
+			else if(op.equals("create_var"))
 				varCount++;
 			else if(op.equals("function"))
 				functions.add(i);
+			else if(op.equals("while"))
+				loops.add(i);
 		}
 		
 		variables = new Object[varCount];
@@ -216,6 +225,19 @@ public class ScriptRunner{
 							case BOOLEAN:
 								variables[0] = data == 1;
 								continue;
+							case STRING:
+								ArrayList<Long> list = new ArrayList<Long>();
+								
+								int c = i + data + 1;
+								i++;
+								
+								for(; i <= c; i++)
+									list.add(bytecode[i]);
+								
+								i--;
+								
+								variables[0] = convertString(list);
+								continue;
 						}
 					}
 					continue;
@@ -267,6 +289,19 @@ public class ScriptRunner{
 								continue;
 							case BOOLEAN:
 								expressions.peek().add(data == 1);
+								continue;
+							case STRING:
+								ArrayList<Long> list = new ArrayList<Long>();
+								
+								int c = i + data + 1;
+								i++;
+								
+								for(; i <= c; i++)
+									list.add(bytecode[i]);
+								
+								i--;
+								
+								expressions.peek().add(convertString(list));
 								continue;
 						}
 					}
@@ -494,20 +529,9 @@ public class ScriptRunner{
 					i = skipToEnd(i, true);
 					continue;
 				
-				case "end_while":{
-					
-					int whileNumC = 0;
-					String op2 = "";
-					
-					// Loop back to while
-					while(!op2.equals("while") || whileNumC != data){
-						i--;
-						op2 = getOpcodeName(bytecode[i]);
-						whileNumC = getData(bytecode[i]);
-					}
-					
+				case "end_while":
+					i = loops.get(data);
 					continue;
-				}
 				
 				
 				
@@ -604,7 +628,9 @@ public class ScriptRunner{
 			i++;
 			String opcode = getOpcodeName(bytecode[i]);
 			
-			if(opcode.equals("if") || opcode.equals("else") || opcode.equals("else_if") ||
+			if(getType(bytecode[i]) == STRING)
+				i += getData(bytecode[i]) + 1;
+			else if(opcode.equals("if") || opcode.equals("else") || opcode.equals("else_if") ||
 			   opcode.equals("function"))
 				depth++;
 			else if(opcode.equals("end") || opcode.equals("end_while")){
@@ -715,6 +741,22 @@ public class ScriptRunner{
 		if(o1 == null || (!op.equals("!") && o2 == null)){
 			runtimeError("Variable is not defined", lineNum);
 			return null;
+		}
+		
+		boolean isString = o1 instanceof String || o2 instanceof String;
+		
+		// Check strings
+		if(isString && !(op.equals("+") || op.equals("=="))){
+			runtimeError("Type mismatch", lineNum);
+			return null;
+		}
+		
+		// String operation
+		if(isString){
+			if(op.equals("+"))
+				return o1.toString() + o2.toString();
+			else
+				return o1.equals(o2);
 		}
 		
 		boolean isBoolean = o1 instanceof Boolean || o2 instanceof Boolean;
@@ -935,7 +977,10 @@ public class ScriptRunner{
 				return;
 
 			case "length":
-				returnValue = ((ArrayList<Object>)o1).size();
+				if(o1 instanceof ArrayList)
+					returnValue = ((ArrayList<Object>)o1).size();
+				else
+					returnValue = ((String)o1).length();
 				return;
 			
 			case "add":

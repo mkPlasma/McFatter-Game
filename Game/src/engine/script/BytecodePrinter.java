@@ -25,15 +25,22 @@ public class BytecodePrinter{
 			
 			long inst = bytecode.get(i);
 			
-			String opcode = opcodes[getOpcode(inst)];
+			String opcode = getOpcodeName(inst);
 			
-			System.out.println(i + "\t" + getLineNum(inst) + "\t" + opcode + (opcode.length() < 8 ? "\t\t" : "\t") + getInfo(inst, opcode));
+			System.out.println(i + "\t" + getLineNum(inst) + "\t" + opcode + (opcode.length() < 8 ? "\t\t" : "\t") + getInfo(bytecode, i));
+			
+			// Skip next longs if string
+			if(getType(inst) == STRING)
+				i += getData(inst) + 1;
 		}
 		
 		System.out.println();
 	}
 	
-	private static String getInfo(long inst, String opcode){
+	private static String getInfo(ArrayList<Long> bytecode, int i){
+		
+		long inst = bytecode.get(i);
+		String opcode = getOpcodeName(inst);
 		
 		boolean var = isVariable(inst);
 		byte type = getType(inst);
@@ -41,46 +48,46 @@ public class BytecodePrinter{
 		// Get first 4 bytes
 		int data = getData(inst);
 		
-		String info = "";
-		
 		// Variable number
 		if(var || opcode.equals("store") || opcode.equals("create_var") || opcode.equals("delete_var")
 			|| opcode.equals("increment") || opcode.equals("decrement") || opcode.equals("get_param")){
 			
 			if(data == 0)
-				info += "register";
-			else{
-				info += "variable #" + data;
-				if(type == 4)
-					info += " (object)";
-			}
+				return "register";
+			else
+				return "variable #" + data;
 		}
 		
 		// While loop
 		else if(opcode.equals("while") || opcode.equals("end_while"))
-			info += "loop #" + data;
+			return "loop #" + data;
 		
 		// Function
 		else if(opcode.equals("function") || opcode.equals("call_func"))
-			info += "function #" + data;
+			return "function #" + data;
 		
 		else if(opcode.equals("call_func_b"))
-			info += getBuiltInFunctionName(data);
+			return getBuiltInFunctionName(data);
 		
 		// Literal value
 		else if(opcode.equals("load") || opcode.equals("exp_val")){
 			switch(type){
-				case 0: // int
-					info += data;
-					break;
-				case 1: // float
-					info += Float.intBitsToFloat(data);
-					break;
-				case 2: // boolean
-					info += data == 1 ? "true" : "false";
+				case INT:
+					return Integer.toString(data);
+				case FLOAT:
+					return Float.toString(Float.intBitsToFloat(data));
+				case BOOLEAN:
+					return data == 1 ? "true" : "false";
+				case STRING:
+					ArrayList<Long> list = new ArrayList<Long>();
+					for(int j = i + 1; j <= i + 1 + data; j++)
+						list.add(bytecode.get(j));
+					
+					return '"' + convertString(list) + '"';
+					
 			}
 		}
 		
-		return info;
+		return "";
 	}
 }

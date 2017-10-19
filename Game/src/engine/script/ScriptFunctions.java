@@ -151,7 +151,7 @@ public class ScriptFunctions{
 		"less", "greater", "equals", "less_eq", "greater_eq",
 	};
 	
-	public static final byte INT = 0, FLOAT = 1, BOOLEAN = 2,
+	public static final byte INT = 0, FLOAT = 1, BOOLEAN = 2, STRING = 3,
 							 VALUE = 0, VARIABLE = 1,
 							 ZERO = 0;
 	
@@ -192,6 +192,60 @@ public class ScriptFunctions{
 				return true;
 		return false;
 	}
+	
+	
+	// String functions
+	
+	// Convert string to longs
+	public static ArrayList<Long> convertString(String s){
+		
+		ArrayList<Long> list = new ArrayList<Long>();
+		
+		long l = 0;
+		
+		for(int i = 0; i < s.length(); i++){
+			
+			l |= s.charAt(i);
+			
+			if((i + 1) % 8 == 0){
+				list.add(l);
+				l = 0;
+			}
+			else
+				l <<= 8;
+			
+			if(i == s.length() - 1){
+				l <<= (6 - i)*8;
+			}
+		}
+		
+		list.add(l);
+		
+		return list;
+	}
+	
+	// Convert longs to string
+	public static String convertString(ArrayList<Long> list){
+		
+		String s = "";
+		
+		for(int i = 0; i < list.size(); i++){
+			
+			long l = list.get(i);
+			
+			for(int j = 0; j < 8; j++){
+				char c = (char)(255 & (l >>> ((7 - j)*8)));
+				
+				if(c == 0)
+					return s;
+				
+				s += c;
+			}
+		}
+		
+		return s;
+	}
+	
 	
 	
 	// Built in functions
@@ -238,7 +292,7 @@ public class ScriptFunctions{
 				return (o1 instanceof Integer || o1 instanceof Float) && (o2 instanceof Integer || o2 instanceof Float);
 			
 			case "length":
-				return o1 instanceof ArrayList;
+				return o1 instanceof ArrayList || o1 instanceof String;
 			
 			case "add":
 				return o1 instanceof ArrayList && !(o2 instanceof ArrayList);

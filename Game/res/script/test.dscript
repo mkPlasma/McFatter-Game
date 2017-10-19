@@ -1,5 +1,6 @@
-set c = 2;
+
+set c = 20;
 
 for(i in c){
-  bullet(_crystal, _cyan, 400, 200 + i*100, 0, 5);
+  bullet(_crystal, _red, 400, 200, i*(360/c), 5);
 }
