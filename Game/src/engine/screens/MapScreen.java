@@ -26,4 +26,8 @@ public class MapScreen extends GameScreen{
 	public void render(){
 		
 	}
+	
+	public void cleanup(){
+		
+	}
 }

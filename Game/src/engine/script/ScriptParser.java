@@ -132,7 +132,7 @@ public class ScriptParser{
 			return;
 		
 		// Print bytecode (debug)
-		BytecodePrinter.printBytecode(bytecode, script.getFileName());
+		//BytecodePrinter.printBytecode(bytecode, script.getFileName());
 		
 		// Clear tokens after
 		script.clearTokens();
@@ -261,18 +261,6 @@ public class ScriptParser{
 			}
 			
 			requireAfter = null;
-
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println(token);
-			System.out.println(states);
-			for(int j = 0; j < expressions.size(); j++)
-				System.out.print(expressions.get(j));
-			
-			if(!tempBc.isEmpty())
-				BytecodePrinter.printBytecode(tempBc.peek(), "tempbc " + tempBc.size());
 			
 			// Check if not array item
 			if(expVar != null && !token.equals("[") && !token.equals(".") && type != 'a'){
@@ -905,8 +893,6 @@ public class ScriptParser{
 									// Check if is built in function
 									int funcIndex = getBuiltInFunctionIndex(func);
 									boolean builtIn = funcIndex != -1;
-									
-									System.out.println(func);
 									
 									// If not, check defined functions
 									if(funcIndex == -1){

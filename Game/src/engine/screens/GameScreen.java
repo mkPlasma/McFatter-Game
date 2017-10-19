@@ -22,4 +22,5 @@ public abstract class GameScreen{
 	public abstract void init();
 	public abstract void update();
 	public abstract void render();
+	public abstract void cleanup();
 }

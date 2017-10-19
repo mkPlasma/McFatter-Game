@@ -8,11 +8,11 @@ out vec2 texCoords;
 vec2 rotate(){
     vec2 pos = position.xy;
     pos -= rotation.xy;
-    
+
     float a = rotation.z;
-    
+
     pos *= mat2(cos(a), -sin(a), sin(a), cos(a));
-    
+
     pos += rotation.xy;
     return pos;
 }
@@ -26,7 +26,7 @@ vec2 normalize(vec2 inp){
 
 void main(){
     texCoords = position.zw;
-    
+
     vec2 pos = normalize(rotate());
     gl_Position = vec4(pos, 0.0, 1.0);
 }

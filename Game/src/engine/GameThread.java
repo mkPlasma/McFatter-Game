@@ -152,6 +152,8 @@ public class GameThread implements Runnable{
 				e.printStackTrace();
 			}
 		}
+		
+		cleanup();
 	}
 	
 	private void update(){
@@ -166,5 +168,9 @@ public class GameThread implements Runnable{
 		ScreenManager.render();
         
 		glfwSwapBuffers(window);
+	}
+	
+	private void cleanup(){
+		ScreenManager.cleanup();
 	}
 }

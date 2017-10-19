@@ -110,13 +110,10 @@ public class Renderer{
 			}
 		}
 		
-		int[] vao = genQuadVAO(vertices, rotations);
+		int[] vao = genQuadVAO(el.size(), vertices, rotations);
 		
 		
 		// Render
-		
-		//int framebuffer = glGenBuffers();
-		//glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 		
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -132,7 +129,7 @@ public class Renderer{
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glDrawElements(GL_TRIANGLES, vertices.length, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, vertices.length/2, GL_UNSIGNED_INT, 0);
 		
 		glDisable(GL_BLEND);
 		
@@ -144,17 +141,9 @@ public class Renderer{
 		glBindVertexArray(0);
 		
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		
-		// Delete VAO
-		for(int i = 1; i < vao.length; i++)
-			glDeleteBuffers(vao[i]);
-		
-		glDeleteVertexArrays(vao[0]);
-		
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 	
-	private int[] genQuadVAO(float[] vertices, float[] rotations){
+	private int[] genQuadVAO(int num, float[] vertices, float[] rotations){
 		
 		int vao = glGenVertexArrays();
 		glBindVertexArray(vao);
@@ -184,12 +173,13 @@ public class Renderer{
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		
 		// 6 elements per 4 vertices
-		int[] elements = new int[(int)(vertices.length*(6f/4f))];
+		int[] elements = new int[num*6];
 		
-		for(int i = 0; i < vertices.length/4; i++){
+		for(int i = 0; i < elements.length/6; i++){
 			for(int j = 0; j < 6; j++){
-				int add = j >= 3 ? (j == 5 ? 0 : j - 1) : j;
-				elements[i*6 + j] = i*4 + add;
+				int a = j >= 3 ? -1 : 0;
+				a = j == 5 ? -5 : a;
+				elements[i*6 + j] = i*4 + j + a;
 			}
 		}
 		
@@ -223,7 +213,7 @@ public class Renderer{
 			v[6], v[7], tx, ty,
 		};
 		
-		int[] vao = genQuadVAO(vertices, null);
+		int[] vao = genQuadVAO(1, vertices, null);
 		
 		// Render
 
@@ -252,7 +242,15 @@ public class Renderer{
 		
 		glDeleteVertexArrays(vao[0]);
 	}
-
+	
+	// Delete vao/buffers
+	public void cleanup(){
+		glDeleteVertexArrays(0);
+		
+		for(int i = 0; i < 3; i++)
+			glDeleteBuffers(i);
+	}
+	
 	// Returns normalized vertex coordinates
 	private float[] getVertexCoords(float x, float y, float w, float h){
 		float left =	x - w/2;

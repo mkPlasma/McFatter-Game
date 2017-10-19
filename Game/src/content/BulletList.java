@@ -24,38 +24,38 @@ public class BulletList{
 		TYPE_ORB_M =			0,
 		TYPE_SCALE =			1,
 		TYPE_STAR4 =			2,
-		TYPE_CRYSTAL =		3,
-		TYPE_MISSILE =		4,
-		TYPE_MINE =			5,
-		TYPE_PLUS =			6,
-		TYPE_WALL =			7,
-		TYPE_ORB_M_DARK =	8,
-		TYPE_SCALE_DARK =	9,
-		TYPE_STAR4_DARK =	10,
-		TYPE_CRYSTAL_DARK =	11,
-		TYPE_MISSILE_DARK =	12,
+		TYPE_CRYSTAL =			3,
+		TYPE_MISSILE =			4,
+		TYPE_MINE =				5,
+		TYPE_PLUS =				6,
+		TYPE_WALL =				7,
+		TYPE_ORB_M_DARK =		8,
+		TYPE_SCALE_DARK =		9,
+		TYPE_STAR4_DARK =		10,
+		TYPE_CRYSTAL_DARK =		11,
+		TYPE_MISSILE_DARK =		12,
 		TYPE_MINE_DARK =		13,
 		TYPE_PLUS_DARK =		14,
 		TYPE_WALL_DARK =		15,
 		TYPE_LASER =			16;
 	
 	public static final byte
-		COLOR_RED =			0,
+		COLOR_RED =				0,
 		COLOR_DARK_RED =		1,
-		COLOR_ORANGE =		2,
-		COLOR_YELLOW =		3,
-		COLOR_DARK_YELLOW =	4,
-		COLOR_GREEN =		5,
-		COLOR_DARK_GREEN =	6,
+		COLOR_ORANGE =			2,
+		COLOR_YELLOW =			3,
+		COLOR_DARK_YELLOW =		4,
+		COLOR_GREEN =			5,
+		COLOR_DARK_GREEN =		6,
 		COLOR_CYAN =			7,
-		COLOR_LIGHT_BLUE =	8,
+		COLOR_LIGHT_BLUE =		8,
 		COLOR_BLUE =			9,
-		COLOR_DARK_BLUE =	10,
-		COLOR_PURPLE =		11,
+		COLOR_DARK_BLUE =		10,
+		COLOR_PURPLE =			11,
 		COLOR_PINK =			12,
-		COLOR_WHITE =		13,
+		COLOR_WHITE =			13,
 		COLOR_GRAY =			14,
-		COLOR_BLACK =		15;
+		COLOR_BLACK =			15;
 	
 	
 	// Cache and index of current bullet frame cache
@@ -132,8 +132,8 @@ public class BulletList{
 	
 	public static boolean getSpriteAlign(byte type){
 		return	type == TYPE_SCALE			||
-				type == TYPE_CRYSTAL			||
-				type == TYPE_MISSILE			||
+				type == TYPE_CRYSTAL		||
+				type == TYPE_MISSILE		||
 				type == TYPE_WALL			||
 				type == TYPE_SCALE_DARK		||
 				type == TYPE_CRYSTAL_DARK	||

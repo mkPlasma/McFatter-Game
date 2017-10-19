@@ -28,8 +28,6 @@ public class MainScreen extends GameScreen{
 	
 	private GameStage stage;
 	
-	private Renderer r;
-	
 	private ArrayList<Bullet> enemyBullets, playerBullets;
 	private ArrayList<Enemy> enemies;
 	private ArrayList<Effect> effects;
@@ -57,6 +55,9 @@ public class MainScreen extends GameScreen{
 		stage.init();
 	}
 	
+	public void cleanup(){
+		r.cleanup();
+	}
 	
 	public void update(){
 		
@@ -72,7 +73,7 @@ public class MainScreen extends GameScreen{
 	}
 	
 	private void updateGameStage(){
-		
+		//if(time < 5)
 		stage.update();
 		//System.exit(0);
 		

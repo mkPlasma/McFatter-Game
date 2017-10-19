@@ -1,1 +1,3 @@
-bullet(_orb_m, _blue, 400, 200, 45, 5);
+for(i in 72){
+  bullet(_crystal, _blue, 400, 200, i*5, 5);
+}

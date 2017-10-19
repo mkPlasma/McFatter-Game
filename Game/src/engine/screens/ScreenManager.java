@@ -36,6 +36,10 @@ public class ScreenManager{
 		screen.render();
 	}
 	
+	public static void cleanup(){
+		screen.cleanup();
+	}
+	
 	public static void setScreen(GameScreen screen){
 		ScreenManager.screen = screen;
 	}
