@@ -25,17 +25,12 @@ public class Enemy extends MovableEntity{
 	private int health;
 	private int hpmax;
 	
-	public Enemy(EnemyFrame frame, InstructionSet inst){
+	public Enemy(EnemyFrame frame){
 		super();
 		
 		visible = true;
 		
 		this.frame = frame;
-		
-		inst.setEntity(this);
-		this.inst = inst;
-		inst.init();
-		
 		
 		hitboxSize = 8;
 		hpmax = 50000;

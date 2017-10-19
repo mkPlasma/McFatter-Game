@@ -19,32 +19,11 @@ public class Laser extends Bullet{
 	private int length, width;
 	private float scx, scy;
 	
-	public Laser(BulletFrame frame, MovementInstruction inst){
-		super(frame, inst);
-		
-		visible = true;
-		
-		this.frame = frame;
-		
-		inst.setEntity(this);
-		this.inst = new InstructionSet(inst);
-		
-		onCreate();
+	public Laser(){
+		super(null, 0, 0, 0, 0);
 	}
 	
-	public Laser(BulletFrame frame, InstructionSet inst){
-		super(frame, inst);
-		
-		visible = true;
-		
-		this.frame = frame;
-		
-		inst.setEntity(this);
-		this.inst = inst;
-		
-		onCreate();
-	}
-	
+	/*
 	public Laser(BulletFrame frame, float x, float y, float dir, float spd, int length, int width){
 		super(frame, x, y, dir, spd);
 		
@@ -74,6 +53,7 @@ public class Laser extends Bullet{
 		
 		onCreate();
 	}
+	*/
 	
 	public void update(){
 		if(paused)

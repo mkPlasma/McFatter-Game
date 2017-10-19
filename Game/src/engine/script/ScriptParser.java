@@ -132,7 +132,7 @@ public class ScriptParser{
 			return;
 		
 		// Print bytecode (debug)
-		//BytecodePrinter.printBytecode(bytecode, script.getFileName());
+		BytecodePrinter.printBytecode(bytecode, script.getFileName());
 		
 		// Clear tokens after
 		script.clearTokens();
@@ -168,6 +168,8 @@ public class ScriptParser{
 		variables.add("0c:_plus_d");
 		variables.add("0c:_wall_d");
 		
+		variables.add("0c:_laser");
+		
 		variables.add("0c:_red");
 		variables.add("0c:_dark_red");
 		variables.add("0c:_orange");
@@ -184,14 +186,6 @@ public class ScriptParser{
 		variables.add("0c:_white");
 		variables.add("0c:_gray");
 		variables.add("0c:_black");
-		
-		for(int i = 0; i < 2; i++){
-			for(int j = 0; j < 16; j++){
-				bytecode.add(getInstruction("load", 0, j));
-				bytecode.add(getInstruction("create_var", 0, (i*16) + j + 1));
-				bytecode.add(getInstruction("store", 0, (i*16) + j + 1));
-			}
-		}
 	}
 	
 	// Process tokens into bytecode
@@ -1185,6 +1179,10 @@ public class ScriptParser{
 							expressions.peek().add("@");
 						
 						tempBc.push(new ArrayList<Long>());
+						
+						// Use new parameter queue if in function call
+						if(statesPeek("func_args", 1))
+							tempBc.peek().add(getInstruction("param_inc", lineNum));
 						
 						// Use new expression for paramters
 						expressions.add(new ArrayList<Object>());

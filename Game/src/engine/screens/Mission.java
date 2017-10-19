@@ -42,9 +42,9 @@ public class Mission extends GameStage{
 	public void update(){
 		player.update();
 		
-		runner.run();
+		scriptController.run();
 		
-		bullets.addAll(runner.getBullets());
+		bullets.addAll(scriptController.getBullets());
 	}
 	
 	public void render(){

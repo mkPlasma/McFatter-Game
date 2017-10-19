@@ -16,9 +16,6 @@ package engine.entities;
 
 public abstract class MovableEntity extends GameEntity{
 	
-	// Instruction set will control movements
-	protected InstructionSet inst;
-	
 	protected float	dir, dirPast,
 					velX, velY, angVel,
 					spd, spdPast, accel,
@@ -30,30 +27,24 @@ public abstract class MovableEntity extends GameEntity{
 		super();
 	}
 	
-	public MovableEntity(float x, float y){
-		super(x, y);
+	public MovableEntity(EntityFrame frame, float x, float y){
+		super(frame, x, y);
 	}
 	
-	public MovableEntity(float[] pos){
-		super(pos);
+	public MovableEntity(EntityFrame frame, float x, float y, float dir, float spd){
+		super(frame, x, y);
+		
+		this.dir = dir;
+		this.spd = spd;
+		
+		dirPast = dir;
+		spdPast = spd;
+		
+		setVelocities();
 	}
 	
-	public InstructionSet getInstructionSet(){
-		return inst;
-	}
-	
-	public void setInstructionSet(InstructionSet inst){
-		this.inst = inst;
-	}
-	
-	public void setInstructionSet(MovementInstruction inst){
-		this.inst = new InstructionSet(inst);
-	}
 	
 	protected void updateMovements(){
-		
-		// Set up movements
-		inst.run();
 		
 		// Acceleration
 		spd += accel;
@@ -76,21 +67,39 @@ public abstract class MovableEntity extends GameEntity{
 	}
 	
 	// Updates velocity if direction has changed
-	protected void updateVelocity(){
+	private void updateVelocity(){
 		if(dir != dirPast){
-			velX = (float)(spd*Math.cos(Math.toRadians(dir)));
-			velY = (float)(spd*Math.sin(Math.toRadians(dir)));
-			
+			setVelocities();
 			dirPast = dir;
 			spdPast = spd;
+			return;
 		}
-		else if(spd != spdPast){
+		
+		if(spd != spdPast){
+			
+			if(spdPast == 0){
+				setVelocities();
+				return;
+			}
+			
 			float sr = spd/spdPast;
+			
+			if(Float.isInfinite(sr)){
+				setVelocities();
+				return;
+			}
+			
 			velX *= sr;
 			velY *= sr;
 			
 			spdPast = spd;
 		}
+	}
+	
+	// Set velocities based on direction
+	private void setVelocities(){
+		velX = (float)(spd*Math.cos(Math.toRadians(dir)));
+		velY = (float)(spd*Math.sin(Math.toRadians(dir)));
 	}
 	
 	

@@ -50,7 +50,7 @@ public class Player extends GameEntity{
 	
 	
 	public Player(float x, float y){
-		super(x, y);
+		super(null, x, y);
 		
 		bullets = new ArrayList<Bullet>();
 		shot = BulletList.get(BulletList.TYPE_PLUS, BulletList.COLOR_RED);

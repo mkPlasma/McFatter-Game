@@ -14,26 +14,10 @@ package engine.entities;
 
 public class Effect extends MovableEntity{
 	
-	private EntityFrame frame;
-	
-	public Effect(MovementInstruction inst, EntityFrame frame){
+	public Effect(EntityFrame frame){
 		this.frame = frame;
 		
 		visible = true;
-		
-		inst.setEntity(this);
-		this.inst = new InstructionSet(inst);
-		this.inst.init();
-	}
-	
-	public Effect(InstructionSet inst, EntityFrame frame){
-		this.frame = frame;
-		
-		visible = true;
-		
-		inst.setEntity(this);
-		this.inst = inst;
-		inst.init();
 	}
 	
 	public void onCreate(){

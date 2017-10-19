@@ -1,3 +1,5 @@
-for(i in 72){
-  bullet(_crystal, _blue, 400, 200, i*5, 5);
+set c = 2;
+
+for(i in c){
+  bullet(_crystal, _cyan, 400, 200 + i*100, 0, 5);
 }

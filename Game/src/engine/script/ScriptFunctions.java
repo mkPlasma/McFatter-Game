@@ -84,6 +84,7 @@ public class ScriptFunctions{
 		"call_func_b",		// Calls built-in function
 		"set_param",		// Set function parameter
 		"get_param",		// Store function parameter into register
+		"param_inc",		// Use new parameter queue
 		"return",			// Returns register value
 		"return_void",		// Return no value
 		"dot",				// Dot separator
@@ -217,11 +218,6 @@ public class ScriptFunctions{
 	// Check for type mismatch
 	public static boolean builtInFunctionTypeMatch(int index, Object[] params){
 		
-		int p = getBuiltInFunctionParameterCount(index);
-		
-		if(params.length != p)
-			return false;
-		
 		Object o1 = null;
 		Object o2 = null;
 		
@@ -231,6 +227,8 @@ public class ScriptFunctions{
 			if(params.length > 1)
 				o2 = params[1];
 		}
+		
+		int p = getBuiltInFunctionParameterCount(index);
 		
 		switch(getBuiltInFunctionName(index)){
 			case "abs": case "degrees": case "radians": case "sin": case "cos": case "tan": case "asin": case "acos": case "atan":

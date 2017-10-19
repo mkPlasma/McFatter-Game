@@ -2,6 +2,7 @@ package engine.screens;
 
 import engine.script.DScript;
 import engine.script.ScriptCompiler;
+import engine.script.ScriptController;
 import engine.script.ScriptRunner;
 
 /*
@@ -23,7 +24,7 @@ public abstract class GameStage{
 	protected String xmlPath;
 	protected int time;
 	
-	protected ScriptRunner runner;
+	protected ScriptController scriptController;
 	protected DScript script;
 	
 	public GameStage(String xmlPath){
@@ -34,7 +35,8 @@ public abstract class GameStage{
 		script = new DScript(xmlPath);
 		new ScriptCompiler().compile(script);
 		
-		runner = new ScriptRunner(script);
+		scriptController = new ScriptController(script);
+		scriptController.init();
 	}
 	
 	

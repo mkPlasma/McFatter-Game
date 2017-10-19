@@ -37,14 +37,10 @@ public abstract class GameEntity{
 		
 	}
 	
-	public GameEntity(float x, float y){
+	public GameEntity(EntityFrame frame, float x, float y){
+		this.frame = frame;
 		this.x = x;
 		this.y = y;
-	}
-	
-	public GameEntity(float[] pos){
-		x = pos[0];
-		y = pos[1];
 	}
 	
 	public abstract void onCreate();
