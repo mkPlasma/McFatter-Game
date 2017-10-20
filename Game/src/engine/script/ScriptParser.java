@@ -376,6 +376,7 @@ public class ScriptParser{
 						
 						case "task":
 							states.push("task_def");
+							funcArgs = 0;
 							continue;
 						
 						case "return":
@@ -957,7 +958,6 @@ public class ScriptParser{
 											int sc = Integer.parseInt(f.substring(0, ind - 1));
 											
 											if(func.equals(fn)){
-												
 												// Check if in scope
 												boolean inScope = sc == scope || sc == 0;
 												int last = scope;

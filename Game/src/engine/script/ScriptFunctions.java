@@ -155,7 +155,7 @@ public class ScriptFunctions{
 		
 		// Bullet
 		"bullet:6",
-
+		
 		"setX:d1",
 		"setY:d1",
 		"setPos:d1",

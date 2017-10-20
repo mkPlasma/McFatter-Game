@@ -74,9 +74,6 @@ public class ScriptRunner{
 	// Branched states
 	private ArrayList<ScriptBranch> branches;
 	
-	// Update current branch
-	private boolean updateBranch;
-	
 	// Generated bullets
 	private ArrayList<Bullet> bullets;
 	
@@ -183,31 +180,18 @@ public class ScriptRunner{
 		return temp;
 	}
 	
-	public void updateState(ScriptBranch branch){
-		
-		if(!updateBranch)
-			return;
-		
-		branch.setVariables(variables);
-		branch.setReturnPoints(returnPoints);
-	}
-	
 	// Run bytecode
 	@SuppressWarnings("unchecked")
 	public void run(ScriptBranch branch){
-		
-		updateBranch = true;
 		
 		if(haltRun)
 			return;
 		
 		// Return if waiting
-		if(!branch.tickWaitTime()){
-			updateBranch = false;
+		if(!branch.tickWaitTime())
 			return;
-		}
 
-		branch.syncVariables(variables);
+		branch.syncVariables();
 		variables = branch.getVariables();
 		returnPoints = branch.getReturnPoints();
 		
@@ -604,9 +588,13 @@ public class ScriptRunner{
 					
 					// Branch if task
 					if(getOpcodeName(bytecode[i]).equals("task")){
-						branches.add(new ScriptBranch(index + 1, variables, true));
+						// New branch continues outside of task
+						ScriptBranch newBranch = new ScriptBranch(index + 1, variables, branch.isPrimary());
+						branches.add(newBranch);
+						
+						// Current branch enters task
 						branch.setPrimary(false);
-						branch.setSyncVariables(variables);
+						branch.setParent(newBranch);
 					}
 					
 					// For functions add return point and use new expression
@@ -700,6 +688,10 @@ public class ScriptRunner{
 					
 					// Set bytecode index
 					branch.setBytecodeIndex(i + 1);
+					
+					// Update variables/return points
+					branch.setVariables(variables);
+					branch.setReturnPoints(returnPoints);
 					
 					// Return to continue running
 					return;

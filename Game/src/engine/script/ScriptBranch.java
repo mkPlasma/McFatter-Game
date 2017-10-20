@@ -5,6 +5,9 @@ import java.util.Stack;
 
 public class ScriptBranch{
 	
+	// Parent to sync variables with
+	private ScriptBranch parent;
+	
 	// Where in bytecode state is running
 	private int bytecodeIndex;
 	
@@ -35,28 +38,28 @@ public class ScriptBranch{
 		
 		syncVariables = new ArrayList<Integer>();
 		returnPoints = new Stack<Integer>();
-		
-		setSyncVariables(variables);
-	}
-	
-	// Sync variables with previous ScriptState
-	public void syncVariables(Object[] variables){
-		
-		if(variables == null)
-			return;
-		
-		for(int i = 0; i < syncVariables.size(); i++){
-			int n = syncVariables.get(i);
-			this.variables[n] = variables[n];
-		}
-	}
-	
-	// Get synced variables
-	public void setSyncVariables(Object[] variables){
+
 		for(int i = 0; i < variables.length; i++)
 			if(variables[i] != null)
 				syncVariables.add(i);
 	}
+	
+	public void setParent(ScriptBranch parent){
+		this.parent = parent;
+	}
+	
+	// Sync variables with parent
+	public void syncVariables(){
+		
+		if(parent == null || parent.toRemove())
+			return;
+		
+		Object[] variables = parent.getVariables();
+		
+		for(int i:syncVariables)
+			this.variables[i] = variables[i];
+	}
+	
 	
 	public int getBytecodeIndex(){
 		return bytecodeIndex;

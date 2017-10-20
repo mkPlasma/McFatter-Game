@@ -29,16 +29,15 @@ public class ScriptController{
 	
 	public void run(){
 		
-		if(haltRun || (finished && branches.isEmpty()))
+		if(haltRun || finished)
 			return;
 		
 		for(int i = 0; i < branches.size(); i++){
 			
 			ScriptBranch branch = branches.get(i);
 			
-			// Run current branch and update
+			// Run current branch
 			runner.run(branch);
-			runner.updateState(branch);
 			
 			// Remove branch
 			if(branch.toRemove())

@@ -1,50 +1,47 @@
 
-set color = _red;
-set angvel = 2;
-set count = 0;
-set c = 1;
+set c = 3;
 
-while(true){
-  
-  for(i in c){
-    bullet(color, angvel, i);
-  }
-  
-  count++;
-  
-  if(count == 2){
-    break;
-  }
-  
-  if(count > 10){
-    count = 0;
+spiral(false);
+spiral(true);
+
+task spiral(inv){
     
-    if(color == _red){
-      color = _blue;
-    }
-    else{
-      color = _red;
+    set color = _red;
+    set dirAdd = 5;
+    set ang = -45;
+    
+    if(inv){
+        color = _cyan;
+        dirAdd = -dirAdd;
+        ang = -ang;
     }
     
-    angvel = -angvel;
-  //  break;
-  }
-  
-  wait 2;
-}
-
-task bullet(color, angvel, i){
-  set b = bullet(_scale, color, 400, 200, i*(360/c), 5);
-  b.setAngVel(angvel);
-  b.setAccel(-0.08);
-  b.setSpdMin(0);
-  
-  for(j in 90){
-    wait;
-  }
-  
-  b.setAngVel(0);
-  b.setSpd(4);
-  b.setAccel(0);
-  b.setDir(b.getDir() + angvel*10);
+    set dir;
+    
+    while(true){
+        
+        for(i in c){
+            fire(color, ang, dir + i*(360/c));
+        }
+        //break;
+        dir += dirAdd;
+        
+        if(dir > 360){dir -= 360;}
+        else if(dir < 0){dir += 360;}
+        
+        wait 5;
+    }
+    
+    task fire(col, angleChange, dir2){
+        set b = bullet(_star4, col, 400, 200, dir2, 5);
+        b.setAccel(-0.08);
+        b.setSpdMin(0);
+        
+        wait 60;
+        
+        b.setAngVel(0);
+        b.setSpd(3);
+        b.setAccel(0);
+        b.setDir(b.getDir() + angleChange);
+    }
 }
