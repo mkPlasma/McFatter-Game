@@ -136,7 +136,7 @@ public class ScriptParser{
 			return;
 		
 		// Print bytecode (debug)
-		BytecodePrinter.printBytecode(bytecode, script.getFileName());
+		//BytecodePrinter.printBytecode(bytecode, script.getFileName());
 		
 		// Clear tokens after
 		script.clearTokens();
@@ -1078,6 +1078,12 @@ public class ScriptParser{
 									// Name + arg count
 									String fn = f.substring(ind);
 									
+									// Remove t:
+									if(f.contains("t:" + fn)){
+										f = f.replace("t:" + fn, ":" + fn);
+										ind--;
+									}
+									
 									// Scope
 									int sc = Integer.parseInt(f.substring(0, ind - 1));
 									
@@ -1459,21 +1465,6 @@ public class ScriptParser{
 		
 		states.pop();	// Pop "exp"
 		
-		
-		// Check if single negative number
-		if(exp.size() == 3){
-			if(exp.get(0) instanceof Integer && (int)exp.get(0) == 0 &&
-				exp.get(1) instanceof String && exp.get(1).equals("-")){
-				
-				Object obj = exp.get(2);
-				exp.clear();
-				
-				if(obj instanceof Integer)
-					exp.add(-(int)obj);
-				else
-					exp.add(-(float)obj);
-			}
-		}
 		
 		// If single value (exclude placeholders)
 		if(exp.size() == 1){

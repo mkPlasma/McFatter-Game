@@ -122,7 +122,7 @@ public class ScriptLexer{
 		
 		
 		// Print tokens (debug)
-		//printTokens(tokensArray);
+		printTokens(tokensArray);
 		
 		// Set tokens
 		script.setTokens(tokensArray);
@@ -558,17 +558,29 @@ public class ScriptLexer{
 					if((lType == 'o' || lType == 'a' || lData.equals(",") || lData.equals("(") ||
 						lData.equals("[") || lData.equals("return") || lData.equals("wait"))){
 						
-						// Remove -
-						tokens.remove(i);
+						char type2 = getType(tokens.get(i + 1));
 						
-						// Set number to negative
-						String t = tokens.get(i);
-						String t2 = t.substring(0, t.indexOf(':') + 1);
-						t = getData(t);
+						// Ints and floats
+						if(type2 == 'i' || type2 == 'l'){
+							// Remove -
+							tokens.remove(i);
+							
+							// Set number to negative
+							String t = tokens.get(i);
+							String t2 = t.substring(0, t.indexOf(':') + 1);
+							t = getData(t);
+							
+							tokens.set(i, t2 + '-' + t);
+							
+							i--;
+						}
 						
-						tokens.set(i, t2 + '-' + t);
-						
-						i--;
+						// Other
+						else{
+							// Add 0 in front of -, skip it
+							tokens.add(i, lineNum + "i:0");
+							i++;
+						}
 					}
 				}
 				

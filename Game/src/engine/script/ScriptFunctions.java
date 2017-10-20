@@ -2,6 +2,9 @@ package engine.script;
 
 import java.util.ArrayList;
 
+import engine.entities.GameEntity;
+import engine.entities.MovableEntity;
+
 /*
  * 		ScriptFunctions.java
  * 		
@@ -125,6 +128,10 @@ public class ScriptFunctions{
 		// Math
 		"pi:0",
 		"abs:1",
+		"round:1",
+		"floor:1",
+		"ceil:1",
+		"sqrt:1",
 		"degrees:1",
 		"radians:1",
 		"sin:1",
@@ -146,6 +153,27 @@ public class ScriptFunctions{
 		
 		// Bullet
 		"bullet:6",
+
+		"setX:d1",
+		"setY:d1",
+		"setPos:d1",
+		"setSpd:d1",
+		"setDir:d1",
+		"setAngVel:d1",
+		"setAccel:d1",
+		"setSpdMin:d1",
+		"setSpdMax:d1",
+
+		"getX:d0",
+		"getY:d0",
+		"getPos:d0",
+		"getTime:d0",
+		"getSpd:d0",
+		"getDir:d0",
+		"getAngVel:d0",
+		"getAccel:d0",
+		"getSpdMin:d0",
+		"getSpdMax:d0",
 	};
 	
 	public static final String[] operations = {
@@ -289,7 +317,8 @@ public class ScriptFunctions{
 		int p = getBuiltInFunctionParameterCount(index);
 		
 		switch(getBuiltInFunctionName(index)){
-			case "abs": case "degrees": case "radians": case "sin": case "cos": case "tan": case "asin": case "acos": case "atan":
+			case "abs": case "round": case "floor": case "ceil": case "sqrt": case "degrees": case "radians":
+			case "sin": case "cos": case "tan": case "asin": case "acos": case "atan":
 				return o1 instanceof Integer || o1 instanceof Float;
 			
 			case "atan2": case "pow": case "min": case "max":
@@ -315,6 +344,24 @@ public class ScriptFunctions{
 					  (o4 instanceof Integer || o4 instanceof Float) &&
 					  (o5 instanceof Integer || o5 instanceof Float) &&
 					  (o6 instanceof Integer || o6 instanceof Float);
+			
+			case "setX": case "setY":
+				return o1 instanceof GameEntity && (o2 instanceof Integer || o2 instanceof Float);
+			
+			case "setSpd": case "setDir":
+			case "setAngVel": case "setAccel": case "setSpdMin": case "setSpdMax":
+				return o1 instanceof MovableEntity && (o2 instanceof Integer || o2 instanceof Float);
+			
+			case "setPos":
+				return o1 instanceof GameEntity && o2 instanceof ArrayList;
+			
+			
+			case "getX": case "getY": case "getPos": case "getTime":
+				return o1 instanceof GameEntity;
+			
+			case "getSpd": case "getDir":
+			case "getAngVel": case "getAccel": case "getSpdMin": case "getSpdMax":
+				return o1 instanceof MovableEntity;
 		}
 		
 		return true;

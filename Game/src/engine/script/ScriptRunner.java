@@ -6,12 +6,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Stack;
 
 import content.BulletList;
 import engine.entities.Bullet;
+import engine.entities.GameEntity;
+import engine.entities.MovableEntity;
 
 /*
  * 		ScriptRunner.java
@@ -985,6 +988,11 @@ public class ScriptRunner{
 			f2 = o2 instanceof Integer ? i2 : f2;
 		}
 		
+		// As GameEntity
+		GameEntity ge = o1 instanceof GameEntity ? (GameEntity)o1 : null;
+		// As MovableEntity
+		MovableEntity me = o1 instanceof MovableEntity ? (MovableEntity)o1 : null;
+		
 		// No return value by default
 		returnValue = null;
 		
@@ -995,76 +1003,100 @@ public class ScriptRunner{
 			case "print":
 				System.out.println(script.getFileName() + ": " + o1);
 				return;
-				
+			
+			
+			// Math functions
 			case "pi":
 				returnValue = (float)Math.PI;
 				return;
-				
+			
 			case "abs":
-				if(!isFloat) returnValue = Math.abs(i1);
-				else		 returnValue = Math.abs(f1);
+				if(isFloat) returnValue = Math.abs(f1);
+				else		returnValue = Math.abs(i1);
 				return;
-				
+			
+			case "round":
+				if(isFloat) returnValue = (int)Math.round(f1);
+				else		returnValue = (int)Math.round(i1);
+				return;
+			
+			case "floor":
+				if(isFloat) returnValue = (int)Math.floor(f1);
+				else		returnValue = (int)Math.floor(i1);
+				return;
+			
+			case "ceil":
+				if(isFloat) returnValue = (int)Math.ceil(f1);
+				else		returnValue = (int)Math.ceil(i1);
+				return;
+			
+			case "sqrt":
+				if(isFloat) returnValue = (float)Math.sqrt(f1);
+				else		returnValue = (float)Math.sqrt(i1);
+				return;
+			
 			case "degrees":
-				if(!isFloat) returnValue = (float)Math.toDegrees(i1);
-				else		 returnValue = (float)Math.toDegrees(f1);
+				if(isFloat) returnValue = (float)Math.toDegrees(f1);
+				else		returnValue = (float)Math.toDegrees(i1);
 				return;
 			
 			case "radians":
-				if(!isFloat) returnValue = (float)Math.toRadians(i1);
-				else		 returnValue = (float)Math.toRadians(f1);
+				if(isFloat) returnValue = (float)Math.toRadians(f1);
+				else		returnValue = (float)Math.toRadians(i1);
 				return;
 			
 			case "sin":
-				if(!isFloat) returnValue = (float)Math.sin(Math.toRadians(i1));
-				else		 returnValue = (float)Math.sin(Math.toRadians(f1));
+				if(isFloat) returnValue = (float)Math.sin(Math.toRadians(f1));
+				else		returnValue = (float)Math.sin(Math.toRadians(i1));
 				return;
 				
 			case "cos":
-				if(!isFloat) returnValue = (float)Math.cos(Math.toRadians(i1));
-				else		 returnValue = (float)Math.cos(Math.toRadians(f1));
+				if(isFloat) returnValue = (float)Math.cos(Math.toRadians(f1));
+				else		returnValue = (float)Math.cos(Math.toRadians(i1));
 				return;
 				
 			case "tan":
-				if(!isFloat) returnValue = (float)Math.tan(Math.toRadians(i1));
-				else		 returnValue = (float)Math.tan(Math.toRadians(f1));
+				if(isFloat) returnValue = (float)Math.tan(Math.toRadians(f1));
+				else		returnValue = (float)Math.tan(Math.toRadians(i1));
 				return;
 				
 			case "asin":
-				if(!isFloat) returnValue = (float)Math.toDegrees(Math.asin(i1));
-				else		 returnValue = (float)Math.toDegrees(Math.asin(f1));
+				if(isFloat) returnValue = (float)Math.toDegrees(Math.asin(f1));
+				else		returnValue = (float)Math.toDegrees(Math.asin(i1));
 				return;
 				
 			case "acos":
-				if(!isFloat) returnValue = (float)Math.toDegrees(Math.acos(i1));
-				else		 returnValue = (float)Math.toDegrees(Math.acos(f1));
+				if(isFloat) returnValue = (float)Math.toDegrees(Math.acos(f1));
+				else		returnValue = (float)Math.toDegrees(Math.acos(i1));
 				return;
 				
 			case "atan":
-				if(!isFloat) returnValue = (float)Math.toDegrees(Math.atan(i1));
-				else		 returnValue = (float)Math.toDegrees(Math.atan(f1));
+				if(isFloat) returnValue = (float)Math.toDegrees(Math.atan(f1));
+				else		returnValue = (float)Math.toDegrees(Math.atan(i1));
 				return;
 				
 			case "atan2":
-				if(!isFloat) returnValue = (float)Math.toDegrees(Math.atan2(i1, i2));
-				else		 returnValue = (float)Math.toDegrees(Math.atan2(f1, f2));
+				if(isFloat) returnValue = (float)Math.toDegrees(Math.atan2(i1, i2));
+				else		returnValue = (float)Math.toDegrees(Math.atan2(f1, f2));
 				return;
 				
 			case "pow":
-				if(!isFloat) returnValue = (float)Math.pow(i1, i2);
-				else		 returnValue = (float)Math.pow(f1, f2);
+				if(isFloat) returnValue = (float)Math.pow(f1, f2);
+				else		returnValue = (float)Math.pow(i1, i2);
 				return;
 				
 			case "min":
-				if(!isFloat) returnValue = Math.min(i1, i2);
-				else		 returnValue = Math.min(f1, f2);
+				if(isFloat) returnValue = Math.min(f1, f2);
+				else		returnValue = Math.min(i1, i2);
 				return;
 				
 			case "max":
-				if(!isFloat) returnValue = Math.max(i1, i2);
-				else		 returnValue = Math.max(f1, f2);
+				if(isFloat) returnValue = Math.max(f1, f2);
+				else		returnValue = Math.max(i1, i2);
 				return;
-
+			
+			
+			// Array functions
 			case "length":
 				if(o1 instanceof ArrayList)
 					returnValue = ((ArrayList<Object>)o1).size();
@@ -1092,6 +1124,8 @@ public class ScriptRunner{
 				return;
 			}
 			
+			
+			// Bullet functions
 			case "bullet":{
 				Object ox = params.remove();
 				Object oy = params.remove();
@@ -1103,9 +1137,126 @@ public class ScriptRunner{
 				float dir = oDir instanceof Float ? (float)oDir : (float)(int)oDir;
 				float spd = oSpd instanceof Float ? (float)oSpd : (float)(int)oSpd;
 				
-				bullets.add(new Bullet(BulletList.get((byte)i1, (byte)i2), x, y, dir, spd));
+				returnValue = new Bullet(BulletList.get((byte)i1, (byte)i2), x, y, dir, spd);
+				bullets.add((Bullet)returnValue);
 				return;
 			}
+			
+			
+			case "setX":
+				if(isFloat) ge.setX(f2);
+				else		ge.setX(i2);
+				return;
+			
+			case "setY":
+				if(isFloat) ge.setY(f2);
+				else		ge.setY(i2);
+				return;
+			
+			case "setPos":{
+				ArrayList<Object> ar = (ArrayList<Object>)o2;
+				
+				// Check size
+				if(ar.size() < 2){
+					runtimeError("setPos requires an array of length 2", lineNum);
+					return;
+				}
+				
+				// Get numbers
+				Object ao1 = ar.get(0);
+				Object ao2 = ar.get(1);
+				
+				float fl1 = ao1 instanceof Float ? (float)ao1 : ao1 instanceof Integer ? (float)(int)ao1 : Float.NaN;
+				float fl2 = ao2 instanceof Float ? (float)ao2 : ao2 instanceof Integer ? (float)(int)ao2 : Float.NaN;
+				
+				// Check type
+				if(Float.isNaN(fl1) || Float.isNaN(fl2)){
+					runtimeError("setPos requires an array of numbers", lineNum);
+					return;
+				}
+				
+				// Set
+				ge.setPos(new float[]{fl1, fl2});
+				return;
+			}
+			
+			case "setDir":
+				if(isFloat) me.setDir(f2);
+				else		me.setDir(i2);
+				return;
+			
+			case "setAngVel":
+				if(isFloat) me.setAngVel(f2);
+				else		me.setAngVel(i2);
+				return;
+			
+			case "setSpd":
+				if(isFloat) me.setSpd(f2);
+				else		me.setSpd(i2);
+				return;
+			
+			case "setAccel":
+				if(isFloat) me.setAccel(f2);
+				else		me.setAccel(i2);
+				return;
+			
+			case "setSpdMin":
+				if(isFloat) me.setSpdMin(f2);
+				else		me.setSpdMin(i2);
+				return;
+			
+			case "setSpdMax":
+				if(isFloat) me.setSpdMax(f2);
+				else		me.setSpdMax(i2);
+				return;
+
+				
+			case "getX":
+				returnValue = ge.getX();
+				return;
+			
+			case "getY":
+				returnValue = ge.getY();
+				return;
+			
+			case "getPos":{
+				float[] pos = ge.getPos();
+				ArrayList<Float> pos1 = new ArrayList<Float>();
+				
+				pos1.add(pos[0]);
+				pos1.add(pos[1]);
+				
+				returnValue = pos1;
+				return;
+			}
+			
+			case "getTime":
+				returnValue = ge.getTime();
+				return;
+			
+			case "getDir":
+				returnValue = me.getSpd();
+				return;
+			
+			case "getAngVel":
+				returnValue = me.getSpd();
+				return;
+			
+			case "getSpd":
+				returnValue = me.getSpd();
+				return;
+			
+			case "getAccel":
+				returnValue = me.getSpd();
+				return;
+			
+			case "getSpdMin":
+				returnValue = me.getSpd();
+				return;
+			
+			case "getSpdMax":
+				returnValue = me.getSpd();
+				return;
 		}
 	}
 	
