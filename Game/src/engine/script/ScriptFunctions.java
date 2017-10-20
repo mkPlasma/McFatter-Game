@@ -80,6 +80,7 @@ public class ScriptFunctions{
 		"end_else_if",		// Same as end, also skips following else_if/else blocks
 		"while",			// Return point for end_while, branches with if
 		"end_while",		// Loops back to while
+		"break",			// Breaks out of loop
 		
 		// Functions
 		"function",			// Function jump location

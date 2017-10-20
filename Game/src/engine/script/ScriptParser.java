@@ -259,10 +259,6 @@ public class ScriptParser{
 			}
 			
 			requireAfter = null;
-
-			System.out.println();
-			System.out.println(token);
-			System.out.println(states);
 			
 			// Check if not array item
 			if(expVar != null && !token.equals("[") && !token.equals(".") && type != 'a'){
@@ -362,6 +358,15 @@ public class ScriptParser{
 							
 							// For argument expression
 							states.push("exp");
+							continue;
+						
+						case "break":
+							if(!states.contains("while_body") && !states.contains("for_body")){
+								compilationError("Break statement must be in loop", lineNum);
+								return;
+							}
+							
+							bytecode.add(getInstruction("break", lineNum));
 							continue;
 						
 						case "function":
@@ -504,7 +509,7 @@ public class ScriptParser{
 								
 								// Empty wait statement
 								if(statesPeek("wait", 1) && expressions.peek().isEmpty()){
-									bytecode.add(getInstruction("load", VALUE, lineNum, 0));
+									bytecode.add(getInstruction("load", VALUE, lineNum, 1));
 									bytecode.add(getInstruction("wait", lineNum));
 									states.pop();
 									states.pop();

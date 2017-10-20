@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Stack;
@@ -66,7 +65,7 @@ public class ScriptRunner{
 	private Object returnValue;
 	
 	// Holds value before dot separator
-	private Object dotValue;
+	private Stack<Object> dotValues;
 	
 	private long[] bytecode;
 	
@@ -107,6 +106,7 @@ public class ScriptRunner{
 		funcParams		= new Stack<Queue<Object>>();
 		branches		= new ArrayList<ScriptBranch>();
 		bullets			= new ArrayList<Bullet>();
+		dotValues		= new Stack<Object>();
 		
 		expressions.push(new ArrayList<Object>());
 		funcParams.add(new LinkedList<Object>());
@@ -206,7 +206,7 @@ public class ScriptRunner{
 			updateBranch = false;
 			return;
 		}
-		
+
 		branch.syncVariables(variables);
 		variables = branch.getVariables();
 		returnPoints = branch.getReturnPoints();
@@ -582,6 +582,11 @@ public class ScriptRunner{
 					continue;
 				
 				
+					
+				case "break":
+					while(!getOpcodeName(bytecode[++i]).equals("end_while"));
+					continue;
+				
 				
 				// Skip function definitions
 				case "function": case "task":
@@ -601,6 +606,7 @@ public class ScriptRunner{
 					if(getOpcodeName(bytecode[i]).equals("task")){
 						branches.add(new ScriptBranch(index + 1, variables, true));
 						branch.setPrimary(false);
+						branch.setSyncVariables(variables);
 					}
 					
 					// For functions add return point and use new expression
@@ -674,7 +680,7 @@ public class ScriptRunner{
 						return;
 					}
 					
-					dotValue = variables[0];
+					dotValues.push(variables[0]);
 					continue;
 				
 				case "wait":{
@@ -927,12 +933,8 @@ public class ScriptRunner{
 		boolean dot = builtInFunctionDot(index);
 		
 		// Function requirement/dot must match
-		if(dot && dotValue == null){
+		if(dot && dotValues.isEmpty()){
 			runtimeError("Function must be used with dot separator", lineNum);
-			return;
-		}
-		if(!dot && dotValue != null){
-			runtimeError("Function cannot be used with dot separator", lineNum);
 			return;
 		}
 		
@@ -947,8 +949,7 @@ public class ScriptRunner{
 				tmp.add(params.remove());
 			
 			// Add dot value
-			params.add(dotValue);
-			dotValue = null;
+			params.add(dotValues.pop());
 			
 			// Place values back
 			while(!tmp.isEmpty())
@@ -1233,11 +1234,11 @@ public class ScriptRunner{
 				return;
 			
 			case "getDir":
-				returnValue = me.getSpd();
+				returnValue = me.getDir();
 				return;
 			
 			case "getAngVel":
-				returnValue = me.getSpd();
+				returnValue = me.getAngVel();
 				return;
 			
 			case "getSpd":
@@ -1245,15 +1246,15 @@ public class ScriptRunner{
 				return;
 			
 			case "getAccel":
-				returnValue = me.getSpd();
+				returnValue = me.getAccel();
 				return;
 			
 			case "getSpdMin":
-				returnValue = me.getSpd();
+				returnValue = me.getSpdMin();
 				return;
 			
 			case "getSpdMax":
-				returnValue = me.getSpd();
+				returnValue = me.getSpdMax();
 				return;
 		}
 	}

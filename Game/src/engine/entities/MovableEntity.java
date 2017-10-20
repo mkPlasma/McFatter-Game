@@ -157,6 +157,7 @@ public abstract class MovableEntity extends GameEntity{
 	
 	public void setSpdMax(float spdMax){
 		this.spdMax = spdMax;
+		useSpdMax = true;
 	}
 	
 	public float getSpdMin(){
@@ -165,21 +166,6 @@ public abstract class MovableEntity extends GameEntity{
 	
 	public void setSpdMin(float spdMin){
 		this.spdMin = spdMin;
-	}
-	
-	public boolean useSpdMin(){
-		return useSpdMin;
-	}
-	
-	public void setUseSpdMin(boolean useSpdMin){
-		this.useSpdMin = useSpdMin;
-	}
-	
-	public boolean useSpdMax(){
-		return useSpdMax;
-	}
-	
-	public void setUseSpdMax(boolean useSpdMax){
-		this.useSpdMax = useSpdMax;
+		useSpdMin = true;
 	}
 }

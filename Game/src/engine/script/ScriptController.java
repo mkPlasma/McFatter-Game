@@ -48,7 +48,7 @@ public class ScriptController{
 			branches.addAll(runner.getBranches());
 			
 			haltRun = runner.haltRun();
-			finished = runner.isFinished();
+			finished = runner.isFinished() && branches.isEmpty();
 		}
 	}
 	

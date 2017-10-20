@@ -1,17 +1,20 @@
 
 set color = _red;
-set angvel = 0.5;
+set angvel = 2;
 set count = 0;
-set c = 8;
+set c = 1;
 
 while(true){
   
   for(i in c){
-    set b = bullet(_scale, color, 400, 200, i*(360/c), 5);
-    b.setAngVel(angvel);
+    bullet(color, angvel, i);
   }
   
   count++;
+  
+  if(count == 2){
+    break;
+  }
   
   if(count > 10){
     count = 0;
@@ -24,7 +27,24 @@ while(true){
     }
     
     angvel = -angvel;
+  //  break;
   }
   
-  wait 4;
+  wait 2;
+}
+
+task bullet(color, angvel, i){
+  set b = bullet(_scale, color, 400, 200, i*(360/c), 5);
+  b.setAngVel(angvel);
+  b.setAccel(-0.08);
+  b.setSpdMin(0);
+  
+  for(j in 90){
+    wait;
+  }
+  
+  b.setAngVel(0);
+  b.setSpd(4);
+  b.setAccel(0);
+  b.setDir(b.getDir() + angvel*10);
 }

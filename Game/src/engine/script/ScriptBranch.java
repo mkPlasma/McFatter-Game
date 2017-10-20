@@ -22,7 +22,7 @@ public class ScriptBranch{
 	private Object[] variables;
 	
 	// Sync variables with other states
-	private int[] syncVariables;
+	private ArrayList<Integer> syncVariables;
 	
 	// Store return points for function calls
 	private Stack<Integer> returnPoints;
@@ -33,19 +33,10 @@ public class ScriptBranch{
 		this.variables = variables.clone();
 		this.primary = primary;
 		
+		syncVariables = new ArrayList<Integer>();
 		returnPoints = new Stack<Integer>();
 		
-		// Get synced variables
-		ArrayList<Integer> sync = new ArrayList<Integer>();
-		
-		for(int i = 0; i < variables.length; i++)
-			if(variables[i] != null)
-				sync.add(i);
-		
-		syncVariables = new int[sync.size()];
-		
-		for(int i = 0; i < sync.size(); i++)
-			syncVariables[i] = sync.get(i);
+		setSyncVariables(variables);
 	}
 	
 	// Sync variables with previous ScriptState
@@ -54,8 +45,17 @@ public class ScriptBranch{
 		if(variables == null)
 			return;
 		
-		for(int i:syncVariables)
-			this.variables[i] = variables[i];
+		for(int i = 0; i < syncVariables.size(); i++){
+			int n = syncVariables.get(i);
+			this.variables[n] = variables[n];
+		}
+	}
+	
+	// Get synced variables
+	public void setSyncVariables(Object[] variables){
+		for(int i = 0; i < variables.length; i++)
+			if(variables[i] != null)
+				syncVariables.add(i);
 	}
 	
 	public int getBytecodeIndex(){
