@@ -122,7 +122,7 @@ public class ScriptLexer{
 		
 		
 		// Print tokens (debug)
-		printTokens(tokensArray);
+		//printTokens(tokensArray);
 		
 		// Set tokens
 		script.setTokens(tokensArray);

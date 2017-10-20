@@ -86,6 +86,7 @@ public class ScriptFunctions{
 		"task",				// Jump location and creates branch
 		"call_func",		// Calls function with set parameters
 		"call_func_b",		// Calls built-in function
+		"end_func",			// Ends function, returns void
 		"set_param",		// Set function parameter
 		"get_param",		// Store function parameter into register
 		"param_inc",		// Use new parameter queue

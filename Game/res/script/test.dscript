@@ -1,5 +1,30 @@
 
-set b = bullet(_star4, _yellow, 400, 200, 0, 2);
+set color = _red;
+set angvel = 0.5;
+set count = 0;
+set c = 8;
 
-wait 30;
-b.setDir(90);
+while(true){
+  
+  for(i in c){
+    set b = bullet(_scale, color, 400, 200, i*(360/c), 5);
+    b.setAngVel(angvel);
+  }
+  
+  count++;
+  
+  if(count > 10){
+    count = 0;
+    
+    if(color == _red){
+      color = _blue;
+    }
+    else{
+      color = _red;
+    }
+    
+    angvel = -angvel;
+  }
+  
+  wait 4;
+}

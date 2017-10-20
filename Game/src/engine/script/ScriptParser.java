@@ -136,7 +136,7 @@ public class ScriptParser{
 			return;
 		
 		// Print bytecode (debug)
-		//BytecodePrinter.printBytecode(bytecode, script.getFileName());
+		BytecodePrinter.printBytecode(bytecode, script.getFileName());
 		
 		// Clear tokens after
 		script.clearTokens();
@@ -259,6 +259,10 @@ public class ScriptParser{
 			}
 			
 			requireAfter = null;
+
+			System.out.println();
+			System.out.println(token);
+			System.out.println(states);
 			
 			// Check if not array item
 			if(expVar != null && !token.equals("[") && !token.equals(".") && type != 'a'){
@@ -671,6 +675,7 @@ public class ScriptParser{
 								else if(statesPeek("else")){
 									states.pop();
 									bytecode.add(getInstruction("else", lineNum));
+									states.add("if_body");
 								}
 								else if(!statesPeek("") && !statesPeek("else") && !statesPeek("if_body") &&
 									!statesPeek("while_body") && !statesPeek("for_body") && !statesPeek("func_body") && !statesPeek("task_body")){
@@ -783,7 +788,7 @@ public class ScriptParser{
 									if(statesPeek("func_body") || statesPeek("task_body"))
 										states.pop();
 									
-									bytecode.add(getInstruction("end", lineNum));
+									bytecode.add(getInstruction("end_func", lineNum));
 								}
 							}
 							

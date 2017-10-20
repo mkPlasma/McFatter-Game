@@ -645,9 +645,7 @@ public class ScriptRunner{
 					continue;
 				
 				
-				// End instruction should be reached only at the end of a function
-				// It is skipped by if/else if statements
-				case "end": case "return_void": case "return":
+				case "end_func": case "return_void": case "return":
 					
 					// End branch
 					if(!branch.isPrimary() && returnPoints.isEmpty()){
@@ -725,7 +723,7 @@ public class ScriptRunner{
 			   opcode.equals("function") || opcode.equals("task"))
 				depth++;
 			
-			else if(opcode.equals("end") || opcode.equals("end_while")){
+			else if(opcode.equals("end") || opcode.equals("end_while") || opcode.equals("end_func")){
 				depth--;
 				
 				// Skip other else if/else statements
