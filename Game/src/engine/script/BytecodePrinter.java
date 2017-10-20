@@ -58,35 +58,35 @@ public class BytecodePrinter{
 				return "variable #" + data;
 		}
 		
-		// While loop
-		else if(opcode.equals("while") || opcode.equals("end_while"))
-			return "loop #" + data;
-		
-		// Function
-		else if(opcode.equals("function") || opcode.equals("call_func"))
-			return "function #" + data;
-		
-		else if(opcode.equals("call_func_b"))
-			return getBuiltInFunctionName(data);
-		
-		// Literal value
-		else if(opcode.equals("load") || opcode.equals("exp_val")){
-			switch(type){
-				case INT:
-					return Integer.toString(data);
-				case FLOAT:
-					return Float.toString(Float.intBitsToFloat(data));
-				case BOOLEAN:
-					return data == 1 ? "true" : "false";
-				case STRING:
-					ArrayList<Long> list = new ArrayList<Long>();
-					for(int j = i + 1; j <= i + 1 + data; j++)
-						list.add(bytecode.get(j));
-					
-					return '"' + convertString(list) + '"';
-					
+		switch(opcode){
+			// While loop
+			case "while": case "end_while":
+				return "loop #" + data;
+			
+			// Function
+			case "function": case "task": case "call_func":
+				return "function #" + data;
+			
+			case "call_func_b":
+				return getBuiltInFunctionName(data);
+			
+			// Literal value
+			case "load": case "exp_val":
+				switch(type){
+					case INT:
+						return Integer.toString(data);
+					case FLOAT:
+						return Float.toString(Float.intBitsToFloat(data));
+					case BOOLEAN:
+						return data == 1 ? "true" : "false";
+					case STRING:
+						ArrayList<Long> list = new ArrayList<Long>();
+						for(int j = i + 1; j <= i + 1 + data; j++)
+							list.add(bytecode.get(j));
+						
+						return '"' + convertString(list) + '"';
+				}
 			}
-		}
 		
 		return "";
 	}

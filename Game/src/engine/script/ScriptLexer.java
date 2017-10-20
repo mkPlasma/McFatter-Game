@@ -492,7 +492,7 @@ public class ScriptLexer{
 							nextExpected = new String[]{"f"};
 							break;
 						case ";":
-							lastExpected = new String[]{"v", "i", "l", "b", "t", "}", ")", "]", "++", "--", "break", "return"};
+							lastExpected = new String[]{"v", "i", "l", "b", "t", "}", ")", "]", "++", "--", "break", "return", "wait"};
 							break;
 					}
 					break;

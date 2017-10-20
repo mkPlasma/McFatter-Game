@@ -80,6 +80,7 @@ public class ScriptFunctions{
 		
 		// Functions
 		"function",			// Function jump location
+		"task",				// Jump location and creates branch
 		"call_func",		// Calls function with set parameters
 		"call_func_b",		// Calls built-in function
 		"set_param",		// Set function parameter
@@ -87,7 +88,10 @@ public class ScriptFunctions{
 		"param_inc",		// Use new parameter queue
 		"return",			// Returns register value
 		"return_void",		// Return no value
+		
+		// Misc
 		"dot",				// Dot separator
+		"wait",				// Wait number of frames in register
 	};
 	
 	public static final String[] reservedWords = {
@@ -368,6 +372,11 @@ public class ScriptFunctions{
 	}
 	
 	public static String getOpcodeName(long inst){
+		byte op = getOpcode(inst);
+		
+		if(op < 0 || op > opcodes.length)
+			return "stringval";
+			
 		return opcodes[getOpcode(inst)];
 	}
 	

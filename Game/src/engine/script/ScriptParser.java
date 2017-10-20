@@ -97,15 +97,13 @@ public class ScriptParser{
 		funcBrackets= new Stack<Integer>();
 		funcParams	= new Stack<Integer>();
 		
-		tmpExpInd = -1;
-		
-		loopNum = -1;
-		forLoopNum = -1;
-		loopTotal = -1;
-		
-		funcArgs = 0;
-		
 		expressions.add(new ArrayList<Object>());
+
+		tmpExpInd = -1;
+		loopNum = 0;
+		forLoopNum = -1;
+		loopTotal = 0;
+		funcArgs = 0;
 		
 		haltCompiler = false;
 		
@@ -124,6 +122,12 @@ public class ScriptParser{
 		variables.clear();
 		variables.add("");
 		addDefaultVars();
+		
+		tmpExpInd = -1;
+		loopNum = 0;
+		forLoopNum = -1;
+		loopTotal = 0;
+		funcArgs = 0;
 		
 		// Process into bytecode
 		process(false);
@@ -375,6 +379,11 @@ public class ScriptParser{
 							states.push("exp");
 							
 							continue;
+						
+						case "wait":
+							states.push("wait");
+							states.push("exp");
+							continue;
 					}
 					
 					continue;
@@ -479,7 +488,6 @@ public class ScriptParser{
 								
 								// Return statement with value cannot be in task
 								if(statesPeek("return", 1)){
-									
 									for(int j = states.size() - 1; j >= 0; j--){
 										if(states.get(j).equals("func_body"))
 											break;
@@ -488,7 +496,15 @@ public class ScriptParser{
 											return;
 										}
 									}
-									
+								}
+								
+								// Empty wait statement
+								if(statesPeek("wait", 1) && expressions.peek().isEmpty()){
+									bytecode.add(getInstruction("load", VALUE, lineNum, 0));
+									bytecode.add(getInstruction("wait", lineNum));
+									states.pop();
+									states.pop();
+									continue;
 								}
 								
 								bytecode.addAll(parseExpression(lineNum));
@@ -902,17 +918,12 @@ public class ScriptParser{
 									// Get function
 									String func = funcNames.pop() + ":" + funcParams.pop();
 									
-									// Task does not return value
-									if(statesPeek("exp") && func.contains("t:")){
-										compilationError("Task cannot return a value", lineNum);
-										return;
-									}
-									
-									func = func.replace("t:", ":");
-									
 									// Check if is built in function
 									int funcIndex = getBuiltInFunctionIndex(func);
 									boolean builtIn = funcIndex != -1;
+									
+									// Is task
+									boolean task = false;
 									
 									// If not, check defined functions
 									if(funcIndex == -1){
@@ -923,6 +934,14 @@ public class ScriptParser{
 											
 											// Name + arg count
 											String fn = f.substring(ind);
+											
+											task = false;
+											
+											if(f.charAt(ind - 2) == 't'){
+												f = f.replace("t:" + fn, ":" + fn);
+												ind--;
+												task = true;
+											}
 											
 											// Scope
 											int sc = Integer.parseInt(f.substring(0, ind - 1));
@@ -954,6 +973,11 @@ public class ScriptParser{
 												}
 											}
 										}
+									}
+									
+									if(statesPeek("exp") && task){
+										compilationError("Task cannot return a value", lineNum);
+										return;
 									}
 									
 									// Do not check if functions are being defined
@@ -1028,15 +1052,14 @@ public class ScriptParser{
 								
 								requireAfter = new String[]{"{"};
 								
-								boolean task = states.pop().equals("task_def");
-								states.push(task ? "task_body" : "func_body");
+								states.push(states.pop().equals("task_def") ? "task_body" : "func_body");
 
 								// Add to functions list only if defining
 								if(!functionDef)
 									continue;
 								
 								// Add number of args
-								String func = functions.get(functions.size() - 1) + (task ? "t" : "") + ":" + funcArgs;
+								String func = functions.get(functions.size() - 1) + ":" + funcArgs;
 								functions.set(functions.size() - 1, func);
 								
 								func = func.substring(func.indexOf(':') + 1);
@@ -1185,8 +1208,9 @@ public class ScriptParser{
 					
 					// Add function
 					if(statesPeek("func_def") || statesPeek("task_def")){
+						
 						if(functionDef)
-							functions.add(scope + ":" + token);
+							functions.add(scope + (statesPeek("task_def") ? "t" : "") + ":" + token);
 						
 						bytecode.add(getInstruction(statesPeek("task_def") ? "task" : "function", lineNum, funcNum));
 						funcNum++;
@@ -1624,6 +1648,12 @@ public class ScriptParser{
 						bc.add(getInstruction("array_elem", lineNum));
 					
 					return bc;
+				
+				// Wait
+				case "wait":
+					bc.add(getInstruction("wait", lineNum));
+					states.pop();
+					return bc;
 			}
 			
 			bc.clear();
@@ -1880,6 +1910,12 @@ public class ScriptParser{
 				else
 					bc.add(getInstruction("array_elem", lineNum));
 				
+				return bc;
+			
+			// Wait
+			case "wait":
+				bc.add(getInstruction("wait", lineNum));
+				states.pop();
 				return bc;
 		}
 

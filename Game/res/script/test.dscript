@@ -1,6 +1,15 @@
 
-set c = 20;
+set c = 10;
 
-for(i in c){
-  bullet(_crystal, _red, 400, 200, i*(360/c), 5);
+task circle(x, y, color){
+  while(true){
+    for(i in c){
+      bullet(_scale, color, x, y, i*(360/c), 4);
+    }
+
+    wait 10;
+  }
 }
+
+circle(200, 200, _red);
+circle(600, 200, _blue);
