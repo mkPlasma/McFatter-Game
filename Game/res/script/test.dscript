@@ -1,17 +1,17 @@
 
-set ang = 20;
+set c = 30;
 
 while(true){
     
-    for(i in -2, 3){
-        bulletStack(getAngleToPlayer({400, 200}) + i*ang);
+    for(i in c){
+        bulletStack(getAngleToPlayer({400, 200}) + i*(360/c));
     }
     
-    wait 20;
+    wait 10;
 }
 
 function bulletStack(dir){
-    for(i in 5){
-        bullet(_scale_d, _dark_yellow, 400, 200, dir, 2 + i/2);
+    for(i in 10){
+        bullet(_crystal, _red, 400, 200, dir, 2 + i/2);
     }
 }
