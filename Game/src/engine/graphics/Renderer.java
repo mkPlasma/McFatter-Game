@@ -119,7 +119,7 @@ public class Renderer{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, el.get(0).getSprite().getTextureID());
 		
-		//glBindVertexArray(vao[0]);
+		glBindVertexArray(vao[0]);
 		
 		glEnableVertexAttribArray(0);
 		if(useRotations)
@@ -191,7 +191,7 @@ public class Renderer{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, eBuffer, GL_DYNAMIC_DRAW);
 		
-		//glBindVertexArray(0);
+		glBindVertexArray(0);
 		
 		if(rotations != null)
 			return new int[]{vao, vbo, rts, ebo};

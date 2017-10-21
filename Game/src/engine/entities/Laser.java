@@ -136,36 +136,36 @@ public class Laser extends Bullet{
 		this.accel = accel;
 	}
 	
-	public float getSpdMax(){
-		return spdMax;
+	public float getMaxSpd(){
+		return maxSpd;
 	}
 	
-	public void setSpdMax(float spdMax){
-		this.spdMax = spdMax;
+	public void setMaxSpd(float spdMax){
+		this.maxSpd = spdMax;
 	}
 	
-	public float getSpdMin(){
-		return spdMin;
+	public float getMinSpd(){
+		return minSpd;
 	}
 	
-	public void setSpdMin(float spdMin){
-		this.spdMin = spdMin;
+	public void setMinSpd(float spdMin){
+		this.minSpd = spdMin;
 	}
 	
 	public boolean useSpdMin(){
-		return useSpdMin;
+		return useMinSpd;
 	}
 	
 	public void setUseSpdMin(boolean useSpdMin){
-		this.useSpdMin = useSpdMin;
+		this.useMinSpd = useSpdMin;
 	}
 	
 	public boolean useSpdMax(){
-		return useSpdMax;
+		return useMaxSpd;
 	}
 	
 	public void setUseSpdMax(boolean useSpdMax){
-		this.useSpdMax = useSpdMax;
+		this.useMaxSpd = useSpdMax;
 	}
 	
 	public void setLength(int length){

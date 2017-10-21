@@ -3,6 +3,7 @@ package engine.script;
 import java.util.ArrayList;
 
 import engine.entities.Bullet;
+import engine.entities.Player;
 
 public class ScriptController{
 	
@@ -49,6 +50,10 @@ public class ScriptController{
 			haltRun = runner.haltRun();
 			finished = runner.isFinished() && branches.isEmpty();
 		}
+	}
+	
+	public void setPlayer(Player player){
+		runner.setPlayer(player);
 	}
 	
 	public ArrayList<Bullet> getBullets(){

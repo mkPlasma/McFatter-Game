@@ -392,7 +392,7 @@ public class ScriptLexer{
 							break;
 						case "in":
 							lastExpected = new String[]{"v"};
-							nextExpected = new String[]{"i", "l", "v", "f"};
+							nextExpected = new String[]{"i", "l", "v", "f", "-"};
 							lastExpectedStrict = true;
 							break;
 						case "function": case "task":
@@ -434,7 +434,7 @@ public class ScriptLexer{
 							break;
 					
 						case "-":
-							lastExpected = new String[]{"v", "o", "a", "f", "i", "l", ",", "(", ")", "[", "]", "}", "return", "wait"};
+							lastExpected = new String[]{"v", "o", "a", "f", "i", "l", ",", "(", ")", "[", "]", "}", "return", "wait", "in"};
 							nextExpected = new String[]{"v", "f", "i", "l", "(", "{", "global"};
 						break;
 					}
@@ -555,8 +555,8 @@ public class ScriptLexer{
 				
 				// Change to single negative number
 				if(getData(token).equals("-")){
-					if((lType == 'o' || lType == 'a' || lData.equals(",") || lData.equals("(") ||
-						lData.equals("[") || lData.equals("return") || lData.equals("wait"))){
+					if(lType == 'o' || lType == 'a' || lData.equals(",") || lData.equals("(") ||
+						lData.equals("[") || lData.equals("return") || lData.equals("wait") || lData.equals("in")){
 						
 						char type2 = getType(tokens.get(i + 1));
 						

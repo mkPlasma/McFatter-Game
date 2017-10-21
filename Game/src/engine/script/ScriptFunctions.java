@@ -122,28 +122,56 @@ public class ScriptFunctions{
 		"wait",
 	};
 	
+	public static final String[] operations = {
+		"+", "-", "*", "/", "%", "^", "<", ">", "==", "<=", ">=", "!", "||", "&&",
+		
+		"add", "subtract", "multiply", "divide", "modulo", "exponent", "not", "or", "and",
+		"less", "greater", "equals", "less_eq", "greater_eq",
+	};
+	
+	public static final byte INT = 0, FLOAT = 1, BOOLEAN = 2, STRING = 3,
+							 VALUE = 0, VARIABLE = 1,
+							 ZERO = 0;
+	
 	public static final String[] builtInFunctions = {
 		
 		// General
 		"print:1",
 		
+		"getPlayerX:0",
+		"getPlayerY:0",
+		"getPlayerPos:0",
+		
+		"getAngleToPlayer:1",
+		"getAngleToPlayer:2",
+		"getAngleToLocation:2",
+		"getAngleToLocation:4",
+
+		"random:2",
+		"randomFloat:2",
+		"randomBool:0",
+		
 		// Math
 		"pi:0",
 		"abs:1",
 		"round:1",
+		"trunc:1",
 		"floor:1",
 		"ceil:1",
 		"sqrt:1",
+		"log:1",
+		"log10:1",
 		"degrees:1",
 		"radians:1",
+		
 		"sin:1",
 		"cos:1",
 		"tan:1",
 		"ain:1",
 		"acos:1",
 		"atan:1",
+		
 		"atan2:2",
-		"pow:2",
 		"min:2",
 		"max:2",
 		
@@ -163,8 +191,8 @@ public class ScriptFunctions{
 		"setDir:d1",
 		"setAngVel:d1",
 		"setAccel:d1",
-		"setSpdMin:d1",
-		"setSpdMax:d1",
+		"setMinSpd:d1",
+		"setMaxSpd:d1",
 
 		"getX:d0",
 		"getY:d0",
@@ -174,20 +202,110 @@ public class ScriptFunctions{
 		"getDir:d0",
 		"getAngVel:d0",
 		"getAccel:d0",
-		"getSpdMin:d0",
-		"getSpdMax:d0",
+		"getMinSpd:d0",
+		"getMaxSpd:d0",
 	};
 	
-	public static final String[] operations = {
-		"+", "-", "*", "/", "%", "^", "<", ">", "==", "<=", ">=", "!", "||", "&&",
+	
+	// Built in functions
+	
+	// Get index of name
+	public static int getBuiltInFunctionIndex(String func){
+		for(int i = 0; i < builtInFunctions.length; i++)
+			if(builtInFunctions[i].replace(":d", ":").equals(func))
+				return i;
+		return -1;
+	}
+	
+	// Get name
+	public static String getBuiltInFunctionName(int index){
+		String name = builtInFunctions[index];
+		return name.substring(0, name.indexOf(':'));
+	}
+	
+	public static int getBuiltInFunctionParameterCount(int index){
+		String f = builtInFunctions[index].replaceAll(":d", ":");
+		return Integer.parseInt(f.substring(f.indexOf(':') + 1));
+	}
+	
+	// Check for type mismatch
+	public static boolean builtInFunctionTypeMatch(int index, Object[] params){
+
+		Object o1 = params.length > 0 ? params[0] : null;
+		Object o2 = params.length > 1 ? params[1] : null;
+		Object o3 = params.length > 2 ? params[2] : null;
+		Object o4 = params.length > 3 ? params[3] : null;
 		
-		"add", "subtract", "multiply", "divide", "modulo", "exponent", "not", "or", "and",
-		"less", "greater", "equals", "less_eq", "greater_eq",
-	};
+		int p = getBuiltInFunctionParameterCount(index);
+		
+		switch(getBuiltInFunctionName(index)){
+			case "getAngleToPlayer":
+				if(p == 1)
+					return o1 instanceof ArrayList;
+				return (o1 instanceof Integer || o1 instanceof Float) && (o2 instanceof Integer || o2 instanceof Float);
+			
+			case "getAngleToLocation":
+				
+				if(p == 2)
+					return o1 instanceof ArrayList && o2 instanceof ArrayList;
+				
+				return (o1 instanceof Integer || o1 instanceof Float) && (o2 instanceof Integer || o2 instanceof Float) &&
+					   (o3 instanceof Integer || o3 instanceof Float) && (o4 instanceof Integer || o4 instanceof Float);
+			
+			case "abs": case "round": case "trunc": case "floor": case "ceil": case "sqrt": case "log": case "log10": case "degrees": case "radians":
+			case "sin": case "cos": case "tan": case "asin": case "acos": case "atan":
+				return o1 instanceof Integer || o1 instanceof Float;
+			
+			case "random": case "randomFloat": case "atan2": case "min": case "max":
+				return (o1 instanceof Integer || o1 instanceof Float) && (o2 instanceof Integer || o2 instanceof Float);
+			
+			case "length":
+				return o1 instanceof ArrayList || o1 instanceof String;
+			
+			case "add":
+				return o1 instanceof ArrayList && !(o2 instanceof ArrayList);
+			
+			case "remove":
+				return o1 instanceof ArrayList && (p == 0 || o2 instanceof Integer);
+			
+			case "bullet":
+				Object o5 = params[4];
+				Object o6 = params[5];
+				
+				return o1 instanceof Integer && o2 instanceof Integer &&
+					  (o3 instanceof Integer || o3 instanceof Float) &&
+					  (o4 instanceof Integer || o4 instanceof Float) &&
+					  (o5 instanceof Integer || o5 instanceof Float) &&
+					  (o6 instanceof Integer || o6 instanceof Float);
+			
+			case "setX": case "setY":
+				return o1 instanceof GameEntity && (o2 instanceof Integer || o2 instanceof Float);
+			
+			case "setSpd": case "setDir":
+			case "setAngVel": case "setAccel": case "setMinSpd": case "setMaxSpd":
+				return o1 instanceof MovableEntity && (o2 instanceof Integer || o2 instanceof Float);
+			
+			case "setPos":
+				return o1 instanceof GameEntity && o2 instanceof ArrayList;
+			
+			
+			case "getX": case "getY": case "getPos": case "getTime":
+				return o1 instanceof GameEntity;
+			
+			case "getSpd": case "getDir":
+			case "getAngVel": case "getAccel": case "getMinSpd": case "getMaxSpd":
+				return o1 instanceof MovableEntity;
+		}
+		
+		return true;
+	}
 	
-	public static final byte INT = 0, FLOAT = 1, BOOLEAN = 2, STRING = 3,
-							 VALUE = 0, VARIABLE = 1,
-							 ZERO = 0;
+	// Function requires dot separator
+	public static boolean builtInFunctionDot(int index){
+		return builtInFunctions[index].contains(":d");
+	}
+	
+	
 	
 	// Token functions
 	
@@ -280,99 +398,6 @@ public class ScriptFunctions{
 		return s;
 	}
 	
-	
-	
-	// Built in functions
-	
-	// Get index of name
-	public static int getBuiltInFunctionIndex(String func){
-		for(int i = 0; i < builtInFunctions.length; i++)
-			if(builtInFunctions[i].replace(":d", ":").equals(func))
-				return i;
-		return -1;
-	}
-	
-	// Get name
-	public static String getBuiltInFunctionName(int index){
-		String name = builtInFunctions[index];
-		return name.substring(0, name.indexOf(':'));
-	}
-	
-	public static int getBuiltInFunctionParameterCount(int index){
-		String f = builtInFunctions[index].replaceAll(":d", ":");
-		return Integer.parseInt(f.substring(f.indexOf(':') + 1));
-	}
-	
-	// Check for type mismatch
-	public static boolean builtInFunctionTypeMatch(int index, Object[] params){
-		
-		Object o1 = null;
-		Object o2 = null;
-		
-		if(params.length > 0){
-			o1 = params[0];
-			
-			if(params.length > 1)
-				o2 = params[1];
-		}
-		
-		int p = getBuiltInFunctionParameterCount(index);
-		
-		switch(getBuiltInFunctionName(index)){
-			case "abs": case "round": case "floor": case "ceil": case "sqrt": case "degrees": case "radians":
-			case "sin": case "cos": case "tan": case "asin": case "acos": case "atan":
-				return o1 instanceof Integer || o1 instanceof Float;
-			
-			case "atan2": case "pow": case "min": case "max":
-				return (o1 instanceof Integer || o1 instanceof Float) && (o2 instanceof Integer || o2 instanceof Float);
-			
-			case "length":
-				return o1 instanceof ArrayList || o1 instanceof String;
-			
-			case "add":
-				return o1 instanceof ArrayList && !(o2 instanceof ArrayList);
-			
-			case "remove":
-				return o1 instanceof ArrayList && (p == 0 || o2 instanceof Integer);
-			
-			case "bullet":
-				Object o3 = params[2];
-				Object o4 = params[2];
-				Object o5 = params[2];
-				Object o6 = params[2];
-				
-				return o1 instanceof Integer && o2 instanceof Integer &&
-					  (o3 instanceof Integer || o3 instanceof Float) &&
-					  (o4 instanceof Integer || o4 instanceof Float) &&
-					  (o5 instanceof Integer || o5 instanceof Float) &&
-					  (o6 instanceof Integer || o6 instanceof Float);
-			
-			case "setX": case "setY":
-				return o1 instanceof GameEntity && (o2 instanceof Integer || o2 instanceof Float);
-			
-			case "setSpd": case "setDir":
-			case "setAngVel": case "setAccel": case "setSpdMin": case "setSpdMax":
-				return o1 instanceof MovableEntity && (o2 instanceof Integer || o2 instanceof Float);
-			
-			case "setPos":
-				return o1 instanceof GameEntity && o2 instanceof ArrayList;
-			
-			
-			case "getX": case "getY": case "getPos": case "getTime":
-				return o1 instanceof GameEntity;
-			
-			case "getSpd": case "getDir":
-			case "getAngVel": case "getAccel": case "getSpdMin": case "getSpdMax":
-				return o1 instanceof MovableEntity;
-		}
-		
-		return true;
-	}
-	
-	// Function requires dot separator
-	public static boolean builtInFunctionDot(int index){
-		return builtInFunctions[index].contains(":d");
-	}
 	
 	
 	// Creates an instruction

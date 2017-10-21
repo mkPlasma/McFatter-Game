@@ -10,6 +10,7 @@ import engine.entities.Effect;
 import engine.entities.EffectGenerator;
 import engine.entities.Enemy;
 import engine.entities.Laser;
+import engine.entities.Player;
 import engine.graphics.Renderer;
 
 /*
@@ -32,6 +33,8 @@ public class MainScreen extends GameScreen{
 	private ArrayList<Enemy> enemies;
 	private ArrayList<Effect> effects;
 	
+	private Player player;
+	
 	private int time, rTime;
 	
 	private boolean paused;
@@ -53,6 +56,9 @@ public class MainScreen extends GameScreen{
 		// Temporary test
 		stage = new Mission("Game/res/script/test.dscript");
 		stage.init();
+		
+		if(stage instanceof Mission)
+			player = ((Mission)stage).getPlayer();
 	}
 	
 	public void cleanup(){
@@ -142,7 +148,8 @@ public class MainScreen extends GameScreen{
 	}
 	
 	private void checkCollisions(){
-		final float[] ppos = ((Mission)stage).getPlayer().getPos();
+		final float[] ppos = player.getPos();
+		final int pHitbox = player.getHitboxSize();
 		
 		// Enemy bullets
 		for(int i = 0; i < enemyBullets.size(); i++){
@@ -151,7 +158,16 @@ public class MainScreen extends GameScreen{
 			if(b.collisionsEnabled()){
 				final float bpos[] = b.getPos();
 				
-				if(b instanceof Laser){
+				// Bullet collisions
+				if(!(b instanceof Laser)){
+					if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) < pHitbox + b.getHitboxSize()){
+						//player.death();
+						b.onDestroy();
+					}
+				}
+				
+				// Laser collisions
+				else{
 					
 					// Angle between laser and player
 					float ang = (float)(Math.atan2(bpos[1] - ppos[1], bpos[0] - ppos[0]) - Math.toRadians(b.getDir()));
@@ -168,13 +184,8 @@ public class MainScreen extends GameScreen{
 					Laser l = (Laser)b;
 					int crop = l.getHBLengthCrop();
 					
-					if(d3 > crop && d3 < l.getLength() - crop && d2 < ((Mission)stage).getPlayer().getHitboxSize() + l.getHitboxSize()){
-						//player.death();
-						b.onDestroy();
-					}
-				}
-				else{
-					if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) < ((Mission)stage).getPlayer().getHitboxSize() + b.getHitboxSize()){
+					// Check collision
+					if(d3 > crop && d3 < l.getLength() - crop && d2 < pHitbox + l.getHitboxSize()){
 						//player.death();
 						b.onDestroy();
 					}

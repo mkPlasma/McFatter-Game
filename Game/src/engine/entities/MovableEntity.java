@@ -19,9 +19,9 @@ public abstract class MovableEntity extends GameEntity{
 	protected float	dir, dirPast,
 					velX, velY, angVel,
 					spd, spdPast, accel,
-					spdMin, spdMax;
+					minSpd, maxSpd;
 	
-	protected boolean useSpdMin, useSpdMax;
+	protected boolean useMinSpd, useMaxSpd;
 	
 	public MovableEntity(){
 		super();
@@ -51,10 +51,10 @@ public abstract class MovableEntity extends GameEntity{
 		
 		// Keep speed within range
 		
-		if(useSpdMax && spd > spdMax)
-			spd = spdMax;
-		else if(useSpdMin && spd < spdMin)
-			spd = spdMin;
+		if(useMaxSpd && spd > maxSpd)
+			spd = maxSpd;
+		else if(useMinSpd && spd < minSpd)
+			spd = minSpd;
 		
 		// Angular velocity
 		dir += angVel;
@@ -151,21 +151,21 @@ public abstract class MovableEntity extends GameEntity{
 		this.accel = accel;
 	}
 	
-	public float getSpdMax(){
-		return spdMax;
+	public float getMaxSpd(){
+		return maxSpd;
 	}
 	
-	public void setSpdMax(float spdMax){
-		this.spdMax = spdMax;
-		useSpdMax = true;
+	public void setMaxSpd(float spdMax){
+		this.maxSpd = spdMax;
+		useMaxSpd = true;
 	}
 	
-	public float getSpdMin(){
-		return spdMin;
+	public float getMinSpd(){
+		return minSpd;
 	}
 	
-	public void setSpdMin(float spdMin){
-		this.spdMin = spdMin;
-		useSpdMin = true;
+	public void setMinSpd(float spdMin){
+		this.minSpd = spdMin;
+		useMinSpd = true;
 	}
 }

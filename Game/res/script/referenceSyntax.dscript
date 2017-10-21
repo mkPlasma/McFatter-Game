@@ -1,0 +1,346 @@
+
+
+
+
+// DScript Syntax Reference
+
+
+
+
+
+
+
+
+// Variables
+// ==================================================
+
+// Variables are loosely typed, their type does not need to be defined.
+// Types include int, float, boolean, and string.
+// Variables can also be bullets, enemies, etc. if set by functions.
+
+// Initializes x to an int with value 0.
+set x;
+
+// Initializes y to a float with value 5.12.
+set y = 5.12;
+
+// Strings can be defined using double quotes.
+set string = "some string";
+
+// Variables can also be constant, meaning their value cannot be changed.
+// Attempting to change a constant's value results in a compilation error.
+set const PI = 3.1415;
+PI += 2; // Compilation error.
+
+// Floats cannot be initialized without a leading zero.
+set wrong = .1;
+set right = 0.1;
+
+// Variables can be redefined if "set" is not used.
+x = 4.2;
+x = true;
+
+// Operations
+// Return numbers.
+x = 1 + 1;
+x = 1 - 1;
+x = 1 * 1;
+x = 1 / 1;
+x = 1 % 1;
+x = 1 ^ 1;
+
+// Return booleans.
+x = 1 < 1;
+x = 1 > 1;
+x = 1 <= 1;
+x = 1 >= 1;
+x = 1 == 1;
+x = true || true;
+x = true && true;
+
+// Assignment operators
+x += 1;
+x -= 1;
+x *= 1;
+x /= 1;
+x %= 1;
+x++;
+x--;
+
+// Strings and variables can be concatenized with +.
+set somePhrase = "The value of y is " + y + ".";
+
+// Strings can be compared with ==.
+set thisIsTrue = "test" == "test";
+
+
+
+
+
+
+
+
+
+
+// Arrays
+// ==================================================
+
+// Arrays can be defined using { and }.
+// They can hold any type of variable.
+set myArray = {1, 2.0, false, y};
+
+// A value can be accessed with [index].
+x = myArray[0]; // Sets x to 1.
+
+// Elements can be added by using .add().
+myArray.add(4); // Now contains [1, 2.0, false, 3.14, 4].
+
+// Elements can be removed with .remove().
+// Without arguments, one item will be removed and returned.
+set e = myArray.remove(); // e = 4
+
+// A number of elements to remove can also be specified.
+myArray.remove(2); // Does not return a value
+
+// Arrays can be printed with print().
+print(myArray);
+
+
+
+
+
+
+
+
+
+
+// Control Statements
+// ==================================================
+
+// If statements will branch according to their condition.
+if(4 > 3){
+    // Statements here will run.
+    
+    // For boolean variables, the expression can be shortened.
+    set cond = true;
+    
+    if(cond){
+        // Statements here will run.
+    }
+}
+
+// Else and if else work the same as other languages.
+if(0 == 1){
+}
+else if(0 == 2){
+}
+else{
+}
+
+// While loops run while a condition is true.
+
+set c = 0;
+
+while(c < 10){
+    c++; // Runs 10 times.
+}
+// c = 9 after the loop.
+
+
+// For loops run for a certain range of values.
+
+// With one value, the loop runs from 0 to that value.
+for(i in 10){
+    // Equivalent to the for loop before.
+}
+
+// With two values, the loops starts at the first and runs until the second.
+for(i in 2, 5){
+    // i will be between 2 and 4.
+}
+
+// With three values, the middle value serves as the increment.
+for(i in 3, 2, 10){
+    // i = 3, 5, 7, 9.
+}
+
+// If the second value is a negative number, the loop will run backwards.
+// Note: Only works with negative ints/floats. Expressions or variables that are negative do not work.
+for(i in 10, -1, 0){
+    // i starts at 10 and finished as 1.
+}
+
+// Break statements exit the innermost loop.
+while(true){
+    while(true){
+        break;
+    }
+    // First break leads to here.
+    
+    break;
+}
+// Second break leads here.
+
+// The wait keyword can be used to pause the script for a certain number of franes.
+wait; // Waits one frame.
+wait 30; // Waits 30 frames, or 0.5 seconds.
+wait x; // Waits x frames.
+wait 1.2; // Waits 1 frame (rounds down).
+
+
+
+
+
+
+
+
+
+
+// Functions and Tasks
+// ==================================================
+
+// Functions can be defined with any number of parameters.
+// Multiple functions can share the same name, as long as they have a different number of parameters.
+// Functions can also share their name with a variable.
+set test = 0;
+function test(){}
+function test(value){}
+function test(a, b){}
+function test(param1, param2, param3){}
+
+// Functions can be terminated early with a return statement.
+function something(d){
+    if(d > 0){
+        return;
+    }
+}
+
+// Return statement can also return values.
+function returnsOne(){
+    return 1;
+}
+
+// Tasks are defined the same way as functions, but with the task keyword.
+task someTask(){}
+    
+// Tasks share names under the same rules as functions.
+// This means a task and a function with the same name and number of parameters will cause an error.
+task test(){} // Compilation error, since function test() already exists.
+
+// Tasks also cannot return values, but they can use empty return statements.
+task somethingElse(d){
+    if(d > 0){
+        return;
+    }
+    
+    return 5; // Compilation error.
+}
+
+// The main difference between tasks and functions is that tasks create a new branch in the script.
+// This means several tasks can run parallel to each other.
+// Script execution jumps between branches once a wait statement is reached.
+
+// The following code will print "1" twice, 1 second after the script is run.
+task printOne(){
+    wait 60;
+    print(1);
+}
+
+printOne();
+printOne();
+
+// On the other hand, this code will wait 1 second, print "1", then wait 1 second again, and print "1" again.
+function printOne(){
+    wait 60;
+    print(1);
+}
+
+printOne();
+printOne();
+
+// Tasks will also sync up variables with each other.
+// When a task is called, any currently defined variables will sync between that task's branch and the current branch.
+// If the same task is called twice, its variables will be independent to each other.
+// However, any variables defined before the calls will sync up between the two tasks, as well as code outside the tasks.
+
+// When a task is reached, the code inside the task will run first.
+
+// Other examples.
+// This code will print "1" then "2".
+set value;
+
+task incValue(){
+    value++;
+    print(value);
+}
+
+incValue();
+incValue();
+
+// This code will print "2" then "3", due to the wait statement inside incValue().
+set value;
+
+task incValue(){
+    wait;
+    value++;
+    print(value);
+}
+
+incValue();
+incValue();
+value++;
+
+
+
+
+
+
+
+
+
+
+// Scope
+// ==================================================
+
+// Scope works the same way it does in Java.
+// Variables, functions, and tasks all follow the same rules for scope.
+
+// Global variables are any variables defined outside of any control statements or functions.
+set globalVar;
+
+if(globalVar == 0){
+    set localVar;
+}
+
+// Local variables can take the same name as a global variable.
+// However, a local variable cannot have the same name as another local variable in the same scope.
+// If a local variable shares its name with a global one, the global one can be accessed using the "global" keyword.
+
+// Note that functions do not have a global/local distinction.
+// Functions can only be used within scope, and they cannot share names if one is global and the other is not.
+
+set test;
+
+if(test == 0){
+    set test; // This is a new variable with the same name.
+    set localOne;
+    
+    if(test == 0){ // Refers to the second "test".
+        global test++; // Refers to the first "test".
+        
+        set localOne; // Compilation error.
+        set localTwo = global test;
+    }
+    // At this point, localOne and localTwo are deleted.
+    
+    set localTwo; // Since localTwo was deleted, this is valid. It creates a new variable.
+}
+
+
+
+
+
+
+
+
+

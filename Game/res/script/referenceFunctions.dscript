@@ -1,0 +1,123 @@
+
+// DScript Function Reference
+
+
+// General
+
+// Prints a
+print(a);
+
+// Player position
+getPlayerX();
+getPlayerY();
+// As array
+getPlayerPos();
+
+// Returns angle to player
+getAngleToPlayer(x, y);
+// With array
+getAngleToPlayer(pos);
+
+// Returns angle from (x1, y1) to (x2, y2)
+getAngleToLocation(x1, y1, x2, y2);
+// With array, angle from pos1 to pos2
+getAngleToLocation(pos1, pos2);
+
+// Random int between a (inclusive) and b (exclusive)
+random(a, b);
+// Random float
+randomFloat(a, b);
+// Random boolean
+randomBool();
+
+// Math
+
+// Pi
+pi();
+// Absolute value
+abs(a);
+
+// Rounds (returns int)
+round(a);
+// Truncates (returns int)
+trunc(a);
+// Rounds down (returns int)
+floor(a);
+// Rounds up (returns int)
+ceil(a);
+
+// Square root
+sqrt(a);
+// Natural log
+log(a);
+// Log base 10
+log10(a);
+// Convert to degrees
+degrees(a);
+// Convert to radians
+radians(a);
+
+// Trigonometry
+sin(a);
+cos(a);
+tan(a);
+// Arcsin, etc.
+asin(a);
+acos(a);
+atan(a);
+// Arctan of y/x
+atan2(x, y);
+// Returns smaller value
+min(a, b);
+// Returns larger value
+max(a, b);
+
+
+
+// Arrays
+
+// Returns length of array or string
+array.length();
+// Adds a to array
+array.add(a);
+// Removes one value and returns it
+array.remove();
+// Removes n values
+array.remove(n);
+
+
+
+// Entities
+
+// Creates a bullet with given parameters
+set b = bullet(type, color, x, y, dir, spd);
+
+// Location
+b.setX(x);
+b.setY(y);
+b.getX();
+b.getY();
+
+// As an array, [x, y]
+b.setPos(pos);
+b.getPos();
+
+// Direction and speed
+b.setDir(d);
+b.setSpd(s);
+b.getDir();
+b.getSpd();
+
+// Acceleration, min/max speed
+b.setAccel(a);
+b.setMinSpd(s);
+b.setMaxSpd(s);
+b.getMinSpd();
+b.getMaxSpd();
+
+// Angular velocity, value gets added to direction, causing bullet to curve
+b.setAngVel();
+b.getAngVel();
+
+// How many frames entity has existed
+b.getTime();

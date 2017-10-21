@@ -35,6 +35,8 @@ public class Mission extends GameStage{
 		
 		player = new Player(400, 500);
 		
+		scriptController.setPlayer(player);
+		
 		bullets = new ArrayList<Bullet>();		
 		enemies = new ArrayList<Enemy>();
 	}
