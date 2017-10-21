@@ -1,17 +1,9 @@
 
-set c = 30;
 
 while(true){
-    
-    for(i in c){
-        bulletStack(getAngleToPlayer({400, 200}) + i*(360/c));
+    for(i in 4){
+        bullet(_orb_m, _blue, 400, 200, random(0, 360), random(3, 8));
     }
     
-    wait 10;
-}
-
-function bulletStack(dir){
-    for(i in 10){
-        bullet(_crystal, _red, 400, 200, dir, 2 + i/2);
-    }
+    wait;
 }

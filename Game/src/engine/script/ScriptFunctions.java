@@ -198,6 +198,7 @@ public class ScriptFunctions{
 		"getY:d0",
 		"getPos:d0",
 		"getTime:d0",
+		"isRemoved:d0",
 		"getSpd:d0",
 		"getDir:d0",
 		"getAngVel:d0",
@@ -289,7 +290,7 @@ public class ScriptFunctions{
 				return o1 instanceof GameEntity && o2 instanceof ArrayList;
 			
 			
-			case "getX": case "getY": case "getPos": case "getTime":
+			case "getX": case "getY": case "getPos": case "getTime": case "isRemoved":
 				return o1 instanceof GameEntity;
 			
 			case "getSpd": case "getDir":

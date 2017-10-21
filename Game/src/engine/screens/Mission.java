@@ -2,11 +2,12 @@ package engine.screens;
 
 import java.util.ArrayList;
 
+import content.BulletList;
 import engine.entities.Bullet;
-import engine.entities.Effect;
 import engine.entities.Enemy;
 import engine.entities.Player;
 import engine.graphics.Renderer;
+import engine.graphics.SpriteCache;
 
 /*
  * 		Mission.java
@@ -26,16 +27,22 @@ public class Mission extends GameStage{
 	private ArrayList<Enemy> enemies;
 	private Player player;
 	
-	public Mission(String scriptPath, Renderer r){
-		super(scriptPath, r);
+	private BulletList bulletList;
+	
+	public Mission(String scriptPath, Renderer r, SpriteCache sc){
+		super(scriptPath, r, sc);
 	}
 	
 	public void init(){
 		super.init();
 		
-		player = new Player(400, 500);
+		bulletList = new BulletList(sc);
+		player = new Player(400, 500, bulletList.get(BulletList.TYPE_CRYSTAL, BulletList.COLOR_LIGHT_BLUE));
+		
+		player.setSprite(sc.cache(player.getSprite()));
 		
 		scriptController.setPlayer(player);
+		scriptController.setBulletList(bulletList);
 		
 		bullets = new ArrayList<Bullet>();		
 		enemies = new ArrayList<Enemy>();
@@ -44,6 +51,7 @@ public class Mission extends GameStage{
 	public void update(){
 		player.update();
 		
+		reloadScript();
 		scriptController.run();
 		
 		bullets.addAll(scriptController.getBullets());

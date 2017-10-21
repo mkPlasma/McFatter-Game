@@ -34,6 +34,8 @@ public class GameThread implements Runnable{
 	
 	private int fps;
 	
+	private ScreenManager screenManager;
+	
 	public GameThread(){
 		super();
 	}
@@ -89,9 +91,10 @@ public class GameThread implements Runnable{
 		
 		GL.createCapabilities();
 		
-		ScreenManager.init();
-		ScreenManager.setScreen(ScreenManager.scrnMain);
-		ScreenManager.initScreen();
+		screenManager = new ScreenManager();
+		screenManager.init();
+		screenManager.setScreen(screenManager.mainScreen);
+		screenManager.initScreen();
 	}
 	
 	public void run(){
@@ -159,18 +162,18 @@ public class GameThread implements Runnable{
 	private void update(){
 		glfwPollEvents();
 		
-		ScreenManager.update();
+		screenManager.update();
 	}
 	
 	private void render(){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		ScreenManager.render();
+		screenManager.render();
         
 		glfwSwapBuffers(window);
 	}
 	
 	private void cleanup(){
-		ScreenManager.cleanup();
+		screenManager.cleanup();
 	}
 }

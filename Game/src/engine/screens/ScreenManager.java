@@ -1,5 +1,7 @@
 package engine.screens;
 
+import engine.graphics.SpriteCache;
+
 /*
  * 		ScreenManager.java
  * 		
@@ -14,37 +16,37 @@ package engine.screens;
 public class ScreenManager{
 	
 	// Active screen
-	private static GameScreen screen;
+	private GameScreen screen;
 	
-	public static MainScreen scrnMain;
-	public static MapScreen scrnMap;
+	public MainScreen mainScreen;
+	public MapScreen mapScreen;
 	
-	public static void init(){
-		scrnMain = new MainScreen();
-		scrnMap = new MapScreen();
+	private SpriteCache spriteCache;
+	
+	public void init(){
+		mainScreen = new MainScreen();
+		mapScreen = new MapScreen();
+		
+		spriteCache = new SpriteCache();
 	}
 	
-	public static void initScreen(){
-		screen.init();
+	public void initScreen(){
+		screen.init(spriteCache);
 	}
 	
-	public static void update(){
+	public void update(){
 		screen.update();
 	}
 	
-	public static void render(){
+	public void render(){
 		screen.render();
 	}
 	
-	public static void cleanup(){
+	public void cleanup(){
 		screen.cleanup();
 	}
 	
-	public static void setScreen(GameScreen screen){
-		ScreenManager.screen = screen;
-	}
-	
-	public static GameScreen getGameScreen(){
-		return screen;
+	public void setScreen(GameScreen screen){
+		this.screen = screen;
 	}
 }

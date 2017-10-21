@@ -1,5 +1,7 @@
 package engine.screens;
 
+import engine.graphics.SpriteCache;
+
 /*
  * 		MapScreen.java
  * 		
@@ -15,8 +17,8 @@ package engine.screens;
 
 public class MapScreen extends GameScreen{
 	
-	public void init(){
-		
+	public void init(SpriteCache sc){
+		this.sc = sc;
 	}
 	
 	public void update(){

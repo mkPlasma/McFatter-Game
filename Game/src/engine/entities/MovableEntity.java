@@ -16,9 +16,8 @@ package engine.entities;
 
 public abstract class MovableEntity extends GameEntity{
 	
-	protected float	dir, dirPast,
-					velX, velY, angVel,
-					spd, spdPast, accel,
+	protected float	dir, dirRad, angVel,
+					spd, accel,
 					minSpd, maxSpd;
 	
 	protected boolean useMinSpd, useMaxSpd;
@@ -36,11 +35,6 @@ public abstract class MovableEntity extends GameEntity{
 		
 		this.dir = dir;
 		this.spd = spd;
-		
-		dirPast = dir;
-		spdPast = spd;
-		
-		setVelocities();
 	}
 	
 	
@@ -59,47 +53,10 @@ public abstract class MovableEntity extends GameEntity{
 		// Angular velocity
 		dir += angVel;
 		
-		updateVelocity();
+		dirRad = (float)Math.toRadians(dir);
 		
-		// Movement
-		x += velX;
-		y += velY;
-	}
-	
-	// Updates velocity if direction has changed
-	private void updateVelocity(){
-		if(dir != dirPast){
-			setVelocities();
-			dirPast = dir;
-			spdPast = spd;
-			return;
-		}
-		
-		if(spd != spdPast){
-			
-			if(spdPast == 0){
-				setVelocities();
-				return;
-			}
-			
-			float sr = spd/spdPast;
-			
-			if(Float.isInfinite(sr)){
-				setVelocities();
-				return;
-			}
-			
-			velX *= sr;
-			velY *= sr;
-			
-			spdPast = spd;
-		}
-	}
-	
-	// Set velocities based on direction
-	private void setVelocities(){
-		velX = (float)(spd*Math.cos(Math.toRadians(dir)));
-		velY = (float)(spd*Math.sin(Math.toRadians(dir)));
+		x += spd*Math.cos(dirRad);
+		y += spd*Math.sin(dirRad);
 	}
 	
 	
@@ -109,22 +66,6 @@ public abstract class MovableEntity extends GameEntity{
 	
 	public void setDir(float dir){
 		this.dir = dir;
-	}
-	
-	public float getVelX(){
-		return velX;
-	}
-	
-	public void setVelX(float velX){
-		this.velX = velX;
-	}
-	
-	public float getVelY(){
-		return velY;
-	}
-	
-	public void setVelY(float velY){
-		this.velY = velY;
 	}
 	
 	public float getAngVel(){

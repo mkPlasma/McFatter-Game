@@ -7,11 +7,11 @@ import org.lwjgl.glfw.GLFW;
 import engine.KeyboardListener;
 import engine.entities.Bullet;
 import engine.entities.Effect;
-import engine.entities.EffectGenerator;
 import engine.entities.Enemy;
 import engine.entities.Laser;
 import engine.entities.Player;
 import engine.graphics.Renderer;
+import engine.graphics.SpriteCache;
 
 /*
  * 		MainScreen.java
@@ -38,9 +38,12 @@ public class MainScreen extends GameScreen{
 	private int time, rTime;
 	
 	private boolean paused;
-	private int pauseTime;
+	private int pauseTime = -30;
 	
-	public void init(){
+	public void init(SpriteCache sc){
+		
+		this.sc = sc;
+		
 		enemyBullets = new ArrayList<Bullet>();
 		playerBullets = new ArrayList<Bullet>();
 		enemies = new ArrayList<Enemy>();
@@ -54,7 +57,7 @@ public class MainScreen extends GameScreen{
 		r.init();
 		
 		// Temporary test
-		stage = new Mission("Game/res/script/test.dscript", r);
+		stage = new Mission("Game/res/script/test.dscript", r, sc);
 		stage.init();
 		
 		if(stage instanceof Mission)
@@ -81,7 +84,6 @@ public class MainScreen extends GameScreen{
 	private void updateGameStage(){
 		
 		stage.update();
-		//System.exit(0);
 		
 		if(stage instanceof Mission){
 			Mission ms = (Mission)stage;
@@ -95,8 +97,6 @@ public class MainScreen extends GameScreen{
 			addPlayerBullets(ms.getPlayerBullets());
 			
 			checkCollisions();
-			
-			addEffects(EffectGenerator.getEffects());
 		}
 	}
 	
@@ -249,25 +249,13 @@ public class MainScreen extends GameScreen{
 		}
 	}
 	
-	private void addEffects(ArrayList<Effect> effects){
-		if(effects == null || effects.size() < 1)
-			return;
-		
-		for(int i = 0; i < effects.size(); i++){
-			if(effects.get(i) != null)
-				this.effects.add(effects.get(i));
-		}
-	}
 	
-	
-	int j = 0;
 	public void render(){
 		
 		drawGameStage();
 		
 		drawEnemies();
 		drawBullets();
-		//drawEffects();
 		
 		if(!paused)
 			rTime++;
@@ -284,11 +272,6 @@ public class MainScreen extends GameScreen{
 
 	private void drawEnemies(){
 		r.renderEnemies(enemies, rTime);
-	}
-	
-	private void drawEffects(){
-		for(int i = 0; i < effects.size(); i++)
-			effects.get(i).render();
 	}
 	
 	

@@ -129,3 +129,6 @@ b.getAngVel();
 
 // How many frames entity has existed
 b.getTime();
+
+// Is entity removed
+b.isRemoved();

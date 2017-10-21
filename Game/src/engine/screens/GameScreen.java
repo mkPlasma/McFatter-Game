@@ -1,6 +1,7 @@
 package engine.screens;
 
 import engine.graphics.Renderer;
+import engine.graphics.SpriteCache;
 
 /*
  * 		GameScreen.java
@@ -17,9 +18,10 @@ import engine.graphics.Renderer;
  */
 
 public abstract class GameScreen{
+	protected SpriteCache sc;
 	protected Renderer r;
 	
-	public abstract void init();
+	public abstract void init(SpriteCache sc);
 	public abstract void update();
 	public abstract void render();
 	public abstract void cleanup();

@@ -20,14 +20,14 @@ import java.util.ArrayList;
 
 public class SpriteCache{
 	
-	private static short maxSize = 512;
+	private short maxSize = 512;
 	
-	private static ArrayList<Sprite> sprites = new ArrayList<Sprite>();
+	private ArrayList<Sprite> sprites = new ArrayList<Sprite>();
 	
 	// Caches sprite or returns cache in sprite
 	// Use when loading sprites
 	
-	public static Sprite cache(Sprite spr){
+	public Sprite cache(Sprite spr){
 		
 		int i = getSpriteIndex(spr);
 		
@@ -64,7 +64,7 @@ public class SpriteCache{
 	
 	// Returns index of sprite in cache
 	// -1 if not cached
-	private static int getSpriteIndex(Sprite spr){
+	private int getSpriteIndex(Sprite spr){
 		for(int i = 0; i < sprites.size(); i++)
 			if(sprites.get(i).isEqual(spr))
 				return i;
@@ -73,7 +73,7 @@ public class SpriteCache{
 
 	// Returns index of sprite texture in cache
 	// -1 if not cached
-	private static int getTextureIndex(Sprite spr){
+	private int getTextureIndex(Sprite spr){
 		for(int i = 0; i < sprites.size(); i++)
 			if(sprites.get(i).getPath().equals(spr.getPath()))
 				return i;

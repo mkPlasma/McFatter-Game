@@ -51,7 +51,7 @@ public class ScriptParser{
 	private Stack<String> funcNames;
 	
 	// Bytecode holder for functions/arrays in expression
-	private Stack<ArrayList<Long>> tempBc;
+	private ArrayList<ArrayList<Long>> tempBc;
 	
 	// Number of parenthesis during function call
 	private Stack<Integer> funcBrackets;
@@ -93,7 +93,7 @@ public class ScriptParser{
 		forVars		= new ArrayList<String>();
 		functions	= new ArrayList<String>();
 		funcNames	= new Stack<String>();
-		tempBc		= new Stack<ArrayList<Long>>();
+		tempBc		= new ArrayList<ArrayList<Long>>();
 		funcBrackets= new Stack<Integer>();
 		funcParams	= new Stack<Integer>();
 		
@@ -162,16 +162,6 @@ public class ScriptParser{
 		variables.add("0c:_mine");
 		variables.add("0c:_plus");
 		variables.add("0c:_wall");
-		
-		variables.add("0c:_orb_m_d");
-		variables.add("0c:_scale_d");
-		variables.add("0c:_star4_d");
-		variables.add("0c:_crystal_d");
-		variables.add("0c:_missile_d");
-		variables.add("0c:_mine_d");
-		variables.add("0c:_plus_d");
-		variables.add("0c:_wall_d");
-		
 		variables.add("0c:_laser");
 		
 		variables.add("0c:_red");
@@ -190,6 +180,23 @@ public class ScriptParser{
 		variables.add("0c:_white");
 		variables.add("0c:_gray");
 		variables.add("0c:_black");
+		
+		variables.add("0c:_red_d");
+		variables.add("0c:_dark_red_d");
+		variables.add("0c:_orange_d");
+		variables.add("0c:_yellow_d");
+		variables.add("0c:_dark_yellow_d");
+		variables.add("0c:_green_d");
+		variables.add("0c:_dark_green_d");
+		variables.add("0c:_cyan_d");
+		variables.add("0c:_light_blue_d");
+		variables.add("0c:_blue_d");
+		variables.add("0c:_dark_blue_d");
+		variables.add("0c:_purple_d");
+		variables.add("0c:_pink_d");
+		variables.add("0c:_white_d");
+		variables.add("0c:_gray_d");
+		variables.add("0c:_black_d");
 	}
 	
 	// Process tokens into bytecode
@@ -562,7 +569,7 @@ public class ScriptParser{
 									else{
 										// Must do this otherwise funcBc.peek() will be the wrong item
 										ArrayList<Long> bc = parseExpression(lineNum);
-										tempBc.peek().addAll(bc);
+										tempBc.get(tempBc.size() - 1).addAll(bc);
 									}
 									
 									funcParams.push(funcParams.pop() + 1);
@@ -574,7 +581,7 @@ public class ScriptParser{
 								
 								// Array item
 								else if(statesPeek("array", 1)){
-									tempBc.peek().addAll(parseExpression(lineNum));
+									tempBc.get(tempBc.size() - 1).addAll(parseExpression(lineNum));
 									states.push("exp");
 									continue;
 								}
@@ -604,8 +611,8 @@ public class ScriptParser{
 							}
 							
 							if(statesPeek("exp")){
-								expressions.peek().add("@");
-								tempBc.push(new ArrayList<Long>());
+								expressions.peek().add("@" + tempBc.size());
+								tempBc.add(new ArrayList<Long>());
 							}
 							
 							// Dot after variable
@@ -620,7 +627,7 @@ public class ScriptParser{
 								long inst = getInstruction("load", VARIABLE, lineNum, variables.indexOf(expVar));
 								
 								if(statesPeek("exp"))
-									tempBc.peek().add(inst);
+									tempBc.get(tempBc.size() - 1).add(inst);
 								else
 									bytecode.add(inst);
 								
@@ -632,7 +639,7 @@ public class ScriptParser{
 								long inst = getInstruction("load_r", lineNum);
 
 								if(statesPeek("exp"))
-									tempBc.peek().add(inst);
+									tempBc.get(tempBc.size() - 1).add(inst);
 								else
 									bytecode.add(inst);
 							}
@@ -640,7 +647,7 @@ public class ScriptParser{
 							long inst = getInstruction("dot", lineNum);
 							
 							if(statesPeek("exp"))
-								tempBc.peek().add(inst);
+								tempBc.get(tempBc.size() - 1).add(inst);
 							else
 								bytecode.add(inst);
 							
@@ -666,11 +673,11 @@ public class ScriptParser{
 									}
 									
 									// Placeholder for bytecode
-									expressions.peek().add("#");
+									expressions.peek().add("#" + tempBc.size());
 									
 									// Use new expression for paramters
 									expressions.add(new ArrayList<Object>());
-									tempBc.push(new ArrayList<Long>());
+									tempBc.add(new ArrayList<Long>());
 									
 									states.add("array");
 									states.add("exp");
@@ -712,13 +719,13 @@ public class ScriptParser{
 									
 									// Parse values if not empty
 									if(!expressions.peek().isEmpty())
-										tempBc.peek().addAll(parseExpression(lineNum));
+										tempBc.get(tempBc.size() - 1).addAll(parseExpression(lineNum));
 									
 									// Pop "exp"
 									else
 										states.pop();
 									
-									tempBc.peek().add(getInstruction("array_end", lineNum));
+									tempBc.get(tempBc.size() - 1).add(getInstruction("array_end", lineNum));
 									expressions.pop();
 									states.pop();
 									
@@ -916,7 +923,7 @@ public class ScriptParser{
 										else{
 											// Must do this otherwise funcBc.peek() will be the wrong item
 											ArrayList<Long> bc = parseExpression(lineNum);
-											tempBc.peek().addAll(bc);
+											tempBc.get(tempBc.size() - 1).addAll(bc);
 										}
 										
 										funcParams.push(funcParams.pop() + 1);
@@ -998,14 +1005,14 @@ public class ScriptParser{
 									
 									// After dot separator
 									if(statesPeek("dot")){
-										tempBc.peek().add(getInstruction("call_func_b", lineNum, funcIndex));
+										tempBc.get(tempBc.size() - 1).add(getInstruction("call_func_b", lineNum, funcIndex));
 										
-										ArrayList<Long> bc = tempBc.pop();
+										ArrayList<Long> bc = tempBc.remove(tempBc.size() - 1);
 										
 										states.pop();
 										
 										if(statesPeek("exp"))
-											tempBc.peek().addAll(bc);
+											tempBc.get(tempBc.size() - 1).addAll(bc);
 										else
 											bytecode.addAll(bc);
 										
@@ -1015,7 +1022,7 @@ public class ScriptParser{
 									else if(expressions.size() == 1)
 										bytecode.add(getInstruction(builtIn ? "call_func_b" : "call_func", lineNum, funcIndex));
 									else{
-										tempBc.peek().add(getInstruction(builtIn ? "call_func_b" : "call_func", lineNum, funcIndex));
+										tempBc.get(tempBc.size() - 1).add(getInstruction(builtIn ? "call_func_b" : "call_func", lineNum, funcIndex));
 										expressions.pop();
 									}
 									
@@ -1139,13 +1146,13 @@ public class ScriptParser{
 								}
 								
 								// Add new temp bytecode holder
-								tempBc.push(new ArrayList<Long>());
+								tempBc.add(new ArrayList<Long>());
 								
 								// Array element in expression
 								if(statesPeek("exp")){
 									// Array variable
 									if(expVar != null){
-										tempBc.peek().add(getInstruction("array_load", lineNum, variables.indexOf(expVar)));
+										tempBc.get(tempBc.size() - 1).add(getInstruction("array_load", lineNum, variables.indexOf(expVar)));
 										arrayElemSwitch.push(false);
 									}
 									
@@ -1153,28 +1160,28 @@ public class ScriptParser{
 									else{
 										// From function
 										if(getData(tokens[i - 1]).equals(")"))
-											tempBc.peek().add(getInstruction("load_r", lineNum));
+											tempBc.get(tempBc.size() - 1).add(getInstruction("load_r", lineNum));
 										
-										tempBc.peek().add(getInstruction("array_load", lineNum, 0));
+										tempBc.get(tempBc.size() - 1).add(getInstruction("array_load", lineNum, 0));
 										
 										arrayElemSwitch.push(true);
 									}
 									
 									// Add placeholder
-									expressions.peek().add(arrayElemSwitch.peek() ? "$" :"#");
+									expressions.peek().add((arrayElemSwitch.peek() ? "$" :"#") + tempBc.size());
 									expressions.add(new ArrayList<Object>());
 								}
 								
 								// Assign array element
 								else{
 									// Two required, one for element as a whole, second for expression inside
-									tempBc.push(new ArrayList<Long>());
+									tempBc.add(new ArrayList<Long>());
 									
 									// Pop "assign"
 									states.pop();
 									
 									// Load variable array
-									tempBc.peek().add(getInstruction("array_load", VARIABLE, lineNum, variables.indexOf(states.pop())));
+									tempBc.get(tempBc.size() - 1).add(getInstruction("array_load", VARIABLE, lineNum, variables.indexOf(states.pop())));
 									
 									states.push("assign_array_pre");
 									states.push("assign");
@@ -1196,11 +1203,11 @@ public class ScriptParser{
 							else{
 								// Must do this otherwise funcBc.peek() will be the wrong item
 								ArrayList<Long> bc = parseExpression(lineNum);
-								tempBc.peek().addAll(bc);
+								tempBc.get(tempBc.size() - 1).addAll(bc);
 								
 								// Switch top 2 bytecode holders if referencing array directly or function call
 								if(arrayElemSwitch.pop()){
-									bc = tempBc.pop();
+									bc = tempBc.remove(tempBc.size() - 1);
 									tempBc.add(tempBc.size() - 1, bc);
 								}
 								
@@ -1242,13 +1249,13 @@ public class ScriptParser{
 						// Add placeholder in expression
 						// Later replaced by function call bytecode
 						if(statesPeek("exp"))
-							expressions.peek().add("@");
+							expressions.peek().add("@" + tempBc.size());
 						
-						tempBc.push(new ArrayList<Long>());
+						tempBc.add(new ArrayList<Long>());
 						
 						// Use new parameter queue if in function call
 						if(statesPeek("func_args", 1))
-							tempBc.peek().add(getInstruction("param_inc", lineNum));
+							tempBc.get(tempBc.size() - 1).add(getInstruction("param_inc", lineNum));
 						
 						// Use new expression for paramters
 						expressions.add(new ArrayList<Object>());
@@ -1488,7 +1495,9 @@ public class ScriptParser{
 				char c = ((String)obj).charAt(0);
 				
 				if(c == '@' || c == '#'){
-					bc.addAll(tempBc.pop());
+					int n = Integer.parseInt(((String)obj).substring(1));
+					
+					bc.addAll(tempBc.remove(n));
 					
 					if(c == '@'){
 						if(statesPeek("for_args"))
@@ -1568,7 +1577,7 @@ public class ScriptParser{
 						bc.add(getInstruction("array_val", lineNum));
 						
 						// Add bytecode to set array element
-						bc.addAll(tempBc.pop());
+						bc.addAll(tempBc.remove(tempBc.size() - 1));
 						
 						// If operation replace last instruction
 						if(isOperation(statesPeek())){
@@ -1636,7 +1645,7 @@ public class ScriptParser{
 					
 					// Assign array element
 					if(statesPeek("assign")){
-						bc.addAll(tempBc.pop());
+						bc.addAll(tempBc.remove(tempBc.size() - 1));
 						bc.add(getInstruction("array_elem_s", lineNum));
 						
 						states.pop();
@@ -1715,9 +1724,12 @@ public class ScriptParser{
 		
 		while(!operators.isEmpty())
 			output.push(operators.pop());
-
+		
 		// Convert to bytecode
 		Object[] expression = output.toArray();
+		
+		// Removed placeholders
+		ArrayList<Integer> removedPh = new ArrayList<Integer>();
 		
 		for(Object obj:expression){
 			
@@ -1732,10 +1744,17 @@ public class ScriptParser{
 				char c = ((String)obj).charAt(0);
 				
 				if(c == '@' || c == '#' || c == '$'){
+					int i = Integer.parseInt(((String)obj).substring(1));
+					
+					for(int j:removedPh)
+						if(i > j)
+							i--;
+					
+					removedPh.add(i);
 					
 					// Add bytecode
 					if(c != '$')
-						bc.addAll(tempBc.pop());
+						bc.addAll(tempBc.remove(i));
 					
 					// Return value
 					if(c == '@')
@@ -1751,7 +1770,7 @@ public class ScriptParser{
 						bc.remove(bc.size() - 1);
 						
 						// Add bytecode
-						bc.addAll(tempBc.pop());
+						bc.addAll(tempBc.remove(i));
 						bc.add(getInstruction("exp_val", VARIABLE, lineNum, 0));
 					}
 					
@@ -1818,7 +1837,7 @@ public class ScriptParser{
 					bc.add(getInstruction("array_val", lineNum));
 					
 					// Add bytecode to set array element
-					bc.addAll(tempBc.pop());
+					bc.addAll(tempBc.remove(tempBc.size() - 1));
 					
 					// If operation replace last instruction
 					if(isOperation(statesPeek())){
@@ -1899,7 +1918,7 @@ public class ScriptParser{
 				
 				// Assign array element
 				if(statesPeek("assign")){
-					bc.addAll(tempBc.pop());
+					bc.addAll(tempBc.remove(tempBc.size() - 1));
 					bc.add(getInstruction("array_elem_s", lineNum));
 					
 					states.pop();

@@ -80,6 +80,10 @@ public class ScriptBranch{
 		this.waitTime = waitTime;
 	}
 	
+	public int getWaitTime(){
+		return waitTime;
+	}
+	
 	public boolean isPrimary(){
 		return primary;
 	}

@@ -44,16 +44,20 @@ public class Player extends GameEntity{
 	// Temporary
 	private Sprite sprite;
 	
-	public Player(float x, float y){
+	public Player(float x, float y, BulletFrame shot){
 		super(null, x, y);
 		
+		this.shot = shot;
+		
 		bullets = new ArrayList<Bullet>();
-		shot = BulletList.get(BulletList.TYPE_CRYSTAL, BulletList.COLOR_LIGHT_BLUE);
 		
 		sprite = new Sprite("player.png", 0, 0, 64, 64);
-		sprite = SpriteCache.cache(sprite);
 		
 		onCreate();
+	}
+	
+	public void setSprite(Sprite sprite){
+		this.sprite = sprite;
 	}
 	
 	public Sprite getSprite(){

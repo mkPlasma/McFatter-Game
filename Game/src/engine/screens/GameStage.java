@@ -1,6 +1,10 @@
 package engine.screens;
 
+import org.lwjgl.glfw.GLFW;
+
+import engine.KeyboardListener;
 import engine.graphics.Renderer;
+import engine.graphics.SpriteCache;
 import engine.script.DScript;
 import engine.script.ScriptCompiler;
 import engine.script.ScriptController;
@@ -20,28 +24,47 @@ import engine.script.ScriptController;
 
 public abstract class GameStage{
 	
-	// Currently used as dscript path
 	protected String scriptPath;
 	protected int time;
 	
+	protected ScriptCompiler scriptCompiler;
 	protected ScriptController scriptController;
 	protected DScript script;
 	
-	protected Renderer r;
+	private boolean reloadingScript = false;
 	
-	public GameStage(String scriptPath, Renderer r){
+	protected Renderer r;
+	protected SpriteCache sc;
+	
+	public GameStage(String scriptPath, Renderer r, SpriteCache sc){
 		this.scriptPath = scriptPath;
 		this.r = r;
+		this.sc = sc;
 	}
 	
 	public void init(){
 		script = new DScript(scriptPath);
-		new ScriptCompiler().compile(script);
+		
+		scriptCompiler = new ScriptCompiler();
+		scriptCompiler.compile(script);
 		
 		scriptController = new ScriptController(script);
 		scriptController.init();
 	}
 	
+	// Check if script needs to be reloaded
+	public void reloadScript(){
+		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyDown(GLFW.GLFW_KEY_R)){
+			if(!reloadingScript){
+				reloadingScript = true;
+				
+				scriptCompiler.compile(script);
+				scriptController.reload();
+			}
+		}
+		else
+			reloadingScript = false;
+	}
 	
 	public abstract void update();
 	public abstract void render();

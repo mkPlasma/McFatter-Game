@@ -2,6 +2,7 @@ package engine.script;
 
 import java.util.ArrayList;
 
+import content.BulletList;
 import engine.entities.Bullet;
 import engine.entities.Player;
 
@@ -40,20 +41,37 @@ public class ScriptController{
 			// Run current branch
 			runner.run(branch);
 			
-			// Remove branch
-			if(branch.toRemove())
-				branches.remove(i);
-			
 			// Add new branches
 			branches.addAll(runner.getBranches());
+			
+			// Remove branch
+			if(branch.toRemove()){
+				branches.remove(i);
+				i--;
+			}
 			
 			haltRun = runner.haltRun();
 			finished = runner.isFinished() && branches.isEmpty();
 		}
 	}
 	
+	// Reload script
+	public void reload(){
+		System.out.println("Reloaded " + script.getFileName() + "!");
+		
+		branches.clear();
+		branches.add(runner.init());
+		
+		haltRun = false;
+		finished = false;
+	}
+	
 	public void setPlayer(Player player){
 		runner.setPlayer(player);
+	}
+	
+	public void setBulletList(BulletList bulletList){
+		runner.setBulletList(bulletList);
 	}
 	
 	public ArrayList<Bullet> getBullets(){
