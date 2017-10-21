@@ -30,6 +30,10 @@ randomFloat(a, b);
 // Random boolean
 randomBool();
 
+
+
+
+
 // Math
 
 // Pi
@@ -74,6 +78,8 @@ max(a, b);
 
 
 
+
+
 // Arrays
 
 // Returns length of array or string
@@ -84,6 +90,8 @@ array.add(a);
 array.remove();
 // Removes n values
 array.remove(n);
+
+
 
 
 

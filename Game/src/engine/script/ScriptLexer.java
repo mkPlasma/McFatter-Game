@@ -465,15 +465,15 @@ public class ScriptLexer{
 				case 's':
 					switch(token){
 						case "(":
-							lastExpected = new String[]{"o", "a", "f", "(", "if", "while", "for", "return"};
-							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", ")", "!", "-", "global"};
+							lastExpected = new String[]{"o", "a", "f", "(", "{", "if", "while", "for", "return"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "{", "(", ")", "!", "-", "global"};
 							break;
 						case ")":
-							lastExpected = new String[]{"v", "i", "l", "b", "t", "(", ")", "]"};
+							lastExpected = new String[]{"v", "i", "l", "b", "t", "}", "(", ")", "]"};
 							nextExpected = new String[]{"o", "{", ";", ",", ")", "[", "]"};
 							break;
 						case "{":
-							lastExpected = new String[]{")", "{", "o", "a", "else", "return", "in"};
+							lastExpected = new String[]{")", "(", "{", "o", "a", "else", "return", "in"};
 							break;
 						case "[":
 							lastExpected = new String[]{"v", "}", ")"};

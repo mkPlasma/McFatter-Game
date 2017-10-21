@@ -1,47 +1,17 @@
 
-set c = 3;
+set ang = 20;
 
-spiral(false);
-spiral(true);
-
-task spiral(inv){
+while(true){
     
-    set color = _red;
-    set dirAdd = 5;
-    set ang = -45;
-    
-    if(inv){
-        color = _cyan;
-        dirAdd = -dirAdd;
-        ang = -ang;
+    for(i in -2, 3){
+        bulletStack(getAngleToPlayer({400, 200}) + i*ang);
     }
     
-    set dir;
-    
-    while(true){
-        
-        for(i in c){
-            fire(color, ang, dir + i*(360/c));
-        }
-        //break;
-        dir += dirAdd;
-        
-        if(dir > 360){dir -= 360;}
-        else if(dir < 0){dir += 360;}
-        
-        wait 5;
-    }
-    
-    task fire(col, angleChange, dir2){
-        set b = bullet(_star4, col, 400, 200, dir2, 5);
-        b.setAccel(-0.08);
-        b.setSpdMin(0);
-        
-        wait 60;
-        
-        b.setAngVel(0);
-        b.setSpd(3);
-        b.setAccel(0);
-        b.setDir(b.getDir() + angleChange);
+    wait 20;
+}
+
+function bulletStack(dir){
+    for(i in 5){
+        bullet(_scale_d, _dark_yellow, 400, 200, dir, 2 + i/2);
     }
 }
