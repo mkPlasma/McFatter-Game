@@ -54,7 +54,7 @@ public class MainScreen extends GameScreen{
 		r.init();
 		
 		// Temporary test
-		stage = new Mission("Game/res/script/test.dscript");
+		stage = new Mission("Game/res/script/test.dscript", r);
 		stage.init();
 		
 		if(stage instanceof Mission)

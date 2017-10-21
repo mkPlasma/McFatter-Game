@@ -1,9 +1,9 @@
 package engine.screens;
 
+import engine.graphics.Renderer;
 import engine.script.DScript;
 import engine.script.ScriptCompiler;
 import engine.script.ScriptController;
-import engine.script.ScriptRunner;
 
 /*
  * 		GameStage.java
@@ -21,18 +21,21 @@ import engine.script.ScriptRunner;
 public abstract class GameStage{
 	
 	// Currently used as dscript path
-	protected String xmlPath;
+	protected String scriptPath;
 	protected int time;
 	
 	protected ScriptController scriptController;
 	protected DScript script;
 	
-	public GameStage(String xmlPath){
-		this.xmlPath = xmlPath;
+	protected Renderer r;
+	
+	public GameStage(String scriptPath, Renderer r){
+		this.scriptPath = scriptPath;
+		this.r = r;
 	}
 	
 	public void init(){
-		script = new DScript(xmlPath);
+		script = new DScript(scriptPath);
 		new ScriptCompiler().compile(script);
 		
 		scriptController = new ScriptController(script);

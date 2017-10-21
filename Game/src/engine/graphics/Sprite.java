@@ -152,7 +152,7 @@ public class Sprite{
 		ByteBuffer t = null;
 		
 		try{
-			t = stbi_load_from_memory(IOFunctions.readToByteBuffer(path), w, h, comp, 0);
+			t = stbi_load_from_memory(IOFunctions.readToByteBuffer("Game/res/img/" + path), w, h, comp, 0);
 			loaded = true;
 		}catch(IOException e){
 			e.printStackTrace();

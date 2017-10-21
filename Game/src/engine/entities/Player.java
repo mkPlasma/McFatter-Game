@@ -1,20 +1,13 @@
 package engine.entities;
 
-import static engine.KeyboardListener.isKeyDown;
-import static engine.KeyboardListener.isKeyUp;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_SHIFT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_X;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_Z;
+import static engine.KeyboardListener.*;
+import static org.lwjgl.glfw.GLFW.*;
 
 import java.util.ArrayList;
 
 import content.BulletList;
-import engine.graphics.Animation;
+import engine.graphics.Sprite;
+import engine.graphics.SpriteCache;
 
 /*
  * 		Player.java
@@ -48,14 +41,31 @@ public class Player extends GameEntity{
 	
 	private ArrayList<Bullet> bullets;
 	
+	// Temporary
+	private Sprite sprite;
 	
 	public Player(float x, float y){
 		super(null, x, y);
 		
 		bullets = new ArrayList<Bullet>();
-		shot = BulletList.get(BulletList.TYPE_PLUS, BulletList.COLOR_RED);
+		shot = BulletList.get(BulletList.TYPE_CRYSTAL, BulletList.COLOR_LIGHT_BLUE);
+		
+		sprite = new Sprite("player.png", 0, 0, 64, 64);
+		sprite = SpriteCache.cache(sprite);
 		
 		onCreate();
+	}
+	
+	public Sprite getSprite(){
+		return sprite;
+	}
+	
+	public void onCreate(){
+		
+	}
+	
+	public void onDestroy(){
+		
 	}
 	
 	public void update(){
@@ -113,8 +123,8 @@ public class Player extends GameEntity{
 	}
 	
 	private void fire(){
-		bullets.add(new Bullet(shot, x - 5, y, 270, 15, 500, 5));
-		bullets.add(new Bullet(shot, x + 5, y, 270, 15, 500, 5));
+		bullets.add(new Bullet(shot, x - 10, y - 5, 270, 15, 500, 5));
+		bullets.add(new Bullet(shot, x + 10, y - 5, 270, 15, 500, 5));
 		shotCooldown = 4;
 	}
 	
@@ -140,14 +150,6 @@ public class Player extends GameEntity{
 		}
 		*/
 		bombCooldown = 120;
-	}
-	
-	public void onCreate(){
-		
-	}
-	
-	public void onDestroy(){
-		
 	}
 	
 	public void death(){

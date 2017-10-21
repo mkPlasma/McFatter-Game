@@ -56,7 +56,58 @@ public class Renderer{
 		basicShader.use();
 		renderEntities(eli, time, false);
 	}
+	
+	// Renders a single entity
+	public void renderEntity(GameEntity entity, int time){
+		
+		// Get animated sprite
+		Sprite s = entity.getSprite().animate(entity.getTime(), time, entity);
+		
+		float[] c = {entity.getX(), entity.getY()};
+		float[] v = getVertexCoords(c[0], c[1], s.getScaledWidth(), s.getScaledHeight());
+		float[] t = s.getTextureCoords();
+		
+		float[] vertices = new float[16];
+		
+		// Fill vertices
+		// x, y, textureX, textureY
+		for(int i = 0; i < 4; i++){
+			vertices[i*4]		= v[i*2];
+			vertices[i*4 + 1]	= v[i*2 + 1];
+			vertices[i*4 + 2]	= t[i*2];
+			vertices[i*4 + 3]	= t[i*2 + 1];
+		}
+		
+		int[] vao = genQuadVAO(1, vertices, null);
+		
+		
+		// Render
+		
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, entity.getSprite().getTextureID());
+		
+		glBindVertexArray(vao[0]);
+		
+		glEnableVertexAttribArray(0);
+		
+		
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		glDrawElements(GL_TRIANGLES, vertices.length/2, GL_UNSIGNED_INT, 0);
+		
+		glDisable(GL_BLEND);
+		
+		
+		glDisableVertexAttribArray(0);
+		
+		glBindVertexArray(0);
+		
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+	
+	// Renders a list of entities
 	@SuppressWarnings("rawtypes")
 	public void renderEntities(ArrayList entityList, int time, boolean useRotations){
 		

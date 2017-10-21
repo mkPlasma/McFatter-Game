@@ -75,10 +75,8 @@ public class BulletList{
 	}
 	
 	public static Sprite getSprite(byte type, byte color){
-		String path = "01.png";
+		String path = "bullets/01.png";
 		int size = 32;
-		
-		path = "Game/res/img/bullets/" + path;
 		
 		if(type >= 8 && type < 16){
 			color += 16;

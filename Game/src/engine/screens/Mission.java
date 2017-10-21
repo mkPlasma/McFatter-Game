@@ -26,8 +26,8 @@ public class Mission extends GameStage{
 	private ArrayList<Enemy> enemies;
 	private Player player;
 	
-	public Mission(String xmlPath){
-		super(xmlPath);
+	public Mission(String scriptPath, Renderer r){
+		super(scriptPath, r);
 	}
 	
 	public void init(){
@@ -50,7 +50,7 @@ public class Mission extends GameStage{
 	}
 	
 	public void render(){
-		
+		r.renderEntity(player, time);
 	}
 	
 	public ArrayList<Bullet> getPlayerBullets(){
