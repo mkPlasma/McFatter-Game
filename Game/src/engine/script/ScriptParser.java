@@ -154,14 +154,16 @@ public class ScriptParser{
 	private void addDefaultVars(){
 		
 		// Add to variables list first
-		variables.add("0c:_orb_m");
+		variables.add("0c:_orb");
 		variables.add("0c:_scale");
-		variables.add("0c:_star4");
 		variables.add("0c:_crystal");
-		variables.add("0c:_missile");
-		variables.add("0c:_mine");
+		variables.add("0c:_rice");
+		variables.add("0c:_star");
+		variables.add("0c:_star4");
 		variables.add("0c:_plus");
 		variables.add("0c:_wall");
+		variables.add("0c:_missile");
+		variables.add("0c:_mine");
 		variables.add("0c:_laser");
 		
 		variables.add("0c:_red");

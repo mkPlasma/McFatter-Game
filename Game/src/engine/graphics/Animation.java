@@ -169,14 +169,14 @@ public class Animation{
 		}
 	}
 	
-	public boolean isEqual(Animation anim){
+	public boolean equals(Animation anim){
 		
 		if(anim == null)
 			return false;
 		
 		return	anim.getType() == type &&
 				anim.getArgs() == args &&
-				anim.getSprite().isEqual(spr);
+				anim.getSprite().equals(spr);
 	}
 	
 	public void setEntity(GameEntity e){

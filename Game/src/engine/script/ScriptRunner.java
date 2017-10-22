@@ -121,7 +121,7 @@ public class ScriptRunner{
 		random = new Random();
 		
 		// Account for register and default vars
-		int varCount = 43;
+		int varCount = 44;
 		
 		// Add variables, find functions
 		for(int i = 0; i < bytecode.length; i++){
@@ -151,16 +151,15 @@ public class ScriptRunner{
 		int c = 1;
 		
 		// Bullet types
-		for(int i = 0; i < 9; i++){
-			variables[c] = i;
-			c++;
-		}
+		for(int i = 0; i < 10; i++)
+			variables[c++] = i;
+		
+		// Laser
+		variables[c++] = 15;
 		
 		// Bullet colors
-		for(int i = 0; i < 32; i++){
-			variables[c] = i;
-			c++;
-		}
+		for(int i = 0; i < 32; i++)
+			variables[c++] = i;
 	}
 	
 	public void setPlayer(Player player){

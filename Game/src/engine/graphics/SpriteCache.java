@@ -66,7 +66,7 @@ public class SpriteCache{
 	// -1 if not cached
 	private int getSpriteIndex(Sprite spr){
 		for(int i = 0; i < sprites.size(); i++)
-			if(sprites.get(i).isEqual(spr))
+			if(sprites.get(i).equals(spr))
 				return i;
 		return -1;
 	}

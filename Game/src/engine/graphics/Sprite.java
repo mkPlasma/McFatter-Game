@@ -227,7 +227,7 @@ public class Sprite{
 	}
 	
 	// Return true if two sprites are the same, used in SpriteCache
-	public boolean isEqual(Sprite sprite){
+	public boolean equals(Sprite sprite){
 		
 		if(sprite == null)
 			return false;
@@ -256,7 +256,7 @@ public class Sprite{
 				
 				// Check if equal
 				for(int i = 0; i < sprite.getAnimations().length; i++)
-					if(a[i].isEqual(anim[i]))
+					if(a[i].equals(anim[i]))
 						return false;
 			}
 			
