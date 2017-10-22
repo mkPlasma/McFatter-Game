@@ -2,7 +2,7 @@
 
 while(true){
     for(i in 4){
-        bullet(_orb_m, _blue, 400, 200, random(0, 360), random(3, 8));
+        bullet(_star, _red_d, 400, 200, random(0, 360), random(3, 8));
     }
     
     wait;
