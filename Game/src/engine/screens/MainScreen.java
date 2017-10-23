@@ -27,6 +27,10 @@ import engine.graphics.SpriteCache;
 
 public class MainScreen extends GameScreen{
 	
+	public static final int MAX_ENEMY_BULLETS = 2048,
+							MAX_PLAYER_BULLETS = 128,
+							MAX_ENEMIES = 64;
+	
 	private GameStage stage;
 	
 	private ArrayList<Bullet> enemyBullets, playerBullets;
@@ -40,9 +44,13 @@ public class MainScreen extends GameScreen{
 	private boolean paused;
 	private int pauseTime = -30;
 	
-	public void init(SpriteCache sc){
-		
-		this.sc = sc;
+	private boolean clearingBullets = false;
+	
+	public MainScreen(Renderer r, SpriteCache sc){
+		super(r, sc);
+	}
+	
+	public void init(){
 		
 		enemyBullets = new ArrayList<Bullet>();
 		playerBullets = new ArrayList<Bullet>();
@@ -52,9 +60,6 @@ public class MainScreen extends GameScreen{
 		time = 0;
 		rTime = 0;
 		paused = false;
-		
-		r = new Renderer();
-		r.init();
 		
 		// Temporary test
 		stage = new Mission("Game/res/script/test.dscript", r, sc);
@@ -66,6 +71,21 @@ public class MainScreen extends GameScreen{
 	
 	public void cleanup(){
 		r.cleanup();
+	}
+	
+	public void render(){
+		
+		r.renderPlayerBullets(playerBullets, rTime);
+		r.renderPlayer(player, rTime);
+		
+		//stage.render();
+		
+		r.renderEnemyBullets(enemyBullets, rTime);
+		
+		//r.renderEnemies(enemies, rTime);
+		
+		if(!paused)
+			rTime++;
 	}
 	
 	public void update(){
@@ -97,6 +117,20 @@ public class MainScreen extends GameScreen{
 			addPlayerBullets(ms.getPlayerBullets());
 			
 			checkCollisions();
+			
+			// Clear bullets with Alt+C
+			if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyDown(GLFW.GLFW_KEY_C)){
+				if(!clearingBullets){
+					
+					System.out.println("Cleared screen!");
+					clearingBullets = true;
+					
+					for(Bullet b:enemyBullets)
+						b.onDestroy();
+				}
+			}
+			else
+				clearingBullets = false;
 		}
 	}
 	
@@ -219,64 +253,36 @@ public class MainScreen extends GameScreen{
 	
 	// Used to add player shots to the screen
 	private void addPlayerBullets(ArrayList<Bullet> bullets){
-		if(bullets == null || bullets.size() < 1)
+		
+		if(bullets == null || bullets.size() < 1 || playerBullets.size() >= MAX_PLAYER_BULLETS)
 			return;
 		
-		for(int i = 0; i < bullets.size(); i++){
-			if(bullets.get(i) != null)
-				playerBullets.add(bullets.get(i));
-		}
+		playerBullets.addAll(bullets);
+		
+		while(playerBullets.size() >= MAX_PLAYER_BULLETS)
+			playerBullets.remove(playerBullets.size() - 1);
 	}
 	
 	// Used to add enemy shots to the screen
 	private void addEnemyBullets(ArrayList<Bullet> bullets){
-		if(bullets == null || bullets.size() < 1)
+		
+		if(bullets == null || bullets.size() < 1 || enemyBullets.size() >= MAX_ENEMY_BULLETS)
 			return;
 		
-		for(int i = 0; i < bullets.size(); i++){
-			if(bullets.get(i) != null)
-				enemyBullets.add(bullets.get(i));
-		}
+		enemyBullets.addAll(bullets);
+		
+		while(enemyBullets.size() >= MAX_ENEMY_BULLETS)
+			enemyBullets.remove(enemyBullets.size() - 1);
 	}
 	
-	private void addEnemies(ArrayList<Enemy> enemies){
-		if(enemies == null || enemies.size() < 1)
+	private void addEnemies(ArrayList<Enemy> enemyList){
+		
+		if(enemyList == null || enemyList.size() < 1 || enemies.size() >= MAX_ENEMIES)
 			return;
 		
-		for(int i = 0; i < enemies.size(); i++){
-			if(enemies.get(i) != null)
-				this.enemies.add(enemies.get(i));
-		}
-	}
-	
-	
-	public void render(){
+		enemies.addAll(enemyList);
 		
-		drawGameStage();
-		
-		drawEnemies();
-		drawBullets();
-		
-		if(!paused)
-			rTime++;
-	}
-	
-	private void drawGameStage(){
-		stage.render();
-	}
-	
-	private void drawBullets(){
-		r.renderBullets(playerBullets, rTime);
-		r.renderBullets(enemyBullets, rTime);
-	}
-
-	private void drawEnemies(){
-		r.renderEnemies(enemies, rTime);
-	}
-	
-	
-	
-	public ArrayList<Enemy> getEnemies(){
-		return enemies;
+		while(enemies.size() >= MAX_ENEMIES)
+			enemies.remove(enemies.size() - 1);
 	}
 }

@@ -42,7 +42,6 @@ public class Sprite{
 	
 	// Full image dimensions
 	private int texWidth, texHeight;
-	private int comp;
 	
 	// Area of spritesheet to use
 	private int x, y, width, height;
@@ -155,22 +154,13 @@ public class Sprite{
 		
 		texWidth = w.get(0);
 		texHeight = h.get(0);
-		this.comp = comp.get(0);
 		
 		texture = t;
 		
 		texID = glGenTextures();
 		glBindTexture(GL_TEXTURE_2D, texID);
-		
-		/*
-		if(this.comp == 3){
-			if((texWidth & 3) != 0)
-				glPixelStorei(GL_UNPACK_ALIGNMENT, 2 - (texWidth & 1));
-			
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
-		}
-		else*/
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture);
+		glBindTexture(GL_TEXTURE_2D, 0);
 		
 		genTextureCoords();
 	}
@@ -300,14 +290,6 @@ public class Sprite{
 	
 	public int getTexHeight(){
 		return texHeight;
-	}
-	
-	public void setComp(int comp){
-		this.comp = comp;
-	}
-	
-	public int getComp(){
-		return comp;
 	}
 	
 	public void addUser(){

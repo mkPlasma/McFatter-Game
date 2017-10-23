@@ -21,8 +21,7 @@ public class Bullet extends MovableEntity{
 	// Whether entity can collide
 	protected boolean collisions = true;
 	
-	// If true, bullet will not be updated
-	protected boolean paused;
+	protected int despawnRange = 32;
 	
 	public Bullet(BulletFrame frame, float x, float y, float dir, float spd){
 		super(frame, x, y, dir, spd);
@@ -53,13 +52,11 @@ public class Bullet extends MovableEntity{
 	}
 	
 	public void update(){
-		if(paused)
-			return;
 		
 		updateMovements();
 		
 		// Delete at borders
-		if(x < -64 || x > 864 || y < -64 || y > 664)
+		if(x < -despawnRange || x > 640 + despawnRange || y < -despawnRange || y > 480 + despawnRange)
 			remove = true;
 		
 		damage -= dmgReduce;
@@ -93,14 +90,6 @@ public class Bullet extends MovableEntity{
 	
 	public int getDamageReduce(){
 		return dmgReduce;
-	}
-	
-	public void setPaused(boolean paused){
-		this.paused = paused;
-	}
-	
-	public boolean isPaused(){
-		return paused;
 	}
 
 	public void setCollisions(boolean collisions){

@@ -1,5 +1,6 @@
 package engine.screens;
 
+import engine.graphics.Renderer;
 import engine.graphics.SpriteCache;
 
 /*
@@ -16,9 +17,13 @@ import engine.graphics.SpriteCache;
  */
 
 public class MapScreen extends GameScreen{
+
+	public MapScreen(Renderer r, SpriteCache sc){
+		super(r, sc);
+	}
 	
-	public void init(SpriteCache sc){
-		this.sc = sc;
+	public void init(){
+		
 	}
 	
 	public void update(){

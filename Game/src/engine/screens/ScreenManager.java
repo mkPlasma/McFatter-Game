@@ -1,5 +1,6 @@
 package engine.screens;
 
+import engine.graphics.Renderer;
 import engine.graphics.SpriteCache;
 
 /*
@@ -18,20 +19,25 @@ public class ScreenManager{
 	// Active screen
 	private GameScreen screen;
 	
+	private Renderer r;
+	
 	public MainScreen mainScreen;
 	public MapScreen mapScreen;
 	
 	private SpriteCache spriteCache;
 	
 	public void init(){
-		mainScreen = new MainScreen();
-		mapScreen = new MapScreen();
+		r = new Renderer();
+		r.init();
 		
 		spriteCache = new SpriteCache();
+		
+		mainScreen = new MainScreen(r, spriteCache);
+		mapScreen = new MapScreen(r, spriteCache);
 	}
 	
 	public void initScreen(){
-		screen.init(spriteCache);
+		screen.init();
 	}
 	
 	public void update(){

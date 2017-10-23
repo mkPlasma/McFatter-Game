@@ -1,9 +1,20 @@
 
 
+set dir;
+
+set r = 60;
+set c = 2048;
+
 while(true){
-    for(i in 4){
-        bullet(_star, _red_d, 400, 200, random(0, 360), random(3, 8));
+    for(i in c){
+        bullet(dir + i*(360/c));
     }
+    break;
+    dir += 2;
     
     wait;
+}
+
+task bullet(dir){
+    set b = bullet(_star, _purple, 320, 240, dir, 0.1);
 }

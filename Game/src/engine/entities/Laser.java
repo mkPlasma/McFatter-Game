@@ -56,16 +56,7 @@ public class Laser extends Bullet{
 	*/
 	
 	public void update(){
-		if(paused)
-			return;
-		
-		updateMovements();
-		
-		// Delete at borders
-		if(x < -64 || x > 864 || y < -64 || y > 664)
-			remove = true;
-		
-		time++;
+		super.update();
 	}
 	
 	public void draw(Renderer r){

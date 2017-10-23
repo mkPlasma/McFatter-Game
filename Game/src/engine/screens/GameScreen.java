@@ -18,10 +18,16 @@ import engine.graphics.SpriteCache;
  */
 
 public abstract class GameScreen{
+	
 	protected SpriteCache sc;
 	protected Renderer r;
 	
-	public abstract void init(SpriteCache sc);
+	public GameScreen(Renderer r, SpriteCache sc){
+		this.r = r;
+		this.sc = sc;
+	}
+	
+	public abstract void init();
 	public abstract void update();
 	public abstract void render();
 	public abstract void cleanup();

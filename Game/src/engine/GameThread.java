@@ -61,7 +61,7 @@ public class GameThread implements Runnable{
 		// Create window
 		scale = Settings.getWindowScale();
 		
-		window = glfwCreateWindow((int)(800*scale), (int)(600*scale), "DSG", NULL, NULL);
+		window = glfwCreateWindow((int)(640*scale), (int)(480*scale), "DSG", NULL, NULL);
 		
 		if(window == NULL)
 			throw new RuntimeException("Failed to create GLFW window");

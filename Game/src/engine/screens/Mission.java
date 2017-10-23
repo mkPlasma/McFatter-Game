@@ -37,7 +37,7 @@ public class Mission extends GameStage{
 		super.init();
 		
 		bulletList = new BulletList(sc);
-		player = new Player(400, 500, bulletList.get(BulletList.TYPE_CRYSTAL, BulletList.COLOR_LIGHT_BLUE));
+		player = new Player(320, 450, bulletList.get(BulletList.TYPE_CRYSTAL, BulletList.COLOR_LIGHT_BLUE));
 		
 		player.setSprite(sc.cache(player.getSprite()));
 		
@@ -58,7 +58,7 @@ public class Mission extends GameStage{
 	}
 	
 	public void render(){
-		r.renderEntity(player, time);
+		
 	}
 	
 	public ArrayList<Bullet> getPlayerBullets(){

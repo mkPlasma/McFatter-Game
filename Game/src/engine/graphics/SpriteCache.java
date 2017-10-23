@@ -45,7 +45,6 @@ public class SpriteCache{
 			spr.setTextureID(s.getTextureID());
 			spr.setTexWidth(s.getTexWidth());
 			spr.setTexHeight(s.getTexHeight());
-			spr.setComp(s.getComp());
 			
 			spr.genTextureCoords();
 		}

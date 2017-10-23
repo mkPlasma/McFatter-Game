@@ -53,6 +53,8 @@ public class Player extends GameEntity{
 		
 		sprite = new Sprite("player.png", 0, 0, 64, 64);
 		
+		visible = true;
+		
 		onCreate();
 	}
 	
@@ -104,10 +106,10 @@ public class Player extends GameEntity{
 			bomb();
 		
 		// Movement borders
-		if(x < 0)	x = 0;
-		if(x > 800)	x = 800;
-		if(y < 0)	y = 0;
-		if(y > 600)	y = 600;
+		if(x < 16)	x = 16;
+		if(x > 624)	x = 624;
+		if(y < 16)	y = 16;
+		if(y > 464)	y = 464;
 		
 		// Set speed
 		speed = unfocusedSpeed;
