@@ -38,7 +38,7 @@ public class SpriteBatch{
 	
 	public SpriteBatch(int capacity, boolean additive){
 		vBuffer		= BufferUtils.createFloatBuffer(capacity);
-		tcBuffer		= BufferUtils.createFloatBuffer(capacity);
+		tcBuffer	= BufferUtils.createFloatBuffer(capacity);
 		
 		vao = glGenVertexArrays();
 		vbo = glGenBuffers();
@@ -106,14 +106,14 @@ public class SpriteBatch{
 		}
 		
 		// Set vertices count
-		size = el.size()*12;
+		size = el.size()*6;
 		
 		if(el.isEmpty())
 			return;
 		
 		// VAO arguments
-		float[] vertices = new float[size];
-		float[] texCoords = new float[size];
+		float[] vertices = new float[size*2];
+		float[] texCoords = new float[size*2];
 		
 		for(int i = 0; i < el.size(); i++){
 			

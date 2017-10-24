@@ -162,9 +162,14 @@ public class ScriptParser{
 		variables.add("0c:_star4");
 		variables.add("0c:_plus");
 		variables.add("0c:_wall");
+		variables.add("0c:_needle");
 		variables.add("0c:_missile");
 		variables.add("0c:_mine");
+		variables.add("0c:_emptytype1");
+		variables.add("0c:_emptytype2");
 		variables.add("0c:_laser");
+		variables.add("0c:_laser_dist");
+		variables.add("0c:_laser_helix");
 		
 		variables.add("0c:_red");
 		variables.add("0c:_dark_red");

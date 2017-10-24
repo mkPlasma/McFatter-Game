@@ -17,11 +17,15 @@ public class ScriptController{
 	private boolean haltRun = false;
 	private boolean finished = false;
 	
+	private int time;
+	
 	public ScriptController(DScript script){
 		this.script = script;
 		
 		runner = new ScriptRunner(script);
 		branches = new ArrayList<ScriptBranch>();
+		
+		time = 0;
 	}
 	
 	public void init(){
@@ -33,6 +37,8 @@ public class ScriptController{
 		
 		if(haltRun || finished)
 			return;
+		
+		runner.setTime(time);
 		
 		for(int i = 0; i < branches.size(); i++){
 			
@@ -53,6 +59,8 @@ public class ScriptController{
 			haltRun = runner.haltRun();
 			finished = runner.isFinished() && branches.isEmpty();
 		}
+		
+		time++;
 	}
 	
 	// Reload script
@@ -64,6 +72,8 @@ public class ScriptController{
 		
 		haltRun = false;
 		finished = false;
+		
+		time = 0;
 	}
 	
 	public void setPlayer(Player player){

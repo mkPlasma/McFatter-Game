@@ -3,18 +3,21 @@
 set dir;
 
 set r = 60;
-set c = 2048;
+set c = 8;
 
 while(true){
+    
+    //dir = random(0, 360);
+    
     for(i in c){
         bullet(dir + i*(360/c));
     }
-    break;
-    dir += 2;
+    
+    dir += 0.05;
     
     wait;
 }
 
 task bullet(dir){
-    set b = bullet(_star, _purple, 320, 240, dir, 0.1);
+    set b = bullet(_laser_helix, _red_d, 320, 120, dir, 16);
 }

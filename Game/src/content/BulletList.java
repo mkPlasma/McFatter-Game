@@ -29,9 +29,12 @@ public class BulletList{
 		TYPE_STAR4			= 5,
 		TYPE_PLUS			= 6,
 		TYPE_WALL			= 7,
-		TYPE_MISSILE		= 8,
-		TYPE_MINE			= 9,
-		TYPE_LASER			= 15;
+		TYPE_NEEDLE			= 8,
+		TYPE_MISSILE		= 9,
+		TYPE_MINE			= 10,
+		TYPE_LASER			= 13,
+		TYPE_LASER_DIST		= 14,
+		TYPE_LASER_HELIX	= 15;
 	
 	public static final byte
 		COLOR_RED			= 0,
@@ -123,11 +126,14 @@ public class BulletList{
 			case TYPE_STAR4:
 			case TYPE_PLUS:
 			case TYPE_WALL:
+			case TYPE_NEEDLE:
 			case TYPE_MISSILE:
 				return 3;
 			
 			case TYPE_MINE:
 			case TYPE_LASER:
+			case TYPE_LASER_DIST:
+			case TYPE_LASER_HELIX:
 				return 5;
 			
 			default:
@@ -146,11 +152,14 @@ public class BulletList{
 			case TYPE_STAR4:
 			case TYPE_PLUS:
 			case TYPE_WALL:
+			case TYPE_NEEDLE:
 			case TYPE_MISSILE:
 				return .8f;
 				
 			case TYPE_MINE:
 			case TYPE_LASER:
+			case TYPE_LASER_DIST:
+			case TYPE_LASER_HELIX:
 				return .9f;
 			
 			default:
@@ -161,12 +170,15 @@ public class BulletList{
 	
 	public boolean getSpriteAlign(byte type){
 		
-		return	type == TYPE_SCALE			||
-				type == TYPE_CRYSTAL		||
-				type == TYPE_RICE			||
-				type == TYPE_MISSILE		||
-				type == TYPE_WALL			||
-				type == TYPE_LASER;
+		return	type == TYPE_SCALE		||
+				type == TYPE_CRYSTAL	||
+				type == TYPE_RICE		||
+				type == TYPE_NEEDLE		||
+				type == TYPE_MISSILE	||
+				type == TYPE_WALL		||
+				type == TYPE_LASER		||
+				type == TYPE_LASER_DIST	||
+				type == TYPE_LASER_HELIX;
 	}
 	
 	public float getSpriteRotation(byte type){

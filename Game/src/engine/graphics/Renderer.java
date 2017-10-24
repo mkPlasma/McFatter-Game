@@ -21,7 +21,7 @@ public class Renderer{
 	private ShaderProgram basicShader;
 	private ShaderProgram illumiShader;
 
-	// 0		Player
+	// 0	Player
 	// 2-3	Enemy bullets
 	// 3-4	Player bullets
 	private SpriteBatch[] spriteBatches = new SpriteBatch[3];
@@ -91,6 +91,9 @@ public class Renderer{
 	
 	// Delete vao/buffers
 	public void cleanup(){
+		basicShader.destroy();
+		illumiShader.destroy();
+		
 		for(SpriteBatch sb:spriteBatches)
 			sb.cleanup();
 	}

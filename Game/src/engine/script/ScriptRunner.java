@@ -87,6 +87,8 @@ public class ScriptRunner{
 	// RNG
 	private Random random;
 	
+	private int time;
+	
 	public ScriptRunner(DScript script){
 		this.script = script;
 	}
@@ -121,7 +123,7 @@ public class ScriptRunner{
 		random = new Random();
 		
 		// Account for register and default vars
-		int varCount = 44;
+		int varCount = 49;
 		
 		// Add variables, find functions
 		for(int i = 0; i < bytecode.length; i++){
@@ -151,11 +153,8 @@ public class ScriptRunner{
 		int c = 1;
 		
 		// Bullet types
-		for(int i = 0; i < 10; i++)
+		for(int i = 0; i < 16; i++)
 			variables[c++] = i;
-		
-		// Laser
-		variables[c++] = 15;
 		
 		// Bullet colors
 		for(int i = 0; i < 32; i++)
@@ -183,6 +182,10 @@ public class ScriptRunner{
 		ArrayList<Bullet> temp = new ArrayList<Bullet>(bullets);
 		bullets.clear();
 		return temp;
+	}
+	
+	public void setTime(int time){
+		this.time = time;
 	}
 	
 	public boolean haltRun(){
@@ -983,15 +986,19 @@ public class ScriptRunner{
 			runtimeError("Type mismatch", lineNum);
 			return;
 		}
+
+		// Parameter count
+		int paramCount = getBuiltInFunctionParameterCount(index);
+		paramCount += dot ? 1 : 0;
 		
 		// Parameters
 		Object o1 = null;
 		Object o2 = null;
 		
-		if(params.size() > 0){
+		if(paramCount > 0 && params.size() > 0){
 			o1 = params.remove();
 			
-			if(params.size() > 0)
+			if(paramCount > 1 && params.size() > 0)
 				o2 = params.remove();
 		}
 		
@@ -1017,9 +1024,6 @@ public class ScriptRunner{
 		// No return value by default
 		returnValue = null;
 		
-		// Parameter count
-		int paramCount = getBuiltInFunctionParameterCount(index);
-		
 		String func = getBuiltInFunctionName(index);
 		
 		switch(func){
@@ -1028,7 +1032,11 @@ public class ScriptRunner{
 			case "print":
 				System.out.println(script.getFileName() + ": " + o1);
 				return;
-				
+			
+			case "getScriptTime":
+				returnValue = time;
+				return;
+			
 			case "getPlayerX":
 				returnValue = player.getX();
 				return;
