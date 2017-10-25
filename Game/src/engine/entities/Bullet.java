@@ -47,7 +47,7 @@ public class Bullet extends MovableEntity{
 	}
 	
 	public void onDestroy(){
-		remove = true;
+		deleted = true;
 		getSprite().removeUser();
 	}
 	
@@ -56,8 +56,8 @@ public class Bullet extends MovableEntity{
 		updateMovements();
 		
 		// Delete at borders
-		if(x < -despawnRange || x > 640 + despawnRange || y < -despawnRange || y > 480 + despawnRange)
-			remove = true;
+		if(x < 32 - despawnRange || x > 416 + despawnRange || y < 16 - despawnRange || y > 464 + despawnRange)
+			deleted = true;
 		
 		damage -= dmgReduce;
 		

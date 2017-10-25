@@ -1016,10 +1016,10 @@ public class ScriptRunner{
 			f2 = o2 instanceof Integer ? i2 : f2;
 		}
 		
-		// As GameEntity
+		// As entities
 		GameEntity ge = o1 instanceof GameEntity ? (GameEntity)o1 : null;
-		// As MovableEntity
 		MovableEntity me = o1 instanceof MovableEntity ? (MovableEntity)o1 : null;
+		Bullet bl = o1 instanceof Bullet ? (Bullet)o1 : null;
 		
 		// No return value by default
 		returnValue = null;
@@ -1036,16 +1036,48 @@ public class ScriptRunner{
 			case "getScriptTime":
 				returnValue = time;
 				return;
+
+			case "centerX":
+				returnValue = 224;
+				return;
 			
-			case "getPlayerX":
+			case "centerY":
+				returnValue = 240;
+				return;
+			
+			case "centerPos":{
+				ArrayList<Object> ar = new ArrayList<Object>();
+				ar.add(224);
+				ar.add(240);
+				returnValue = ar;
+				return;
+			}
+			
+			case "leftX":
+				returnValue = 32;
+				return;
+			
+			case "rightX":
+				returnValue = 416;
+				return;
+			
+			case "topY":
+				returnValue = 16;
+				return;
+			
+			case "bottomY":
+				returnValue = 464;
+				return;
+			
+			case "playerX":
 				returnValue = player.getX();
 				return;
 				
-			case "getPlayerY":
+			case "playerY":
 				returnValue = player.getY();
 				return;
 			
-			case "getAngleToPlayer":
+			case "angleToPlayer":
 				// Pos array
 				if(paramCount == 1){
 					float[] pos = convertArray((ArrayList<Object>)o1, func, lineNum);
@@ -1063,7 +1095,7 @@ public class ScriptRunner{
 				returnValue = (float)Math.toDegrees(Math.atan2(player.getY() - f2, player.getX() - f1));
 				return;
 			
-			case "getAngleToLocation":
+			case "angleToLocation":
 				// Pos array
 				if(paramCount == 2){
 					float[] pos1 = convertArray((ArrayList<Object>)o1, func, lineNum);
@@ -1087,7 +1119,7 @@ public class ScriptRunner{
 				returnValue = (float)Math.toDegrees(Math.atan2(f4 - f2, f3 - f1));
 				return;
 
-			case "random":
+			case "rand":
 				if(isFloat){
 					i1 = (int)f1;
 					i2 = (int)f2;
@@ -1096,11 +1128,11 @@ public class ScriptRunner{
 				returnValue = i1 + random.nextInt(i2 - i1);
 				return;
 			
-			case "randomFloat":
+			case "randFloat":
 				returnValue = f1 + random.nextFloat()*(f2 - f1);
 				return;
 			
-			case "randomBool":
+			case "randBool":
 				returnValue = random.nextBoolean();
 				return;
 			
@@ -1255,6 +1287,9 @@ public class ScriptRunner{
 				return;
 			}
 			
+			case "delete":
+				ge.delete();
+				return;
 			
 			case "setX":
 				if(isFloat) ge.setX(f2);
@@ -1299,8 +1334,16 @@ public class ScriptRunner{
 				if(isFloat) me.setMaxSpd(f2);
 				else		me.setMaxSpd(i2);
 				return;
-
-				
+			
+			case "setType":
+				bl.setFrame(bulletList.get(i2, bl.getFrame().getColor()));
+				return;
+			
+			case "setColor":
+				bl.setFrame(bulletList.get(bl.getFrame().getType(), i2));
+				return;
+			
+			
 			case "getX":
 				returnValue = ge.getX();
 				return;
@@ -1324,8 +1367,8 @@ public class ScriptRunner{
 				returnValue = ge.getTime();
 				return;
 			
-			case "isRemoved":
-				returnValue = ge.remove();
+			case "isDeleted":
+				returnValue = ge.isDeleted();
 				return;
 			
 			case "getDir":
@@ -1350,6 +1393,14 @@ public class ScriptRunner{
 			
 			case "getMaxSpd":
 				returnValue = me.getMaxSpd();
+				return;
+
+			case "getType":
+				returnValue = bl.getFrame().getType();
+				return;
+			
+			case "getColor":
+				returnValue = bl.getFrame().getColor();
 				return;
 		}
 	}

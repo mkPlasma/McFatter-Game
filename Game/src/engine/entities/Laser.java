@@ -75,7 +75,7 @@ public class Laser extends Bullet{
 	}
 	
 	public void onDestroy(){
-		remove = true;
+		deleted = true;
 	}
 	
 	public void setLength(int length){

@@ -81,7 +81,7 @@ public class BulletList{
 		this.spriteCache = spriteCache;
 	}
 	
-	public BulletFrame get(byte type, byte color){
+	public BulletFrame get(int type, int color){
 		
 		for(int i = 0; i < index; i++)
 			if(cache[i].getType() == type && cache[i].getColor() == color)
@@ -93,7 +93,7 @@ public class BulletList{
 		return cache[index - 1];
 	}
 	
-	public Sprite getSprite(byte type, byte color){
+	public Sprite getSprite(int type, int color){
 		String path = "bullets/b32.png";
 		int size = 32;
 		
@@ -115,7 +115,7 @@ public class BulletList{
 		return sprite;
 	}
 	
-	public int getHitboxSize(byte type){
+	public int getHitboxSize(int type){
 		switch(type){
 			
 			case TYPE_ORB:
@@ -141,7 +141,7 @@ public class BulletList{
 		}
 	}
 	
-	public float getHBLengthCrop(byte type){
+	public float getHBLengthCrop(int type){
 		switch(type){
 			
 			case TYPE_ORB:
@@ -168,7 +168,7 @@ public class BulletList{
 	}
 	
 	
-	public boolean getSpriteAlign(byte type){
+	public boolean getSpriteAlign(int type){
 		
 		return	type == TYPE_SCALE		||
 				type == TYPE_CRYSTAL	||
@@ -181,7 +181,7 @@ public class BulletList{
 				type == TYPE_LASER_HELIX;
 	}
 	
-	public float getSpriteRotation(byte type){
+	public float getSpriteRotation(int type){
 		switch(type){
 		
 			case TYPE_STAR:
@@ -197,7 +197,7 @@ public class BulletList{
 		}
 	}
 	
-	public boolean getSpriteRotationBySpd(byte type){
+	public boolean getSpriteRotationBySpd(int type){
 		switch(type){
 			
 			case TYPE_MINE:

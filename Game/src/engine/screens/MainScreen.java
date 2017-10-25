@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.lwjgl.glfw.GLFW;
 
+import content.BulletList;
 import engine.KeyboardListener;
 import engine.entities.Bullet;
 import engine.entities.Effect;
@@ -44,7 +45,7 @@ public class MainScreen extends GameScreen{
 	private boolean paused;
 	private int pauseTime = -30;
 	
-	private boolean clearingBullets = false;
+	private boolean reloadingScript = false, clearingBullets = false;
 	
 	public MainScreen(Renderer r, SpriteCache sc){
 		super(r, sc);
@@ -67,6 +68,9 @@ public class MainScreen extends GameScreen{
 		
 		if(stage instanceof Mission)
 			player = ((Mission)stage).getPlayer();
+		
+		// Temporary
+		r.initMainScreen(player.getSprite().getTextureID(), new BulletList(sc).get((byte)0, (byte)0).getSprite().getTextureID());
 	}
 	
 	public void cleanup(){
@@ -75,14 +79,11 @@ public class MainScreen extends GameScreen{
 	
 	public void render(){
 		
-		r.renderPlayerBullets(playerBullets, rTime);
-		r.renderPlayer(player, rTime);
+		r.updatePlayer(player, rTime);
+		r.updateEnemyBullets(enemyBullets, rTime);
+		r.updatePlayerBullets(playerBullets, rTime);
 		
-		//stage.render();
-		
-		r.renderEnemyBullets(enemyBullets, rTime);
-		
-		//r.renderEnemies(enemies, rTime);
+		r.render();
 		
 		if(!paused)
 			rTime++;
@@ -117,28 +118,42 @@ public class MainScreen extends GameScreen{
 			addPlayerBullets(ms.getPlayerBullets());
 			
 			checkCollisions();
-			
-			// Clear bullets with Alt+C
-			if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyDown(GLFW.GLFW_KEY_C)){
-				if(!clearingBullets){
-					
-					System.out.println("Cleared screen!");
-					clearingBullets = true;
-					
-					for(Bullet b:enemyBullets)
-						b.onDestroy();
-				}
-			}
-			else
-				clearingBullets = false;
 		}
+		
+		// Reload script with Alt+R
+		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyDown(GLFW.GLFW_KEY_R)){
+			if(!reloadingScript){
+				reloadingScript = true;
+				
+				stage.reloadScript();
+				
+				for(Bullet b:enemyBullets)
+					b.onDestroy();
+			}
+		}
+		else
+			reloadingScript = false;
+		
+		// Clear bullets with Alt+C
+		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && (KeyboardListener.isKeyDown(GLFW.GLFW_KEY_C))){
+			if(!clearingBullets){
+				
+				System.out.println("Cleared screen!");
+				clearingBullets = true;
+				
+				for(Bullet b:enemyBullets)
+					b.onDestroy();
+			}
+		}
+		else
+			clearingBullets = false;
 	}
 	
 	private void updateBullets(){
 		
 		for(int i = 0; i < enemyBullets.size(); i++){
 			
-			if(enemyBullets.get(i).remove()){
+			if(enemyBullets.get(i).isDeleted()){
 				enemyBullets.remove(i);
 				
 				// Update index, prevents objects from updating twice when another object is removed
@@ -150,7 +165,7 @@ public class MainScreen extends GameScreen{
 		
 		for(int i = 0; i < playerBullets.size(); i++){
 			
-			if(playerBullets.get(i).remove()){
+			if(playerBullets.get(i).isDeleted()){
 				playerBullets.remove(i);
 				i--;
 			}
@@ -161,7 +176,7 @@ public class MainScreen extends GameScreen{
 	
 	private void updateEnemies(){
 		for(int i = 0; i < enemies.size(); i++){
-			if(enemies.get(i).remove()){
+			if(enemies.get(i).isDeleted()){
 				enemies.remove(i);
 				i--;
 			}
@@ -172,7 +187,7 @@ public class MainScreen extends GameScreen{
 	
 	private void updateEffects(){
 		for(int i = 0; i < effects.size(); i++){
-			if(effects.get(i).remove()){
+			if(effects.get(i).isDeleted()){
 				effects.remove(i);
 				i--;
 			}

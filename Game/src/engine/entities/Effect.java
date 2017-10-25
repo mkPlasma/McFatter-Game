@@ -25,7 +25,7 @@ public class Effect extends MovableEntity{
 	}
 	
 	public void onDestroy(){
-		remove = true;
+		deleted = true;
 	}
 	
 	public void update(){

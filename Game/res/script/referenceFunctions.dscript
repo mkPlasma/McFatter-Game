@@ -7,28 +7,43 @@
 // Prints a
 print(a);
 
+// How long script has been running (frames)
+getScriptTime();
+
+// Center of screen position
+centerX();// 224
+centerY();// 240
+centerPos();
+
+// Border positions
+leftX();// 32
+rightX();// 416
+topY();// 16
+bottomY();// 464
+
+
 // Player position
-getPlayerX();
-getPlayerY();
+playerX();
+playerY();
 // As array
-getPlayerPos();
+playerPos();
 
 // Returns angle to player
-getAngleToPlayer(x, y);
+angleToPlayer(x, y);
 // With array
-getAngleToPlayer(pos);
+angleToPlayer(pos);
 
 // Returns angle from (x1, y1) to (x2, y2)
-getAngleToLocation(x1, y1, x2, y2);
+angleToLocation(x1, y1, x2, y2);
 // With array, angle from pos1 to pos2
-getAngleToLocation(pos1, pos2);
+angleToLocation(pos1, pos2);
 
 // Random int between a (inclusive) and b (exclusive)
-random(a, b);
+rand(a, b);
 // Random float
-randomFloat(a, b);
+randFloat(a, b);
 // Random boolean
-randomBool();
+randBool();
 
 
 
@@ -39,42 +54,43 @@ randomBool();
 // Pi
 pi();
 // Absolute value
-abs(a);
+abs(x);
 
 // Rounds (returns int)
-round(a);
+round(x);
 // Truncates (returns int)
-trunc(a);
+trunc(x);
 // Rounds down (returns int)
-floor(a);
+floor(x);
 // Rounds up (returns int)
-ceil(a);
+ceil(x);
 
 // Square root
-sqrt(a);
+sqrt(x);
 // Natural log
-log(a);
+log(x);
 // Log base 10
-log10(a);
+log10(x);
 // Convert to degrees
-degrees(a);
+degrees(x);
 // Convert to radians
-radians(a);
+radians(x);
 
 // Trigonometry
-sin(a);
-cos(a);
-tan(a);
+sin(x);
+cos(x);
+tan(x);
 // Arcsin, etc.
-asin(a);
-acos(a);
-atan(a);
+asin(x);
+acos(x);
+atan(x);
 // Arctan of y/x
 atan2(x, y);
+
 // Returns smaller value
-min(a, b);
+min(x, y);
 // Returns larger value
-max(a, b);
+max(x, y);
 
 
 
@@ -100,15 +116,23 @@ array.remove(n);
 // Creates a bullet with given parameters
 set b = bullet(type, color, x, y, dir, spd);
 
+// Delete entity
+b.delete();
+
 // Location
 b.setX(x);
 b.setY(y);
 b.getX();
 b.getY();
-
 // As an array, [x, y]
 b.setPos(pos);
 b.getPos();
+
+// How many frames entity has existed
+b.getTime();
+
+// Is entity removed
+b.isDeleted();
 
 // Direction and speed
 b.setDir(d);
@@ -127,8 +151,8 @@ b.getMaxSpd();
 b.setAngVel();
 b.getAngVel();
 
-// How many frames entity has existed
-b.getTime();
-
-// Is entity removed
-b.isRemoved();
+// Type/Color of bullet
+b.setType(t);
+b.setColor(c);
+b.getType();
+b.getColor();

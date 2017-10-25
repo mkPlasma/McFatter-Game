@@ -51,7 +51,7 @@ public class Enemy extends MovableEntity{
 	}
 	
 	public void onDestroy(){
-		remove = true;
+		deleted = true;
 	}
 	
 	public void damage(int damage){

@@ -2,6 +2,7 @@ package engine.script;
 
 import java.util.ArrayList;
 
+import engine.entities.Bullet;
 import engine.entities.GameEntity;
 import engine.entities.MovableEntity;
 
@@ -138,18 +139,29 @@ public class ScriptFunctions{
 		// General
 		"print:1",
 		
-		"getPlayerX:0",
-		"getPlayerY:0",
-		"getPlayerPos:0",
+		"getScriptTime:0",
 		
-		"getAngleToPlayer:1",
-		"getAngleToPlayer:2",
-		"getAngleToLocation:2",
-		"getAngleToLocation:4",
+		"centerX:0",
+		"centerY:0",
+		"centerPos:0",
 
-		"random:2",
-		"randomFloat:2",
-		"randomBool:0",
+		"leftX:0",
+		"rightX:0",
+		"topY:0",
+		"bottomY:0",
+		
+		"playerX:0",
+		"playerY:0",
+		"playerPos:0",
+		
+		"angleToPlayer:1",
+		"angleToPlayer:2",
+		"angleToLocation:2",
+		"angleToLocation:4",
+
+		"rand:2",
+		"randFloat:2",
+		"randBool:0",
 		
 		// Math
 		"pi:0",
@@ -184,6 +196,7 @@ public class ScriptFunctions{
 		// Bullet
 		"bullet:6",
 		
+		"delete:d0",
 		"setX:d1",
 		"setY:d1",
 		"setPos:d1",
@@ -193,18 +206,22 @@ public class ScriptFunctions{
 		"setAccel:d1",
 		"setMinSpd:d1",
 		"setMaxSpd:d1",
+		"setType:d1",
+		"setColor:d1",
 
 		"getX:d0",
 		"getY:d0",
 		"getPos:d0",
 		"getTime:d0",
-		"isRemoved:d0",
+		"isDeleted:d0",
 		"getSpd:d0",
 		"getDir:d0",
 		"getAngVel:d0",
 		"getAccel:d0",
 		"getMinSpd:d0",
 		"getMaxSpd:d0",
+		"getType:d0",
+		"getColor:d0",
 	};
 	
 	
@@ -240,12 +257,12 @@ public class ScriptFunctions{
 		int p = getBuiltInFunctionParameterCount(index);
 		
 		switch(getBuiltInFunctionName(index)){
-			case "getAngleToPlayer":
+			case "angleToPlayer":
 				if(p == 1)
 					return o1 instanceof ArrayList;
 				return (o1 instanceof Integer || o1 instanceof Float) && (o2 instanceof Integer || o2 instanceof Float);
 			
-			case "getAngleToLocation":
+			case "angleToLocation":
 				
 				if(p == 2)
 					return o1 instanceof ArrayList && o2 instanceof ArrayList;
@@ -257,7 +274,7 @@ public class ScriptFunctions{
 			case "sin": case "cos": case "tan": case "asin": case "acos": case "atan":
 				return o1 instanceof Integer || o1 instanceof Float;
 			
-			case "random": case "randomFloat": case "atan2": case "min": case "max":
+			case "rand": case "randFloat": case "atan2": case "min": case "max":
 				return (o1 instanceof Integer || o1 instanceof Float) && (o2 instanceof Integer || o2 instanceof Float);
 			
 			case "length":
@@ -289,13 +306,18 @@ public class ScriptFunctions{
 			case "setPos":
 				return o1 instanceof GameEntity && o2 instanceof ArrayList;
 			
+			case "setType": case "setColor":
+				return o1 instanceof Bullet && o2 instanceof Integer;
 			
-			case "getX": case "getY": case "getPos": case "getTime": case "isRemoved":
+			case "delete": case "getX": case "getY": case "getPos": case "getTime": case "isDeleted":
 				return o1 instanceof GameEntity;
 			
 			case "getSpd": case "getDir":
 			case "getAngVel": case "getAccel": case "getMinSpd": case "getMaxSpd":
 				return o1 instanceof MovableEntity;
+			
+			case "getType": case "getColor":
+				return o1 instanceof Bullet;
 		}
 		
 		return true;

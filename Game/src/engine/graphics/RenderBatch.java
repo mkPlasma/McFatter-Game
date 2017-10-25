@@ -15,14 +15,14 @@ import engine.entities.GameEntity;
 import engine.entities.MovableEntity;
 
 /*
- * 		Renderer.java
+ * 		RenderBatch.java
  * 		
  * 		Purpose:	Stores VAOs/VBOs for a set of entities
  * 		Notes:		
  * 		
  */
 
-public class SpriteBatch{
+public class RenderBatch{
 	
 	private int size;
 	
@@ -31,12 +31,16 @@ public class SpriteBatch{
 	
 	private final int vao, vbo, tex;
 	
-	private int textureID;
+	private final int textureID;
+	
+	// If true, texture coords will be sent only once
+	private boolean texCoordsFinal;
+	private boolean setTexCoords;
 	
 	// Additive rendering
 	private boolean additive;
 	
-	public SpriteBatch(int capacity, boolean additive){
+	public RenderBatch(int capacity, int textureID, boolean texCoordsFinal, boolean additive){
 		vBuffer		= BufferUtils.createFloatBuffer(capacity);
 		tcBuffer	= BufferUtils.createFloatBuffer(capacity);
 		
@@ -44,14 +48,14 @@ public class SpriteBatch{
 		vbo = glGenBuffers();
 		tex = glGenBuffers();
 		
-		this.additive = additive;
-	}
-	
-	public void setTextureID(int textureID){
 		this.textureID = textureID;
+		this.texCoordsFinal = texCoordsFinal;
+		this.additive = additive;
+		
+		setTexCoords = true;
 	}
 	
-	public void draw(){
+	public void render(){
 		enable();
 		glDrawArrays(GL_TRIANGLES, 0, size);
 		disable();
@@ -94,14 +98,47 @@ public class SpriteBatch{
 	}
 	
 	// Update batch
+	public void updateManual(float x, float y, float w, float h, float[] texCoords){
+		
+		size = 6;
+		
+		float[] vertices = new float[size*2];
+		float[] tc = new float[size*2];
+		
+		// Vertex coords
+		float[] v = getVertexCoords(x, y, w, h, 0);
+		
+		// Fill vertices/texCoords
+		for(int i = 0; i < 6; i++){
+			int a = i >= 3 ? i - 1 : i;
+			a = i == 5 ? 0 : a;
+			
+			vertices[i*2]			= v[a*2];
+			vertices[i*2 + 1]		= v[a*2 + 1];
+			
+			if(setTexCoords){
+				tc[i*2]		= texCoords[a*2];
+				tc[i*2 + 1]	= texCoords[a*2 + 1];
+			}
+		}
+		
+		updateVBOs(vertices, tc);
+	}
+	
+	public void updateWithEntity(GameEntity e, int time){
+		ArrayList<GameEntity> l = new ArrayList<GameEntity>(1);
+		l.add(e);
+		updateWithEntities(l, time);
+	}
+	
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	public void update(ArrayList entityList, int time){
+	public void updateWithEntities(ArrayList entityList, int time){
 		
 		ArrayList<GameEntity> el = new ArrayList<GameEntity>();
 		
 		// Take only visible entities
 		for(GameEntity e:(ArrayList<GameEntity>)entityList){
-			if(e.isVisible() && !e.remove())
+			if(e.isVisible() && !e.isDeleted())
 				el.add(e);
 		}
 		
@@ -113,7 +150,10 @@ public class SpriteBatch{
 		
 		// VAO arguments
 		float[] vertices = new float[size*2];
-		float[] texCoords = new float[size*2];
+		float[] texCoords = null;
+		
+		if(setTexCoords)
+			texCoords = new float[size*2];
 		
 		for(int i = 0; i < el.size(); i++){
 			
@@ -141,12 +181,19 @@ public class SpriteBatch{
 				
 				vertices[i*12 + j*2]			= v[a*2];
 				vertices[i*12 + j*2 + 1]		= v[a*2 + 1];
-				texCoords[i*12 + j*2]		= t[a*2];
-				texCoords[i*12 + j*2 + 1]	= t[a*2 + 1];
+				
+				if(setTexCoords){
+					texCoords[i*12 + j*2]		= t[a*2];
+					texCoords[i*12 + j*2 + 1]	= t[a*2 + 1];
+				}
 			}
 		}
 		
-		// Generate
+		updateVBOs(vertices, texCoords);
+	}
+	
+	private void updateVBOs(float[] vertices, float[] texCoords){
+		
 		glBindVertexArray(vao);
 		
 		// Vertices
@@ -159,13 +206,18 @@ public class SpriteBatch{
 		glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
 		
 		// Texture coords
-		tcBuffer.clear();
-		tcBuffer.put(texCoords);
-		tcBuffer.flip();
-		
-		glBindBuffer(GL_ARRAY_BUFFER, tex);
-		glBufferData(GL_ARRAY_BUFFER, tcBuffer, GL_DYNAMIC_DRAW);
-		glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+		if(setTexCoords){
+			tcBuffer.clear();
+			tcBuffer.put(texCoords);
+			tcBuffer.flip();
+			
+			glBindBuffer(GL_ARRAY_BUFFER, tex);
+			glBufferData(GL_ARRAY_BUFFER, tcBuffer, GL_DYNAMIC_DRAW);
+			glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+			
+			if(texCoordsFinal)
+				setTexCoords = false;
+		}
 		
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		

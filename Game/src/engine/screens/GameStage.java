@@ -31,8 +31,6 @@ public abstract class GameStage{
 	protected ScriptController scriptController;
 	protected DScript script;
 	
-	private boolean reloadingScript = false;
-	
 	protected Renderer r;
 	protected SpriteCache sc;
 	
@@ -52,18 +50,10 @@ public abstract class GameStage{
 		scriptController.init();
 	}
 	
-	// Check if script needs to be reloaded
+	// Recompile script
 	public void reloadScript(){
-		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyDown(GLFW.GLFW_KEY_R)){
-			if(!reloadingScript){
-				reloadingScript = true;
-				
-				scriptCompiler.compile(script);
-				scriptController.reload();
-			}
-		}
-		else
-			reloadingScript = false;
+		scriptCompiler.compile(script);
+		scriptController.reload();
 	}
 	
 	public abstract void update();

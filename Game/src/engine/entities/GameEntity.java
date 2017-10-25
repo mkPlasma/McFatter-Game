@@ -25,7 +25,7 @@ public abstract class GameEntity{
 	protected int time;
 	
 	// If true, the entity will be deleted
-	protected boolean remove;
+	protected boolean deleted;
 	
 	// Whether entity is drawn or not
 	protected boolean visible;
@@ -54,6 +54,10 @@ public abstract class GameEntity{
 	
 	public Sprite getSprite(){
 		return frame.getSprite();
+	}
+	
+	public void delete(){
+		deleted = true;
 	}
 	
 	public void setX(float x){
@@ -90,8 +94,8 @@ public abstract class GameEntity{
 		return time;
 	}
 	
-	public boolean remove(){
-		return remove;
+	public boolean isDeleted(){
+		return deleted;
 	}
 	
 	public void setVisible(boolean visible){

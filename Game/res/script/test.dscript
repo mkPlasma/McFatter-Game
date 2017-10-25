@@ -3,21 +3,37 @@
 set dir;
 
 set r = 60;
-set c = 8;
+set c = 12;
 
 while(true){
-    
-    //dir = random(0, 360);
     
     for(i in c){
         bullet(dir + i*(360/c));
     }
     
-    dir += 0.05;
+    dir += 10;
     
-    wait;
+    wait 25;
 }
 
 task bullet(dir){
-    set b = bullet(_laser_helix, _red_d, 320, 120, dir, 16);
+    set b = bullet(_orb, _green, centerX(), 140, dir, 2);
+    
+    while(!b.isDeleted()){
+        
+        set pos = b.getPos();
+        
+        if(pos[0] < leftX() || pos[0] > rightX()){
+            b.setDir(-b.getDir() + 180);
+            b.setColor(_red);
+            return;
+        }
+        if(pos[1] < topY()){
+            b.setDir(-b.getDir());
+            b.setColor(_red);
+            return;
+        }
+        
+        wait;
+    }
 }

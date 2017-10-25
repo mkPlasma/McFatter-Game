@@ -106,10 +106,10 @@ public class Player extends GameEntity{
 			bomb();
 		
 		// Movement borders
-		if(x < 16)	x = 16;
-		if(x > 624)	x = 624;
-		if(y < 16)	y = 16;
-		if(y > 464)	y = 464;
+		if(x < 48)	x = 48;
+		if(x > 400)	x = 400;
+		if(y < 32)	y = 32;
+		if(y > 448)	y = 448;
 		
 		// Set speed
 		speed = unfocusedSpeed;

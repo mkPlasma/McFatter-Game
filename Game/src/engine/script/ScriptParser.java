@@ -1175,7 +1175,7 @@ public class ScriptParser{
 									}
 									
 									// Add placeholder
-									expressions.peek().add((arrayElemSwitch.peek() ? "$" :"#") + tempBc.size());
+									expressions.peek().add((arrayElemSwitch.peek() ? "$" :"#") + (tempBc.size() - 1));
 									expressions.add(new ArrayList<Object>());
 								}
 								
@@ -1754,7 +1754,7 @@ public class ScriptParser{
 					int i = Integer.parseInt(((String)obj).substring(1));
 					
 					for(int j:removedPh)
-						if(i > j)
+						if(i >= j)
 							i--;
 					
 					removedPh.add(i);
