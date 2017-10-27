@@ -153,7 +153,7 @@ public class ScriptRunner{
 		int c = 1;
 		
 		// Bullet types
-		for(int i = 0; i < 19; i++)
+		for(int i = 0; i < 20; i++)
 			variables[c++] = i;
 		
 		// Bullet colors
