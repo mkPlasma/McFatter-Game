@@ -7,7 +7,7 @@ import engine.entities.Bullet;
 import engine.entities.Enemy;
 import engine.entities.Player;
 import engine.graphics.Renderer;
-import engine.graphics.SpriteCache;
+import engine.graphics.TextureCache;
 
 /*
  * 		Mission.java
@@ -16,9 +16,6 @@ import engine.graphics.SpriteCache;
  * 		Notes:		Bullets, enemies, bosses, and gameplay
  * 					will be handled here.
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
  */
 
 public class Mission extends GameStage{
@@ -29,17 +26,17 @@ public class Mission extends GameStage{
 	
 	private BulletList bulletList;
 	
-	public Mission(String scriptPath, Renderer r, SpriteCache sc){
-		super(scriptPath, r, sc);
+	public Mission(String scriptPath, Renderer r, TextureCache tc){
+		super(scriptPath, r, tc);
 	}
 	
 	public void init(){
 		super.init();
 		
-		bulletList = new BulletList(sc);
+		bulletList = new BulletList(tc);
 		player = new Player(224, 450, bulletList.get(BulletList.TYPE_CRYSTAL, BulletList.COLOR_LIGHT_BLUE));
 		
-		player.setSprite(sc.cache(player.getSprite()));
+		tc.loadSprite(player.getSprite());
 		
 		scriptController.setPlayer(player);
 		scriptController.setBulletList(bulletList);

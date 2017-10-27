@@ -1,7 +1,7 @@
 package engine.screens;
 
 import engine.graphics.Renderer;
-import engine.graphics.SpriteCache;
+import engine.graphics.TextureCache;
 
 /*
  * 		ScreenManager.java
@@ -24,13 +24,13 @@ public class ScreenManager{
 	public MainScreen mainScreen;
 	public MapScreen mapScreen;
 	
-	private SpriteCache spriteCache;
+	private TextureCache spriteCache;
 	
 	public void init(){
 		r = new Renderer();
 		r.init();
 		
-		spriteCache = new SpriteCache();
+		spriteCache = new TextureCache();
 		
 		mainScreen = new MainScreen(r, spriteCache);
 		mapScreen = new MapScreen(r, spriteCache);

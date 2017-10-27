@@ -4,7 +4,7 @@ import org.lwjgl.glfw.GLFW;
 
 import engine.KeyboardListener;
 import engine.graphics.Renderer;
-import engine.graphics.SpriteCache;
+import engine.graphics.TextureCache;
 import engine.script.DScript;
 import engine.script.ScriptCompiler;
 import engine.script.ScriptController;
@@ -32,12 +32,12 @@ public abstract class GameStage{
 	protected DScript script;
 	
 	protected Renderer r;
-	protected SpriteCache sc;
+	protected TextureCache tc;
 	
-	public GameStage(String scriptPath, Renderer r, SpriteCache sc){
+	public GameStage(String scriptPath, Renderer r, TextureCache sc){
 		this.scriptPath = scriptPath;
 		this.r = r;
-		this.sc = sc;
+		this.tc = sc;
 	}
 	
 	public void init(){

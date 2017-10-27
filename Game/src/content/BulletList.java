@@ -3,7 +3,7 @@ package content;
 import engine.entities.BulletFrame;
 import engine.graphics.Animation;
 import engine.graphics.Sprite;
-import engine.graphics.SpriteCache;
+import engine.graphics.TextureCache;
 
 /*
  * 		BulletList.java
@@ -30,18 +30,45 @@ public class BulletList{
 		TYPE_PLUS			= 6,
 		TYPE_WALL			= 7,
 		TYPE_NEEDLE			= 8,
-		TYPE_MISSILE		= 9,
-		TYPE_MINE			= 10,
+		TYPE_RING			= 9,
+		
+		TYPE_MISSILE		= 11,
+		TYPE_MINE			= 12,
 		TYPE_LASER			= 13,
 		TYPE_LASER_DIST		= 14,
-		TYPE_LASER_HELIX	= 15;
+		TYPE_LASER_HELIX	= 15,
+		
+		TYPE_ATOM = 18;
+	
+	public static final String[] types = {
+		"orb",
+		"scale",
+		"crystal",
+		"rice",
+		"star",
+		"star4",
+		"plus",
+		"wall",
+		"needle",
+		"ring",
+		"?",
+		"missile",
+		"mine",
+		"laser",
+		"laser_dist",
+		"laser_helix",
+		"??",
+		"???",
+		"atom",
+		"????",
+	};
 	
 	public static final byte
 		COLOR_RED			= 0,
 		COLOR_DARK_RED		= 1,
 		COLOR_ORANGE		= 2,
 		COLOR_YELLOW		= 3,
-		COLOR_DARK_YELLOW	= 4,
+		COLOR_GOLD			= 4,
 		COLOR_GREEN			= 5,
 		COLOR_DARK_GREEN	= 6,
 		COLOR_CYAN			= 7,
@@ -57,7 +84,7 @@ public class BulletList{
 		COLOR_DARK_RED_D	= 17,
 		COLOR_ORANGE_D		= 18,
 		COLOR_YELLOW_D		= 19,
-		COLOR_DARK_YELLOW_D	= 20,
+		COLOR_GOLD_D		= 20,
 		COLOR_GREEN_D		= 21,
 		COLOR_DARK_GREEN_D	= 22,
 		COLOR_CYAN_D		= 23,
@@ -69,15 +96,33 @@ public class BulletList{
 		COLOR_WHITE_D		= 29,
 		COLOR_GRAY_D		= 30,
 		COLOR_BLACK_D		= 31;
-	
+
+	public static final String[] colors = {
+		"red",
+		"dark_red",
+		"orange",
+		"yellow",
+		"gold",
+		"green",
+		"dark_green",
+		"cyan",
+		"light_blue",
+		"blue",
+		"dark_blue",
+		"purple",
+		"pink",
+		"white",
+		"gray",
+		"black"
+	};
 	
 	// Cache and index of current bullet frame cache
 	private BulletFrame[] cache = new BulletFrame[256];
 	private int index;
 	
-	private SpriteCache spriteCache;
+	private TextureCache spriteCache;
 	
-	public BulletList(SpriteCache spriteCache){
+	public BulletList(TextureCache spriteCache){
 		this.spriteCache = spriteCache;
 	}
 	
@@ -94,23 +139,48 @@ public class BulletList{
 	}
 	
 	public Sprite getSprite(int type, int color){
-		String path = "bullets/b32.png";
+		
+		// Path, sprite size
+		String path = "01.png";
 		int size = 32;
 		
-		// Standard sprite rotation will be stored in an animation
+		int sx = color*size;
+		int sy = type*size;
+		
+		
+		if(type >= 16 && type <= 19){
+			path = "02.png";
+			
+			sx = (color%16)*size;
+			sx += type % 2 == 0 ? 0 : 512;
+			
+			sy = type <= 17 ? 0 : 256;
+		}
+		
+		
+		// Create sprite
+		Sprite sprite = new Sprite("bullets/" + path, sx, sy, size, size);
+		
+		
+		// Animations
 		float rotation = getSpriteRotation(type)*(color%2 == 0 ? 1 : -1);
 		boolean spdRotation = getSpriteRotationBySpd(type);
 		
-		Sprite sprite;
+		if(spdRotation)
+			sprite.addAnimation(new Animation(Animation.ANIM_ROTATION_BY_SPD,  1, false, new float[]{rotation}));
 		
-		if(rotation == 0)
-			sprite = new Sprite(path, color*size, type*size, size, size);
-		else if(spdRotation)
-			sprite = new Sprite(path, color*size, type*size, size, size, new Animation(Animation.ANIM_ROTATION_BY_SPD,  1, false, new float[]{rotation}));
-		else
-			sprite = new Sprite(path, color*size, type*size, size, size, new Animation(Animation.ANIM_ROTATION, 1, false, new float[]{rotation}));
+		else if(rotation != 0)
+			sprite.addAnimation(new Animation(Animation.ANIM_ROTATION, 1, false, new float[]{rotation}));
 		
-		sprite = spriteCache.cache(sprite);
+		if(type >= 16 && type <= 19){
+			final int spd = 2;
+			sprite.addAnimation(new Animation(Animation.ANIM_SET_SPRITE_FLIP, spd, false, new float[]{sx, sy, 0, 32, 8, sx, sy}));
+			
+			if(type == TYPE_ATOM)
+				sprite.addAnimation(new Animation(Animation.ANIM_FLIP_X, 7*spd, false, null));
+		}
+		
+		spriteCache.loadSprite(sprite);
 		
 		return sprite;
 	}
@@ -128,6 +198,7 @@ public class BulletList{
 			case TYPE_WALL:
 			case TYPE_NEEDLE:
 			case TYPE_MISSILE:
+			case TYPE_ATOM:
 				return 3;
 			
 			case TYPE_MINE:
@@ -154,6 +225,7 @@ public class BulletList{
 			case TYPE_WALL:
 			case TYPE_NEEDLE:
 			case TYPE_MISSILE:
+			case TYPE_ATOM:
 				return .8f;
 				
 			case TYPE_MINE:
@@ -170,14 +242,14 @@ public class BulletList{
 	
 	public boolean getSpriteAlign(int type){
 		
-		return	type == TYPE_SCALE		||
-				type == TYPE_CRYSTAL	||
-				type == TYPE_RICE		||
-				type == TYPE_NEEDLE		||
-				type == TYPE_MISSILE	||
-				type == TYPE_WALL		||
-				type == TYPE_LASER		||
-				type == TYPE_LASER_DIST	||
+		return	type == TYPE_SCALE			||
+				type == TYPE_CRYSTAL		||
+				type == TYPE_RICE			||
+				type == TYPE_NEEDLE			||
+				type == TYPE_MISSILE		||
+				type == TYPE_WALL			||
+				type == TYPE_LASER			||
+				type == TYPE_LASER_DIST		||
 				type == TYPE_LASER_HELIX;
 	}
 	

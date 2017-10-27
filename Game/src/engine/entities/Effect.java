@@ -14,9 +14,8 @@ package engine.entities;
 
 public class Effect extends MovableEntity{
 	
-	public Effect(EntityFrame frame){
-		this.frame = frame;
-		
+	public Effect(EntityFrame frame, float x, float y){
+		super(frame, x, y);
 		visible = true;
 	}
 	
@@ -26,11 +25,6 @@ public class Effect extends MovableEntity{
 	
 	public void onDestroy(){
 		deleted = true;
-	}
-	
-	public void update(){
-		updateMovements();
-		time++;
 	}
 	
 	public void render(){

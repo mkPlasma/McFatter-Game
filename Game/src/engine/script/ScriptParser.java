@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Stack;
 
+import content.BulletList;
+
 /*
  * 		ScriptParser.java
  * 		
@@ -153,57 +155,17 @@ public class ScriptParser{
 	// Adds built in variable definitions
 	private void addDefaultVars(){
 		
-		// Add to variables list first
-		variables.add("0c:_orb");
-		variables.add("0c:_scale");
-		variables.add("0c:_crystal");
-		variables.add("0c:_rice");
-		variables.add("0c:_star");
-		variables.add("0c:_star4");
-		variables.add("0c:_plus");
-		variables.add("0c:_wall");
-		variables.add("0c:_needle");
-		variables.add("0c:_missile");
-		variables.add("0c:_mine");
-		variables.add("0c:_emptytype1");
-		variables.add("0c:_emptytype2");
-		variables.add("0c:_laser");
-		variables.add("0c:_laser_dist");
-		variables.add("0c:_laser_helix");
+		// Bullet types
+		for(String s:BulletList.types)
+			variables.add("0c:_" + s);
 		
-		variables.add("0c:_red");
-		variables.add("0c:_dark_red");
-		variables.add("0c:_orange");
-		variables.add("0c:_yellow");
-		variables.add("0c:_dark_yellow");
-		variables.add("0c:_green");
-		variables.add("0c:_dark_green");
-		variables.add("0c:_cyan");
-		variables.add("0c:_light_blue");
-		variables.add("0c:_blue");
-		variables.add("0c:_dark_blue");
-		variables.add("0c:_purple");
-		variables.add("0c:_pink");
-		variables.add("0c:_white");
-		variables.add("0c:_gray");
-		variables.add("0c:_black");
+		// Bullet colors
+		for(String s:BulletList.colors)
+			variables.add("0c:_" + s);
 		
-		variables.add("0c:_red_d");
-		variables.add("0c:_dark_red_d");
-		variables.add("0c:_orange_d");
-		variables.add("0c:_yellow_d");
-		variables.add("0c:_dark_yellow_d");
-		variables.add("0c:_green_d");
-		variables.add("0c:_dark_green_d");
-		variables.add("0c:_cyan_d");
-		variables.add("0c:_light_blue_d");
-		variables.add("0c:_blue_d");
-		variables.add("0c:_dark_blue_d");
-		variables.add("0c:_purple_d");
-		variables.add("0c:_pink_d");
-		variables.add("0c:_white_d");
-		variables.add("0c:_gray_d");
-		variables.add("0c:_black_d");
+		// Dark colors
+		for(String s:BulletList.colors)
+			variables.add("0c:_" + s + "_d");
 	}
 	
 	// Process tokens into bytecode

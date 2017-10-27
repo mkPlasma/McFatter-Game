@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 import content.BulletList;
 import engine.graphics.Sprite;
-import engine.graphics.SpriteCache;
+import engine.graphics.TextureCache;
 
 /*
  * 		Player.java

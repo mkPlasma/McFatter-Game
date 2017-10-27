@@ -33,14 +33,12 @@ public abstract class GameEntity{
 	// Stores a template of sprites and animations
 	protected EntityFrame frame;
 	
-	public GameEntity(){
-		
-	}
-	
 	public GameEntity(EntityFrame frame, float x, float y){
 		this.frame = frame;
 		this.x = x;
 		this.y = y;
+		
+		visible = true;
 	}
 	
 	public abstract void onCreate();

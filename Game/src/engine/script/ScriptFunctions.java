@@ -208,7 +208,11 @@ public class ScriptFunctions{
 		"setMaxSpd:d1",
 		"setType:d1",
 		"setColor:d1",
-
+		"setFrame:d1",
+		"setFrame:d2",
+		"setAdditive:d0",
+		"setAdditive:d1",
+		
 		"getX:d0",
 		"getY:d0",
 		"getPos:d0",
@@ -222,6 +226,8 @@ public class ScriptFunctions{
 		"getMaxSpd:d0",
 		"getType:d0",
 		"getColor:d0",
+		"getFrame:d0",
+		"isAdditive:d0",
 	};
 	
 	
@@ -305,9 +311,15 @@ public class ScriptFunctions{
 			
 			case "setPos":
 				return o1 instanceof GameEntity && o2 instanceof ArrayList;
-			
+
 			case "setType": case "setColor":
 				return o1 instanceof Bullet && o2 instanceof Integer;
+				
+			case "setFrame":
+				return o1 instanceof Bullet && ((p == 2 && o2 instanceof Integer && o3 instanceof Integer) || (p == 1 && o2 instanceof ArrayList));
+				
+			case "setAdditive":
+				return o1 instanceof Bullet && (p == 0 || (p == 1 && o2 instanceof Boolean));
 			
 			case "delete": case "getX": case "getY": case "getPos": case "getTime": case "isDeleted":
 				return o1 instanceof GameEntity;
@@ -316,7 +328,7 @@ public class ScriptFunctions{
 			case "getAngVel": case "getAccel": case "getMinSpd": case "getMaxSpd":
 				return o1 instanceof MovableEntity;
 			
-			case "getType": case "getColor":
+			case "getType": case "getColor": case "getFrame": case "isAdditive":
 				return o1 instanceof Bullet;
 		}
 		

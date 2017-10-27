@@ -89,11 +89,12 @@ set thisIsTrue = "test" == "test";
 // They can hold any type of variable.
 set myArray = {1, 2.0, false, y};
 
-// A value can be accessed with [index].
+// A value can be set or accessed with [index].
+myArray[0] = 2; // Replaces '1' in myArray with '2'.
 x = myArray[0]; // Sets x to 1.
 
 // Elements can be added by using .add().
-myArray.add(4); // Now contains [1, 2.0, false, 3.14, 4].
+myArray.add(4); // Now contains [2, 2.0, false, 3.14, 4].
 
 // Elements can be removed with .remove().
 // Without arguments, one item will be removed and returned.
@@ -175,7 +176,7 @@ while(true){
     while(true){
         break;
     }
-    // First break leads to here.
+    // First break leads here.
     
     break;
 }

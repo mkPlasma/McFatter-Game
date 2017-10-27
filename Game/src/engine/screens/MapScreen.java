@@ -1,7 +1,7 @@
 package engine.screens;
 
 import engine.graphics.Renderer;
-import engine.graphics.SpriteCache;
+import engine.graphics.TextureCache;
 
 /*
  * 		MapScreen.java
@@ -18,7 +18,7 @@ import engine.graphics.SpriteCache;
 
 public class MapScreen extends GameScreen{
 
-	public MapScreen(Renderer r, SpriteCache sc){
+	public MapScreen(Renderer r, TextureCache sc){
 		super(r, sc);
 	}
 	

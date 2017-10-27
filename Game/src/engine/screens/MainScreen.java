@@ -12,7 +12,8 @@ import engine.entities.Enemy;
 import engine.entities.Laser;
 import engine.entities.Player;
 import engine.graphics.Renderer;
-import engine.graphics.SpriteCache;
+import engine.graphics.TextureCache;
+import engine.graphics.Texture;
 
 /*
  * 		MainScreen.java
@@ -47,8 +48,8 @@ public class MainScreen extends GameScreen{
 	
 	private boolean reloadingScript = false, clearingBullets = false;
 	
-	public MainScreen(Renderer r, SpriteCache sc){
-		super(r, sc);
+	public MainScreen(Renderer r, TextureCache tc){
+		super(r, tc);
 	}
 	
 	public void init(){
@@ -61,16 +62,20 @@ public class MainScreen extends GameScreen{
 		time = 0;
 		rTime = 0;
 		paused = false;
+
+		// Load textures
+		int tPlayer = tc.cache("player.png").getID();
+		int tBullets1 = tc.cache("bullets/01.png").getID();
+		int tBullets2 = tc.cache("bullets/02.png").getID();
+		
+		r.initMainScreen(tPlayer, tBullets1, tBullets2);
 		
 		// Temporary test
-		stage = new Mission("Game/res/script/test.dscript", r, sc);
+		stage = new Mission("Game/res/script/test.dscript", r, tc);
 		stage.init();
 		
 		if(stage instanceof Mission)
 			player = ((Mission)stage).getPlayer();
-		
-		// Temporary
-		r.initMainScreen(player.getSprite().getTextureID(), new BulletList(sc).get((byte)0, (byte)0).getSprite().getTextureID());
 	}
 	
 	public void cleanup(){

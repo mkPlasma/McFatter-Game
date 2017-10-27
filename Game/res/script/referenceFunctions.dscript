@@ -144,15 +144,33 @@ b.getSpd();
 b.setAccel(a);
 b.setMinSpd(s);
 b.setMaxSpd(s);
+b.getAccel();
 b.getMinSpd();
 b.getMaxSpd();
 
 // Angular velocity, value gets added to direction, causing bullet to curve
-b.setAngVel();
+b.setAngVel(a);
 b.getAngVel();
 
 // Type/Color of bullet
 b.setType(t);
 b.setColor(c);
+b.setFrame(t, c);
 b.getType();
 b.getColor();
+// As array, [type, color]
+b.setFrame(frame);
+b.getFrame();
+
+// Additive rendering
+b.setAdditive(a);
+// Set to true
+b.setAdditive();
+b.isAdditive();
+
+
+
+
+
+
+

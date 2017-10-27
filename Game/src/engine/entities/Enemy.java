@@ -25,8 +25,8 @@ public class Enemy extends MovableEntity{
 	private int health;
 	private int hpmax;
 	
-	public Enemy(EnemyFrame frame){
-		super();
+	public Enemy(EnemyFrame frame, float x, float y){
+		super(frame, x, y);
 		
 		visible = true;
 		
@@ -40,11 +40,6 @@ public class Enemy extends MovableEntity{
 		onCreate();
 	}
 	
-	
-	public void update(){
-		updateMovements();
-		time++;
-	}
 	
 	public void onCreate(){
 		

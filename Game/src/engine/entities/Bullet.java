@@ -1,5 +1,7 @@
 package engine.entities;
 
+import engine.graphics.Sprite;
+
 /*
  * 		Bullet.java
  * 		
@@ -21,47 +23,45 @@ public class Bullet extends MovableEntity{
 	// Whether entity can collide
 	protected boolean collisions = true;
 	
+	// How far outside screen to despawn
 	protected int despawnRange = 32;
+	
+	// Customizable bullet sprite
+	private Sprite sprite;
+	private boolean spriteCloned;
 	
 	public Bullet(BulletFrame frame, float x, float y, float dir, float spd){
 		super(frame, x, y, dir, spd);
-		
-		visible = true;
+		sprite = frame.getSprite();
 		
 		onCreate();
 	}
 	
 	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, int damage, int dmgReduce){
 		super(frame, x, y, dir, spd);
+		sprite = frame.getSprite();
 		
 		this.damage = damage;
 		this.dmgReduce = dmgReduce;
-
-		visible = true;
 		
 		onCreate();
 	}
 	
 	public void onCreate(){
-		getSprite().addUser();
+		
 	}
 	
 	public void onDestroy(){
 		deleted = true;
-		getSprite().removeUser();
 	}
 	
 	public void update(){
 		
-		updateMovements();
+		super.update();
 		
 		// Delete at borders
 		if(x < 32 - despawnRange || x > 416 + despawnRange || y < 16 - despawnRange || y > 464 + despawnRange)
 			deleted = true;
-		
-		damage -= dmgReduce;
-		
-		time++;
 	}
 	
 	public void setFrame(BulletFrame frame){
@@ -70,6 +70,20 @@ public class Bullet extends MovableEntity{
 	
 	public BulletFrame getFrame(){
 		return (BulletFrame)frame;
+	}
+	
+	public Sprite getSprite(){
+		return sprite;
+	}
+	
+	// Must clone sprite if modifying it
+	public void cloneSprite(){
+		
+		if(spriteCloned)
+			return;
+		
+		sprite = new Sprite(sprite);
+		spriteCloned = true;
 	}
 	
 	public int getHitboxSize(){

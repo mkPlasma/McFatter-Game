@@ -123,7 +123,7 @@ public class ScriptRunner{
 		random = new Random();
 		
 		// Account for register and default vars
-		int varCount = 49;
+		int varCount = 53;
 		
 		// Add variables, find functions
 		for(int i = 0; i < bytecode.length; i++){
@@ -153,7 +153,7 @@ public class ScriptRunner{
 		int c = 1;
 		
 		// Bullet types
-		for(int i = 0; i < 16; i++)
+		for(int i = 0; i < 19; i++)
 			variables[c++] = i;
 		
 		// Bullet colors
@@ -213,7 +213,7 @@ public class ScriptRunner{
 		if(!branch.tickWaitTime())
 			return;
 
-		branch.syncVariables();
+		branch.syncWithParent();
 		variables = branch.getVariables();
 		returnPoints = branch.getReturnPoints();
 		
@@ -670,6 +670,8 @@ public class ScriptRunner{
 					
 					// End branch
 					if(!branch.isPrimary() && returnPoints.isEmpty()){
+						branch.setVariables(variables);
+						branch.syncToParent();
 						branch.remove();
 						return;
 					}
@@ -719,6 +721,7 @@ public class ScriptRunner{
 					// Update variables/return points
 					branch.setVariables(variables);
 					branch.setReturnPoints(returnPoints);
+					branch.syncToParent();
 					
 					// Return to continue running
 					return;
@@ -1343,6 +1346,40 @@ public class ScriptRunner{
 				bl.setFrame(bulletList.get(bl.getFrame().getType(), i2));
 				return;
 			
+			case "setFrame":{
+				
+				// Type, color
+				if(paramCount == 3){
+					int i3 = (int)params.remove();
+					bl.setFrame(bulletList.get(i2, i3));
+					return;
+				}
+				
+				// Array
+				ArrayList<Object> ar = (ArrayList<Object>)o2;
+				
+				if(ar.size() < 2){
+					runtimeError("setFrame requires an array of length 2", lineNum);
+					return;
+				}
+				
+				if(!(ar.get(0) instanceof Integer) || !(ar.get(1) instanceof Integer)){
+					runtimeError("Type mismatch", lineNum);
+					return;
+				}
+				
+				bl.setFrame(bulletList.get((int)ar.get(0), (int)ar.get(1)));
+				return;
+			}
+			
+			case "setAdditive":{
+				boolean add = paramCount == 1 ? true : (boolean)o2;
+				
+				bl.cloneSprite();
+				bl.getSprite().setAdditive(add);
+				return;
+			}
+			
 			
 			case "getX":
 				returnValue = ge.getX();
@@ -1401,6 +1438,20 @@ public class ScriptRunner{
 			
 			case "getColor":
 				returnValue = bl.getFrame().getColor();
+				return;
+
+			case "getFrame":{
+				ArrayList<Integer> frame = new ArrayList<Integer>();
+				
+				frame.add(bl.getFrame().getType());
+				frame.add(bl.getFrame().getColor());
+				
+				returnValue = frame;
+				return;
+			}
+			
+			case "isAdditive":
+				returnValue = bl.getSprite().isAdditive();
 				return;
 		}
 	}

@@ -22,9 +22,6 @@ public abstract class MovableEntity extends GameEntity{
 	
 	protected boolean useMinSpd, useMaxSpd;
 	
-	public MovableEntity(){
-		super();
-	}
 	
 	public MovableEntity(EntityFrame frame, float x, float y){
 		super(frame, x, y);
@@ -37,6 +34,10 @@ public abstract class MovableEntity extends GameEntity{
 		this.spd = spd;
 	}
 	
+	public void update(){
+		updateMovements();
+		time++;
+	}
 	
 	protected void updateMovements(){
 		

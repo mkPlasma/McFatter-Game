@@ -3,7 +3,9 @@
 set dir;
 
 set r = 60;
-set c = 12;
+set c = 24;
+
+set test = false;
 
 while(true){
     
@@ -13,27 +15,12 @@ while(true){
     
     dir += 10;
     
-    wait 25;
+    wait 10;
 }
 
 task bullet(dir){
-    set b = bullet(_orb, _green, centerX(), 140, dir, 2);
-    
-    while(!b.isDeleted()){
-        
-        set pos = b.getPos();
-        
-        if(pos[0] < leftX() || pos[0] > rightX()){
-            b.setDir(-b.getDir() + 180);
-            b.setColor(_red);
-            return;
-        }
-        if(pos[1] < topY()){
-            b.setDir(-b.getDir());
-            b.setColor(_red);
-            return;
-        }
-        
-        wait;
-    }
+    set b = bullet(_rice, _red, centerX(), 140, dir, 2);
+    bullet(_rice, _blue, centerX(), 140, dir, 2);
+    b.setAdditive(test);
+    test = !test;
 }

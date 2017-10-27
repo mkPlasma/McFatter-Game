@@ -1,16 +1,7 @@
 package engine.graphics;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.stb.STBImage.stbi_load_from_memory;
-
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 
-import org.lwjgl.BufferUtils;
-import org.lwjgl.stb.STBImage;
-
-import engine.IOFunctions;
 import engine.entities.GameEntity;
 
 /*
@@ -18,10 +9,7 @@ import engine.entities.GameEntity;
  * 		
  * 		Purpose:	Holds an image and certain properties, such as scale or alpha
  * 		Notes:		Several entities may share one sprite to reduce memory use.
- * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
+ * 			
  */
 
 public class Sprite{
@@ -34,14 +22,8 @@ public class Sprite{
 	 * This will place the sprite in the cache and return a loaded instance of the sprite.
 	*/
 	
-	// Path of spritesheet
-	private final String path;
-	
-	// Number of current sprite users
-	private int numUsers;
-	
-	// Full image dimensions
-	private int texWidth, texHeight;
+	// Image texture
+	private Texture texture;
 	
 	// Area of spritesheet to use
 	private int x, y, width, height;
@@ -57,29 +39,23 @@ public class Sprite{
 	private float scaleX = 1, scaleY = 1;
 	private float alpha = 1;
 	
-	// Stores texture
-	private ByteBuffer texture;
-	private int texID;
+	// Render additively
+	private boolean additive = false;
 	
-	// True if sprite has been loaded
-	private boolean loaded;
-
 	// Sprite animation
 	private Animation[] anim;
 	
 	
 	public Sprite(Sprite spr){
-		path = spr.getPath();
+		
+		texture = spr.getTexture();
 		
 		x = spr.getX();
 		y = spr.getY();
 		width = spr.getWidth();
 		height = spr.getHeight();
 		
-		texHeight = spr.getTexHeight();
-		texWidth = spr.getTexWidth();
-		
-		genTextureCoords();
+		texCoords = spr.getTextureCoords();
 		
 		rotation = spr.getRotation();
 		scaleX = spr.getScaleX();
@@ -87,90 +63,64 @@ public class Sprite{
 		alpha = spr.getAlpha();
 		
 		anim = spr.getAnimations();
-		
-		texture = spr.getTexture();
-		texID = spr.getTextureID();
-		
-		loaded = true;
 	}
 
 	public Sprite(String path, int x, int y, int width, int height){
-		this.path = path;
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
+		
+		texture = new Texture(path);
 	}
 	
 	public Sprite(String path, int x, int y, int width, int height, float scale){
-		this.path = path;
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
 		scaleX = scale;
 		scaleY = scale;
+		
+		texture = new Texture(path);
 	}
 	
 	public Sprite(String path, int x, int y, int width, int height, Animation anim){
-		this.path = path;
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
 		this.anim = new Animation[]{anim};
+		
+		texture = new Texture(path);
 	}
 	
 	public Sprite(String path, int x, int y, int width, int height, Animation[] anim){
-		this.path = path;
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
 		this.anim = anim;
+		
+		texture = new Texture(path);
 	}
 	
 	// Load sprite to texture
 	public void load(){
-		
-		if(loaded)
-			return;
-		
-		IntBuffer w = BufferUtils.createIntBuffer(1);
-		IntBuffer h = BufferUtils.createIntBuffer(1);
-		IntBuffer comp = BufferUtils.createIntBuffer(1);
-		
-		ByteBuffer t = null;
-		
-		try{
-			t = stbi_load_from_memory(IOFunctions.readToByteBuffer("Game/res/img/" + path), w, h, comp, 0);
-			loaded = true;
-		}catch(IOException e){
-			e.printStackTrace();
-		}
-		
-		if(t == null)
-			throw new RuntimeException("Failed to load image: " + STBImage.stbi_failure_reason());
-		
-		texWidth = w.get(0);
-		texHeight = h.get(0);
-		
-		texture = t;
-		
-		texID = glGenTextures();
-		glBindTexture(GL_TEXTURE_2D, texID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		
+		texture.load();
 		genTextureCoords();
 	}
 	
 	// Creates texture coordinates
 	public void genTextureCoords(){
-		float left =	(float)x/(float)texWidth;
-		float right =	((float)x + (float)width)/(float)texWidth;
-		float top =		(float)y/(float)texHeight;
-		float bottom =	((float)y + (float)height)/(float)texHeight;
+		
+		int w = texture.getWidth();
+		int h = texture.getHeight();
+		
+		float left =	(float)x/(float)w;
+		float right =	((float)x + (float)width)/(float)w;
+		float top =		(float)y/(float)h;
+		float bottom =	((float)y + (float)height)/(float)h;
 		
 		texCoords = new float[]{
 			left,  top,
@@ -192,6 +142,10 @@ public class Sprite{
 			a.setSprite(spr);
 			a.setEntity(e);
 			a.update(a.sync() ? syncTime : time);
+			
+			// Update texture coords
+			if(a.getType() == Animation.ANIM_SET_SPRITE || a.getType() == Animation.ANIM_SET_SPRITE_FLIP)
+				spr.genTextureCoords();
 		}
 		
 		return spr;
@@ -222,15 +176,15 @@ public class Sprite{
 		if(sprite == null)
 			return false;
 		
-		if(sprite.path.equalsIgnoreCase(path) &&
-			sprite.x == x &&
-			sprite.y == y &&
-			sprite.width == width &&
-			sprite.height == height &&
-			sprite.rotation == rotation &&
-			sprite.scaleX == scaleX &&
-			sprite.scaleY == scaleY &&
-			sprite.alpha == alpha){
+		if(sprite.getTexture().getPath().equalsIgnoreCase(texture.getPath()) &&
+			sprite.getX() == x &&
+			sprite.getY() == y &&
+			sprite.getWidth() == width &&
+			sprite.getHeight() == height &&
+			sprite.getRotation() == rotation &&
+			sprite.getScaleX() == scaleX &&
+			sprite.getScaleY() == scaleY &&
+			sprite.getAlpha() == alpha){
 		
 			// Check if all animations are equal
 			Animation[] a = sprite.getAnimations();
@@ -256,61 +210,24 @@ public class Sprite{
 		return false;
 	}
 	
-	public float[] getTextureCoords(){
-		return texCoords;
+	public void setTextureCoords(float[] texCoords){
+		this.texCoords = texCoords;
 	}
 	
-	public void setTexture(ByteBuffer texture){
+	public float[] getTextureCoords(){
+		return texCoords.clone();
+	}
+	
+	public void setTexture(Texture texture){
 		this.texture = texture;
 	}
 
-	public ByteBuffer getTexture(){
+	public Texture getTexture(){
 		return texture;
 	}
 	
-	public void setTextureID(int texID){
-		this.texID = texID;
-	}
-	
-	public int getTextureID(){
-		return texID;
-	}
-	
-	public void setTexWidth(int texWidth){
-		this.texWidth = texWidth;
-	}
-	
-	public int getTexWidth(){
-		return texWidth;
-	}
-	
-	public void setTexHeight(int texHeight){
-		this.texHeight = texHeight;
-	}
-	
-	public int getTexHeight(){
-		return texHeight;
-	}
-	
-	public void addUser(){
-		numUsers++;
-	}
-	
-	public void removeUser(){
-		numUsers--;
-	}
-	
-	public int getNumUsers(){
-		return numUsers;
-	}
-	
-	
-	public boolean isLoaded(){
-		return loaded;
-	}
-	
-	public String getPath(){
-		return path;
+	public ByteBuffer getImage(){
+		return texture.getImage();
 	}
 	
 	public void setX(int x){
@@ -367,15 +284,6 @@ public class Sprite{
 		return height*scaleY;
 	}
 	
-	public void setDimensions(int[] dim){
-		width = dim[0];
-		height = dim[1];
-	}
-	
-	public int[] getDimensions(){
-		return new int[]{width, height};
-	}
-	
 	public void setRotation(float rotation){
 		this.rotation = rotation;
 	}
@@ -420,6 +328,14 @@ public class Sprite{
 	
 	public float getAlpha(){
 		return alpha;
+	}
+	
+	public void setAdditive(boolean additive){
+		this.additive = additive;
+	}
+	
+	public boolean isAdditive(){
+		return additive;
 	}
 	
 	public void setAnimations(Animation anim){

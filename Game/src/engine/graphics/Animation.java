@@ -18,41 +18,54 @@ public class Animation{
 	
 	/* Args reference
 	================================================================
-	ANIM_ROTATION
-	[inc]
-	ANIM_ROTATION_BY_SPD
-	[inc, fac]
 	
-	Increments by [inc] every [time] frames
-	Multiplies by speed*fac if BY_SPD
+	ANIM_ROTATION, ANIM_ROTATION_BY_SPD
+	[inc]
+	
+	Increments by [inc] every [timeInc] frames
+	Multiplies by speed if BY_SPD
 	
 	
 	
 	ANIM_SCALE, ANIM_ALPHA
 	[inc, min, max]
 	
-	Increments by [inc] every [time] frames
+	Increments by [inc] every [timeInc] frames
 	Stops at [min] or [max] values
 	
 	
 	
 	ANIM_SET_SPRITE
-	[xStart, yStart, xInc, yInc, xEnd, yEnd, xReturn, yReturn]
+	[xStart, yStart, xInc, yInc, num, xReturn, yReturn]
 	
 	Moves sprite region from source image, used to animate from within a spritesheet
-	Starts at (xStart, yStart) moves (xInc, yInc) every [time] frames, stops at (xEnd, yEnd) and loops back to (xReturn, yReturn)
-	Note that this can only move sprites rightwards or downwards along the sheet, but can still loop back
+	Starts at (xStart, yStart) moves (xInc, yInc) every [timeInc] frames, stops after [num] times and loops back to (xReturn, yReturn)
+	Note that this can only move the sprite region downwards and/or rightwards
+	
+	
+	ANIM_SET_SPRITE_FLIP
+	[xStart, yStart, xInc, yInc, num]
+	
+	Moves sprite region from (xStart, yStart) by (xInc, yInc) [num] times, then back and forth
+	
+	
+	ANIM_FLIP_X
+	Flips X scale from positive to negative every [timeInc] frames
+	Used for atom bullet type animation
+	
 	================================================================
 	*/
 	
 	public static final int
-		ANIM_ROTATION =			0,
-		ANIM_ROTATION_BY_SPD =	1,
-		ANIM_SCALE =				2,
-		ANIM_SCALE_X =			3,
-		ANIM_SCALE_Y =			4,
-		ANIM_ALPHA =				5,
-		ANIM_SET_SPRITE =		6;
+		ANIM_ROTATION			= 0,
+		ANIM_ROTATION_BY_SPD	= 1,
+		ANIM_SCALE				= 2,
+		ANIM_SCALE_X			= 3,
+		ANIM_SCALE_Y			= 4,
+		ANIM_ALPHA				= 5,
+		ANIM_SET_SPRITE			= 6,
+		ANIM_SET_SPRITE_FLIP	= 7,
+		ANIM_FLIP_X				= 8;
 	
 	
 	// Time increment to run the animation on
@@ -106,6 +119,7 @@ public class Animation{
 				spr.rotate(m*args[0]*((MovableEntity)e).getSpd());
 			else
 				spr.rotate(m*args[0]);
+			return;
 		}
 		
 		// Scale X
@@ -121,6 +135,7 @@ public class Animation{
 				scx = args[2];
 			
 			spr.setScaleX(scx);
+			return;
 		}
 		
 		// Scale Y
@@ -135,6 +150,7 @@ public class Animation{
 				scy = args[2];
 			
 			spr.setScaleY(scy);
+			return;
 		}
 		
 		if(type == ANIM_ALPHA){
@@ -148,24 +164,46 @@ public class Animation{
 				a = args[2];
 			
 			spr.setAlpha(a);
+			return;
 		}
 		
 		if(type == ANIM_SET_SPRITE){
-			if(time == 0)// Set start position
-				spr.setPos((int)args[0], (int)args[1]);
-			else{
-				int[] pos = spr.getPos();
-				
-				pos[0] += m*args[2];
-				pos[1] += m*args[3];
-				
-				if((pos[0] >= args[4] && args[4] >= 0) || (pos[1] >= args[5] && args[5] >= 0)){// Loop back
-					pos[0] = (int)args[6];
-					pos[1] = (int)args[7];
-				}
-				
-				spr.setPos(pos);
+			int[] pos = {(int)args[0], (int)args[1]};
+			
+			if(m > (int)args[4]){
+				pos[0] = (int)args[5];
+				pos[1] = (int)args[6];
 			}
+			
+			m = m % (int)args[4];
+			
+			pos[0] += m*args[2];
+			pos[1] += m*args[3];
+			
+			spr.setPos(pos);
+			return;
+		}
+		
+		if(type == ANIM_SET_SPRITE_FLIP){
+			int[] pos = {(int)args[0], (int)args[1]};
+			
+			m = m % (((int)args[4]*2) - 2);
+			
+			if(m >= (int)args[4])
+				m = (int)args[4] - (m - (int)args[4]) - 2;
+			
+			pos[0] += m*args[2];
+			pos[1] += m*args[3];
+			
+			spr.setPos(pos);
+			return;
+		}
+		
+		if(type == ANIM_FLIP_X){
+			float scx = spr.getScaleX();
+			scx *= m % 2 == 0 ? 1 : -1;
+			spr.setScaleX(scx);
+			return;
 		}
 	}
 	

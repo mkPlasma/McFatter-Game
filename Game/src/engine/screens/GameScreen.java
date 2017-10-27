@@ -1,7 +1,7 @@
 package engine.screens;
 
 import engine.graphics.Renderer;
-import engine.graphics.SpriteCache;
+import engine.graphics.TextureCache;
 
 /*
  * 		GameScreen.java
@@ -19,12 +19,12 @@ import engine.graphics.SpriteCache;
 
 public abstract class GameScreen{
 	
-	protected SpriteCache sc;
+	protected TextureCache tc;
 	protected Renderer r;
 	
-	public GameScreen(Renderer r, SpriteCache sc){
+	public GameScreen(Renderer r, TextureCache sc){
 		this.r = r;
-		this.sc = sc;
+		this.tc = sc;
 	}
 	
 	public abstract void init();

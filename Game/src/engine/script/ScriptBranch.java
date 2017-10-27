@@ -48,8 +48,8 @@ public class ScriptBranch{
 		this.parent = parent;
 	}
 	
-	// Sync variables with parent
-	public void syncVariables(){
+	// Copy variables from parent
+	public void syncWithParent(){
 		
 		if(parent == null || parent.toRemove())
 			return;
@@ -60,6 +60,19 @@ public class ScriptBranch{
 			this.variables[i] = variables[i];
 	}
 	
+	// Copy variables to parent
+	public void syncToParent(){
+
+		if(parent == null || parent.toRemove())
+			return;
+		
+		Object[] variables = parent.getVariables();
+		
+		for(int i:syncVariables)
+			variables[i] = this.variables[i];
+		
+		parent.setVariables(variables);
+	}
 	
 	public int getBytecodeIndex(){
 		return bytecodeIndex;
