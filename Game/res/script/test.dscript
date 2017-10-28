@@ -19,8 +19,8 @@ while(true){
 }
 
 task bullet(dir){
-    set b = bullet(_rice, _red, centerX(), 140, dir, 2);
-    bullet(_rice, _blue, centerX(), 140, dir, 2);
-    b.setAdditive(test);
-    test = !test;
+    set b = bullet(_atom, _red, centerX(), 140, dir, 2);
+    /*b.setAdditive();
+    b.setAccel(.1);
+    b.setMaxSpd(5);*/
 }

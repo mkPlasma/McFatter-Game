@@ -29,6 +29,8 @@ public class ScriptLexer{
 	
 	private ArrayList<String> tokens;
 	
+	// In multi-line comment
+	boolean inComment = false;
 	
 	// Regexes
 	
@@ -153,7 +155,7 @@ public class ScriptLexer{
 				matcher.find();
 				
 				// Add token
-				tokens.add(lineNum + (token.contains(".") ? "l:" : "i:") + matcher.group(1));
+				if(!inComment) tokens.add(lineNum + (token.contains(".") ? "l:" : "i:") + matcher.group(1));
 				token = "";
 				
 				// Push back i as not to miss data
@@ -169,8 +171,22 @@ public class ScriptLexer{
 					token += line.charAt(++i);
 					
 					// Comments defined here because single / is an operator
-					if(token.matches("//"))
+					if(token.equals("//"))
 						return;
+					if(token.equals("/*")){
+						inComment = true;
+						return;
+					}
+					if(token.equals("*/")){
+						
+						if(!inComment){
+							compilationError("Invalid end of comment", line, lineNum);
+							return;
+						}
+						
+						inComment = false;
+						return;
+					}
 					
 					// If match fails with extra character, revert
 					if(!token.matches(rOperators) && !token.matches(rAssignments)){
@@ -179,7 +195,7 @@ public class ScriptLexer{
 					}
 				}
 				
-				tokens.add(lineNum + (token.matches(rOperators) ? "o" : "a") + ":" + token);
+				if(!inComment) tokens.add(lineNum + (token.matches(rOperators) ? "o" : "a") + ":" + token);
 				token = "";
 				
 				skipWhitespace = true;
@@ -187,7 +203,7 @@ public class ScriptLexer{
 			
 			// Add separators directly
 			else if(token.matches(rSeparators)){
-				tokens.add(lineNum + "s:" + token);
+				if(!inComment) tokens.add(lineNum + "s:" + token);
 				token = "";
 				
 				skipWhitespace = true;
@@ -233,7 +249,7 @@ public class ScriptLexer{
 					i++;
 				}
 				
-				tokens.add(lineNum + "t:" + s);
+				if(!inComment) tokens.add(lineNum + "t:" + s);
 				token = "";
 				
 				skipWhitespace = true;
@@ -254,22 +270,22 @@ public class ScriptLexer{
 					return;
 				}
 				
-				// Check if reserved word
-				if(isReservedWord(token2)){
-					if(token2.equals("true") || token2.equals("false"))
-						tokens.add(lineNum + "b:" + token2);
+				if(!inComment){
+					// Check if reserved word
+					if(isReservedWord(token2)){
+						if(token2.equals("true") || token2.equals("false"))
+							tokens.add(lineNum + "b:" + token2);
+						else
+							tokens.add(lineNum + "k:" + token2);
+					}
+					
+					// Add function
+					else if(p2.contains("("))
+						tokens.add(lineNum + "f:" + token2);
+					
+					// Add variable
 					else
-						tokens.add(lineNum + "k:" + token2);
-				}
-				
-				// Add function
-				else if(p2.contains("(")){
-					tokens.add(lineNum + "f:" + token2);
-				}
-				
-				// Add variable
-				else{
-					tokens.add(lineNum + "v:" + token2);
+						tokens.add(lineNum + "v:" + token2);
 				}
 				
 				// Clear token
@@ -399,10 +415,10 @@ public class ScriptLexer{
 							nextExpected = new String[]{"f"};
 							break;
 						case "return":
-							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", ";", "!", "-", "(", "{"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", ";", "!", "-", ".", "(", "{"};
 							break;
 						case "wait":
-							nextExpected = new String[]{"i", "l", "v", "f", ";", "-"};
+							nextExpected = new String[]{"i", "l", "v", "f", ";", "-", "."};
 							break;
 					}
 					break;
@@ -410,7 +426,7 @@ public class ScriptLexer{
 				// Operator
 				case 'o':
 					lastExpected = new String[]{"v", "f", "i", "l", ")", "]", "}"};
-					nextExpected = new String[]{"v", "f", "i", "l", "(", "{", "global", "-"};
+					nextExpected = new String[]{"v", "f", "i", "l", "(", "{", "global", "-", "."};
 					
 					switch(token){
 						case "!":
@@ -420,22 +436,22 @@ public class ScriptLexer{
 						
 						case "||": case "&&":
 							lastExpected = new String[]{"v", "f", "i", "l", "b", ")", "]", "}"};
-							nextExpected = new String[]{"v", "f", "i", "l", "b", "(", "{", "!", "-", "global"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "(", "{", "!", "-", ".", "global"};
 							break;
 						
 						case "==":
 							lastExpected = new String[]{"v", "f", "i", "l", "b", "t", ")", "]", "}"};
-							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "{", "!", "-", "global"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "{", "!", "-", ".", "global"};
 							break;
 					
 						case "+":
 							lastExpected = new String[]{"v", "f", "i", "l", "t", ")", "]", "}"};
-							nextExpected = new String[]{"v", "f", "i", "l", "t", "(", "{", "global"};
+							nextExpected = new String[]{"v", "f", "i", "l", "t", "(", "{", "-", ".", "global"};
 							break;
 					
 						case "-":
 							lastExpected = new String[]{"v", "o", "a", "f", "i", "l", ",", "(", ")", "[", "]", "}", "return", "wait", "in"};
-							nextExpected = new String[]{"v", "f", "i", "l", "(", "{", "global"};
+							nextExpected = new String[]{"v", "f", "i", "l", "(", "{", "-", ".", "global"};
 						break;
 					}
 					break;
@@ -443,15 +459,15 @@ public class ScriptLexer{
 				// Assignment operator
 				case 'a':
 					lastExpected = new String[]{"v", "]"};
-					nextExpected = new String[]{"v", "f", "i", "l", "b", ")", "-", "global"};
+					nextExpected = new String[]{"v", "f", "i", "l", "b", ")", "-", ".", "global"};
 					
 					switch(token){
 						case "=":
-							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "{", "(", "!", "-", "global"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "{", "(", "!", "-", ".", "global"};
 							break;
 					
 						case "+=":
-							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "-", "global"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "-", ".", "global"};
 							break;
 					
 						case "++": case "--":
@@ -466,7 +482,7 @@ public class ScriptLexer{
 					switch(token){
 						case "(":
 							lastExpected = new String[]{"o", "a", "f", "(", "{", "if", "while", "for", "return"};
-							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "{", "(", ")", "!", "-", "global"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "{", "(", ")", "!", "-", ".", "global"};
 							break;
 						case ")":
 							lastExpected = new String[]{"v", "i", "l", "b", "t", "}", "(", ")", "]"};
@@ -477,7 +493,7 @@ public class ScriptLexer{
 							break;
 						case "[":
 							lastExpected = new String[]{"v", "}", ")"};
-							nextExpected = new String[]{"v", "f", "i", "-", "global"};
+							nextExpected = new String[]{"v", "f", "i", "-", ".", "global"};
 							break;
 						case "]":
 							lastExpected = new String[]{"v", "i", ")", "]"};
@@ -485,11 +501,11 @@ public class ScriptLexer{
 							break;
 						case ",":
 							lastExpected = new String[]{"v", "i", "l", "b", "t", ")", "]", "}"};
-							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "!", "-", "global"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "!", "-", ".", "global"};
 							break;
 						case ".":
-							lastExpected = new String[]{"v", ")", "]"};
-							nextExpected = new String[]{"f"};
+							lastExpected = new String[]{"v", ")", "]", "o", "a", ",", "{", "(", "[", "in", "return", "wait"};
+							nextExpected = new String[]{"f", "i"};
 							break;
 						case ";":
 							lastExpected = new String[]{"v", "i", "l", "b", "t", "}", ")", "]", "++", "--", "break", "return", "wait"};
@@ -555,8 +571,10 @@ public class ScriptLexer{
 				
 				// Change to single negative number
 				if(getData(token).equals("-")){
-					if(lType == 'o' || lType == 'a' || lData.equals(",") || lData.equals("(") ||
-						lData.equals("[") || lData.equals("return") || lData.equals("wait") || lData.equals("in")){
+					if((i < tokens.size() + 1 && (getType(tokens.get(i + 1)) == 'i' || getType(tokens.get(i + 1)) == 'l' ||
+						getType(tokens.get(i + 1)) == 'v' || getType(tokens.get(i + 1)) == 'f' || getData(tokens.get(i + 1)).equals("("))) &&
+						(lType == 'o' || lType == 'a' || lData.equals(",") || lData.equals("(") ||
+						lData.equals("[") || lData.equals("return") || lData.equals("wait") || lData.equals("in"))){
 						
 						char type2 = getType(tokens.get(i + 1));
 						
@@ -572,6 +590,7 @@ public class ScriptLexer{
 							
 							tokens.set(i, t2 + '-' + t);
 							
+							nextExpected = null;
 							i--;
 						}
 						
@@ -581,6 +600,25 @@ public class ScriptLexer{
 							tokens.add(i, lineNum + "i:0");
 							i++;
 						}
+					}
+				}
+				
+				// Float values without leading zero
+				else if(getData(token).equals(".")){
+					if(i < tokens.size() + 1 && getType(tokens.get(i + 1)) == 'i' && lType != 'v' && !lData.equals(")") && !lData.equals("]")){
+						
+						// Remove .
+						tokens.remove(i);
+						
+						// Set value
+						String t = tokens.get(i);
+						String t2 = t.substring(0, t.indexOf(':') + 1).replace("i:", "l:");
+						t = getData(t);
+						
+						tokens.set(i, t2 + '.' + t);
+						
+						nextExpected = null;
+						i--;
 					}
 				}
 				
@@ -609,15 +647,25 @@ public class ScriptLexer{
 			else if(token.equals(")"))	brackets[1]--;
 			else if(token.equals("["))	brackets[2]++;
 			else if(token.equals("]"))	brackets[2]--;
-			else	 bracketsChanged = false;
+			else bracketsChanged = false;
 			
+			// Check for extra close brackets
 			if(bracketsChanged){
 				for(int j:brackets){
-					// If closed before opened or unclosed at end
-					if(j < 0)
+					if(j < 0){
 						compilationError("Extra close bracket", token, lineNum);
-					else if(i == tokens.size() - 1 && j > 0)
-						compilationError("Unclosed bracket", token, lineNum);
+						return;
+					}
+				}
+			}
+			
+			// Check for unclosed brackets
+			if(i == tokens.size() - 1){
+				for(int j:brackets){
+					if(j > 0){
+						compilationError("Unclosed bracket" + (j != 1 ? "s" : ""), token, lineNum);
+						return;
+					}
 				}
 			}
 		}
@@ -648,6 +696,7 @@ public class ScriptLexer{
 	}
 	
 	// Print tokens (debug)
+	@SuppressWarnings("unused")
 	private void printTokens(String[] tokens){
 		
 		System.out.println("\nPrinting lexical tokens of " + script.getFileName() + ":\n");
