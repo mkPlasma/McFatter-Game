@@ -6,9 +6,6 @@ package engine.script;
  * 		Purpose:	Compiles a DScript object into bytecode.
  * 		Notes:		
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				10/6
- * 		Changes:			Created
  */
 
 public class ScriptCompiler{

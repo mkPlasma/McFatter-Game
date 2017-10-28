@@ -1,8 +1,5 @@
 package engine.screens;
 
-import org.lwjgl.glfw.GLFW;
-
-import engine.KeyboardListener;
 import engine.graphics.Renderer;
 import engine.graphics.TextureCache;
 import engine.script.DScript;
@@ -17,9 +14,6 @@ import engine.script.ScriptController;
  * 		
  * 		Children:	Mission.java
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				10/17
- * 		Changes:			Added DScript
  */
 
 public abstract class GameStage{

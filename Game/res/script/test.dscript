@@ -3,24 +3,38 @@
 set dir;
 
 set r = 60;
-set c = 24;
+set c = 32;
 
-set test = false;
+set count = 0;
+set type = _laser;
 
 while(true){
     
     for(i in c){
-        bullet(dir + i*(360/c));
+        bullet(dir + i*(360/c), i);
     }
     
-    dir += 10;
+    dir += .01;
     
-    wait 10;
+    count++;
+    
+    if(count > 90){
+        count = 0;
+        type++;
+        
+        if(type > _laser_helix){
+            type = _laser;
+        }
+    }
+    
+    wait 1;
 }
 
-task bullet(dir){
-    set b = bullet(_atom, _red, centerX(), 140, dir, 2);
-    /*b.setAdditive();
-    b.setAccel(.1);
-    b.setMaxSpd(5);*/
+task bullet(dir, color){
+    set b = bullet(type, color, centerX(), 140, dir, 16);
+    b.setAdditive();
+    
+    wait 90;
+    
+    b.delete();
 }

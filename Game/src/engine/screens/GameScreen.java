@@ -12,9 +12,6 @@ import engine.graphics.TextureCache;
  * 		
  * 		Children:	MainScreen.java, MapScreen.java
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
  */
 
 public abstract class GameScreen{

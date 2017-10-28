@@ -114,13 +114,19 @@ public class Sprite{
 	// Creates texture coordinates
 	public void genTextureCoords(){
 		
-		int w = texture.getWidth();
-		int h = texture.getHeight();
+		float w = texture.getWidth();
+		float h = texture.getHeight();
 		
-		float left =	(float)x/(float)w;
-		float right =	((float)x + (float)width)/(float)w;
-		float top =		(float)y/(float)h;
-		float bottom =	((float)y + (float)height)/(float)h;
+		float left		= x/w;
+		float right		= (x + width)/w;
+		float top		= y/h;
+		float bottom	= (y + height)/h;
+		
+		// Correct texture bleeding
+		left	+= 0.5/w;
+		right	-= 0.5/w;
+		top		+= 0.5/h;
+		bottom	-= 0.5/h;
 		
 		texCoords = new float[]{
 			left,  top,

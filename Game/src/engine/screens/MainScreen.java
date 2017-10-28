@@ -22,16 +22,14 @@ import engine.graphics.Texture;
  * 		Notes:		Any gameplay or cutscenes will be
  * 					processed by this class.
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
  */
 
 public class MainScreen extends GameScreen{
 	
-	public static final int MAX_ENEMY_BULLETS = 2048,
+	public static final int MAX_ENEMY_BULLETS = 1024,
 							MAX_PLAYER_BULLETS = 128,
-							MAX_ENEMIES = 64;
+							MAX_ENEMIES = 64,
+							MAX_EFFECTS = 1024;
 	
 	private GameStage stage;
 	
@@ -45,8 +43,7 @@ public class MainScreen extends GameScreen{
 	
 	private boolean paused;
 	private int pauseTime = -30;
-	
-	private boolean reloadingScript = false, clearingBullets = false;
+	private boolean tickFrame;
 	
 	public MainScreen(Renderer r, TextureCache tc){
 		super(r, tc);
@@ -67,8 +64,9 @@ public class MainScreen extends GameScreen{
 		int tPlayer = tc.cache("player.png").getID();
 		int tBullets1 = tc.cache("bullets/01.png").getID();
 		int tBullets2 = tc.cache("bullets/02.png").getID();
+		int tEffects = tc.cache("effects.png").getID();
 		
-		r.initMainScreen(tPlayer, tBullets1, tBullets2);
+		r.initMainScreen(tPlayer, tBullets1, tBullets2, tEffects);
 		
 		// Temporary test
 		stage = new Mission("Game/res/script/test.dscript", r, tc);
@@ -87,22 +85,31 @@ public class MainScreen extends GameScreen{
 		r.updatePlayer(player, rTime);
 		r.updateEnemyBullets(enemyBullets, rTime);
 		r.updatePlayerBullets(playerBullets, rTime);
+		r.updateEffects(effects, rTime);
 		
 		r.render();
 		
-		if(!paused)
+		if(!paused || tickFrame)
 			rTime++;
 	}
 	
 	public void update(){
 		
+		// Pause
 		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_ESCAPE) && time > pauseTime + 30){
 			paused = !paused;
 			pauseTime = time;
 		}
 		
-		if(!paused)
+		// Tick frame with P
+		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_P))
+			tickFrame = true;
+		
+		if(!paused || tickFrame){
 			updateGameStage();
+			tickFrame = false;
+		}
+		
 		
 		time++;
 	}
@@ -113,10 +120,10 @@ public class MainScreen extends GameScreen{
 		
 		if(stage instanceof Mission){
 			Mission ms = (Mission)stage;
-			
+
+			updateEffects();
 			updateBullets();
 			updateEnemies();
-			updateEffects();
 
 			addEnemies(ms.getEnemies());
 			addEnemyBullets(ms.getBullets());
@@ -126,37 +133,30 @@ public class MainScreen extends GameScreen{
 		}
 		
 		// Reload script with Alt+R
-		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyDown(GLFW.GLFW_KEY_R)){
-			if(!reloadingScript){
-				reloadingScript = true;
-				
-				stage.reloadScript();
-				
-				for(Bullet b:enemyBullets)
-					b.onDestroy();
-			}
+		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_R)){
+			stage.reloadScript();
+			
+			for(Bullet b:enemyBullets)
+				b.onDestroy();
 		}
-		else
-			reloadingScript = false;
 		
 		// Clear bullets with Alt+C
-		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && (KeyboardListener.isKeyDown(GLFW.GLFW_KEY_C))){
-			if(!clearingBullets){
-				
-				System.out.println("Cleared screen!");
-				clearingBullets = true;
-				
-				for(Bullet b:enemyBullets)
-					b.onDestroy();
-			}
+		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && (KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_C))){
+			System.out.println("Cleared screen!");
+			
+			for(Bullet b:enemyBullets)
+				b.onDestroy();
 		}
-		else
-			clearingBullets = false;
 	}
 	
 	private void updateBullets(){
 		
 		for(int i = 0; i < enemyBullets.size(); i++){
+			
+			Effect e = enemyBullets.get(i).getEffect();
+			
+			if(e != null)
+				effects.add(e);
 			
 			if(enemyBullets.get(i).isDeleted()){
 				enemyBullets.remove(i);
@@ -304,5 +304,16 @@ public class MainScreen extends GameScreen{
 		
 		while(enemies.size() >= MAX_ENEMIES)
 			enemies.remove(enemies.size() - 1);
+	}
+	
+	public void addEffect(Effect effect){
+		
+		if(effect == null || effects.size() >= MAX_EFFECTS)
+			return;
+		
+		effects.add(effect);
+		
+		if(effects.size() >= MAX_EFFECTS)
+			effects.remove(effects.size() - 1);
 	}
 }

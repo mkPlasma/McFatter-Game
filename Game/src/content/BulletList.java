@@ -8,17 +8,12 @@ import engine.graphics.TextureCache;
 /*
  * 		BulletList.java
  * 		
- * 		Purpose:	Generates BulletFrame objects for creating bullet patterns.
- * 		Notes:		Will be replaced by external definitions.
+ * 		Purpose:	Generates BulletFrame objects for bullet presets.
+ * 		Notes:		
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
  */
 
 public class BulletList{
-	
-	// Generates and caches BulletFrame objects
 	
 	public static final byte
 		TYPE_ORB			= 0,
@@ -64,22 +59,6 @@ public class BulletList{
 	};
 	
 	public static final byte
-		COLOR_RED			= 0,
-		COLOR_DARK_RED		= 1,
-		COLOR_ORANGE		= 2,
-		COLOR_YELLOW		= 3,
-		COLOR_GOLD			= 4,
-		COLOR_GREEN			= 5,
-		COLOR_DARK_GREEN	= 6,
-		COLOR_CYAN			= 7,
-		COLOR_LIGHT_BLUE	= 8,
-		COLOR_BLUE			= 9,
-		COLOR_DARK_BLUE		= 10,
-		COLOR_PURPLE		= 11,
-		COLOR_PINK			= 12,
-		COLOR_WHITE			= 13,
-		COLOR_GRAY			= 14,
-		COLOR_BLACK			= 15,
 		COLOR_RED_D			= 16,
 		COLOR_DARK_RED_D	= 17,
 		COLOR_ORANGE_D		= 18,
@@ -96,46 +75,16 @@ public class BulletList{
 		COLOR_WHITE_D		= 29,
 		COLOR_GRAY_D		= 30,
 		COLOR_BLACK_D		= 31;
-
-	public static final String[] colors = {
-		"red",
-		"dark_red",
-		"orange",
-		"yellow",
-		"gold",
-		"green",
-		"dark_green",
-		"cyan",
-		"light_blue",
-		"blue",
-		"dark_blue",
-		"purple",
-		"pink",
-		"white",
-		"gray",
-		"black"
-	};
 	
-	// Cache and index of current bullet frame cache
-	private BulletFrame[] cache = new BulletFrame[256];
-	private int index;
+	private TextureCache tc;
 	
-	private TextureCache spriteCache;
-	
-	public BulletList(TextureCache spriteCache){
-		this.spriteCache = spriteCache;
+	public BulletList(TextureCache tc){
+		this.tc = tc;
 	}
 	
 	public BulletFrame get(int type, int color){
-		
-		for(int i = 0; i < index; i++)
-			if(cache[i].getType() == type && cache[i].getColor() == color)
-				return cache[i];
-		
-		cache[index] = new BulletFrame(type, color, getSprite(type, color), getHitboxSize(type), getHBLengthCrop(type), getSpriteAlign(type), getSpriteRotation(type), getSpriteRotationBySpd(type));
-		index++;
-		
-		return cache[index - 1];
+		return new BulletFrame(type, color, getSprite(type, color), getHitboxSize(type), getHBLengthCrop(type),
+			getSpriteAlign(type), getSpriteRotation(type), getSpriteRotationBySpd(type));
 	}
 	
 	public Sprite getSprite(int type, int color){
@@ -180,7 +129,7 @@ public class BulletList{
 				sprite.addAnimation(new Animation(Animation.ANIM_FLIP_X, 7*spd, false, null));
 		}
 		
-		spriteCache.loadSprite(sprite);
+		tc.loadSprite(sprite);
 		
 		return sprite;
 	}

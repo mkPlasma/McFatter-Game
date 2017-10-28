@@ -2,9 +2,17 @@ package engine.script;
 
 import java.util.ArrayList;
 
-import content.BulletList;
+import content.FrameList;
 import engine.entities.Bullet;
 import engine.entities.Player;
+
+/*
+ * 		ScriptController.java
+ * 		
+ * 		Purpose:	Runs DScript and connects to other engine components.
+ * 		Notes:		Holds script branches and adds generated bullets.
+ * 		
+ */
 
 public class ScriptController{
 	
@@ -80,8 +88,8 @@ public class ScriptController{
 		runner.setPlayer(player);
 	}
 	
-	public void setBulletList(BulletList bulletList){
-		runner.setBulletList(bulletList);
+	public void setFrameList(FrameList frameList){
+		runner.setFrameList(frameList);
 	}
 	
 	public ArrayList<Bullet> getBullets(){

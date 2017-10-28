@@ -10,9 +10,6 @@ import engine.graphics.Sprite;
  * 		
  * 		Children: Player.java, MovableEntity.java
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
  */
 
 public abstract class GameEntity{
@@ -41,8 +38,6 @@ public abstract class GameEntity{
 		visible = true;
 	}
 	
-	public abstract void onCreate();
-	public abstract void onDestroy();
 	public abstract void update();
 	
 	

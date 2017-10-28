@@ -10,11 +10,8 @@ import engine.entities.MovableEntity;
  * 		ScriptFunctions.java
  * 		
  * 		Purpose:	DScript reference and bytecode functions.
- * 		Notes:		WIP
+ * 		Notes:		
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				current
- * 		Changes:			
  */
 
 public class ScriptFunctions{

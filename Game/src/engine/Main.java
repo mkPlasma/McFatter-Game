@@ -5,10 +5,7 @@ package engine;
  * 		
  * 		Purpose:	Starts the game.
  * 		Notes:		Should not need to be modified. Ask Daniel before modifying this file.
- * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
+ * 			
  */
 
 public class Main{

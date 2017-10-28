@@ -1,13 +1,20 @@
 package engine.entities;
 
-import static engine.KeyboardListener.*;
-import static org.lwjgl.glfw.GLFW.*;
+import static engine.KeyboardListener.isKeyDown;
+import static engine.KeyboardListener.isKeyUp;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_SHIFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_X;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_Z;
 
 import java.util.ArrayList;
 
-import content.BulletList;
+import content.FrameList;
 import engine.graphics.Sprite;
-import engine.graphics.TextureCache;
 
 /*
  * 		Player.java
@@ -18,9 +25,6 @@ import engine.graphics.TextureCache;
  * 					
  * 					Also needs upgrade functionality.
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
  */
 
 public class Player extends GameEntity{
@@ -43,17 +47,18 @@ public class Player extends GameEntity{
 	
 	// Temporary
 	private Sprite sprite;
+	private FrameList frameList;
 	
-	public Player(float x, float y, BulletFrame shot){
+	public Player(float x, float y, BulletFrame shot, FrameList frameList){
 		super(null, x, y);
 		
 		this.shot = shot;
 		
 		bullets = new ArrayList<Bullet>();
 		
+		// temp
 		sprite = new Sprite("player.png", 0, 0, 64, 64);
-		
-		visible = true;
+		this.frameList = frameList;
 		
 		onCreate();
 	}
@@ -129,8 +134,8 @@ public class Player extends GameEntity{
 	}
 	
 	private void fire(){
-		bullets.add(new Bullet(shot, x - 10, y - 5, 270, 15, 500, 5));
-		bullets.add(new Bullet(shot, x + 10, y - 5, 270, 15, 500, 5));
+		bullets.add(new Bullet(shot, x - 10, y - 5, 270, 15, 500, 5, frameList));
+		bullets.add(new Bullet(shot, x + 10, y - 5, 270, 15, 500, 5, frameList));
 		shotCooldown = 4;
 	}
 	

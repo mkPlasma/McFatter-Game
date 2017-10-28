@@ -8,11 +8,8 @@ import static engine.script.ScriptFunctions.*;
  * 		BytecodePrinter.java
  * 		
  * 		Purpose:	Prints compiled DScript bytecode.
- * 		Notes:		WIP
+ * 		Notes:		For debug use
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				10/2
- * 		Changes:			
  */
 
 public class BytecodePrinter{

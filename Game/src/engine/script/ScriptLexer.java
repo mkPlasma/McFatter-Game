@@ -15,9 +15,6 @@ import static engine.script.ScriptFunctions.*;
  * 		Purpose:	Parses DScript script into lexical tokens.
  * 		Notes:		Sets up script for parsing and checks most syntax errors.
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				10/6
- * 		Changes:			Finished
  */
 
 public class ScriptLexer{

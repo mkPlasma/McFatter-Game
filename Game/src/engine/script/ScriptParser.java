@@ -9,16 +9,14 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 import content.BulletList;
+import content.FrameList;
 
 /*
  * 		ScriptParser.java
  * 		
  * 		Purpose:	Parses DScript tokens into bytecode.
- * 		Notes:		WIP
+ * 		Notes:		
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				current
- * 		Changes:			
  */
 
 public class ScriptParser{
@@ -160,11 +158,11 @@ public class ScriptParser{
 			variables.add("0c:_" + s);
 		
 		// Bullet colors
-		for(String s:BulletList.colors)
+		for(String s:FrameList.colors)
 			variables.add("0c:_" + s);
 		
 		// Dark colors
-		for(String s:BulletList.colors)
+		for(String s:FrameList.colors)
 			variables.add("0c:_" + s + "_d");
 	}
 	

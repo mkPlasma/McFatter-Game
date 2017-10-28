@@ -7,9 +7,6 @@ package engine;
  * 		Notes:		May be replaced by external definitions.
  * 					Will probably still keep variables after loading them.
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				9/24
- * 		Changes:			Removed hardwareAcceleration, unnecessary
  */
 public class Settings{
 	

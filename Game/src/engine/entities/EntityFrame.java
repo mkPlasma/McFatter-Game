@@ -11,9 +11,6 @@ import engine.graphics.Sprite;
  * 		
  * 		Children: 	BulletFrame.java, EnemyFrame.java
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
  */
 
 public class EntityFrame{
@@ -27,14 +24,12 @@ public class EntityFrame{
 	
 	// Rotation
 	private final float spriteRotation;
-	private final boolean spriteRotationBySpd;
 	
-	public EntityFrame(int type, Sprite sprite, boolean spriteAlign, float spriteRotation, boolean spriteRotationBySpd){
+	public EntityFrame(int type, Sprite sprite, boolean spriteAlign, float spriteRotation){
 		this.type = type;
 		this.sprite = sprite;
 		this.spriteAlign = spriteAlign;
 		this.spriteRotation = spriteRotation;
-		this.spriteRotationBySpd = spriteRotationBySpd;
 	}
 	
 	public int getType(){
@@ -51,9 +46,5 @@ public class EntityFrame{
 	
 	public float getSpriteRotation(){
 		return spriteRotation;
-	}
-	
-	public boolean getSpriteRotationBySpd(){
-		return spriteRotationBySpd;
 	}
 }

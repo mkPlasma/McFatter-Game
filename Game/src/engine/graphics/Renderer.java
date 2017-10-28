@@ -3,8 +3,7 @@ package engine.graphics;
 import java.util.ArrayList;
 
 import engine.entities.Bullet;
-import engine.entities.Enemy;
-import engine.entities.GameEntity;
+import engine.entities.Effect;
 import engine.entities.Player;
 import engine.screens.MainScreen;
 
@@ -41,7 +40,7 @@ public class Renderer{
 	}
 	
 	// Initialize rendering for MainScreen
-	public void initMainScreen(int playerTex, int bulletTex1, int bulletTex2){
+	public void initMainScreen(int playerTex, int bulletTex1, int bulletTex2, int effectTex){
 		
 		// Add in order of rendering
 		
@@ -56,6 +55,9 @@ public class Renderer{
 		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS*12, bulletTex1, false, true));
 		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS*12, bulletTex2, false, false));
 		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS*12, bulletTex2, false, true));
+		
+		// Effects
+		renderBatches.add(new RenderBatch(MainScreen.MAX_EFFECTS*12, effectTex, false, true));
 		
 		// Border
 		Sprite border = new Sprite("border.png", 0, 0, 1280, 960);
@@ -106,6 +108,10 @@ public class Renderer{
 	
 	public void updatePlayerBullets(ArrayList<Bullet> bullets, int time){
 		renderBatches.get(0).updateWithEntities(bullets, time);
+	}
+	
+	public void updateEffects(ArrayList<Effect> effects, int time){
+		renderBatches.get(6).updateWithEntities(effects, time);
 	}
 	
 	public void render(){

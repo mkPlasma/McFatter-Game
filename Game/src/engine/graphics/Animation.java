@@ -113,6 +113,7 @@ public class Animation{
 		// Multiplies the animation effect
 		int m = (int)Math.floor(time/tInc);
 		
+		
 		// Rotation
 		if(type == ANIM_ROTATION || type == ANIM_ROTATION_BY_SPD){
 			if(type == ANIM_ROTATION_BY_SPD)
@@ -135,7 +136,6 @@ public class Animation{
 				scx = args[2];
 			
 			spr.setScaleX(scx);
-			return;
 		}
 		
 		// Scale Y

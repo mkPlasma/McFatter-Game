@@ -10,9 +10,6 @@ package engine.entities;
  * 					Instead, it is simply an entity that can move around
  * 					and be shot by the player.
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
  */
 
 public class Enemy extends MovableEntity{

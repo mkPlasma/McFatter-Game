@@ -3,6 +3,15 @@ package engine.script;
 import java.util.ArrayList;
 import java.util.Stack;
 
+/*
+ * 		ScriptBranch.java
+ * 		
+ * 		Purpose:	Controls execution of DScript when running.
+ * 		Notes:		Each task in DScript creates a new branch when run.
+ * 					Branches are deleted automatically when the task ends.
+ * 		
+ */
+
 public class ScriptBranch{
 	
 	// Parent to sync variables with

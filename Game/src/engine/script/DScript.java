@@ -4,11 +4,8 @@ package engine.script;
  * 		DScript.java
  * 		
  * 		Purpose:	Holds DScript bytecode.
- * 		Notes:		WIP
+ * 		Notes:		
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				10/2
- * 		Changes:			
  */
 
 public class DScript{

@@ -20,9 +20,6 @@ import java.nio.IntBuffer;
  * 		Purpose:	Game core. Initializes game window and runs logic and rendering code.
  * 		Notes:		Should not need to be modified. Ask Daniel before modifying this file.
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
  */
 
 public class GameThread implements Runnable{

@@ -9,9 +9,6 @@ package engine.entities;
  * 		
  * 		Children: Bullet.java, Enemy.java, Effect.java
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
  */
 
 public abstract class MovableEntity extends GameEntity{

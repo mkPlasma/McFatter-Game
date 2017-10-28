@@ -10,6 +10,14 @@ import java.nio.file.Paths;
 
 import org.lwjgl.BufferUtils;
 
+/*
+ * 		IOFunctions.java
+ * 		
+ * 		Purpose:	Handles file reading and writing.
+ * 		Notes:		
+ * 		
+ */
+
 public class IOFunctions{
 	
 	public static String readToString(String path) throws IOException{

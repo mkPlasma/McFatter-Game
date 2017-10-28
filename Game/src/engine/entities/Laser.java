@@ -8,9 +8,6 @@ import engine.graphics.Renderer;
  * 		Purpose:	Solid laser object.
  * 		Notes:		Implement curvy lasers?
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
  */
 
 public class Laser extends Bullet{
@@ -20,7 +17,7 @@ public class Laser extends Bullet{
 	private float scx, scy;
 	
 	public Laser(){
-		super(null, 0, 0, 0, 0);
+		super(null, 0, 0, 0, 0, null);
 	}
 	
 	/*

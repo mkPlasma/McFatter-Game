@@ -1,5 +1,7 @@
 package engine.entities;
 
+import content.EffectList;
+import content.FrameList;
 import engine.graphics.Sprite;
 
 /*
@@ -10,9 +12,6 @@ import engine.graphics.Sprite;
  * 		
  * 		Children:	Laser.java
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
  */
 
 public class Bullet extends MovableEntity{
@@ -26,23 +25,31 @@ public class Bullet extends MovableEntity{
 	// How far outside screen to despawn
 	protected int despawnRange = 32;
 	
+	private final FrameList frameList;
+	
+	// Despawn/spawn effect
+	private Effect effect;
+	
 	// Customizable bullet sprite
 	private Sprite sprite;
 	private boolean spriteCloned;
 	
-	public Bullet(BulletFrame frame, float x, float y, float dir, float spd){
+	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, FrameList frameList){
 		super(frame, x, y, dir, spd);
 		sprite = frame.getSprite();
+		
+		this.frameList = frameList;
 		
 		onCreate();
 	}
 	
-	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, int damage, int dmgReduce){
+	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, int damage, int dmgReduce, FrameList frameList){
 		super(frame, x, y, dir, spd);
 		sprite = frame.getSprite();
 		
 		this.damage = damage;
 		this.dmgReduce = dmgReduce;
+		this.frameList = frameList;
 		
 		onCreate();
 	}
@@ -53,6 +60,7 @@ public class Bullet extends MovableEntity{
 	
 	public void onDestroy(){
 		deleted = true;
+		effect = new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, ((BulletFrame)frame).getColor()%16), x, y);
 	}
 	
 	public void update(){
@@ -112,5 +120,9 @@ public class Bullet extends MovableEntity{
 	
 	public boolean collisionsEnabled(){
 		return collisions;
+	}
+	
+	public Effect getEffect(){
+		return effect;
 	}
 }

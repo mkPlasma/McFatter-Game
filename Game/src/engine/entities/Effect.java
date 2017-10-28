@@ -4,37 +4,23 @@ package engine.entities;
  * 		Effect.java
  * 		
  * 		Purpose:	Effect objects, drawn to screen
- * 		Notes:		Not completely implemented, effects do
- * 					not render and cannot be generated easily.
+ * 		Notes:		
  * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
  */
 
 public class Effect extends MovableEntity{
 	
-	public Effect(EntityFrame frame, float x, float y){
+	private int lifetime;
+	
+	public Effect(EffectFrame frame, float x, float y){
 		super(frame, x, y);
-		visible = true;
+		lifetime = frame.getLifetime();
 	}
 	
-	public void onCreate(){
+	public void update(){
+		super.update();
 		
+		if(time >= lifetime)
+			deleted = true;
 	}
-	
-	public void onDestroy(){
-		deleted = true;
-	}
-	
-	public void render(){
-		if(!visible)
-			return;
-		
-		if(frame.spriteAlign())
-			frame.getSprite().rotate(dir + 90);
-		
-		//Renderer.render(frame.getSprite(), time, x, y);
-	}
-	
 }
