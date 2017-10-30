@@ -280,11 +280,11 @@ public class RenderBatch{
 			if(uTFM){
 				transforms[i*3]		= s.getScaleX();
 				transforms[i*3 + 1]	= s.getScaleY();
-				transforms[i*3 + 2]	= r;
+				transforms[i*3 + 2]	= (float)Math.toRadians(r);
 			}
 			
 			if(uALP)
-				alphas[i] = 0.25f;
+				alphas[i] = s.getAlpha();
 		}
 		
 		updateVBOs(vertices, texCoords, transforms, alphas);
