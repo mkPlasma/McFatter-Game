@@ -136,7 +136,7 @@ public class ScriptFunctions{
 		// General
 		"print:1",
 		
-		"getScriptTime:0",
+		"scriptTime:0",
 		
 		"centerX:0",
 		"centerY:0",

@@ -959,7 +959,7 @@ public class ScriptParser{
 										}
 									}
 									
-									if(statesPeek("exp") && task){
+									if(funcIndex != -1 && statesPeek("exp") && task){
 										compilationError("Task cannot return a value", lineNum);
 										return;
 									}

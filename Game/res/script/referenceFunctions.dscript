@@ -8,7 +8,7 @@
 print(a);
 
 // How long script has been running (frames)
-getScriptTime();
+scriptTime();
 
 // Center of screen position
 centerX();// 224
@@ -164,9 +164,9 @@ b.getFrame();
 
 // Additive rendering
 b.setAdditive(a);
+b.isAdditive();
 // Set to true
 b.setAdditive();
-b.isAdditive();
 
 
 

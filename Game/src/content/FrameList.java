@@ -51,8 +51,8 @@ public class FrameList{
 		"black"
 	};
 	
-	private BulletList bulletList;
-	private EffectList effectList;
+	public final BulletList bulletList;
+	public final EffectList effectList;
 	
 	public FrameList(TextureCache tc){
 		bulletList = new BulletList(tc);

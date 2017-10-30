@@ -3,10 +3,9 @@ package engine.graphics;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL32.*;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import engine.IOFunctions;
 
@@ -23,17 +22,19 @@ import engine.IOFunctions;
 
 public class ShaderProgram{
 	
-	int program, vShader, fShader;
+	private final int program, vShader, fShader, gShader;
 	
-	public ShaderProgram(String vertShader, String fragShader){
+	public ShaderProgram(String vertShader, String fragShader, String geomShader){
 		
 		vShader = compileShader(vertShader + ".vs", GL_VERTEX_SHADER);
 		fShader = compileShader(fragShader + ".fs", GL_FRAGMENT_SHADER);
+		gShader = compileShader(geomShader + ".gs", GL_GEOMETRY_SHADER);
 		
 		program = glCreateProgram();
-
+		
 		glAttachShader(program, vShader);
 		glAttachShader(program, fShader);
+		glAttachShader(program, gShader);
 		
 		glBindFragDataLocation(program, 0, "fragColor");
 	}
@@ -55,26 +56,11 @@ public class ShaderProgram{
 
 		glDetachShader(program, vShader);
 		glDetachShader(program, fShader);
+		glDetachShader(program, gShader);
 		glDeleteShader(vShader);
 		glDeleteShader(fShader);
+		glDeleteShader(gShader);
 	}
-	
-	public int getUniformLocation(String uni){
-		return glGetUniformLocation(program, uni);
-	}
-	
-	public void use(){
-		glUseProgram(program);
-	}
-	
-	public void destroy(){
-		glDeleteProgram(program);
-	}
-	
-	public int getProgram(){
-		return program;
-	}
-	
 	
 	private int compileShader(String path, int type){
 		
@@ -95,11 +81,26 @@ public class ShaderProgram{
 		String infoLog = glGetShaderInfoLog(shader, glGetShaderi(shader, GL_INFO_LOG_LENGTH));
 		
 		if(glGetShaderi(shader, GL_COMPILE_STATUS) == GL_FALSE){
-			String name = type == GL_VERTEX_SHADER ? "vertex" : "fragment";
-			System.err.println("Failed to compile " + name + " shader:\n" + infoLog);
+			System.err.println(infoLog);
 			System.exit(1);
 		}
 		
 		return shader;
+	}
+	
+	public int getUniformLocation(String uni){
+		return glGetUniformLocation(program, uni);
+	}
+	
+	public void use(){
+		glUseProgram(program);
+	}
+	
+	public void destroy(){
+		glDeleteProgram(program);
+	}
+	
+	public int getProgram(){
+		return program;
 	}
 }

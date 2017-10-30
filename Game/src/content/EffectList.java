@@ -16,7 +16,8 @@ import engine.graphics.TextureCache;
 public class EffectList{
 
 	public static final byte
-		TYPE_CLOUD			= 0;
+		TYPE_CLOUD			= 0,
+		TYPE_CLOUD_REVERSE	= 1;
 	
 	private static final int animSpd = 1;
 	
@@ -45,7 +46,6 @@ public class EffectList{
 		
 		// Animations
 		sprite.addAnimation(new Animation(Animation.ANIM_SET_SPRITE, animSpd, false, new float[]{sx, sy, 0, 32, 8, sx, sy}));
-		sprite.addAnimation(new Animation(Animation.ANIM_ALPHA, 1, false, new float[]{-1f, 0, 1}));
 		
 		tc.loadSprite(sprite);
 		

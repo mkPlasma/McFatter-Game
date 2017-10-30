@@ -7,6 +7,8 @@ import engine.entities.Effect;
 import engine.entities.Player;
 import engine.screens.MainScreen;
 
+import static engine.graphics.RenderBatch.*;
+
 /*
  * 		Renderer.java
  * 		
@@ -24,14 +26,20 @@ public class Renderer{
 	
 	public void init(){
 		// Init shaders
-		basicShader = new ShaderProgram("basic", "basic");
+		basicShader = new ShaderProgram("quad", "basic", "quad");
 		basicShader.bindAttrib(0, "position");
-		basicShader.bindAttrib(1, "texCoords");
+		basicShader.bindAttrib(1, "size");
+		basicShader.bindAttrib(2, "texCoords");
+		basicShader.bindAttrib(3, "transforms");
+		basicShader.bindAttrib(4, "alpha");
 		basicShader.link();
 		
-		illumiShader = new ShaderProgram("basic", "illumi");
+		illumiShader = new ShaderProgram("quad", "basic", "quad");
 		illumiShader.bindAttrib(0, "position");
-		illumiShader.bindAttrib(1, "texCoords");
+		illumiShader.bindAttrib(1, "size");
+		illumiShader.bindAttrib(2, "texCoords");
+		illumiShader.bindAttrib(3, "transforms");
+		illumiShader.bindAttrib(4, "alpha");
 		illumiShader.link();
 		
 		renderBatches = new ArrayList<RenderBatch>();
@@ -45,25 +53,25 @@ public class Renderer{
 		// Add in order of rendering
 		
 		// Player bullets
-		renderBatches.add(new RenderBatch(MainScreen.MAX_PLAYER_BULLETS*12, bulletTex1, false, false));
+		renderBatches.add(new RenderBatch(MainScreen.MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL, false));
 		
 		// Player
-		renderBatches.add(new RenderBatch(12, playerTex, true, false));
+		renderBatches.add(new RenderBatch(1, 64, playerTex, UPDATE_VBO, false));
 		
 		// Enemy bullets
-		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS*12, bulletTex1, false, false));
-		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS*12, bulletTex1, false, true));
-		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS*12, bulletTex2, false, false));
-		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS*12, bulletTex2, false, true));
+		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false));
+		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true));
+		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, false));
+		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, true));
 		
 		// Effects
-		renderBatches.add(new RenderBatch(MainScreen.MAX_EFFECTS*12, effectTex, false, true));
+		renderBatches.add(new RenderBatch(MainScreen.MAX_EFFECTS, 32, effectTex, UPDATE_ALL, false));
 		
 		// Border
 		Sprite border = new Sprite("border.png", 0, 0, 1280, 960);
 		border.load();
 		
-		RenderBatch borderBatch = new RenderBatch(12, border.getTexture().getID(), true, false);
+		RenderBatch borderBatch = new RenderBatch(1, border.getTexture().getID(), 1280, 960, UPDATE_NONE, false);
 		borderBatch.updateManual(320, 240, 1280, 960, border.getTextureCoords());
 		
 		renderBatches.add(borderBatch);
@@ -115,8 +123,16 @@ public class Renderer{
 	}
 	
 	public void render(){
-		for(RenderBatch rb:renderBatches)
+		for(int i = 0; i < renderBatches.size(); i++){
+			
+			RenderBatch rb = renderBatches.get(i);
+			
+			// Don't bind texture again if last batch had same texture
+			if(i == 0 || rb.getTextureID() != renderBatches.get(i - 1).getTextureID())
+				rb.bindTexture();
+			
 			rb.render();
+		}
 	}
 	
 	// Delete vao/buffers

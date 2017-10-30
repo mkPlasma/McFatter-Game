@@ -26,10 +26,10 @@ import engine.graphics.Texture;
 
 public class MainScreen extends GameScreen{
 	
-	public static final int MAX_ENEMY_BULLETS = 1024,
+	public static final int MAX_ENEMY_BULLETS = 2048,
 							MAX_PLAYER_BULLETS = 128,
 							MAX_ENEMIES = 64,
-							MAX_EFFECTS = 1024;
+							MAX_EFFECTS = 2048;
 	
 	private GameStage stage;
 	
@@ -44,6 +44,8 @@ public class MainScreen extends GameScreen{
 	private boolean paused;
 	private int pauseTime = -30;
 	private boolean tickFrame;
+	
+	private boolean clearScreen;
 	
 	public MainScreen(Renderer r, TextureCache tc){
 		super(r, tc);
@@ -104,6 +106,18 @@ public class MainScreen extends GameScreen{
 		// Tick frame with P
 		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_P))
 			tickFrame = true;
+
+		// Reload script with Alt+R
+		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_R)){
+			stage.reloadScript();
+			clearScreen = true;
+		}
+		
+		// Clear bullets with Alt+C
+		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && (KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_C))){
+			System.out.println("Cleared screen!");
+			clearScreen = true;
+		}
 		
 		if(!paused || tickFrame){
 			updateGameStage();
@@ -115,6 +129,12 @@ public class MainScreen extends GameScreen{
 	}
 	
 	private void updateGameStage(){
+		
+		if(clearScreen){
+			for(Bullet b:enemyBullets)
+				b.onDestroy();
+			clearScreen = false;
+		}
 		
 		stage.update();
 		
@@ -131,28 +151,13 @@ public class MainScreen extends GameScreen{
 			
 			checkCollisions();
 		}
-		
-		// Reload script with Alt+R
-		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_R)){
-			stage.reloadScript();
-			
-			for(Bullet b:enemyBullets)
-				b.onDestroy();
-		}
-		
-		// Clear bullets with Alt+C
-		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && (KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_C))){
-			System.out.println("Cleared screen!");
-			
-			for(Bullet b:enemyBullets)
-				b.onDestroy();
-		}
 	}
 	
 	private void updateBullets(){
 		
 		for(int i = 0; i < enemyBullets.size(); i++){
 			
+			// Add bullet effect
 			Effect e = enemyBullets.get(i).getEffect();
 			
 			if(e != null)

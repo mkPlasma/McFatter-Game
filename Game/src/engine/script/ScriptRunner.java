@@ -1033,7 +1033,7 @@ public class ScriptRunner{
 				System.out.println(script.getFileName() + ": " + o1);
 				return;
 			
-			case "getScriptTime":
+			case "scriptTime":
 				returnValue = time;
 				return;
 
@@ -1336,11 +1336,13 @@ public class ScriptRunner{
 				return;
 			
 			case "setType":
-				bl.setFrame(frameList.getBullet(i2, bl.getFrame().getColor()));
+				bl.setType(i2);
+				bl.refreshSprite();
 				return;
 			
 			case "setColor":
-				bl.setFrame(frameList.getBullet(bl.getFrame().getType(), i2));
+				bl.setColor(i2);
+				bl.refreshSprite();
 				return;
 			
 			case "setFrame":{
@@ -1366,6 +1368,7 @@ public class ScriptRunner{
 				}
 				
 				bl.setFrame(frameList.getBullet((int)ar.get(0), (int)ar.get(1)));
+				bl.initFrameProperties();
 				return;
 			}
 			

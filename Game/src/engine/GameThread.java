@@ -87,6 +87,7 @@ public class GameThread implements Runnable{
 		
 		
 		GL.createCapabilities();
+		glClearColor(0, 0, 0, 0);
 		
 		screenManager = new ScreenManager();
 		screenManager.init();
@@ -107,8 +108,6 @@ public class GameThread implements Runnable{
 	}
 	
 	private void loop(){
-		
-		glClearColor(0, 0, 0, 0);
 		
 		// Timing
 		double lastLoopTime = System.nanoTime();

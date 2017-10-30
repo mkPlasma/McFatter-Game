@@ -50,17 +50,17 @@ public class Sprite{
 		
 		texture = spr.getTexture();
 		
-		x = spr.getX();
-		y = spr.getY();
-		width = spr.getWidth();
-		height = spr.getHeight();
+		x		= spr.getX();
+		y		= spr.getY();
+		width	= spr.getWidth();
+		height	= spr.getHeight();
 		
 		texCoords = spr.getTextureCoords();
 		
-		rotation = spr.getRotation();
-		scaleX = spr.getScaleX();
-		scaleY = spr.getScaleY();
-		alpha = spr.getAlpha();
+		rotation	= spr.getRotation();
+		scaleX		= spr.getScaleX();
+		scaleY		= spr.getScaleY();
+		alpha		= spr.getAlpha();
 		
 		anim = spr.getAnimations();
 	}
@@ -129,10 +129,7 @@ public class Sprite{
 		bottom	-= 0.5/h;
 		
 		texCoords = new float[]{
-			left,  top,
-			right, top,
-			right, bottom,
-			left,  bottom
+			left, top, right, bottom
 		};
 	}
 	
@@ -217,11 +214,11 @@ public class Sprite{
 	}
 	
 	public void setTextureCoords(float[] texCoords){
-		this.texCoords = texCoords;
+		this.texCoords = texCoords.clone();
 	}
 	
 	public float[] getTextureCoords(){
-		return texCoords.clone();
+		return texCoords;
 	}
 	
 	public void setTexture(Texture texture){

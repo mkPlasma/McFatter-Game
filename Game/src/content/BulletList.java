@@ -211,7 +211,7 @@ public class BulletList{
 				return 2;
 			
 			case TYPE_MINE:
-				return -0.05f;
+				return -0.5f;
 			
 			default:
 				return 0;
