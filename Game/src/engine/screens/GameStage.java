@@ -21,6 +21,7 @@ public abstract class GameStage{
 	protected String scriptPath;
 	protected int time;
 	
+	protected final MainScreen screen;
 	protected ScriptCompiler scriptCompiler;
 	protected ScriptController scriptController;
 	protected DScript script;
@@ -28,8 +29,9 @@ public abstract class GameStage{
 	protected Renderer r;
 	protected TextureCache tc;
 	
-	public GameStage(String scriptPath, Renderer r, TextureCache sc){
+	public GameStage(String scriptPath, MainScreen screen, Renderer r, TextureCache sc){
 		this.scriptPath = scriptPath;
+		this.screen = screen;
 		this.r = r;
 		this.tc = sc;
 	}
@@ -40,7 +42,7 @@ public abstract class GameStage{
 		scriptCompiler = new ScriptCompiler();
 		scriptCompiler.compile(script);
 		
-		scriptController = new ScriptController(script);
+		scriptController = new ScriptController(script, screen);
 		scriptController.init();
 	}
 	

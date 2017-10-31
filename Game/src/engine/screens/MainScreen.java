@@ -71,7 +71,7 @@ public class MainScreen extends GameScreen{
 		r.initMainScreen(tPlayer, tBullets1, tBullets2, tEffects);
 		
 		// Temporary test
-		stage = new Mission("Game/res/script/test.dscript", r, tc);
+		stage = new Mission("Game/res/script/test.dscript", this, r, tc);
 		stage.init();
 		
 		if(stage instanceof Mission)
@@ -144,10 +144,6 @@ public class MainScreen extends GameScreen{
 			updateEffects();
 			updateBullets();
 			updateEnemies();
-
-			addEnemies(ms.getEnemies());
-			addEnemyBullets(ms.getBullets());
-			addPlayerBullets(ms.getPlayerBullets());
 			
 			checkCollisions();
 		}
@@ -156,12 +152,6 @@ public class MainScreen extends GameScreen{
 	private void updateBullets(){
 		
 		for(int i = 0; i < enemyBullets.size(); i++){
-			
-			// Add bullet effect
-			Effect e = enemyBullets.get(i).getEffect();
-			
-			if(e != null)
-				effects.add(e);
 			
 			if(enemyBullets.get(i).isDeleted()){
 				enemyBullets.remove(i);
@@ -274,41 +264,27 @@ public class MainScreen extends GameScreen{
 			}
 		}
 	}
-	
-	
-	// Used to add player shots to the screen
-	private void addPlayerBullets(ArrayList<Bullet> bullets){
+
+	public void addEnemyBullet(Bullet bullet){
 		
-		if(bullets == null || bullets.size() < 1 || playerBullets.size() >= MAX_PLAYER_BULLETS)
+		if(bullet == null || enemyBullets.size() >= MAX_ENEMY_BULLETS)
 			return;
 		
-		playerBullets.addAll(bullets);
+		enemyBullets.add(bullet);
 		
-		while(playerBullets.size() >= MAX_PLAYER_BULLETS)
-			playerBullets.remove(playerBullets.size() - 1);
-	}
-	
-	// Used to add enemy shots to the screen
-	private void addEnemyBullets(ArrayList<Bullet> bullets){
-		
-		if(bullets == null || bullets.size() < 1 || enemyBullets.size() >= MAX_ENEMY_BULLETS)
-			return;
-		
-		enemyBullets.addAll(bullets);
-		
-		while(enemyBullets.size() >= MAX_ENEMY_BULLETS)
+		if(enemyBullets.size() >= MAX_ENEMY_BULLETS)
 			enemyBullets.remove(enemyBullets.size() - 1);
 	}
 	
-	private void addEnemies(ArrayList<Enemy> enemyList){
+	public void addPlayerBullet(Bullet bullet){
 		
-		if(enemyList == null || enemyList.size() < 1 || enemies.size() >= MAX_ENEMIES)
+		if(bullet == null || playerBullets.size() >= MAX_PLAYER_BULLETS)
 			return;
 		
-		enemies.addAll(enemyList);
+		playerBullets.add(bullet);
 		
-		while(enemies.size() >= MAX_ENEMIES)
-			enemies.remove(enemies.size() - 1);
+		if(playerBullets.size() >= MAX_PLAYER_BULLETS)
+			playerBullets.remove(playerBullets.size() - 1);
 	}
 	
 	public void addEffect(Effect effect){

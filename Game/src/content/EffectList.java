@@ -16,8 +16,7 @@ import engine.graphics.TextureCache;
 public class EffectList{
 
 	public static final byte
-		TYPE_CLOUD			= 0,
-		TYPE_CLOUD_REVERSE	= 1;
+		TYPE_CLOUD			= 0;
 	
 	private static final int animSpd = 1;
 	
@@ -39,6 +38,8 @@ public class EffectList{
 		int sx = color*size + (type % 2 == 0 ? 0 : 512);
 		int sy = (type/2)*(size*8);
 		
+		//if(type == TYPE_CLOUD_STATIC)
+		//	sy += 0;
 		
 		// Create sprite
 		Sprite sprite = new Sprite(path, sx, sy, size, size);

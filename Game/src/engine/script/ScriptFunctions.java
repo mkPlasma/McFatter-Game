@@ -191,7 +191,7 @@ public class ScriptFunctions{
 		"remove:d1",
 		
 		// Bullet
-		"bullet:6",
+		"bullet:7",
 		
 		"delete:d0",
 		"setX:d1",
@@ -292,12 +292,14 @@ public class ScriptFunctions{
 			case "bullet":
 				Object o5 = params[4];
 				Object o6 = params[5];
+				Object o7 = params[6];
 				
 				return o1 instanceof Integer && o2 instanceof Integer &&
 					  (o3 instanceof Integer || o3 instanceof Float) &&
 					  (o4 instanceof Integer || o4 instanceof Float) &&
 					  (o5 instanceof Integer || o5 instanceof Float) &&
-					  (o6 instanceof Integer || o6 instanceof Float);
+					  (o6 instanceof Integer || o6 instanceof Float) &&
+					  (o7 instanceof Integer || o7 instanceof Float);
 			
 			case "setX": case "setY":
 				return o1 instanceof GameEntity && (o2 instanceof Integer || o2 instanceof Float);

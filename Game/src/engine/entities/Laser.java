@@ -17,7 +17,7 @@ public class Laser extends Bullet{
 	private float scx, scy;
 	
 	public Laser(){
-		super(null, 0, 0, 0, 0, null);
+		super(null, 0, 0, 0, 0, 0, null, null);
 	}
 	
 	/*

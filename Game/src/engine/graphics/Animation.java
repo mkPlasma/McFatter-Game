@@ -71,12 +71,17 @@ public class Animation{
 	// Time increment to run the animation on
 	private int tInc;
 	
+	// Delay before starting animation
+	private int delay;
+	
 	// Sync animations with each other
 	// If true, it uses a global time rather than the entity time
 	private final boolean sync;
 	
 	private final int type;
 	private final float[] args;
+	
+	private boolean finished;
 	
 	private Sprite spr;
 	
@@ -96,11 +101,12 @@ public class Animation{
 		args = new float[]{inc, min, max};
 	}
 	
-	public Animation(int timeInc, boolean sync, int xStart, int yStart, int xInc, int yInc, int xEnd, int yEnd, int xReturn, int yReturn){
-		type = ANIM_SET_SPRITE;
+	public Animation(int type, int timeInc, int delay, boolean sync, float inc, float min, float max){
+		this.type = type;
 		this.tInc = timeInc;
+		this.delay = delay;
 		this.sync = sync;
-		args = new float[]{xStart, yStart, xInc, yInc, xEnd, yEnd, xReturn, yReturn};
+		args = new float[]{inc, min, max};
 	}
 	
 	// Use time from entity
@@ -110,8 +116,11 @@ public class Animation{
 	
 	public void update(int time){
 		
+		if(time < delay)
+			return;
+		
 		// Multiplies the animation effect
-		int m = (int)Math.floor(time/tInc);
+		int m = (int)Math.floor((time - delay)/tInc);
 		
 		
 		// Rotation
@@ -130,10 +139,14 @@ public class Animation{
 			scx += m*args[0];
 			
 			// Min/Max
-			if(scx < args[1])
+			if(scx < args[1]){
 				scx = args[1];
-			else if(scx > args[2])
+				finished = true;
+			}
+			else if(scx > args[2]){
 				scx = args[2];
+				finished = true;
+			}
 			
 			spr.setScaleX(scx);
 		}
@@ -144,10 +157,14 @@ public class Animation{
 			
 			scy += m*args[0];
 			
-			if(scy < args[1])
+			if(scy < args[1]){
 				scy = args[1];
-			else if(scy > args[2])
+				finished = true;
+			}
+			else if(scy > args[2]){
 				scy = args[2];
+				finished = true;
+			}
 			
 			spr.setScaleY(scy);
 			return;
@@ -158,10 +175,14 @@ public class Animation{
 
 			a += m*args[0];
 			
-			if(a < args[1])
+			if(a < args[1]){
 				a = args[1];
-			else if(a > args[2])
+				finished = true;
+			}
+			else if(a > args[2]){
 				a = args[2];
+				finished = true;
+			}
 			
 			spr.setAlpha(a);
 			return;
@@ -231,6 +252,10 @@ public class Animation{
 	
 	public float[] getArgs(){
 		return args;
+	}
+	
+	public boolean isFinished(){
+		return finished;
 	}
 	
 	public void setSprite(Sprite spr){

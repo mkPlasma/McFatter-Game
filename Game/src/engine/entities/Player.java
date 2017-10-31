@@ -1,20 +1,11 @@
 package engine.entities;
 
-import static engine.KeyboardListener.isKeyDown;
-import static engine.KeyboardListener.isKeyUp;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_SHIFT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_X;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_Z;
-
-import java.util.ArrayList;
+import static engine.KeyboardListener.*;
+import static org.lwjgl.glfw.GLFW.*;
 
 import content.FrameList;
 import engine.graphics.Sprite;
+import engine.screens.MainScreen;
 
 /*
  * 		Player.java
@@ -36,25 +27,24 @@ public class Player extends GameEntity{
 	private final int focusedSpeed = 2, unfocusedSpeed = 4;
 	
 	private int speed;
-	private boolean focused, firing, bombing;
+	private boolean focused, firing;
 	
 	private BulletFrame shot;
 	
 	// Timer variables counts up for timing shots/bombs
 	private int shotCooldown = 0, bombCooldown = 0;
 	
-	private ArrayList<Bullet> bullets;
+	private MainScreen screen;
 	
 	// Temporary
 	private Sprite sprite;
 	private FrameList frameList;
 	
-	public Player(float x, float y, BulletFrame shot, FrameList frameList){
+	public Player(float x, float y, BulletFrame shot, FrameList frameList, MainScreen screen){
 		super(null, x, y);
 		
 		this.shot = shot;
-		
-		bullets = new ArrayList<Bullet>();
+		this.screen = screen;
 		
 		// temp
 		sprite = new Sprite("player.png", 0, 0, 64, 64);
@@ -134,13 +124,12 @@ public class Player extends GameEntity{
 	}
 	
 	private void fire(){
-		bullets.add(new Bullet(shot, x - 10, y - 5, 270, 15, 500, 5, frameList));
-		bullets.add(new Bullet(shot, x + 10, y - 5, 270, 15, 500, 5, frameList));
+		screen.addPlayerBullet(new Bullet(shot, x - 10, y - 5, 270, 15, 0, 500, 5, frameList, null));
+		screen.addPlayerBullet(new Bullet(shot, x + 10, y - 5, 270, 15, 0, 500, 5, frameList, null));
 		shotCooldown = 4;
 	}
 	
 	private void bomb(){
-		bombing = true;
 		/*
 		Random r = new Random();
 		
@@ -173,19 +162,5 @@ public class Player extends GameEntity{
 	
 	public int getHitboxSize(){
 		return 3;
-	}
-	
-	public ArrayList<Bullet> getBullets(){
-		// Returns bullets then clears the array list
-		// This is because the bullets on the frame should only be fired once
-		// If not cleared, all previous bullets would keep firing forever
-		
-		if(bullets == null || bullets.size() < 1)
-			return null;
-		
-		ArrayList<Bullet> temp = new ArrayList<Bullet>(bullets);
-		bullets.clear();
-		
-		return temp;
 	}
 }

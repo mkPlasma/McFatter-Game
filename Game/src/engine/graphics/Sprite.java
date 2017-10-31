@@ -1,6 +1,7 @@
 package engine.graphics;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import engine.entities.GameEntity;
 
@@ -43,7 +44,7 @@ public class Sprite{
 	private boolean additive = false;
 	
 	// Sprite animation
-	private Animation[] anim;
+	private ArrayList<Animation> anim;
 	
 	
 	public Sprite(Sprite spr){
@@ -70,7 +71,8 @@ public class Sprite{
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		
+
+		anim = new ArrayList<Animation>();
 		texture = new Texture(path);
 	}
 	
@@ -82,26 +84,7 @@ public class Sprite{
 		scaleX = scale;
 		scaleY = scale;
 		
-		texture = new Texture(path);
-	}
-	
-	public Sprite(String path, int x, int y, int width, int height, Animation anim){
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-		this.anim = new Animation[]{anim};
-		
-		texture = new Texture(path);
-	}
-	
-	public Sprite(String path, int x, int y, int width, int height, Animation[] anim){
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-		this.anim = anim;
-		
+		anim = new ArrayList<Animation>();
 		texture = new Texture(path);
 	}
 	
@@ -136,7 +119,7 @@ public class Sprite{
 	// Returns a modified sprite for the animation at the given time
 	public Sprite animate(int time, int syncTime, GameEntity e){
 		
-		if(anim == null)
+		if(anim.size() == 0)
 			return this;
 		
 		Sprite spr = new Sprite(this);
@@ -151,26 +134,27 @@ public class Sprite{
 				spr.genTextureCoords();
 		}
 		
+		// Remove finished animations
+		for(int i = 0; i < anim.size(); i++){
+			if(anim.get(i).isFinished()){
+				
+				// Set finished scale/alpha
+				scaleX = spr.getScaleX();
+				scaleY = spr.getScaleY();
+				alpha = spr.getAlpha();
+				
+				anim.remove(i);
+				i--;
+			}
+		}
+		
 		return spr;
 	}
 	
 	
 	// Adds an animation to the list
 	public void addAnimation(Animation a){
-		
-		if(anim != null){
-			Animation[] temp = new Animation[anim.length + 1];
-			
-			for(int i = 0; i < anim.length; i++){
-				temp[i] = anim[i];
-			}
-			
-			temp[temp.length - 1] = a;
-			
-			anim = temp.clone();
-		}else{
-			anim = new Animation[]{a};
-		}
+		anim.add(a);
 	}
 	
 	// Return true if two sprites are the same, used in SpriteCache
@@ -190,7 +174,7 @@ public class Sprite{
 			sprite.getAlpha() == alpha){
 		
 			// Check if all animations are equal
-			Animation[] a = sprite.getAnimations();
+			ArrayList<Animation> a = sprite.getAnimations();
 			
 			// Return false if one is null
 			if((a == null && anim != null) || (a != null && anim == null))
@@ -198,12 +182,12 @@ public class Sprite{
 			
 			if(a != null && anim != null){
 				// Return false if they don't have the same amount
-				if(a.length != anim.length)
+				if(a.size() != anim.size())
 					return false;
 				
 				// Check if equal
-				for(int i = 0; i < sprite.getAnimations().length; i++)
-					if(a[i].equals(anim[i]))
+				for(int i = 0; i < a.size(); i++)
+					if(a.get(i).equals(anim.get(i)))
 						return false;
 			}
 			
@@ -341,15 +325,15 @@ public class Sprite{
 		return additive;
 	}
 	
-	public void setAnimations(Animation anim){
-		this.anim = new Animation[]{anim};
-	}
+	//public void setAnimations(Animation anim){
+	//	this.anim = new Animation[]{anim};
+	//}
 	
-	public void setAnimations(Animation[] anim){
-		this.anim = anim;
-	}
+	//public void setAnimations(Animation[] anim){
+	//	this.anim = anim;
+	//}
 	
-	public Animation[] getAnimations(){
+	public ArrayList<Animation> getAnimations(){
 		return anim;
 	}
 }

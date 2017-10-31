@@ -3,8 +3,8 @@ package engine.script;
 import java.util.ArrayList;
 
 import content.FrameList;
-import engine.entities.Bullet;
 import engine.entities.Player;
+import engine.screens.MainScreen;
 
 /*
  * 		ScriptController.java
@@ -27,10 +27,10 @@ public class ScriptController{
 	
 	private int time;
 	
-	public ScriptController(DScript script){
+	public ScriptController(DScript script, MainScreen screen){
 		this.script = script;
 		
-		runner = new ScriptRunner(script);
+		runner = new ScriptRunner(script, screen);
 		branches = new ArrayList<ScriptBranch>();
 		
 		time = 0;
@@ -90,10 +90,6 @@ public class ScriptController{
 	
 	public void setFrameList(FrameList frameList){
 		runner.setFrameList(frameList);
-	}
-	
-	public ArrayList<Bullet> getBullets(){
-		return runner.getBullets();
 	}
 	
 	public boolean isFinished(){

@@ -65,7 +65,7 @@ public class Renderer{
 		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, true));
 		
 		// Effects
-		renderBatches.add(new RenderBatch(MainScreen.MAX_EFFECTS, 32, effectTex, UPDATE_ALL, false));
+		renderBatches.add(new RenderBatch(MainScreen.MAX_EFFECTS, 32, effectTex, UPDATE_ALL, true));
 		
 		// Border
 		Sprite border = new Sprite("border.png", 0, 0, 1280, 960);

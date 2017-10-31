@@ -23,4 +23,8 @@ public class Effect extends MovableEntity{
 		if(time >= lifetime)
 			deleted = true;
 	}
+	
+	public void setLifetime(int lifetime){
+		this.lifetime = lifetime;
+	}
 }
