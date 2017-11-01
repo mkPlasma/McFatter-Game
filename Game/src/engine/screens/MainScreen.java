@@ -84,10 +84,11 @@ public class MainScreen extends GameScreen{
 	
 	public void render(){
 		
-		r.updatePlayer(player, rTime);
-		r.updateEnemyBullets(enemyBullets, rTime);
-		r.updatePlayerBullets(playerBullets, rTime);
-		r.updateEffects(effects, rTime);
+		//r.updatePlayer(player, rTime);
+		//r.updateEnemyBullets(enemyBullets, rTime);
+		//r.updatePlayerBullets(playerBullets, rTime);
+		//r.updateEffects(effects, rTime);
+		r.updateHitboxes(enemyBullets, enemies, player);
 		
 		r.render();
 		

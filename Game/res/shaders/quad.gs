@@ -1,7 +1,7 @@
 #version 150
 
 layout(points) in;
-layout(triangle_strip, max_vertices = 5) out;
+layout(triangle_strip, max_vertices = 4) out;
 
 in vec2 gSize[];
 in vec4 gTexCoords[];

@@ -21,16 +21,16 @@ public class ScreenManager{
 	public MainScreen mainScreen;
 	public MapScreen mapScreen;
 	
-	private TextureCache spriteCache;
+	private TextureCache tc;
 	
 	public void init(){
-		r = new Renderer();
+		tc = new TextureCache();
+		
+		r = new Renderer(tc);
 		r.init();
 		
-		spriteCache = new TextureCache();
-		
-		mainScreen = new MainScreen(r, spriteCache);
-		mapScreen = new MapScreen(r, spriteCache);
+		mainScreen = new MainScreen(r, tc);
+		mapScreen = new MapScreen(r, tc);
 	}
 	
 	public void initScreen(){

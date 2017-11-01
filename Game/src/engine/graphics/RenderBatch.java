@@ -1,35 +1,9 @@
 package engine.graphics;
 
-import static org.lwjgl.opengl.GL11.GL_BLEND;
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL11.GL_LINEAR;
-import static org.lwjgl.opengl.GL11.GL_ONE;
-import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_POINTS;
-import static org.lwjgl.opengl.GL11.GL_SHORT;
-import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL11.glBlendFunc;
-import static org.lwjgl.opengl.GL11.glDisable;
-import static org.lwjgl.opengl.GL11.glDrawArrays;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11.glTexParameteri;
-import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
-import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
-import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
-import static org.lwjgl.opengl.GL15.glBindBuffer;
-import static org.lwjgl.opengl.GL15.glBufferData;
-import static org.lwjgl.opengl.GL15.glDeleteBuffers;
-import static org.lwjgl.opengl.GL15.glGenBuffers;
-import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
-import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.*;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -37,8 +11,11 @@ import java.util.ArrayList;
 
 import org.lwjgl.BufferUtils;
 
+import engine.entities.Bullet;
+import engine.entities.Enemy;
 import engine.entities.GameEntity;
 import engine.entities.MovableEntity;
+import engine.entities.Player;
 
 /*
  * 		RenderBatch.java
@@ -51,14 +28,18 @@ import engine.entities.MovableEntity;
 public class RenderBatch{
 	
 	public static final int
-		UPDATE_VBO = 0b0001,
-		UPDATE_TEX = 0b0010,
-		UPDATE_TFM = 0b0100,
-		UPDATE_ALP = 0b1000,
+		UPDATE_VBO = 0b00001,
+		UPDATE_SZE = 0b00010,
+		UPDATE_TEX = 0b00100,
+		UPDATE_TFM = 0b01000,
+		UPDATE_ALP = 0b10000,
 		
-		UPDATE_NONE = 0,
-		UPDATE_ALL = 0b1111;
+		UPDATE_NONE			= 0,
+		UPDATE_ALL_BUT_SIZE	= 0b11101,
+		UPDATE_HITBOX		= 0b00011;
 	
+	
+	private final int shader;
 	
 	// Number of quads to render
 	private int size;
@@ -69,6 +50,7 @@ public class RenderBatch{
 	private final short sizePixelsX, sizePixelsY;
 	
 	private FloatBuffer vboBuffer, texBuffer, tfmBuffer, alpBuffer;
+	private ShortBuffer szeBuffer;
 	
 	private final int vao, vbo, sze, tex, tfm, alp;
 	
@@ -83,11 +65,13 @@ public class RenderBatch{
 	
 	public RenderBatch(int capacity, int sizePixels, int textureID, int updates, boolean additive){
 		this.capacity = capacity;
-		sizePixelsX = (short)sizePixels;
-		sizePixelsY = (short)sizePixels;
 		this.textureID = textureID;
 		this.updates = updates;
 		this.additive = additive;
+
+		shader = 0;
+		sizePixelsX = (short)sizePixels;
+		sizePixelsY = (short)sizePixels;
 		
 		vao = glGenVertexArrays();
 		vbo = glGenBuffers();
@@ -106,6 +90,8 @@ public class RenderBatch{
 		this.textureID = textureID;
 		this.updates = updates;
 		this.additive = additive;
+
+		shader = 0;
 		
 		vao = glGenVertexArrays();
 		vbo = glGenBuffers();
@@ -117,17 +103,55 @@ public class RenderBatch{
 		init();
 	}
 	
+	// For hitboxes
+	public RenderBatch(int capacity, int updates){
+		this.capacity = capacity;
+		this.updates = updates;
+		
+		shader = 1;
+		textureID = -1;
+		sizePixelsX = 0;
+		sizePixelsY = 0;
+		
+		vao = glGenVertexArrays();
+		vbo = glGenBuffers();
+		sze = glGenBuffers();
+		tex = 0;
+		tfm = 0;
+		alp = 0;
+		
+		init();
+	}
+	
 	private void init(){
 		vboBuffer = BufferUtils.createFloatBuffer(capacity*2);
-		texBuffer = BufferUtils.createFloatBuffer(capacity*4);
-		tfmBuffer = BufferUtils.createFloatBuffer(capacity*3);
-		alpBuffer = BufferUtils.createFloatBuffer(capacity);
 		
-		uVBO = true;
-		uSZE = true;
-		uTEX = true;
-		uTFM = true;
-		uALP = true;
+		if(shader == 0){
+			szeBuffer = BufferUtils.createShortBuffer(capacity*2);
+			texBuffer = BufferUtils.createFloatBuffer(capacity*4);
+			tfmBuffer = BufferUtils.createFloatBuffer(capacity*3);
+			alpBuffer = BufferUtils.createFloatBuffer(capacity);
+			
+			uVBO = true;
+			uSZE = true;
+			uTEX = true;
+			uTFM = true;
+			uALP = true;
+			
+			return;
+		}
+		if(shader == 1){
+			szeBuffer = BufferUtils.createShortBuffer(capacity);
+			
+			uVBO = true;
+			uSZE = true;
+			
+			return;
+		}
+	}
+	
+	public int getShader(){
+		return shader;
 	}
 	
 	public int getTextureID(){
@@ -154,9 +178,12 @@ public class RenderBatch{
 		// Enable arrays
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
-		glEnableVertexAttribArray(2);
-		glEnableVertexAttribArray(3);
-		glEnableVertexAttribArray(4);
+		
+		if(shader == 0){
+			glEnableVertexAttribArray(2);
+			glEnableVertexAttribArray(3);
+			glEnableVertexAttribArray(4);
+		}
 		
 		// Set blend mode
 		glEnable(GL_BLEND);
@@ -168,9 +195,12 @@ public class RenderBatch{
 		glDisable(GL_BLEND);
 		
 		// Disable arrays
-		glDisableVertexAttribArray(4);
-		glDisableVertexAttribArray(3);
-		glDisableVertexAttribArray(2);
+		if(shader == 0){
+			glDisableVertexAttribArray(4);
+			glDisableVertexAttribArray(3);
+			glDisableVertexAttribArray(2);
+		}
+		
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(0);
 		
@@ -188,30 +218,9 @@ public class RenderBatch{
 	}
 	
 	// Update batch
-	public void updateManual(float x, float y, float w, float h, float[] texCoords){
-		
-		/*
+	public void updateManual(float x, float y, float[] texCoords){
 		size = 1;
-		
-		float[] vertices = new float[size*2];
-		float[] tc = new float[size*2];
-		
-		// Vertex coords
-		float[] v = getVertexCoords(x, y, w, h, 0);
-		
-		// Fill vertices/texCoords
-		for(int i = 0; i < 6; i++){
-			int a = i >= 3 ? i - 1 : i;
-			a = i == 5 ? 0 : a;
-			
-			vertices[i*2]			= v[a*2];
-			vertices[i*2 + 1]		= v[a*2 + 1];
-			tc[i*2]		= texCoords[a*2];
-			tc[i*2 + 1]	= texCoords[a*2 + 1];
-		}
-		
-		updateVBOs(vertices, tc);
-		*/
+		updateVBOs(new float[]{x, y}, null, texCoords, new float[]{1, 1, 0}, new float[]{1});
 	}
 	
 	public void updateWithEntity(GameEntity e, int time){
@@ -241,7 +250,7 @@ public class RenderBatch{
 		float[] texCoords	= null;
 		float[] transforms	= null;
 		float[] alphas		= null;
-		
+
 		if(uVBO) vertices	= new float[size*2];
 		if(uTEX) texCoords	= new float[size*4];
 		if(uTFM) transforms	= new float[size*3];
@@ -262,9 +271,6 @@ public class RenderBatch{
 			
 			if(e instanceof MovableEntity)
 				r += (e.getFrame().spriteAlign() ? ((MovableEntity)e).getDir() + 90 : 0);
-			
-			// Vertex coords
-			//float[] v = getVertexCoords(e.getX(), e.getY(), s.getScaledWidth(), s.getScaledHeight(), r);
 			
 			// Fill arrays
 			if(uVBO){
@@ -287,10 +293,53 @@ public class RenderBatch{
 				alphas[i] = s.getAlpha();
 		}
 		
-		updateVBOs(vertices, texCoords, transforms, alphas);
+		updateVBOs(vertices, null, texCoords, transforms, alphas);
 	}
 	
-	private void updateVBOs(float[] vertices, float[] texCoords, float[] transforms, float[] alphas){
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public void updateHitboxes(ArrayList entityList){
+		
+		ArrayList<GameEntity> el = new ArrayList<GameEntity>();
+		
+		// Take only visible entities
+		for(GameEntity e:(ArrayList<GameEntity>)entityList){
+			if(e.isVisible() && !e.isDeleted() && (e instanceof Bullet || e instanceof Player || e instanceof Enemy))
+				el.add(e);
+		}
+		
+		size = el.size();
+		
+		if(el.isEmpty())
+			return;
+		
+		// VAO arguments
+		float[] vertices	 = null;
+		short[] sizes = null;
+		
+		if(uVBO) vertices	= new float[size*2];
+		if(uSZE) sizes		= new short[size];
+		
+		for(int i = 0; i < el.size(); i++){
+			
+			GameEntity e = el.get(i);
+			
+			// Fill arrays
+			if(uVBO){
+				vertices[i*2]		= e.getX();
+				vertices[i*2 + 1]	= e.getY();
+			}
+			
+			if(uSZE){
+				if(e instanceof Bullet)	sizes[i] = (short)((Bullet)e).getHitboxSize();
+				if(e instanceof Player)	sizes[i] = (short)((Player)e).getHitboxSize();
+				if(e instanceof Enemy)	sizes[i] = (short)((Enemy)e).getHitboxSize();
+			}
+		}
+		
+		updateVBOs(vertices, sizes, null, null, null);
+	}
+	
+	private void updateVBOs(float[] vertices, short[] sizes, float[] texCoords, float[] transforms, float[] alphas){
 		
 		glBindVertexArray(vao);
 		
@@ -308,25 +357,28 @@ public class RenderBatch{
 				uVBO = false;
 		}
 		
-		// Sizes (always update only once)
+		// Sizes
 		if(uSZE){
 			
-			short[] sizes = new short[capacity*2];
-			
-			for(int i = 0; i < sizes.length/2; i++){
-				sizes[i*2]		= sizePixelsX;
-				sizes[i*2 + 1]	= sizePixelsY;
+			if(sizes == null){
+				sizes = new short[capacity*2];
+				
+				for(int i = 0; i < sizes.length/2; i++){
+					sizes[i*2]		= sizePixelsX;
+					sizes[i*2 + 1]	= sizePixelsY;
+				}
 			}
 			
-			ShortBuffer szeBuffer = BufferUtils.createShortBuffer(capacity*2);
+			szeBuffer.clear();
 			szeBuffer.put(sizes);
 			szeBuffer.flip();
 			
 			glBindBuffer(GL_ARRAY_BUFFER, sze);
 			glBufferData(GL_ARRAY_BUFFER, szeBuffer, GL_STATIC_DRAW);
-			glVertexAttribPointer(1, 2, GL_SHORT, false, 0, 0);
+			glVertexAttribPointer(1, shader == 0 ? 2 : 1, GL_SHORT, false, 0, 0);
 			
-			uSZE = false;
+			if((updates & UPDATE_SZE) == 0)
+				uSZE = false;
 		}
 		
 		// Texture coords
@@ -373,48 +425,4 @@ public class RenderBatch{
 		
 		glBindVertexArray(0);
 	}
-	
-	// Returns vertex coordinates of object
-	/*
-	private float[] getVertexCoords(float cx, float cy, float w, float h, float r){
-		
-		r = (float)Math.toRadians(r);
-		
-		// Sin and cos for rotations
-		float sin = (float)Math.sin(r);
-		float cos = (float)Math.cos(r);
-
-		// Divide by 4 since textures are 2x scale at 640x480
-		w /= 4;
-		h /= 4;
-		
-		// Top left, top right, bottom right, bottom left
-		float x[] = {-w, w, w, -w};
-		float y[] = {-h, -h, h, h};
-		
-		for(int i = 0; i < 4; i++){
-			
-			// Rotate
-			float x2 = x[i]*cos - y[i]*sin;
-			float y2 = x[i]*sin + y[i]*cos;
-			
-			// Move to center
-			x2 += cx;
-			y2 += cy;
-			
-			// Normalize
-			x2 = x2/320 - 1;
-			y2 = -(y2/240 - 1);
-			
-			x[i] = x2;
-			y[i] = y2;
-		}
-		
-		return new float[]{
-			x[0], y[0],
-			x[1], y[1],
-			x[2], y[2],
-			x[3], y[3],
-		};
-	}*/
 }

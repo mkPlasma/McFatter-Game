@@ -17,6 +17,7 @@ while(true){
 }
 
 task bullet(dir, color){
-    set b = bullet(_scale, _red, centerX(), 140, dir, 5, 10);
+    set r = 50;
+    set b = bullet(_scale, _blue, centerX() + r*cos(dir), 140 + r*sin(dir), dir, 5, 10);
     //b.setAdditive();
 }

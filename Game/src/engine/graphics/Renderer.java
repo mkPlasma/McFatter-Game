@@ -4,10 +4,13 @@ import java.util.ArrayList;
 
 import engine.entities.Bullet;
 import engine.entities.Effect;
+import engine.entities.Enemy;
+import engine.entities.GameEntity;
 import engine.entities.Player;
 import engine.screens.MainScreen;
 
 import static engine.graphics.RenderBatch.*;
+import static engine.screens.MainScreen.*;
 
 /*
  * 		Renderer.java
@@ -20,31 +23,34 @@ import static engine.graphics.RenderBatch.*;
 public class Renderer{
 	
 	private ShaderProgram basicShader;
-	private ShaderProgram illumiShader;
+	private ShaderProgram hitboxShader;
 	
 	private ArrayList<RenderBatch> renderBatches;
 	
+	private TextureCache tc;
+	
+	public Renderer(TextureCache tc){
+		this.tc = tc;
+	}
+	
 	public void init(){
 		// Init shaders
-		basicShader = new ShaderProgram("quad", "basic", "quad");
+		/*basicShader = new ShaderProgram("quad", "basic", "quad");
 		basicShader.bindAttrib(0, "position");
 		basicShader.bindAttrib(1, "size");
 		basicShader.bindAttrib(2, "texCoords");
 		basicShader.bindAttrib(3, "transforms");
 		basicShader.bindAttrib(4, "alpha");
-		basicShader.link();
+		basicShader.link();*/
 		
-		illumiShader = new ShaderProgram("quad", "basic", "quad");
-		illumiShader.bindAttrib(0, "position");
-		illumiShader.bindAttrib(1, "size");
-		illumiShader.bindAttrib(2, "texCoords");
-		illumiShader.bindAttrib(3, "transforms");
-		illumiShader.bindAttrib(4, "alpha");
-		illumiShader.link();
+		hitboxShader = new ShaderProgram("circle", "solid", "circle");
+		hitboxShader.bindAttrib(0, "position");
+		hitboxShader.bindAttrib(1, "radius");
+		hitboxShader.link();
 		
 		renderBatches = new ArrayList<RenderBatch>();
 		
-		basicShader.use();
+		//basicShader.use();
 	}
 	
 	// Initialize rendering for MainScreen
@@ -53,28 +59,31 @@ public class Renderer{
 		// Add in order of rendering
 		
 		// Player bullets
-		renderBatches.add(new RenderBatch(MainScreen.MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL, false));
+		renderBatches.add(new RenderBatch(MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL_BUT_SIZE, false));
 		
 		// Player
 		renderBatches.add(new RenderBatch(1, 64, playerTex, UPDATE_VBO, false));
 		
 		// Enemy bullets
-		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false));
-		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true));
-		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, false));
-		renderBatches.add(new RenderBatch(MainScreen.MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, true));
+		renderBatches.add(new RenderBatch(MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL_BUT_SIZE, false));
+		renderBatches.add(new RenderBatch(MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL_BUT_SIZE, true));
+		renderBatches.add(new RenderBatch(MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL_BUT_SIZE, false));
+		renderBatches.add(new RenderBatch(MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL_BUT_SIZE, true));
 		
 		// Effects
-		renderBatches.add(new RenderBatch(MainScreen.MAX_EFFECTS, 32, effectTex, UPDATE_ALL, true));
+		renderBatches.add(new RenderBatch(MAX_EFFECTS, 32, effectTex, UPDATE_ALL_BUT_SIZE, true));
 		
 		// Border
 		Sprite border = new Sprite("border.png", 0, 0, 1280, 960);
-		border.load();
+		tc.loadSprite(border);
 		
-		RenderBatch borderBatch = new RenderBatch(1, border.getTexture().getID(), 1280, 960, UPDATE_NONE, false);
-		borderBatch.updateManual(320, 240, 1280, 960, border.getTextureCoords());
+		RenderBatch borderBatch = new RenderBatch(1, 1280, 960, border.getTexture().getID(), UPDATE_NONE, false);
+		borderBatch.updateManual(320, 240, border.getTextureCoords());
 		
 		renderBatches.add(borderBatch);
+		
+		// Hitboxes
+		renderBatches.add(new RenderBatch(MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX));
 	}
 	
 	public void updatePlayer(Player player, int time){
@@ -122,13 +131,28 @@ public class Renderer{
 		renderBatches.get(6).updateWithEntities(effects, time);
 	}
 	
+	public void updateHitboxes(ArrayList<Bullet> enemyBullets, ArrayList<Enemy> enemies, Player player){
+		ArrayList<GameEntity> el = new ArrayList<GameEntity>();
+		el.addAll(enemyBullets);
+		el.addAll(enemies);
+		el.add(player);
+		
+		renderBatches.get(8).updateHitboxes(el);
+	}
+	
 	public void render(){
-		for(int i = 0; i < renderBatches.size(); i++){
-			
+		//for(int i = 0; i < renderBatches.size(); i++){
+		for(int i = 8; i < 9; i++){
+		
 			RenderBatch rb = renderBatches.get(i);
 			
+			//if(rb.getShader() == 0)
+			//	basicShader.use();
+			//else
+				hitboxShader.use();
+			
 			// Don't bind texture again if last batch had same texture
-			if(i == 0 || rb.getTextureID() != renderBatches.get(i - 1).getTextureID())
+			if(rb.getTextureID() != -1 && (i == 0 || rb.getTextureID() != renderBatches.get(i - 1).getTextureID()))
 				rb.bindTexture();
 			
 			rb.render();
@@ -137,8 +161,8 @@ public class Renderer{
 	
 	// Delete vao/buffers
 	public void cleanup(){
-		basicShader.destroy();
-		illumiShader.destroy();
+		//basicShader.destroy();
+		hitboxShader.destroy();
 		
 		for(RenderBatch sb:renderBatches)
 			sb.cleanup();
