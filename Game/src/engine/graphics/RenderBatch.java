@@ -375,7 +375,11 @@ public class RenderBatch{
 			
 			glBindBuffer(GL_ARRAY_BUFFER, sze);
 			glBufferData(GL_ARRAY_BUFFER, szeBuffer, GL_STATIC_DRAW);
-			glVertexAttribPointer(1, shader == 0 ? 2 : 1, GL_SHORT, false, 0, 0);
+			
+			if(shader == 0)
+				glVertexAttribPointer(1, 2, GL_SHORT, false, 0, 0);
+			else
+				glVertexAttribIPointer(1, 1, GL_SHORT, 0, 0);
 			
 			if((updates & UPDATE_SZE) == 0)
 				uSZE = false;

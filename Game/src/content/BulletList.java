@@ -146,6 +146,7 @@ public class BulletList{
 			case TYPE_PLUS:
 			case TYPE_WALL:
 			case TYPE_NEEDLE:
+			case TYPE_RING:
 			case TYPE_MISSILE:
 			case TYPE_ATOM:
 				return 3;
@@ -173,6 +174,7 @@ public class BulletList{
 			case TYPE_PLUS:
 			case TYPE_WALL:
 			case TYPE_NEEDLE:
+			case TYPE_RING:
 			case TYPE_MISSILE:
 			case TYPE_ATOM:
 				return .8f;

@@ -77,6 +77,8 @@ public class Bullet extends MovableEntity{
 	
 	private void init(){
 		
+		initFrameProperties();
+		
 		borderDespawn = true;
 		
 		if(delay < 15)
@@ -99,8 +101,6 @@ public class Bullet extends MovableEntity{
 			e.getSprite().addAnimation(new Animation(Animation.ANIM_ALPHA, 1, Math.max(delay - 15, 0), false, -1f/Math.min(delay, 15), 0, 1));
 			screen.addEffect(e);
 		}
-		
-		initFrameProperties();
 	}
 	
 	public void initFrameProperties(){

@@ -5,19 +5,27 @@ set dir;
 set r = 60;
 set c = 8;
 
+set type;
+
 while(true){
     
     for(i in c){
-        bullet(dir + i*(360/c), i);
+        bullet(dir + i*(360/c));
     }
     
-    dir += 5;
+    dir += 15.77;
     
-    wait;
+    wait 5;
 }
 
-task bullet(dir, color){
+task bullet(dir){
     set r = 50;
-    set b = bullet(_scale, _blue, centerX() + r*cos(dir), 140 + r*sin(dir), dir, 5, 10);
+    set b = bullet(type, _green, centerX() + r*cos(dir), 140 + r*sin(dir), dir, 2, 10);
     //b.setAdditive();
+    
+    type++;
+    
+    if(type > _ring){
+        type = _orb;
+    }
 }

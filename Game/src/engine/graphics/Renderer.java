@@ -29,19 +29,21 @@ public class Renderer{
 	
 	private TextureCache tc;
 	
+	private boolean renderHitboxes;
+	
 	public Renderer(TextureCache tc){
 		this.tc = tc;
 	}
 	
 	public void init(){
 		// Init shaders
-		/*basicShader = new ShaderProgram("quad", "basic", "quad");
+		basicShader = new ShaderProgram("quad", "basic", "quad");
 		basicShader.bindAttrib(0, "position");
 		basicShader.bindAttrib(1, "size");
 		basicShader.bindAttrib(2, "texCoords");
 		basicShader.bindAttrib(3, "transforms");
 		basicShader.bindAttrib(4, "alpha");
-		basicShader.link();*/
+		basicShader.link();
 		
 		hitboxShader = new ShaderProgram("circle", "solid", "circle");
 		hitboxShader.bindAttrib(0, "position");
@@ -73,6 +75,9 @@ public class Renderer{
 		// Effects
 		renderBatches.add(new RenderBatch(MAX_EFFECTS, 32, effectTex, UPDATE_ALL_BUT_SIZE, true));
 		
+		// Hitboxes
+		renderBatches.add(new RenderBatch(MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX));
+		
 		// Border
 		Sprite border = new Sprite("border.png", 0, 0, 1280, 960);
 		tc.loadSprite(border);
@@ -81,9 +86,6 @@ public class Renderer{
 		borderBatch.updateManual(320, 240, border.getTextureCoords());
 		
 		renderBatches.add(borderBatch);
-		
-		// Hitboxes
-		renderBatches.add(new RenderBatch(MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX));
 	}
 	
 	public void updatePlayer(Player player, int time){
@@ -137,19 +139,22 @@ public class Renderer{
 		el.addAll(enemies);
 		el.add(player);
 		
-		renderBatches.get(8).updateHitboxes(el);
+		renderBatches.get(7).updateHitboxes(el);
 	}
 	
 	public void render(){
-		//for(int i = 0; i < renderBatches.size(); i++){
-		for(int i = 8; i < 9; i++){
+		for(int i = 0; i < renderBatches.size(); i++){
 		
 			RenderBatch rb = renderBatches.get(i);
 			
-			//if(rb.getShader() == 0)
-			//	basicShader.use();
-			//else
+			if(rb.getShader() == 0)
+				basicShader.use();
+			else{
+				if(!renderHitboxes)
+					continue;
+				
 				hitboxShader.use();
+			}
 			
 			// Don't bind texture again if last batch had same texture
 			if(rb.getTextureID() != -1 && (i == 0 || rb.getTextureID() != renderBatches.get(i - 1).getTextureID()))
@@ -159,9 +164,13 @@ public class Renderer{
 		}
 	}
 	
+	public void toggleRenderHitboxes(){
+		renderHitboxes = !renderHitboxes;
+	}
+	
 	// Delete vao/buffers
 	public void cleanup(){
-		//basicShader.destroy();
+		basicShader.destroy();
 		hitboxShader.destroy();
 		
 		for(RenderBatch sb:renderBatches)

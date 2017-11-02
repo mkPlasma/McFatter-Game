@@ -84,10 +84,10 @@ public class MainScreen extends GameScreen{
 	
 	public void render(){
 		
-		//r.updatePlayer(player, rTime);
-		//r.updateEnemyBullets(enemyBullets, rTime);
-		//r.updatePlayerBullets(playerBullets, rTime);
-		//r.updateEffects(effects, rTime);
+		r.updatePlayer(player, rTime);
+		r.updateEnemyBullets(enemyBullets, rTime);
+		r.updatePlayerBullets(playerBullets, rTime);
+		r.updateEffects(effects, rTime);
 		r.updateHitboxes(enemyBullets, enemies, player);
 		
 		r.render();
@@ -107,6 +107,10 @@ public class MainScreen extends GameScreen{
 		// Tick frame with P
 		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_P))
 			tickFrame = true;
+		
+		// Toggle hitboxes with H
+		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_H))
+			r.toggleRenderHitboxes();
 
 		// Reload script with Alt+R
 		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_R)){

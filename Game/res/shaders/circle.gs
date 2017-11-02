@@ -1,7 +1,7 @@
 #version 150
 
 layout(points) in;
-layout(line_strip, max_vertices = 16) out;
+layout(triangle_strip, max_vertices = 32) out;
 
 in int gRadius[];
 
@@ -21,6 +21,9 @@ void main(){
         
         pos.x = pos.x/320.0 - 1.0;
         pos.y = -(pos.y/240.0 - 1.0);
+        
+        gl_Position = vec4(cPos.x/320.0 - 1.0, -(cPos.y/240.0 - 1.0), 0.0, 1.0);
+        EmitVertex();
         
         gl_Position = pos;
         EmitVertex();
