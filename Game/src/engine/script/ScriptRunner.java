@@ -1131,6 +1131,12 @@ public class ScriptRunner{
 				return;
 			
 			case "randFloat":
+				
+				if(!isFloat){
+					f1 = (float)i1;
+					f2 = (float)i2;
+				}
+				
 				returnValue = f1 + random.nextFloat()*(f2 - f1);
 				return;
 			
