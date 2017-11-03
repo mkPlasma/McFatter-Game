@@ -87,7 +87,7 @@ public class ScriptFunctions{
 		"call_func_b",		// Calls built-in function
 		"end_func",			// Ends function, returns void
 		"set_param",		// Set function parameter
-		"get_param",		// Store function parameter into register
+		"get_param",		// Create variable and assign parameter to it
 		"param_inc",		// Use new parameter queue
 		"return",			// Returns register value
 		"return_void",		// Return no value
@@ -137,6 +137,8 @@ public class ScriptFunctions{
 		"print:1",
 		
 		"scriptTime:0",
+		
+		"int:1",
 		
 		"centerX:0",
 		"centerY:0",
@@ -260,6 +262,9 @@ public class ScriptFunctions{
 		int p = getBuiltInFunctionParameterCount(index);
 		
 		switch(getBuiltInFunctionName(index)){
+			case "int":
+				return o1 instanceof Integer || o1 instanceof Float;
+			
 			case "angleToPlayer":
 				if(p == 1)
 					return o1 instanceof ArrayList;

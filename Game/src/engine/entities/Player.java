@@ -24,9 +24,9 @@ public class Player extends GameEntity{
 	private boolean alive = true;
 	
 	
-	private final int focusedSpeed = 1, unfocusedSpeed = 3;
+	private final float focusedSpeed = 1.5f, unfocusedSpeed = 3;
 	
-	private int speed;
+	private float speed;
 	private boolean focused, firing;
 	
 	private BulletFrame shot;

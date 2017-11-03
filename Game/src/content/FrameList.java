@@ -66,4 +66,26 @@ public class FrameList{
 	public EffectFrame getEffect(int type, int color){
 		return effectList.get(type, color);
 	}
+	
+	public static int getVarNum(String var){
+		
+		// Bullet types
+		for(int i = 0; i < BulletList.types.length; i++)
+			if(var.equals("_" + BulletList.types[i]))
+				return i;
+		
+		// Colors
+		for(int i = 0; i < colors.length; i++){
+			
+			// Standard
+			if(var.equals("_" + colors[i]))
+				return i;
+			
+			// Dark
+			if(var.equals("_" + colors[i] + "_d"))
+				return i + 16;
+		}
+		
+		return -1;
+	}
 }

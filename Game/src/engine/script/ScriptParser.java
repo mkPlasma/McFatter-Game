@@ -109,7 +109,6 @@ public class ScriptParser{
 		
 		// First variable reserved for register
 		variables.add("");
-		addDefaultVars();
 		
 		// Define functions
 		process(true);
@@ -121,7 +120,6 @@ public class ScriptParser{
 		bytecode.clear();
 		variables.clear();
 		variables.add("");
-		addDefaultVars();
 		
 		tmpExpInd = -1;
 		loopNum = 0;
@@ -148,22 +146,6 @@ public class ScriptParser{
 			bytecodeArray[i] = bytecode.get(i);
 		
 		script.setBytecode(bytecodeArray);
-	}
-	
-	// Adds built in variable definitions
-	private void addDefaultVars(){
-		
-		// Bullet types
-		for(String s:BulletList.types)
-			variables.add("0c:_" + s);
-		
-		// Bullet colors
-		for(String s:FrameList.colors)
-			variables.add("0c:_" + s);
-		
-		// Dark colors
-		for(String s:FrameList.colors)
-			variables.add("0c:_" + s + "_d");
 	}
 	
 	// Process tokens into bytecode
@@ -558,7 +540,6 @@ public class ScriptParser{
 							else if(statesPeek("func_args")){
 								// Define parameter
 								variables.add(createVar);
-								bytecode.add(getInstruction("create_var", lineNum, variables.size() - 1));
 								bytecode.add(getInstruction("get_param", lineNum, variables.size() - 1));
 								funcArgs++;
 								
@@ -858,7 +839,7 @@ public class ScriptParser{
 										
 										// Add comparison to expression
 										bc.add(0, getInstruction("exp_val", VARIABLE, lineNum, variables.size() - 1));
-										bc.add(bc.size() - 1, getInstruction(forLess ? "less" : "greater", lineNum));
+										bc.add(bc.size() - 1, getInstruction("less", lineNum));
 										
 										// Add comparison
 										bytecode.addAll(bc);
@@ -1029,7 +1010,6 @@ public class ScriptParser{
 								else{
 									// Define parameter
 									variables.add(createVar);
-									bytecode.add(getInstruction("create_var", lineNum, variables.size() - 1));
 									bytecode.add(getInstruction("get_param", lineNum, variables.size() - 1));
 									funcArgs++;
 								}

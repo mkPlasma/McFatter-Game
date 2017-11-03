@@ -36,20 +36,24 @@ public class ScriptBranch{
 	// Sync variables with other states
 	private ArrayList<Integer> syncVariables;
 	
+	// Vars created in current scope (dont't sync)
+	private ArrayList<Integer> scopeVars;
+	
 	// Store return points for function calls
 	private Stack<Integer> returnPoints;
 	
 	
-	public ScriptBranch(int bytecodeIndex, Object[] variables, boolean primary){
+	public ScriptBranch(int bytecodeIndex, Object[] variables, ArrayList<Integer> scopeVars, boolean primary){
 		this.bytecodeIndex = bytecodeIndex;
 		this.variables = variables.clone();
+		this.scopeVars = scopeVars;
 		this.primary = primary;
 		
 		syncVariables = new ArrayList<Integer>();
 		returnPoints = new Stack<Integer>();
 
 		for(int i = 0; i < variables.length; i++)
-			if(variables[i] != null)
+			if(variables[i] != null && (scopeVars == null || !scopeVars.contains(i)))
 				syncVariables.add(i);
 	}
 	
@@ -106,35 +110,47 @@ public class ScriptBranch{
 		return waitTime;
 	}
 	
-	public boolean isPrimary(){
-		return primary;
-	}
-	
 	public void setPrimary(boolean primary){
 		this.primary = primary;
 	}
 	
-	public boolean toRemove(){
-		return remove;
+	public boolean isPrimary(){
+		return primary;
 	}
 	
 	public void remove(){
 		remove = true;
 	}
 	
+	public boolean toRemove(){
+		return remove;
+	}
+	
+	public void setVariables(Object[] variables){
+		this.variables = variables;
+	}
+	
 	public Object[] getVariables(){
 		return variables.clone();
 	}
 	
-	public void setVariables(Object[] variables){
-		this.variables = variables.clone();
+	public void setScopeVars(ArrayList<Integer> scopeVars){
+		this.scopeVars = scopeVars;
 	}
 	
-	public Stack<Integer> getReturnPoints(){
-		return returnPoints;
+	public ArrayList<Integer> getScopeVars(){
+		
+		if(scopeVars == null)
+			return new ArrayList<Integer>();
+		
+		return new ArrayList<Integer>(scopeVars);
 	}
 	
 	public void setReturnPoints(Stack<Integer> returnPoints){
 		this.returnPoints = returnPoints;
+	}
+	
+	public Stack<Integer> getReturnPoints(){
+		return returnPoints;
 	}
 }

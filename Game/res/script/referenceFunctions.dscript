@@ -7,6 +7,9 @@
 // Prints a
 print(a);
 
+// Cast a to int
+int(a);
+
 // How long script has been running (frames)
 scriptTime();
 

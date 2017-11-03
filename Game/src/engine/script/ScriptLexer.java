@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import content.FrameList;
+
 import static engine.script.ScriptFunctions.*;
 
 /*
@@ -279,6 +281,10 @@ public class ScriptLexer{
 					// Add function
 					else if(p2.contains("("))
 						tokens.add(lineNum + "f:" + token2);
+					
+					// Pre-defined variables
+					else if(FrameList.getVarNum(token2) != -1)
+						tokens.add(lineNum + "i:" + FrameList.getVarNum(token2));
 					
 					// Add variable
 					else

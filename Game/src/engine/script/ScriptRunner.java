@@ -65,6 +65,9 @@ public class ScriptRunner{
 	// Function points
 	private ArrayList<Integer> functions;
 	
+	// Variables defined in current scope, shouldn't sync
+	private ArrayList<Integer> scopeVars;
+	
 	// Current array
 	private ArrayList<Object> array;
 	
@@ -121,6 +124,7 @@ public class ScriptRunner{
 		// Initialize/reset lists
 		loops 			= new ArrayList<Integer>();
 		functions		= new ArrayList<Integer>();
+		scopeVars		= new ArrayList<Integer>();
 		array			= new ArrayList<Object>();
 		arrayRef		= new ArrayList<Object>();
 		expressions		= new Stack<ArrayList<Object>>();
@@ -133,8 +137,8 @@ public class ScriptRunner{
 		
 		random = new Random();
 		
-		// Account for register and default vars
-		int varCount = 53;
+		// Account for register
+		int varCount = 1;
 		
 		// Add variables, find functions
 		for(int i = 0; i < bytecode.length; i++){
@@ -143,8 +147,9 @@ public class ScriptRunner{
 			
 			if(getType(inst) == STRING)
 				i += getData(inst) + 1;
-			else if(op.equals("create_var"))
+			else if(op.equals("create_var") || op.equals("get_param")) {
 				varCount++;
+			}
 			else if(op.equals("function") || op.equals("task"))
 				functions.add(i);
 			else if(op.equals("while"))
@@ -153,23 +158,7 @@ public class ScriptRunner{
 		
 		Object[] variables = new Object[varCount];
 		
-		addDefaultVars(variables);
-		
-		return new ScriptBranch(0, variables, true);
-	}
-	
-	// Adds vars for bullet types, etc.
-	private void addDefaultVars(Object[] variables){
-		
-		int c = 1;
-		
-		// Bullet types
-		for(int i = 0; i < 20; i++)
-			variables[c++] = i;
-		
-		// Bullet colors
-		for(int i = 0; i < 32; i++)
-			variables[c++] = i;
+		return new ScriptBranch(0, variables, null, true);
 	}
 	
 	public void setPlayer(Player player){
@@ -212,6 +201,7 @@ public class ScriptRunner{
 		branch.syncWithParent();
 		variables = branch.getVariables();
 		returnPoints = branch.getReturnPoints();
+		scopeVars = branch.getScopeVars();
 		
 		// Go into else block
 		boolean doElse = false;
@@ -313,6 +303,10 @@ public class ScriptRunner{
 				
 				case "create_var":
 					variables[data] = 0;
+					
+					if(!branch.isPrimary())
+						scopeVars.add(data);
+					
 					continue;
 				
 				
@@ -607,7 +601,7 @@ public class ScriptRunner{
 					// Branch if task
 					if(getOpcodeName(bytecode[i]).equals("task")){
 						// New branch continues outside of task
-						ScriptBranch newBranch = new ScriptBranch(index + 1, variables, branch.isPrimary());
+						ScriptBranch newBranch = new ScriptBranch(index + 1, variables, scopeVars, branch.isPrimary());
 						branches.add(newBranch);
 						
 						// Current branch enters task
@@ -648,6 +642,9 @@ public class ScriptRunner{
 				
 				case "get_param":
 					variables[data] = funcParams.peek().remove();
+					
+					if(!branch.isPrimary())
+						scopeVars.add(data);
 					
 					// Remove if empty
 					if(funcParams.size() > 1 && funcParams.peek().isEmpty())
@@ -717,6 +714,7 @@ public class ScriptRunner{
 					// Update variables/return points
 					branch.setVariables(variables);
 					branch.setReturnPoints(returnPoints);
+					branch.setScopeVars(scopeVars);
 					branch.syncToParent();
 					
 					// Return to continue running
@@ -1030,6 +1028,11 @@ public class ScriptRunner{
 			// General functions
 			case "print":
 				System.out.println(script.getFileName() + ": " + o1);
+				return;
+			
+			case "int":
+				if(isFloat) returnValue = (int) f1;
+				else			returnValue = i1;
 				return;
 			
 			case "scriptTime":

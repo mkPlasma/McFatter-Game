@@ -1,40 +1,45 @@
 
-set rad = 30;
-set randRange = 10;
 
-set count = 0;
+set c = {20, 10, 3};
+set splitNum = 3;
 
-set rNum = 16;
-
-ringLoop(centerX(), 140, rNum, 1.5, _red, 20);
-
-wait 300;
-
-ringLoop(centerX() - 100, 140, rNum, 1.8, _purple, 24);
-ringLoop(centerX() + 100, 140, rNum, 1.8, _purple, 24);
-
-wait 300;
-
-ringLoop(centerX() - 150, 180, rNum*2, 1.4, _blue, 31);
-ringLoop(centerX() + 150, 180, rNum*2, 1.4, _blue, 31);
-
-task ringLoop(x, y, num, spd, col, w){
-    
-    while(true){
-        ring(x, y, num, spd, col);
-        wait w;
-    }
-}
-
-task ring(x, y, num, spd, col){
-    
-    x += rand(-randRange, randRange);
-    y += rand(-randRange, randRange);
+while(true){
     
     set dir = rand(0, 360);
     
-    for(i in num){
-        set dir2 = dir + i*(360/num);
-        bullet(_star4, col, x + rad*cos(dir2), y + rad*sin(dir2), dir2, spd, 5);
+    for(d in 0, 360/c[0], 361){
+        splitBullet(centerX(), 140, dir + d, 0);
     }
+    
+    wait 300;
+}
+
+
+task splitBullet(x, y, dir, num){
+    
+    set type = _orb;
+    
+    if(num == 1){
+        type = _crystal;
+    }
+    
+    if(num == 2){
+        type = _needle;
+    }
+    
+    set b = bullet(type, _green, x, y, dir, 2, 5);
+    
+    wait 60;
+    
+    num++;
+    
+    if(num >= splitNum || b.isDeleted()){
+        return;
+    }
+    
+    for(d in 0, 360/c[num], 361){
+        splitBullet(b.getX(), b.getY(), b.getDir() + d, num);
+    }
+    
+    b.delete();
 }

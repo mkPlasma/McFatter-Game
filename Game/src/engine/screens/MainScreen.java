@@ -115,8 +115,9 @@ public class MainScreen extends GameScreen{
 	}
 	
 	private void debugKeys(){
-		// Tick frame with T
-		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_T))
+		
+		// Frame step with P
+		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_P))
 			tickFrame = true;
 
 		// Toggle hitboxes with H
