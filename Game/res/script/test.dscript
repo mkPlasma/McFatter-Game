@@ -1,31 +1,40 @@
 
+set rad = 30;
+set randRange = 10;
 
-set dir;
+set count = 0;
 
-set r = 60;
-set c = 8;
+set rNum = 16;
 
-set type;
+ringLoop(centerX(), 140, rNum, 1.5, _red, 20);
 
-while(true){
+wait 300;
+
+ringLoop(centerX() - 100, 140, rNum, 1.8, _purple, 24);
+ringLoop(centerX() + 100, 140, rNum, 1.8, _purple, 24);
+
+wait 300;
+
+ringLoop(centerX() - 150, 180, rNum*2, 1.4, _blue, 31);
+ringLoop(centerX() + 150, 180, rNum*2, 1.4, _blue, 31);
+
+task ringLoop(x, y, num, spd, col, w){
     
-    for(i in c){
-        bullet(dir + i*(360/c));
+    while(true){
+        ring(x, y, num, spd, col);
+        wait w;
     }
-    
-    dir += 15.77;
-    
-    wait 5;
 }
 
-task bullet(dir){
-    set r = 50;
-    set b = bullet(type, _green, centerX() + r*cos(dir), 140 + r*sin(dir), dir, 2, 10);
-    //b.setAdditive();
+task ring(x, y, num, spd, col){
     
-    type++;
+    x += rand(-randRange, randRange);
+    y += rand(-randRange, randRange);
     
-    if(type > _ring){
-        type = _orb;
+    set dir = rand(0, 360);
+    
+    for(i in num){
+        set dir2 = dir + i*(360/num);
+        bullet(_star4, col, x + rad*cos(dir2), y + rad*sin(dir2), dir2, spd, 5);
     }
 }

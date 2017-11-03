@@ -136,22 +136,27 @@ public class BulletList{
 	
 	public int getHitboxSize(int type){
 		switch(type){
-			
-			case TYPE_ORB:
-			case TYPE_SCALE:
 			case TYPE_CRYSTAL:
+			case TYPE_WALL:
+			case TYPE_NEEDLE:
+				return 1;
+			
+			case TYPE_SCALE:
 			case TYPE_RICE:
 			case TYPE_STAR:
 			case TYPE_STAR4:
 			case TYPE_PLUS:
-			case TYPE_WALL:
-			case TYPE_NEEDLE:
+				return 2;
+			
+			case TYPE_ORB:
 			case TYPE_RING:
 			case TYPE_MISSILE:
 			case TYPE_ATOM:
 				return 3;
 			
 			case TYPE_MINE:
+				return 4;
+			
 			case TYPE_LASER:
 			case TYPE_LASER_DIST:
 			case TYPE_LASER_HELIX:

@@ -24,7 +24,7 @@ public class Player extends GameEntity{
 	private boolean alive = true;
 	
 	
-	private final int focusedSpeed = 2, unfocusedSpeed = 4;
+	private final int focusedSpeed = 1, unfocusedSpeed = 3;
 	
 	private int speed;
 	private boolean focused, firing;
@@ -161,6 +161,6 @@ public class Player extends GameEntity{
 	}
 	
 	public int getHitboxSize(){
-		return 3;
+		return 1;
 	}
 }

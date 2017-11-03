@@ -45,7 +45,7 @@ public class MainScreen extends GameScreen{
 	private int pauseTime = -30;
 	private boolean tickFrame;
 	
-	private boolean clearScreen;
+	private boolean clearScreen, slowMode;
 	
 	public MainScreen(Renderer r, TextureCache tc){
 		super(r, tc);
@@ -91,8 +91,8 @@ public class MainScreen extends GameScreen{
 		r.updateHitboxes(enemyBullets, enemies, player);
 		
 		r.render();
-		
-		if(!paused || tickFrame)
+
+		if((!paused || tickFrame) && (!slowMode || (slowMode && time % 2 == 0)))
 			rTime++;
 	}
 	
@@ -104,13 +104,37 @@ public class MainScreen extends GameScreen{
 			pauseTime = time;
 		}
 		
-		// Tick frame with P
-		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_P))
-			tickFrame = true;
+		debugKeys();
 		
+		if((!paused || tickFrame) && (!slowMode || (slowMode && time % 2 == 0))){
+			updateGameStage();
+			tickFrame = false;
+		}
+		
+		time++;
+	}
+	
+	private void debugKeys(){
+		// Tick frame with T
+		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_T))
+			tickFrame = true;
+
 		// Toggle hitboxes with H
 		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_H))
 			r.toggleRenderHitboxes();
+
+		// Slow down with D
+		if(!paused && KeyboardListener.isKeyDown(GLFW.GLFW_KEY_D))
+			slowMode = true;
+		else
+			slowMode = false;
+		
+		// Fast forward with F
+		if(!paused && KeyboardListener.isKeyDown(GLFW.GLFW_KEY_F)){
+			updateGameStage();
+			updateGameStage();
+			rTime += 2;
+		}
 
 		// Reload script with Alt+R
 		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_R)){
@@ -123,14 +147,6 @@ public class MainScreen extends GameScreen{
 			System.out.println("Cleared screen!");
 			clearScreen = true;
 		}
-		
-		if(!paused || tickFrame){
-			updateGameStage();
-			tickFrame = false;
-		}
-		
-		
-		time++;
 	}
 	
 	private void updateGameStage(){
