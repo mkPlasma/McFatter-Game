@@ -139,6 +139,7 @@ public class BulletList{
 			case TYPE_CRYSTAL:
 			case TYPE_WALL:
 			case TYPE_NEEDLE:
+			case TYPE_LASER_HELIX:
 				return 1;
 			
 			case TYPE_SCALE:
@@ -146,21 +147,16 @@ public class BulletList{
 			case TYPE_STAR:
 			case TYPE_STAR4:
 			case TYPE_PLUS:
+			case TYPE_MISSILE:
+			case TYPE_LASER:
+			case TYPE_LASER_DIST:
 				return 2;
 			
 			case TYPE_ORB:
 			case TYPE_RING:
-			case TYPE_MISSILE:
 			case TYPE_ATOM:
-				return 3;
-			
 			case TYPE_MINE:
-				return 4;
-			
-			case TYPE_LASER:
-			case TYPE_LASER_DIST:
-			case TYPE_LASER_HELIX:
-				return 5;
+				return 3;
 			
 			default:
 				return 0;
@@ -169,6 +165,8 @@ public class BulletList{
 	
 	public float getHBLengthCrop(int type){
 		switch(type){
+			case TYPE_WALL:
+				return 0.45f;
 			
 			case TYPE_ORB:
 			case TYPE_SCALE:
@@ -177,18 +175,19 @@ public class BulletList{
 			case TYPE_STAR:
 			case TYPE_STAR4:
 			case TYPE_PLUS:
-			case TYPE_WALL:
 			case TYPE_NEEDLE:
 			case TYPE_RING:
 			case TYPE_MISSILE:
 			case TYPE_ATOM:
-				return .8f;
+				return 0.2f;
 				
 			case TYPE_MINE:
+				return 0.1f;
+			
 			case TYPE_LASER:
 			case TYPE_LASER_DIST:
 			case TYPE_LASER_HELIX:
-				return .9f;
+				return 4;
 			
 			default:
 				return 0;

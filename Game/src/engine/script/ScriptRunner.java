@@ -30,6 +30,7 @@ import java.util.Stack;
 import content.FrameList;
 import engine.entities.Bullet;
 import engine.entities.GameEntity;
+import engine.entities.Laser;
 import engine.entities.MovableEntity;
 import engine.entities.Player;
 import engine.screens.MainScreen;
@@ -911,6 +912,7 @@ public class ScriptRunner{
 				case "<":	resultBool = n1 < n2;	useBool = true; break;
 				case ">":	resultBool = n1 > n2;	useBool = true; break;
 				case "==":	resultBool = n1 == n2;	useBool = true; break;
+				case "!=":	resultBool = n1 != n2;	useBool = true; break;
 				case "<=":	resultBool = n1 <= n2;	useBool = true; break;
 				case ">=":	resultBool = n1 >= n2;	useBool = true; break;
 			}
@@ -935,17 +937,16 @@ public class ScriptRunner{
 		boolean b1 = (boolean) o1;
 		boolean b2 = (boolean) o2;
 		
-		boolean result = false;
-		
 		// Operate
 		switch(op){
-			case "!":	result = !b1;		break;
-			case "||":	result = b1 || b2;	break;
-			case "&&":	result = b1 && b2;	break;
-			case "==":	result = b1 == b2;	break;
+			case "!":	return !b1;
+			case "||":	return b1 || b2;
+			case "&&":	return b1 && b2;
+			case "==":	return b1 == b2;
+			case "!=":	return b1 != b2;
 		}
 		
-		return result;
+		return null;
 	}
 	
 	// Built in functions
@@ -1294,6 +1295,26 @@ public class ScriptRunner{
 				
 				returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, spd, del, frameList, screen);
 				screen.addEnemyBullet((Bullet)returnValue);
+				return;
+			}
+			
+			case "laser":{
+				Object ox = params.remove();
+				Object oy = params.remove();
+				Object oDir = params.remove();
+				Object oLen = params.remove();
+				Object oWid = params.remove();
+				Object oDel = params.remove();
+
+				float x = ox instanceof Float ? (float)ox : (float)(int)ox;
+				float y = oy instanceof Float ? (float)oy : (float)(int)oy;
+				float dir = oDir instanceof Float ? (float)oDir : (float)(int)oDir;
+				int len = oLen instanceof Integer ? (int)oLen : (int)(float)oLen;
+				int wid = oWid instanceof Integer ? (int)oWid : (int)(float)oWid;
+				int del = (int)oDel;
+				
+				returnValue = new Laser(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, len, wid, del, frameList, screen);
+				screen.addEnemyBullet((Laser)returnValue);
 				return;
 			}
 			

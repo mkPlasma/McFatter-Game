@@ -57,7 +57,6 @@ public class Bullet extends MovableEntity{
 		this.frameList = frameList;
 		this.screen = screen;
 		
-		init();
 		onCreate();
 	}
 	
@@ -71,11 +70,20 @@ public class Bullet extends MovableEntity{
 		this.frameList = frameList;
 		this.screen = screen;
 		
-		init();
 		onCreate();
 	}
 	
-	private void init(){
+	// For lasers
+	public Bullet(BulletFrame frame, float x, float y, float dir, int delay, FrameList frameList, MainScreen screen){
+		super(frame, x, y, dir, 0);
+
+		this.frame = frame;
+		this.delay = delay;
+		this.frameList = frameList;
+		this.screen = screen;
+	}
+	
+	private void onCreate(){
 		
 		initFrameProperties();
 		
@@ -108,10 +116,6 @@ public class Bullet extends MovableEntity{
 		color			= frame.getColor();
 		hitboxSize		= frame.getHitboxSize();
 		sprite			= new Sprite(frame.getSprite());
-	}
-	
-	public void onCreate(){
-		
 	}
 	
 	public void onDestroy(){

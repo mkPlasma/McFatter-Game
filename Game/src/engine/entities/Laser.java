@@ -1,6 +1,7 @@
 package engine.entities;
 
-import engine.graphics.Renderer;
+import content.FrameList;
+import engine.screens.MainScreen;
 
 /*
  * 		Laser.java
@@ -16,86 +17,82 @@ public class Laser extends Bullet{
 	private int length, width;
 	private float scx, scy;
 	
-	public Laser(){
-		super(null, 0, 0, 0, 0, 0, null, null);
-	}
+	private float hbLengthCrop;
 	
-	/*
-	public Laser(BulletFrame frame, float x, float y, float dir, float spd, int length, int width){
-		super(frame, x, y, dir, spd);
-		
-		visible = true;
+	public Laser(BulletFrame frame, float x, float y, float dir, int length, int width, int delay, FrameList frameList, MainScreen screen){
+		super(frame, x, y, dir, delay, frameList, screen);
 
-		this.frame = frame;
-		
-		inst = new InstructionSet(InstructionSet.INST_MOVABLE);
-		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_LASER, MovementInstruction.SET_POS, new float[]{x, y}));
-		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_LASER, MovementInstruction.CONST_DIR_SPD, new float[]{dir, spd}));
+		this.length = length;
+		this.width = width;
 		
 		onCreate();
 	}
 	
-	public Laser(BulletFrame frame, float x, float y, float dir, float spd, int length, int width, int damage){
-		super(frame, x, y, dir, spd, damage, 0);
+	private void onCreate(){
+		initFrameProperties();
 		
-		visible = true;
+		collisions = true;
 		
-		this.frame = frame;
-		
-		this.damage = damage;
-		
-		inst = new InstructionSet(InstructionSet.INST_MOVABLE);
-		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_LASER, MovementInstruction.SET_POS, new float[]{x, y}));
-		inst.add(new MovementInstruction(this, 0, MovementInstruction.ENT_LASER, MovementInstruction.CONST_DIR_SPD, new float[]{dir, spd}));
-		
-		onCreate();
+		updateScale(2);
 	}
-	*/
+	
+	public void initFrameProperties(){
+		super.initFrameProperties();
+		hbLengthCrop = frame.getHBLengthCrop();
+	}
 	
 	public void update(){
-		super.update();
-	}
-	
-	public void draw(Renderer r){
-		
-		if(!visible)
-			return;
-
-		scx = ((float)width)/((float)frame.getSprite().getWidth());
-		scy = ((float)length)/((float)frame.getSprite().getHeight());
-		
-		//r.render(frame.getSprite(), time, (int)(x + (length/2)*Math.cos(Math.toRadians(dir))), (int)(y + (length/2)*Math.sin(Math.toRadians(dir))), 1, dir + 90, scx, scy);
-	}
-	
-	public void onCreate(){
-		
+		updateMovements();
+		time++;
 	}
 	
 	public void onDestroy(){
 		deleted = true;
 	}
 	
+	// 0 - x	1 - y	2 - both
+	private void updateScale(int s){
+		if(s == 0 || s == 2) scx = (float)(width)/sprite.getHeight();
+		if(s == 1 || s == 2) scy = (float)(length*2)/sprite.getWidth();
+	}
+	
+	
 	public void setLength(int length){
 		this.length = length;
+		updateScale(0);
 	}
 	
 	public int getLength(){
 		return length;
 	}
 	
+	public float getScaleX(){
+		return scx;
+	}
+	
 	public void setWidth(int width){
 		this.width = width;
+		updateScale(1);
 	}
 	
 	public int getWidth(){
 		return width;
 	}
 	
+	public float getScaleY(){
+		return scy;
+	}
+	
 	public int getHitboxSize(){
-		return (int)(scx*((BulletFrame)frame).getHitboxSize());
+		return (int)(scx*hitboxSize);
 	}
 	
 	public int getHBLengthCrop(){
-		return (int)(length - length*((BulletFrame)frame).getHBLengthCrop());
+		
+		// Absolute if whole number
+		if(hbLengthCrop % 1 == 0) return (int)hbLengthCrop;
+		
+		// Depends on length otherwise
+		return (int)(length*hbLengthCrop);
 	}
 }

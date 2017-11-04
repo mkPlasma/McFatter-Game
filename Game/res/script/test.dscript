@@ -1,45 +1,11 @@
 
-
-set c = {20, 10, 3};
-set splitNum = 3;
+set c = 300;
 
 while(true){
     
-    set dir = rand(0, 360);
-    
-    for(d in 0, 360/c[0], 361){
-        splitBullet(centerX(), 140, dir + d, 0);
+    for(d in 0, 360/c, 361){
+        bullet(_orb, _blue, centerX(), centerY(), d, 2, 15);
     }
     
-    wait 300;
-}
-
-
-task splitBullet(x, y, dir, num){
-    
-    set type = _orb;
-    
-    if(num == 1){
-        type = _crystal;
-    }
-    
-    if(num == 2){
-        type = _needle;
-    }
-    
-    set b = bullet(type, _green, x, y, dir, 2, 5);
-    
-    wait 60;
-    
-    num++;
-    
-    if(num >= splitNum || b.isDeleted()){
-        return;
-    }
-    
-    for(d in 0, 360/c[num], 361){
-        splitBullet(b.getX(), b.getY(), b.getDir() + d, num);
-    }
-    
-    b.delete();
+    wait 120;
 }

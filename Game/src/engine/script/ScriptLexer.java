@@ -36,7 +36,7 @@ public class ScriptLexer{
 	public static final String
 	
 	// Operators
-	rOperators = "\\+|-|\\*|/|%|\\^|!|(\\|\\|)|(&&)|<|>|(==)|(<=)|(>=)",
+	rOperators = "\\+|-|\\*|/|%|\\^|!|(\\|\\|)|(&&)|<|>|(==)|(!=)|(<=)|(>=)",
 	
 	// Assignment operators
 	rAssignments = "=|(\\+\\+)|(--)|(\\+=)|(-=)|(\\*=)|(/=)|(%=)",

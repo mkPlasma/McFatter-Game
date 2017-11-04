@@ -24,17 +24,17 @@ public class ShaderProgram{
 	
 	private final int program, vShader, fShader, gShader;
 	
-	public ShaderProgram(String vertShader, String fragShader, String geomShader){
+	public ShaderProgram(String vertShader, String geomShader, String fragShader){
 		
 		vShader = compileShader(vertShader + ".vs", GL_VERTEX_SHADER);
-		fShader = compileShader(fragShader + ".fs", GL_FRAGMENT_SHADER);
 		gShader = compileShader(geomShader + ".gs", GL_GEOMETRY_SHADER);
+		fShader = compileShader(fragShader + ".fs", GL_FRAGMENT_SHADER);
 		
 		program = glCreateProgram();
 		
 		glAttachShader(program, vShader);
-		glAttachShader(program, fShader);
 		glAttachShader(program, gShader);
+		glAttachShader(program, fShader);
 		
 		glBindFragDataLocation(program, 0, "fragColor");
 	}
@@ -55,11 +55,12 @@ public class ShaderProgram{
 		}
 
 		glDetachShader(program, vShader);
-		glDetachShader(program, fShader);
 		glDetachShader(program, gShader);
+		glDetachShader(program, fShader);
+		
 		glDeleteShader(vShader);
-		glDeleteShader(fShader);
 		glDeleteShader(gShader);
+		glDeleteShader(fShader);
 	}
 	
 	private int compileShader(String path, int type){

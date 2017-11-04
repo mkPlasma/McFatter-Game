@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.lwjgl.glfw.GLFW;
 
-import content.BulletList;
 import engine.KeyboardListener;
 import engine.entities.Bullet;
 import engine.entities.Effect;
@@ -13,7 +12,6 @@ import engine.entities.Laser;
 import engine.entities.Player;
 import engine.graphics.Renderer;
 import engine.graphics.TextureCache;
-import engine.graphics.Texture;
 
 /*
  * 		MainScreen.java
@@ -161,8 +159,6 @@ public class MainScreen extends GameScreen{
 		stage.update();
 		
 		if(stage instanceof Mission){
-			Mission ms = (Mission)stage;
-
 			updateEffects();
 			updateBullets();
 			updateEnemies();
@@ -219,15 +215,15 @@ public class MainScreen extends GameScreen{
 	}
 	
 	private void checkCollisions(){
-		final float[] ppos = player.getPos();
-		final int pHitbox = player.getHitboxSize();
+		float[] ppos = player.getPos();
+		int pHitbox = player.getHitboxSize();
 		
 		// Enemy bullets
 		for(int i = 0; i < enemyBullets.size(); i++){
-			final Bullet b = enemyBullets.get(i);
+			Bullet b = enemyBullets.get(i);
 			
 			if(b.collisionsEnabled()){
-				final float bpos[] = b.getPos();
+				float[] bpos = b.getPos();
 				
 				// Bullet collisions
 				if(!(b instanceof Laser)){
@@ -239,24 +235,24 @@ public class MainScreen extends GameScreen{
 				
 				// Laser collisions
 				else{
+					Laser l = (Laser)b;
 					
 					// Angle between laser and player
-					float ang = (float)(Math.atan2(bpos[1] - ppos[1], bpos[0] - ppos[0]) - Math.toRadians(b.getDir()));
+					double ang = (Math.atan2(bpos[1] - ppos[1], bpos[0] - ppos[0]) - Math.toRadians(l.getDir()));
 					
 					// Distance between laser base and player
-					float d = (float)Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]);
+					double d = Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]);
 					
 					// Perpendicular distance (actual distance to check)
-					float d2 = (float)(Math.abs(d*Math.sin(ang)));
+					double d2 = (Math.abs(d*Math.sin(ang)));
 					
 					// Distance outwards from laser, used to 'crop' hitbox
-					float d3 = -(float)(d*Math.cos(ang));
+					double d3 = (-d*Math.cos(ang));
 					
-					Laser l = (Laser)b;
 					int crop = l.getHBLengthCrop();
 					
 					// Check collision
-					if(d3 > crop && d3 < l.getLength() - crop && d2 < pHitbox + l.getHitboxSize()){
+					if(d2 < pHitbox + l.getHitboxSize() && d3 > crop && d3 < l.getLength() - crop){
 						//player.death();
 						b.onDestroy();
 					}
@@ -266,16 +262,16 @@ public class MainScreen extends GameScreen{
 		
 		// Player bullets
 		for(int i = 0; i < enemies.size(); i++){
-			final Enemy e = enemies.get(i);
+			Enemy e = enemies.get(i);
 			
 			if(e.collisionsEnabled()){
-				final float[] epos = e.getPos();
+				float[] epos = e.getPos();
 				
 				for(int j = 0; j < playerBullets.size(); j++){
-					final Bullet b = playerBullets.get(j);
+					Bullet b = playerBullets.get(j);
 					
 					if(b.collisionsEnabled()){
-						final float bpos[] = b.getPos();
+						float[] bpos = b.getPos();
 						
 						if(Math.hypot(epos[0] - bpos[0], epos[1] - bpos[1]) < e.getHitboxSize() + b.getHitboxSize()){
 							e.damage(b.getDamage());

@@ -66,6 +66,7 @@ public class ScriptFunctions{
 		"less",				// Compares register with value, sets register
 		"greater",			//
 		"equals",			//
+		"not_eq",			//
 		"less_eq",			//
 		"greater_eq",		//
 		
@@ -121,10 +122,10 @@ public class ScriptFunctions{
 	};
 	
 	public static final String[] operations = {
-		"+", "-", "*", "/", "%", "^", "<", ">", "==", "<=", ">=", "!", "||", "&&",
+		"+", "-", "*", "/", "%", "^", "<", ">", "==", "!=", "<=", ">=", "!", "||", "&&",
 		
-		"add", "subtract", "multiply", "divide", "modulo", "exponent", "not", "or", "and",
-		"less", "greater", "equals", "less_eq", "greater_eq",
+		"add", "subtract", "multiply", "divide", "modulo", "exponent",
+		"less", "greater", "equals", "not_eq", "less_eq", "greater_eq", "not", "or", "and",
 	};
 	
 	public static final byte INT = 0, FLOAT = 1, BOOLEAN = 2, STRING = 3,
@@ -194,6 +195,7 @@ public class ScriptFunctions{
 		
 		// Bullet
 		"bullet:7",
+		"laser:8",
 		
 		"delete:d0",
 		"setX:d1",
@@ -293,8 +295,8 @@ public class ScriptFunctions{
 			
 			case "remove":
 				return o1 instanceof ArrayList && (p == 0 || o2 instanceof Integer);
-			
-			case "bullet":
+				
+			case "bullet":{
 				Object o5 = params[4];
 				Object o6 = params[5];
 				Object o7 = params[6];
@@ -305,6 +307,22 @@ public class ScriptFunctions{
 					  (o5 instanceof Integer || o5 instanceof Float) &&
 					  (o6 instanceof Integer || o6 instanceof Float) &&
 					  (o7 instanceof Integer || o7 instanceof Float);
+			}
+			
+			case "laser":{
+				Object o5 = params[4];
+				Object o6 = params[5];
+				Object o7 = params[6];
+				Object o8 = params[7];
+				
+				return o1 instanceof Integer && o2 instanceof Integer &&
+					  (o3 instanceof Integer || o3 instanceof Float) &&
+					  (o4 instanceof Integer || o4 instanceof Float) &&
+					  (o5 instanceof Integer || o5 instanceof Float) &&
+					  (o6 instanceof Integer || o6 instanceof Float) &&
+					  (o7 instanceof Integer || o7 instanceof Float) &&
+					  (o8 instanceof Integer || o8 instanceof Float);
+			}
 			
 			case "setX": case "setY":
 				return o1 instanceof GameEntity && (o2 instanceof Integer || o2 instanceof Float);
@@ -544,7 +562,7 @@ public class ScriptFunctions{
 	// Operations
 	
 	public static boolean isNumberOp(String op){
-		for(int i = 0; i < 11; i++)
+		for(int i = 0; i < 12; i++)
 			if(op.equals(operations[i]))
 				return true;
 		return false;
@@ -564,13 +582,14 @@ public class ScriptFunctions{
 			case "multiply":	return "*";
 			case "divide":		return "/";
 			case "modulo":		return "%";
-			case "exponent":		return "^";
+			case "exponent":	return "^";
 			case "not":			return "!";
 			case "or":			return "||";
 			case "and":			return "&&";
 			case "less":		return "<";
 			case "greater":		return ">";
 			case "equals":		return "==";
+			case "not_eq":		return "!=";
 			case "less_eq":		return "<=";
 			case "greater_eq":	return ">=";
 			
@@ -586,6 +605,7 @@ public class ScriptFunctions{
 			case "<":	return "less";
 			case ">":	return "greater";
 			case "==":	return "equals";
+			case "!=":	return "not_eq";
 			case "<=":	return "less_eq";
 			case ">=":	return "greater_eq";
 		}
@@ -603,7 +623,7 @@ public class ScriptFunctions{
 				return 2;
 			case "!":
 				return 1;
-			case "<": case ">": case "=": case "<=": case ">=": 
+			case "<": case ">": case "==": case "!=": case "<=": case ">=": 
 				return 0;
 		}
 		

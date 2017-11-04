@@ -14,6 +14,7 @@ import org.lwjgl.BufferUtils;
 import engine.entities.Bullet;
 import engine.entities.Enemy;
 import engine.entities.GameEntity;
+import engine.entities.Laser;
 import engine.entities.MovableEntity;
 import engine.entities.Player;
 
@@ -36,7 +37,8 @@ public class RenderBatch{
 		
 		UPDATE_NONE			= 0,
 		UPDATE_ALL_BUT_SIZE	= 0b11101,
-		UPDATE_HITBOX		= 0b00011;
+		UPDATE_HITBOX		= 0b00011,
+		UPDATE_LASER_HITBOX	= 0b01001;
 	
 	
 	private final int shader;
@@ -104,21 +106,29 @@ public class RenderBatch{
 	}
 	
 	// For hitboxes
-	public RenderBatch(int capacity, int updates){
+	public RenderBatch(int shader, int capacity, int updates){
+		this.shader = shader;
 		this.capacity = capacity;
 		this.updates = updates;
 		
-		shader = 1;
 		textureID = -1;
-		sizePixelsX = 0;
-		sizePixelsY = 0;
+		sizePixelsX = 32;
+		sizePixelsY = 32;
 		
 		vao = glGenVertexArrays();
 		vbo = glGenBuffers();
 		sze = glGenBuffers();
-		tex = 0;
-		tfm = 0;
-		alp = 0;
+		
+		if(shader == 1){
+			tex = 0;
+			tfm = 0;
+			alp = 0;
+		}
+		else{
+			tex = glGenBuffers();
+			tfm = glGenBuffers();
+			alp = glGenBuffers();
+		}
 		
 		init();
 	}
@@ -126,7 +136,7 @@ public class RenderBatch{
 	private void init(){
 		vboBuffer = BufferUtils.createFloatBuffer(capacity*2);
 		
-		if(shader == 0){
+		if(shader == 0 || shader == 2){
 			szeBuffer = BufferUtils.createShortBuffer(capacity*2);
 			texBuffer = BufferUtils.createFloatBuffer(capacity*4);
 			tfmBuffer = BufferUtils.createFloatBuffer(capacity*3);
@@ -140,6 +150,7 @@ public class RenderBatch{
 			
 			return;
 		}
+		
 		if(shader == 1){
 			szeBuffer = BufferUtils.createShortBuffer(capacity);
 			
@@ -179,11 +190,9 @@ public class RenderBatch{
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		
-		if(shader == 0){
-			glEnableVertexAttribArray(2);
-			glEnableVertexAttribArray(3);
-			glEnableVertexAttribArray(4);
-		}
+		if(shader == 0) glEnableVertexAttribArray(2);
+		if(shader == 0 || shader == 2) glEnableVertexAttribArray(3);
+		if(shader == 0) glEnableVertexAttribArray(4);
 		
 		// Set blend mode
 		glEnable(GL_BLEND);
@@ -195,11 +204,9 @@ public class RenderBatch{
 		glDisable(GL_BLEND);
 		
 		// Disable arrays
-		if(shader == 0){
-			glDisableVertexAttribArray(4);
-			glDisableVertexAttribArray(3);
-			glDisableVertexAttribArray(2);
-		}
+		if(shader == 0) glDisableVertexAttribArray(4);
+		if(shader == 0 || shader == 2) glDisableVertexAttribArray(3);
+		if(shader == 0) glDisableVertexAttribArray(2);
 		
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(0);
@@ -269,8 +276,12 @@ public class RenderBatch{
 			// Rotation
 			float r = s.getRotation();
 			
-			if(e instanceof MovableEntity)
-				r += (e.getFrame().spriteAlign() ? ((MovableEntity)e).getDir() + 90 : 0);
+			// Align to direction
+			if(e instanceof MovableEntity && e.getFrame().spriteAlign())
+				r += ((MovableEntity)e).getDir() + 90;
+			
+			if(e instanceof Laser)
+				r = ((MovableEntity)e).getDir() + 90;
 			
 			// Fill arrays
 			if(uVBO){
@@ -291,6 +302,32 @@ public class RenderBatch{
 			
 			if(uALP)
 				alphas[i] = s.getAlpha();
+			
+			
+			// Laser corrections
+			if(e instanceof Laser){
+				
+				Laser l = (Laser)e;
+				
+				float len = l.getLength()/2f;
+				
+				// Correct origin
+				vertices[i*2]		+= len*Math.cos(Math.toRadians(l.getDir()));
+				vertices[i*2 + 1]	+= len*Math.sin(Math.toRadians(l.getDir()));
+
+				// Set scale
+				if(shader == 0){
+					transforms[i*3]		*= l.getScaleX();
+					transforms[i*3 + 1]	*= l.getScaleY();
+				}
+				
+				// For hitboxes
+				if(shader == 2){
+					int crop = l.getHBLengthCrop();
+					transforms[i*3]		= l.getHitboxSize()/8f;
+					transforms[i*3 + 1]	= (l.getLength() - crop*2)/16f;
+				}
+			}
 		}
 		
 		updateVBOs(vertices, null, texCoords, transforms, alphas);
@@ -376,7 +413,7 @@ public class RenderBatch{
 			glBindBuffer(GL_ARRAY_BUFFER, sze);
 			glBufferData(GL_ARRAY_BUFFER, szeBuffer, GL_STATIC_DRAW);
 			
-			if(shader == 0)
+			if(shader != 1)
 				glVertexAttribPointer(1, 2, GL_SHORT, false, 0, 0);
 			else
 				glVertexAttribIPointer(1, 1, GL_SHORT, 0, 0);

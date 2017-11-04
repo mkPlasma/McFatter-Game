@@ -6,6 +6,7 @@ import engine.entities.Bullet;
 import engine.entities.Effect;
 import engine.entities.Enemy;
 import engine.entities.GameEntity;
+import engine.entities.Laser;
 import engine.entities.Player;
 import engine.screens.MainScreen;
 
@@ -22,8 +23,9 @@ import static engine.screens.MainScreen.*;
 
 public class Renderer{
 	
-	private ShaderProgram basicShader;
-	private ShaderProgram hitboxShader;
+	private ShaderProgram basicShader,
+						  hitboxShader,
+						  laserHitboxShader;
 	
 	private ArrayList<RenderBatch> renderBatches;
 	
@@ -37,7 +39,7 @@ public class Renderer{
 	
 	public void init(){
 		// Init shaders
-		basicShader = new ShaderProgram("quad", "basic", "quad");
+		basicShader = new ShaderProgram("quad", "quad", "basic");
 		basicShader.bindAttrib(0, "position");
 		basicShader.bindAttrib(1, "size");
 		basicShader.bindAttrib(2, "texCoords");
@@ -45,10 +47,18 @@ public class Renderer{
 		basicShader.bindAttrib(4, "alpha");
 		basicShader.link();
 		
-		hitboxShader = new ShaderProgram("circle", "solid", "circle");
+		hitboxShader = new ShaderProgram("circle", "circle", "hitbox");
 		hitboxShader.bindAttrib(0, "position");
 		hitboxShader.bindAttrib(1, "radius");
 		hitboxShader.link();
+		
+		laserHitboxShader = new ShaderProgram("quad", "quad", "hitbox");
+		laserHitboxShader.bindAttrib(0, "position");
+		laserHitboxShader.bindAttrib(1, "size");
+		laserHitboxShader.bindAttrib(2, "texCoords");
+		laserHitboxShader.bindAttrib(3, "transforms");
+		laserHitboxShader.bindAttrib(4, "alpha");
+		laserHitboxShader.link();
 		
 		renderBatches = new ArrayList<RenderBatch>();
 		
@@ -74,9 +84,12 @@ public class Renderer{
 		
 		// Effects
 		renderBatches.add(new RenderBatch(MAX_EFFECTS, 32, effectTex, UPDATE_ALL_BUT_SIZE, true));
-		
+
 		// Hitboxes
-		renderBatches.add(new RenderBatch(MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX));
+		renderBatches.add(new RenderBatch(1, MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX));
+		
+		// Laser hitboxes
+		renderBatches.add(new RenderBatch(2, MAX_ENEMY_BULLETS, UPDATE_LASER_HITBOX));
 		
 		// Border
 		Sprite border = new Sprite("border.png", 0, 0, 1280, 960);
@@ -118,7 +131,6 @@ public class Renderer{
 					break;
 			}
 		}
-
 		renderBatches.get(2).updateWithEntities(b1, time);
 		renderBatches.get(3).updateWithEntities(b1a, time);
 		renderBatches.get(4).updateWithEntities(b2, time);
@@ -134,17 +146,33 @@ public class Renderer{
 	}
 	
 	public void updateHitboxes(ArrayList<Bullet> enemyBullets, ArrayList<Enemy> enemies, Player player){
+		
 		ArrayList<GameEntity> el = new ArrayList<GameEntity>();
+		
 		el.addAll(enemyBullets);
 		el.addAll(enemies);
 		el.add(player);
 		
+		ArrayList<GameEntity> ll = new ArrayList<GameEntity>();
+		
+		for(int i = 0; i < el.size(); i++){
+			GameEntity e = el.get(i);
+			
+			if(e instanceof Laser){
+				el.remove(i);
+				ll.add(e);
+				
+				i--;
+			}
+		}
+		
 		renderBatches.get(7).updateHitboxes(el);
+		renderBatches.get(8).updateWithEntities(ll, 0);
 	}
 	
 	public void render(){
 		for(int i = 0; i < renderBatches.size(); i++){
-		
+			
 			RenderBatch rb = renderBatches.get(i);
 			
 			if(rb.getShader() == 0)
@@ -153,7 +181,10 @@ public class Renderer{
 				if(!renderHitboxes)
 					continue;
 				
-				hitboxShader.use();
+				if(rb.getShader() == 1)
+					hitboxShader.use();
+				else
+					laserHitboxShader.use();
 			}
 			
 			// Don't bind texture again if last batch had same texture
