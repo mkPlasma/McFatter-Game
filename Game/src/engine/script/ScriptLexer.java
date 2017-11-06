@@ -36,10 +36,10 @@ public class ScriptLexer{
 	public static final String
 	
 	// Operators
-	rOperators = "\\+|-|\\*|/|%|\\^|!|(\\|\\|)|(&&)|<|>|(==)|(!=)|(<=)|(>=)",
+	rOperators = "\\+|-|\\*|/|%|\\^|!|\\|\\||&&|<|>|==|!=|<=|>=",
 	
 	// Assignment operators
-	rAssignments = "=|(\\+\\+)|(--)|(\\+=)|(-=)|(\\*=)|(/=)|(%=)",
+	rAssignments = "=|\\+\\+|--|\\+=|-=|\\*=|/=|%=",
 	
 	// Identifiers
 	rIdentifiers = "\\w+",
@@ -58,7 +58,7 @@ public class ScriptLexer{
 	rWordDelim = "(" + rIdentifiers + ")\\s*?(" + rDelimiters + ")",
 	
 	// Number literal + delimiters (remove period delimiter for floats)
-	rNumDelim = "((" + rInt + ")|(" + rFloat + "))\\s*?(" + rDelimiters.replace("|\\.", "") + ")";
+	rNumDelim = "(" + rInt + "|" + rFloat + ")\\s*?(" + rDelimiters.replace("|\\.", "") + ")";
 	
 	
 	/* 	Types
@@ -158,7 +158,7 @@ public class ScriptLexer{
 				token = "";
 				
 				// Push back i as not to miss data
-				i -= matcher.group(4).trim().length();
+				i -= matcher.group(2).trim().length();
 			}
 			
 			// Add operators, assignments, and separators directly
@@ -286,6 +286,16 @@ public class ScriptLexer{
 					else if(FrameList.getVarNum(token2) != -1)
 						tokens.add(lineNum + "i:" + FrameList.getVarNum(token2));
 					
+					else if(token2.equals("_cx"))	tokens.add(lineNum + "i:224");
+					else if(token2.equals("_cy"))	tokens.add(lineNum + "i:240");
+					else if(token2.equals("_lx"))	tokens.add(lineNum + "i:32");
+					else if(token2.equals("_rx"))	tokens.add(lineNum + "i:416");
+					else if(token2.equals("_ty"))	tokens.add(lineNum + "i:16");
+					else if(token2.equals("_by"))	tokens.add(lineNum + "i:464");
+					else if(token2.equals("_time")){tokens.add(lineNum + "f:scriptTime");	tokens.add(lineNum + "s:(");	tokens.add(lineNum + "s:)");}
+					else if(token2.equals("_px")){tokens.add(lineNum + "f:playerX");	tokens.add(lineNum + "s:(");	tokens.add(lineNum + "s:)");}
+					else if(token2.equals("_py")){tokens.add(lineNum + "f:playerY");	tokens.add(lineNum + "s:(");	tokens.add(lineNum + "s:)");}
+					
 					// Add variable
 					else
 						tokens.add(lineNum + "v:" + token2);
@@ -406,7 +416,7 @@ public class ScriptLexer{
 						case "break":
 							nextExpected = new String[]{";"};
 							break;
-						case "while": case "for":
+						case "while": case "for": case "forG": case "forE": case "forNE": case "forLE": case "forGE":
 							nextExpected = new String[]{"("};
 							break;
 						case "in":
@@ -484,12 +494,12 @@ public class ScriptLexer{
 				case 's':
 					switch(token){
 						case "(":
-							lastExpected = new String[]{"o", "a", "f", "(", "{", "if", "while", "for", "return"};
+							lastExpected = new String[]{"o", "a", "f", "(", "{", "if", "while", "for", "forG", "forE", "forNE", "forLE", "forGE", "return"};
 							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "{", "(", ")", "!", "-", ".", "global"};
 							break;
 						case ")":
 							lastExpected = new String[]{"v", "i", "l", "b", "t", "}", "(", ")", "]"};
-							nextExpected = new String[]{"o", "{", ";", ",", ")", "[", "]"};
+							nextExpected = new String[]{"o", "{", ";", ",", "}", ")", "[", "]"};
 							break;
 						case "{":
 							lastExpected = new String[]{")", "(", "{", "o", "a", "else", "return", "in"};

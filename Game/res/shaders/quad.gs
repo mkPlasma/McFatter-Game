@@ -11,8 +11,9 @@ in float gAlpha[];
 out vec2 fTexCoords;
 out float fAlpha;
 
-void vertex(vec4 pos, vec2 pos2, float tx, float ty){
+void vertex(vec2 pos2, float tx, float ty){
     
+    vec4 pos = gl_in[0].gl_Position;
     vec3 trans = gTransforms[0];
     
     // Scale
@@ -39,15 +40,13 @@ void main(){
     
     vec4 tx = gTexCoords[0];
     
-    vec4 pos = gl_in[0].gl_Position;
-    
     float x = gSize[0].x/4;
     float y = gSize[0].y/4;
     
-    vertex(pos, vec2(x, y), tx.z, tx.w);
-    vertex(pos, vec2(x, -y), tx.z, tx.y);
-    vertex(pos, vec2(-x, y), tx.x, tx.w);
-    vertex(pos, vec2(-x, -y), tx.x, tx.y);
+    vertex(vec2(-x, -y), tx.x, tx.z);
+    vertex(vec2(x, -y), tx.y, tx.z);
+    vertex(vec2(-x, y), tx.x, tx.w);
+    vertex(vec2(x, y), tx.y, tx.w);
     
     EndPrimitive();
 }

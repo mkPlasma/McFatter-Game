@@ -1,11 +1,48 @@
 
-set c = 300;
+set const c = 8;
+set const r = 100;
+
+set dir = 0;
+set inv = false;
 
 while(true){
-    
-    for(d in 0, 360/c, 361){
-        bullet(_orb, _blue, centerX(), centerY(), d, 2, 15);
+    for(d in 0, 360/c, 360){
+        laser(dir + d);
     }
     
-    wait 120;
+    dir += 15;
+    inv = !inv;
+    
+    wait 90;
+}
+
+task laser(dir){
+    set color = _red;
+    set angvel = 0.05;
+    
+    if(inv){
+        color = _blue;
+        angvel *= -1;
+    }
+    
+    set l = laser(_laser_helix, color, _cx + r*cos(dir), 140 + r*sin(dir), dir, 200, 64, 30);
+    l.setAdditive();
+    
+    set c = 0;
+    
+    while(!l.isDeleted()){
+        
+        l.setX(_cx + r*cos(dir));
+        l.setY(140 + r*sin(dir));
+        l.setDir(dir);
+        
+        dir += angvel;
+        c++;
+        
+        if(c > 120){
+            l.delete();
+        }
+        
+        wait;
+    }
 }

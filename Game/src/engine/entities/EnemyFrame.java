@@ -1,7 +1,6 @@
 package engine.entities;
 
 import engine.graphics.Sprite;
-import engine.graphics.TextureCache;
 
 /*
  * 		EnemyFrame.java

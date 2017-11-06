@@ -112,7 +112,7 @@ public class Sprite{
 		bottom	-= 0.5/h;
 		
 		texCoords = new float[]{
-			left, top, right, bottom
+			left, right, top, bottom
 		};
 	}
 	

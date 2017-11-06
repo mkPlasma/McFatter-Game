@@ -187,6 +187,7 @@ wait; // Waits one frame.
 wait 30; // Waits 30 frames, or 0.5 seconds.
 wait x; // Waits x frames.
 wait 1.2; // Waits 1 frame (rounds down).
+wait -2; // Waits 1 frame. 0 or negative is treated as 1.
 
 
 

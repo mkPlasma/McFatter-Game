@@ -20,7 +20,7 @@ public class Effect extends MovableEntity{
 	public void update(){
 		super.update();
 		
-		if(time >= lifetime)
+		if(lifetime > 0 && time >= lifetime)
 			deleted = true;
 	}
 	

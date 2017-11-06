@@ -1,22 +1,6 @@
 package engine.script;
 
-import static engine.script.ScriptFunctions.BOOLEAN;
-import static engine.script.ScriptFunctions.FLOAT;
-import static engine.script.ScriptFunctions.INT;
-import static engine.script.ScriptFunctions.STRING;
-import static engine.script.ScriptFunctions.builtInFunctionDot;
-import static engine.script.ScriptFunctions.builtInFunctionTypeMatch;
-import static engine.script.ScriptFunctions.convertString;
-import static engine.script.ScriptFunctions.getBuiltInFunctionName;
-import static engine.script.ScriptFunctions.getBuiltInFunctionParameterCount;
-import static engine.script.ScriptFunctions.getData;
-import static engine.script.ScriptFunctions.getLineNum;
-import static engine.script.ScriptFunctions.getOpcodeName;
-import static engine.script.ScriptFunctions.getOperation;
-import static engine.script.ScriptFunctions.getType;
-import static engine.script.ScriptFunctions.isNumberOp;
-import static engine.script.ScriptFunctions.isOperation;
-import static engine.script.ScriptFunctions.isVariable;
+import static engine.script.ScriptFunctions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,6 +28,10 @@ import engine.screens.MainScreen;
  */
 
 public class ScriptRunner{
+	
+	// Stop script if infinite loop
+	private static final int INFINITE_LOOP_LIMIT = 10000;
+	private int loopCount;
 	
 	// Stops script
 	private boolean haltRun = false;
@@ -91,8 +79,10 @@ public class ScriptRunner{
 	
 	private DScript script;
 	
+	private ScriptController controller;
+	
 	// Branched states
-	private ArrayList<ScriptBranch> branches;
+	//private ArrayList<ScriptBranch> branches;
 	
 	private MainScreen screen;
 	private Player player;
@@ -104,8 +94,9 @@ public class ScriptRunner{
 	
 	private int time;
 	
-	public ScriptRunner(DScript script, MainScreen screen){
+	public ScriptRunner(DScript script, ScriptController controller, MainScreen screen){
 		this.script = script;
+		this.controller = controller;
 		this.screen = screen;
 	}
 	
@@ -119,8 +110,9 @@ public class ScriptRunner{
 			haltRun = true;
 			return null;
 		}
-		
+
 		haltRun = false;
+		finished = false;
 
 		// Initialize/reset lists
 		loops 			= new ArrayList<Integer>();
@@ -130,7 +122,7 @@ public class ScriptRunner{
 		arrayRef		= new ArrayList<Object>();
 		expressions		= new Stack<ArrayList<Object>>();
 		funcParams		= new Stack<Queue<Object>>();
-		branches		= new ArrayList<ScriptBranch>();
+		//branches		= new ArrayList<ScriptBranch>();
 		dotValues		= new Stack<Object>();
 		
 		expressions.push(new ArrayList<Object>());
@@ -181,13 +173,13 @@ public class ScriptRunner{
 	public boolean isFinished(){
 		return finished;
 	}
-	
+	/*
 	public ArrayList<ScriptBranch> getBranches(){
 		ArrayList<ScriptBranch> temp = new ArrayList<ScriptBranch>(branches);
 		branches.clear();
 		return temp;
 	}
-	
+	*/
 	// Run bytecode
 	@SuppressWarnings("unchecked")
 	public void run(ScriptBranch branch){
@@ -204,6 +196,8 @@ public class ScriptRunner{
 		returnPoints = branch.getReturnPoints();
 		scopeVars = branch.getScopeVars();
 		
+		loopCount = 0;
+		
 		// Go into else block
 		boolean doElse = false;
 		boolean resetDoElse = false;
@@ -218,6 +212,12 @@ public class ScriptRunner{
 			boolean isVar = isVariable(inst);
 			int lineNum = getLineNum(inst);
 			int data = getData(inst);
+			
+			// Check for infiinite loops
+			if(loopCount > INFINITE_LOOP_LIMIT){
+				runtimeError("Infinite loop", lineNum);
+				return;
+			}
 			
 			// Set doElse to false after one loop
 			// Preserve if elseAhead
@@ -576,6 +576,7 @@ public class ScriptRunner{
 				
 				case "end_while":
 					i = loops.get(data);
+					loopCount++;
 					continue;
 				
 				
@@ -603,7 +604,7 @@ public class ScriptRunner{
 					if(getOpcodeName(bytecode[i]).equals("task")){
 						// New branch continues outside of task
 						ScriptBranch newBranch = new ScriptBranch(index + 1, variables, scopeVars, branch.isPrimary());
-						branches.add(newBranch);
+						controller.addBranch(newBranch);
 						
 						// Current branch enters task
 						branch.setPrimary(false);
@@ -706,8 +707,8 @@ public class ScriptRunner{
 					// Cast to int
 					obj = obj instanceof Float ? (int)(float)obj : obj;
 					
-					// Set wait time
-					branch.setWaitTime((int)obj);
+					// Set wait time, treat as 0 if negative
+					branch.setWaitTime(Math.max((int)obj, 0));
 					
 					// Set bytecode index
 					branch.setBytecodeIndex(i + 1);
@@ -1039,14 +1040,6 @@ public class ScriptRunner{
 			case "scriptTime":
 				returnValue = time;
 				return;
-
-			case "centerX":
-				returnValue = 224;
-				return;
-			
-			case "centerY":
-				returnValue = 240;
-				return;
 			
 			case "centerPos":{
 				ArrayList<Object> ar = new ArrayList<Object>();
@@ -1055,22 +1048,6 @@ public class ScriptRunner{
 				returnValue = ar;
 				return;
 			}
-			
-			case "leftX":
-				returnValue = 32;
-				return;
-			
-			case "rightX":
-				returnValue = 416;
-				return;
-			
-			case "topY":
-				returnValue = 16;
-				return;
-			
-			case "bottomY":
-				returnValue = 464;
-				return;
 			
 			case "playerX":
 				returnValue = player.getX();
@@ -1286,7 +1263,7 @@ public class ScriptRunner{
 				Object oDir = params.remove();
 				Object oSpd = params.remove();
 				Object oDel = params.remove();
-
+				
 				float x = ox instanceof Float ? (float)ox : (float)(int)ox;
 				float y = oy instanceof Float ? (float)oy : (float)(int)oy;
 				float dir = oDir instanceof Float ? (float)oDir : (float)(int)oDir;
@@ -1305,7 +1282,7 @@ public class ScriptRunner{
 				Object oLen = params.remove();
 				Object oWid = params.remove();
 				Object oDel = params.remove();
-
+				
 				float x = ox instanceof Float ? (float)ox : (float)(int)ox;
 				float y = oy instanceof Float ? (float)oy : (float)(int)oy;
 				float dir = oDir instanceof Float ? (float)oDir : (float)(int)oDir;
@@ -1319,7 +1296,7 @@ public class ScriptRunner{
 			}
 			
 			case "delete":
-				bl.onDestroy();
+				bl.onDestroy(true);
 				return;
 			
 			case "setX":

@@ -16,7 +16,8 @@ import engine.graphics.TextureCache;
 public class EffectList{
 
 	public static final byte
-		TYPE_CLOUD			= 0;
+		TYPE_FLARE	= 0,
+		TYPE_CLOUD	= 1;
 	
 	private static final int animSpd = 1;
 	
@@ -35,18 +36,17 @@ public class EffectList{
 		String path = "effects.png";
 		int size = 32;
 		
-		int sx = color*size + (type % 2 == 0 ? 0 : 512);
-		int sy = (type/2)*(size*8);
-		
-		//if(type == TYPE_CLOUD_STATIC)
-		//	sy += 0;
+		int sx = color*size;
+		int sy = type*(size*8);
 		
 		// Create sprite
 		Sprite sprite = new Sprite(path, sx, sy, size, size);
-		sprite.setScale(2);
 		
-		// Animations
-		sprite.addAnimation(new Animation(Animation.ANIM_SET_SPRITE, animSpd, false, new float[]{sx, sy, 0, 32, 8, sx, sy}));
+		if(type == TYPE_CLOUD){
+			sprite.setScale(2);
+			sprite.addAnimation(new Animation(Animation.ANIM_SET_SPRITE, animSpd, false, new float[]{sx, sy, 0, 32, 8, sx, sy}));
+			sprite.addAnimation(new Animation(Animation.ANIM_SCALE, 1, false, 0.1f/animSpd, 1, 5));
+		}
 		
 		tc.loadSprite(sprite);
 		

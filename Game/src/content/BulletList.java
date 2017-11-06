@@ -26,7 +26,7 @@ public class BulletList{
 		TYPE_WALL			= 7,
 		TYPE_NEEDLE			= 8,
 		TYPE_RING			= 9,
-		
+		TYPE_ORBIT			= 10,
 		TYPE_MISSILE		= 11,
 		TYPE_MINE			= 12,
 		TYPE_LASER			= 13,
@@ -46,7 +46,7 @@ public class BulletList{
 		"wall",
 		"needle",
 		"ring",
-		"?",
+		"orbit",
 		"missile",
 		"mine",
 		"laser",
@@ -112,11 +112,14 @@ public class BulletList{
 		
 		
 		// Animations
-		float rotation = getSpriteRotation(type)*(color%2 == 0 ? 1 : -1);
+		float rotation = getSpriteRotation(type);
 		boolean spdRotation = getSpriteRotationBySpd(type);
 		
+		if(color % 2 == 1)
+			rotation *= -1;
+		
 		if(spdRotation)
-			sprite.addAnimation(new Animation(Animation.ANIM_ROTATION_BY_SPD,  1, false, new float[]{rotation}));
+			sprite.addAnimation(new Animation(Animation.ANIM_ROTATION_BY_SPD, 1, false, new float[]{rotation}));
 		
 		else if(rotation != 0)
 			sprite.addAnimation(new Animation(Animation.ANIM_ROTATION, 1, false, new float[]{rotation}));
@@ -137,7 +140,6 @@ public class BulletList{
 	public int getHitboxSize(int type){
 		switch(type){
 			case TYPE_CRYSTAL:
-			case TYPE_WALL:
 			case TYPE_NEEDLE:
 			case TYPE_LASER_HELIX:
 				return 1;
@@ -146,7 +148,9 @@ public class BulletList{
 			case TYPE_RICE:
 			case TYPE_STAR:
 			case TYPE_STAR4:
+			case TYPE_WALL:
 			case TYPE_PLUS:
+			case TYPE_ORBIT:
 			case TYPE_MISSILE:
 			case TYPE_LASER:
 			case TYPE_LASER_DIST:
@@ -210,6 +214,8 @@ public class BulletList{
 	
 	public float getSpriteRotation(int type){
 		switch(type){
+			case TYPE_ORBIT:
+				return 4;
 		
 			case TYPE_STAR:
 			case TYPE_STAR4:

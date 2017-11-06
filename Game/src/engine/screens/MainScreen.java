@@ -43,7 +43,8 @@ public class MainScreen extends GameScreen{
 	private int pauseTime = -30;
 	private boolean tickFrame;
 	
-	private boolean clearScreen, slowMode;
+	private int clearScreen;
+	private boolean slowMode;
 	
 	public MainScreen(Renderer r, TextureCache tc){
 		super(r, tc);
@@ -51,10 +52,10 @@ public class MainScreen extends GameScreen{
 	
 	public void init(){
 		
-		enemyBullets = new ArrayList<Bullet>();
-		playerBullets = new ArrayList<Bullet>();
-		enemies = new ArrayList<Enemy>();
-		effects = new ArrayList<Effect>();
+		enemyBullets	= new ArrayList<Bullet>(MAX_ENEMY_BULLETS);
+		playerBullets	= new ArrayList<Bullet>(MAX_PLAYER_BULLETS);
+		enemies			= new ArrayList<Enemy>(MAX_ENEMIES);
+		effects			= new ArrayList<Effect>(MAX_EFFECTS);
 		
 		time = 0;
 		rTime = 0;
@@ -82,16 +83,19 @@ public class MainScreen extends GameScreen{
 	
 	public void render(){
 		
-		r.updatePlayer(player, rTime);
-		r.updateEnemyBullets(enemyBullets, rTime);
-		r.updatePlayerBullets(playerBullets, rTime);
-		r.updateEffects(effects, rTime);
+		r.setTime(rTime);
+		r.updatePlayer(player);
+		r.updateEnemyBullets(enemyBullets);
+		r.updatePlayerBullets(playerBullets);
+		r.updateEffects(effects);
 		r.updateHitboxes(enemyBullets, enemies, player);
 		
 		r.render();
-
-		if((!paused || tickFrame) && (!slowMode || (slowMode && time % 2 == 0)))
+		
+		if((!paused || tickFrame) && (!slowMode || (slowMode && time % 2 == 0))){
 			rTime++;
+			tickFrame = false;
+		}
 	}
 	
 	public void update(){
@@ -104,10 +108,8 @@ public class MainScreen extends GameScreen{
 		
 		debugKeys();
 		
-		if((!paused || tickFrame) && (!slowMode || (slowMode && time % 2 == 0))){
+		if((!paused || tickFrame) && (!slowMode || (slowMode && time % 2 == 0)))
 			updateGameStage();
-			tickFrame = false;
-		}
 		
 		time++;
 	}
@@ -138,22 +140,32 @@ public class MainScreen extends GameScreen{
 		// Reload script with Alt+R
 		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_R)){
 			stage.reloadScript();
-			clearScreen = true;
+			clearScreen = 2;
 		}
 		
 		// Clear bullets with Alt+C
 		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && (KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_C))){
 			System.out.println("Cleared screen!");
-			clearScreen = true;
+			clearScreen = 1;
 		}
 	}
 	
 	private void updateGameStage(){
 		
-		if(clearScreen){
-			for(Bullet b:enemyBullets)
-				b.onDestroy();
-			clearScreen = false;
+		if(clearScreen > 0){
+			
+			for(Bullet b:enemyBullets){
+				if(clearScreen == 1)
+					b.onDestroy(true);
+				if(clearScreen == 2)
+					b.delete();
+			}
+			
+			if(clearScreen == 2)
+				for(Effect e:effects)
+					e.delete();
+			
+			clearScreen = 0;
 		}
 		
 		stage.update();
@@ -229,7 +241,7 @@ public class MainScreen extends GameScreen{
 				if(!(b instanceof Laser)){
 					if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) < pHitbox + b.getHitboxSize()){
 						//player.death();
-						b.onDestroy();
+						b.onDestroy(false);
 					}
 				}
 				
@@ -254,7 +266,7 @@ public class MainScreen extends GameScreen{
 					// Check collision
 					if(d2 < pHitbox + l.getHitboxSize() && d3 > crop && d3 < l.getLength() - crop){
 						//player.death();
-						b.onDestroy();
+						b.onDestroy(false);
 					}
 				}
 			}
@@ -275,14 +287,14 @@ public class MainScreen extends GameScreen{
 						
 						if(Math.hypot(epos[0] - bpos[0], epos[1] - bpos[1]) < e.getHitboxSize() + b.getHitboxSize()){
 							e.damage(b.getDamage());
-							b.onDestroy();
+							b.onDestroy(false);
 						}
 					}
 				}
 			}
 		}
 	}
-
+	
 	public void addEnemyBullet(Bullet bullet){
 		
 		if(bullet == null || enemyBullets.size() >= MAX_ENEMY_BULLETS)

@@ -30,7 +30,7 @@ public class ScriptController{
 	public ScriptController(DScript script, MainScreen screen){
 		this.script = script;
 		
-		runner = new ScriptRunner(script, screen);
+		runner = new ScriptRunner(script, this, screen);
 		branches = new ArrayList<ScriptBranch>();
 		
 		time = 0;
@@ -56,7 +56,7 @@ public class ScriptController{
 			runner.run(branch);
 			
 			// Add new branches
-			branches.addAll(runner.getBranches());
+			//branches.addAll(runner.getBranches());
 			
 			// Remove branch
 			if(branch.toRemove()){
@@ -78,10 +78,14 @@ public class ScriptController{
 		branches.clear();
 		branches.add(runner.init());
 		
-		haltRun = false;
+		haltRun = runner.haltRun();
 		finished = false;
 		
 		time = 0;
+	}
+	
+	public void addBranch(ScriptBranch branch){
+		branches.add(branch);
 	}
 	
 	public void setPlayer(Player player){

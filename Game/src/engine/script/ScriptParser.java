@@ -8,9 +8,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Stack;
 
-import content.BulletList;
-import content.FrameList;
-
 /*
  * 		ScriptParser.java
  * 		
@@ -42,7 +39,7 @@ public class ScriptParser{
 	private ArrayList<String> variables;
 	private String createVar;
 	private ArrayList<String> forVars;
-	private boolean forLess;
+	private int forType;
 	
 	// Store functions by name
 	private ArrayList<String> functions;
@@ -63,7 +60,7 @@ public class ScriptParser{
 	private int funcArgs;
 	
 	// Keep track of loops
-	int loopTotal;
+	private int loopTotal;
 	
 	// Loop index
 	private int loopNum;
@@ -244,7 +241,7 @@ public class ScriptParser{
 				
 				// Keywords
 				case 'k':
-					if(!stAccept && !token.equals("global") && !token.equals("in")){
+					if(!stAccept && !token.equals("const") && !token.equals("global") && !token.equals("in")){
 						compilationErrorIT(token, lineNum);
 						return;
 					}
@@ -295,13 +292,22 @@ public class ScriptParser{
 							bytecode.add(getInstruction("while", lineNum, loopNum));
 							continue;
 						
-						case "for":
+						case "for": case "forG": case "forE": case "forNE": case "forLE": case "forGE":
 							loopNum = loopTotal;
 							loopTotal++;
 							
 							forLoopNum++;
 							tmpExpInd++;
 							tmpExp.add(new ArrayList<ArrayList<Long>>());
+							
+							switch(token){
+								case "for":		forType = 0; break;
+								case "forG":	forType = 1; break;
+								case "forE":	forType = 2; break;
+								case "forNE":	forType = 3; break;
+								case "forLE":	forType = 4; break;
+								case "forGE":	forType = 5; break;
+							}
 							
 							states.push("for_args");
 							continue;
@@ -486,15 +492,6 @@ public class ScriptParser{
 									if(tmpExp.get(tmpExpInd).size() > 2){
 										compilationError("For loop has at most 3 arguments", lineNum);
 										return;
-									}
-									
-									if(tmpExp.get(tmpExpInd).size() >= 2){
-										Object o = expressions.peek().get(0);
-										
-										// If counter is negative
-										if((o instanceof Integer && ((int)o) < 0) || (o instanceof Float && ((float)o) < 0) ||
-											(o instanceof String) && o.equals("-"))
-											forLess = true;
 									}
 									
 									// Store expression
@@ -804,10 +801,6 @@ public class ScriptParser{
 											return;
 										}
 										
-										// Unless specified, loop for i < num
-										if(tmpExp.get(tmpExpInd).size() != 2)
-											forLess = true;
-										
 										// Store expression
 										tmpExp.get(tmpExpInd).add(parseExpression(lineNum));
 										
@@ -839,7 +832,18 @@ public class ScriptParser{
 										
 										// Add comparison to expression
 										bc.add(0, getInstruction("exp_val", VARIABLE, lineNum, variables.size() - 1));
-										bc.add(bc.size() - 1, getInstruction("less", lineNum));
+										
+										String comp = "less";
+										
+										switch(forType){
+											case 1: comp = "greater";		break;
+											case 2: comp = "equals";		break;
+											case 3: comp = "not_eq";		break;
+											case 4: comp = "less_eq";		break;
+											case 5: comp = "greater_eq";	break;
+										}
+										
+										bc.add(bc.size() - 1, getInstruction(comp, lineNum));
 										
 										// Add comparison
 										bytecode.addAll(bc);

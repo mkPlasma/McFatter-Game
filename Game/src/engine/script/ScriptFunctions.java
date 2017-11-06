@@ -109,6 +109,11 @@ public class ScriptFunctions{
 
 		"while",
 		"for",
+		"forG",
+		"forE",
+		"forNE",
+		"forLE",
+		"forGE",
 		"in",
 		
 		"function",
@@ -141,14 +146,7 @@ public class ScriptFunctions{
 		
 		"int:1",
 		
-		"centerX:0",
-		"centerY:0",
 		"centerPos:0",
-
-		"leftX:0",
-		"rightX:0",
-		"topY:0",
-		"bottomY:0",
 		
 		"playerX:0",
 		"playerY:0",

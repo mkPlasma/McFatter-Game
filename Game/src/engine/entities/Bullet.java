@@ -1,5 +1,6 @@
 package engine.entities;
 
+import content.BulletList;
 import content.EffectList;
 import content.FrameList;
 import engine.graphics.Animation;
@@ -30,9 +31,14 @@ public class Bullet extends MovableEntity{
 	// Player shots only
 	protected int damage, dmgReduce;
 	
+	// Won't despawn from bomb or player hit
+	protected boolean bombResist;
+	
 	// Delay effect before spawning
 	protected int delay;
-	protected boolean delayAnim;
+	
+	// false - fade		true - flare
+	protected boolean delayFlare;
 	
 	// Whether entity can collide
 	protected boolean collisions;
@@ -51,9 +57,10 @@ public class Bullet extends MovableEntity{
 	
 	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, int delay, FrameList frameList, MainScreen screen){
 		super(frame, x, y, dir, spd);
-
+		
 		this.frame = frame;
-		this.delay = delay;
+		delayFlare = delay > 0;
+		this.delay = Math.abs(delay);
 		this.frameList = frameList;
 		this.screen = screen;
 		
@@ -64,7 +71,8 @@ public class Bullet extends MovableEntity{
 		super(frame, x, y, dir, spd);
 		
 		this.frame = frame;
-		this.delay = delay;
+		delayFlare = delay > 0;
+		this.delay = Math.abs(delay);
 		this.damage = damage;
 		this.dmgReduce = dmgReduce;
 		this.frameList = frameList;
@@ -76,9 +84,10 @@ public class Bullet extends MovableEntity{
 	// For lasers
 	public Bullet(BulletFrame frame, float x, float y, float dir, int delay, FrameList frameList, MainScreen screen){
 		super(frame, x, y, dir, 0);
-
+		
 		this.frame = frame;
-		this.delay = delay;
+		delayFlare = delay > 0;
+		this.delay = Math.abs(delay);
 		this.frameList = frameList;
 		this.screen = screen;
 	}
@@ -89,25 +98,32 @@ public class Bullet extends MovableEntity{
 		
 		borderDespawn = true;
 		
-		if(delay < 15)
-			collisions = true;
-		
-		if(delay > 0){
-			visible = false;
-			
-			Effect e = new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, color%16), x, y);
-
-			e.setLifetime(delay);
-			
-			e.getSprite().setY(160);
-			e.getSprite().genTextureCoords();
-			e.getSprite().getAnimations().clear();
-			
-			e.getSprite().setScale(3);
-			
-			e.getSprite().addAnimation(new Animation(Animation.ANIM_SCALE, 1, Math.max(delay - 15, 0), false, -1f/Math.min(delay, 15), 2, 5));
-			e.getSprite().addAnimation(new Animation(Animation.ANIM_ALPHA, 1, Math.max(delay - 15, 0), false, -1f/Math.min(delay, 15), 0, 1));
-			screen.addEffect(e);
+		// Delay effects
+		if(delay != 0){
+			if(delayFlare){
+				visible = false;
+				
+				int effectCol = color % 16;
+				Effect e = new Effect(frameList.getEffect(EffectList.TYPE_FLARE, effectCol), x, y);
+				
+				e.setLifetime(delay);
+				
+				e.getSprite().setScale(2 + delay*0.2f);
+				e.getSprite().setAlpha(0);
+				
+				e.getSprite().addAnimation(new Animation(Animation.ANIM_SCALE, 1, false, -0.2f, 2, 2 + delay*0.2f));
+				e.getSprite().addAnimation(new Animation(Animation.ANIM_ALPHA, 1, false, 1f/delay, 0, 1));
+				
+				screen.addEffect(e);
+				
+				delay--;
+			}
+			else{
+				sprite.setScale(3);
+				sprite.setAlpha(0);
+				sprite.addAnimation(new Animation(Animation.ANIM_SCALE, 1, false, -2f/delay, 1, 5));
+				sprite.addAnimation(new Animation(Animation.ANIM_ALPHA, 1, false, 1f/delay, 0, 1));
+			}
 		}
 	}
 	
@@ -118,35 +134,45 @@ public class Bullet extends MovableEntity{
 		sprite			= new Sprite(frame.getSprite());
 	}
 	
-	public void onDestroy(){
+	public void onDestroy(boolean force){
+		
+		if(!force && bombResist)
+			return;
+		
 		deleted = true;
 		
+		int effectCol = color % 16;
+		
+		// Black bullets use gray despawn effect
+		if(color == FrameList.COLOR_BLACK || color == BulletList.COLOR_BLACK_D)
+			effectCol--;
+		
+		// "Explosion" despawn effect
+		if(type == BulletList.TYPE_MISSILE || type == BulletList.TYPE_MINE)
+			effectCol = FrameList.COLOR_BLACK;
+		
 		// check temporary
-		if(screen != null)
-			screen.addEffect(new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, color%16), x, y));
+		if(screen != null){
+			Effect e = new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, effectCol), x, y);
+			e.getSprite().rotate((float)Math.random()*360);
+			e.getSprite().setScale(effectCol == FrameList.COLOR_BLACK ? 3 : 2);
+			screen.addEffect(e);
+		}
 	}
 	
 	public void update(){
 		
-		// Delay effect
-		if(delay > 0){
-			
-			// Show bullet and add animation
-			if(!delayAnim && delay < 15){
-				visible = true;
+		if(delay > -1){
+			if(delay == 0){
+				if(delayFlare)
+					visible = true;
 				
-				sprite.setScale(3);
-				sprite.setAlpha(0);
-				sprite.addAnimation(new Animation(Animation.ANIM_SCALE, 1, false, -2f/delay, 1, 5));
-				sprite.addAnimation(new Animation(Animation.ANIM_ALPHA, 1, false, 1f/delay, 0, 1));
-				
-				delayAnim = true;
 				collisions = true;
 			}
 			
 			delay--;
 			
-			if(delay >= 15)
+			if(delayFlare)
 				return;
 		}
 		
@@ -199,6 +225,13 @@ public class Bullet extends MovableEntity{
 		return frame;
 	}
 	
+	public void setBombResist(boolean bombResist){
+		this.bombResist = bombResist;
+	}
+	
+	public boolean bombResist(){
+		return bombResist;
+	}
 	
 	public void setDamage(int damage){
 		this.damage = damage;

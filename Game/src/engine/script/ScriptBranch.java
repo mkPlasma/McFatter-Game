@@ -45,13 +45,13 @@ public class ScriptBranch{
 	
 	public ScriptBranch(int bytecodeIndex, Object[] variables, ArrayList<Integer> scopeVars, boolean primary){
 		this.bytecodeIndex = bytecodeIndex;
-		this.variables = variables.clone();
+		this.variables = variables;
 		this.scopeVars = scopeVars;
 		this.primary = primary;
 		
 		syncVariables = new ArrayList<Integer>();
 		returnPoints = new Stack<Integer>();
-
+		
 		for(int i = 0; i < variables.length; i++)
 			if(variables[i] != null && (scopeVars == null || !scopeVars.contains(i)))
 				syncVariables.add(i);
@@ -120,6 +120,7 @@ public class ScriptBranch{
 	
 	public void remove(){
 		remove = true;
+		variables = null;
 	}
 	
 	public boolean toRemove(){
@@ -127,11 +128,11 @@ public class ScriptBranch{
 	}
 	
 	public void setVariables(Object[] variables){
-		this.variables = variables;
+		this.variables = variables.clone();
 	}
 	
 	public Object[] getVariables(){
-		return variables.clone();
+		return variables;
 	}
 	
 	public void setScopeVars(ArrayList<Integer> scopeVars){

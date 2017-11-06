@@ -29,16 +29,18 @@ import engine.entities.Player;
 public class RenderBatch{
 	
 	public static final int
-		UPDATE_VBO = 0b00001,
-		UPDATE_SZE = 0b00010,
-		UPDATE_TEX = 0b00100,
-		UPDATE_TFM = 0b01000,
-		UPDATE_ALP = 0b10000,
+		UPDATE_VBO = 0b000001,
+		UPDATE_SZE = 0b000010,
+		UPDATE_TEX = 0b000100,
+		UPDATE_TFM = 0b001000,
+		UPDATE_ALP = 0b010000,
+		UPDATE_SEG = 0b100000,
 		
 		UPDATE_NONE			= 0,
-		UPDATE_ALL_BUT_SIZE	= 0b11101,
-		UPDATE_HITBOX		= 0b00011,
-		UPDATE_LASER_HITBOX	= 0b01001;
+		UPDATE_ALL_BUT_SIZE	= 0b011101,
+		UPDATE_LASER		= 0b111101,
+		UPDATE_HITBOX		= 0b000011,
+		UPDATE_LASER_HITBOX	= 0b001001;
 	
 	
 	private final int shader;
@@ -52,26 +54,26 @@ public class RenderBatch{
 	private final short sizePixelsX, sizePixelsY;
 	
 	private FloatBuffer vboBuffer, texBuffer, tfmBuffer, alpBuffer;
-	private ShortBuffer szeBuffer;
+	private ShortBuffer szeBuffer, segBuffer;
 	
-	private final int vao, vbo, sze, tex, tfm, alp;
+	private final int vao, vbo, sze, tex, tfm, alp, seg;
 	
 	private final int textureID;
 	
 	// Which buffers to update
 	private int updates;
-	private boolean uVBO, uSZE, uTEX, uTFM, uALP;
+	private boolean uVBO, uSZE, uTEX, uTFM, uALP, uSEG;
 	
 	// Additive rendering
 	private boolean additive;
 	
-	public RenderBatch(int capacity, int sizePixels, int textureID, int updates, boolean additive){
+	public RenderBatch(int shader, int capacity, int sizePixels, int textureID, int updates, boolean additive){
+		this.shader = shader;
 		this.capacity = capacity;
 		this.textureID = textureID;
 		this.updates = updates;
 		this.additive = additive;
-
-		shader = 0;
+		
 		sizePixelsX = (short)sizePixels;
 		sizePixelsY = (short)sizePixels;
 		
@@ -82,17 +84,21 @@ public class RenderBatch{
 		tfm = glGenBuffers();
 		alp = glGenBuffers();
 		
+		if(shader == 1)
+			seg = glGenBuffers();
+		else
+			seg = 0;
+		
 		init();
 	}
 	
-	public RenderBatch(int capacity, int sizePixelsX, int sizePixelsY, int textureID, int updates, boolean additive){
+	public RenderBatch(int capacity, int sizePixelsX, int sizePixelsY, int textureID, int updates){
 		this.capacity = capacity;
 		this.sizePixelsX = (short)sizePixelsX;
 		this.sizePixelsY = (short)sizePixelsY;
 		this.textureID = textureID;
 		this.updates = updates;
-		this.additive = additive;
-
+		
 		shader = 0;
 		
 		vao = glGenVertexArrays();
@@ -101,6 +107,7 @@ public class RenderBatch{
 		tex = glGenBuffers();
 		tfm = glGenBuffers();
 		alp = glGenBuffers();
+		seg = 0;
 		
 		init();
 	}
@@ -118,8 +125,9 @@ public class RenderBatch{
 		vao = glGenVertexArrays();
 		vbo = glGenBuffers();
 		sze = glGenBuffers();
+		seg = 0;
 		
-		if(shader == 1){
+		if(shader == 2){
 			tex = 0;
 			tfm = 0;
 			alp = 0;
@@ -136,22 +144,26 @@ public class RenderBatch{
 	private void init(){
 		vboBuffer = BufferUtils.createFloatBuffer(capacity*2);
 		
-		if(shader == 0 || shader == 2){
+		if(shader == 0 || shader == 1 || shader == 3){
 			szeBuffer = BufferUtils.createShortBuffer(capacity*2);
 			texBuffer = BufferUtils.createFloatBuffer(capacity*4);
 			tfmBuffer = BufferUtils.createFloatBuffer(capacity*3);
 			alpBuffer = BufferUtils.createFloatBuffer(capacity);
+			
+			if(shader == 1)
+				segBuffer = BufferUtils.createShortBuffer(capacity);
 			
 			uVBO = true;
 			uSZE = true;
 			uTEX = true;
 			uTFM = true;
 			uALP = true;
+			uSEG = shader == 1;
 			
 			return;
 		}
 		
-		if(shader == 1){
+		if(shader == 2){
 			szeBuffer = BufferUtils.createShortBuffer(capacity);
 			
 			uVBO = true;
@@ -190,9 +202,14 @@ public class RenderBatch{
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		
-		if(shader == 0) glEnableVertexAttribArray(2);
-		if(shader == 0 || shader == 2) glEnableVertexAttribArray(3);
-		if(shader == 0) glEnableVertexAttribArray(4);
+		if(shader == 0 || shader == 1)
+			glEnableVertexAttribArray(2);
+		if(shader == 0 || shader == 1 || shader == 3)
+			glEnableVertexAttribArray(3);
+		if(shader == 0 || shader == 1)
+			glEnableVertexAttribArray(4);
+		if(shader == 1)
+			glEnableVertexAttribArray(5);
 		
 		// Set blend mode
 		glEnable(GL_BLEND);
@@ -204,9 +221,14 @@ public class RenderBatch{
 		glDisable(GL_BLEND);
 		
 		// Disable arrays
-		if(shader == 0) glDisableVertexAttribArray(4);
-		if(shader == 0 || shader == 2) glDisableVertexAttribArray(3);
-		if(shader == 0) glDisableVertexAttribArray(2);
+		if(shader == 1)
+			glDisableVertexAttribArray(5);
+		if(shader == 0 || shader == 1)
+			glDisableVertexAttribArray(4);
+		if(shader == 0 || shader == 1 || shader == 3)
+			glDisableVertexAttribArray(3);
+		if(shader == 0 || shader == 1)
+			glDisableVertexAttribArray(2);
 		
 		glDisableVertexAttribArray(1);
 		glDisableVertexAttribArray(0);
@@ -227,7 +249,7 @@ public class RenderBatch{
 	// Update batch
 	public void updateManual(float x, float y, float[] texCoords){
 		size = 1;
-		updateVBOs(new float[]{x, y}, null, texCoords, new float[]{1, 1, 0}, new float[]{1});
+		updateVBOs(new float[]{x, y}, null, texCoords, new float[]{1, 1, 0}, new float[]{1}, null);
 	}
 	
 	public void updateWithEntity(GameEntity e, int time){
@@ -243,8 +265,13 @@ public class RenderBatch{
 		
 		// Take only visible entities
 		for(GameEntity e:(ArrayList<GameEntity>)entityList){
-			if(e.isVisible() && !e.isDeleted())
+			if(e.isVisible() && !e.isDeleted()){
+				
+				if(shader == 3 && !((Laser)e).collisionsEnabled())
+					continue;
+				
 				el.add(e);
+			}
 		}
 		
 		size = el.size();
@@ -253,15 +280,19 @@ public class RenderBatch{
 			return;
 		
 		// VAO arguments
-		float[] vertices	= null;
-		float[] texCoords	= null;
-		float[] transforms	= null;
-		float[] alphas		= null;
-
+		float[]
+			vertices	= null,
+			texCoords	= null,
+			transforms	= null,
+			alphas		= null;
+		
+		short[] segments = null;
+		
 		if(uVBO) vertices	= new float[size*2];
 		if(uTEX) texCoords	= new float[size*4];
 		if(uTFM) transforms	= new float[size*3];
 		if(uALP) alphas		= new float[size];
+		if(uSEG) segments	= new short[size];
 		
 		for(int i = 0; i < el.size(); i++){
 			
@@ -303,7 +334,6 @@ public class RenderBatch{
 			if(uALP)
 				alphas[i] = s.getAlpha();
 			
-			
 			// Laser corrections
 			if(e instanceof Laser){
 				
@@ -316,13 +346,16 @@ public class RenderBatch{
 				vertices[i*2 + 1]	+= len*Math.sin(Math.toRadians(l.getDir()));
 
 				// Set scale
-				if(shader == 0){
+				if(shader == 0 || shader == 1){
 					transforms[i*3]		*= l.getScaleX();
 					transforms[i*3 + 1]	*= l.getScaleY();
+					
+					if(uSEG)
+						segments[i] = (short)Math.max((int)((float)l.getLength()/l.getActualWidth()), 1);
 				}
 				
 				// For hitboxes
-				if(shader == 2){
+				if(shader == 3){
 					int crop = l.getHBLengthCrop();
 					transforms[i*3]		= l.getHitboxSize()/8f;
 					transforms[i*3 + 1]	= (l.getLength() - crop*2)/16f;
@@ -330,7 +363,7 @@ public class RenderBatch{
 			}
 		}
 		
-		updateVBOs(vertices, null, texCoords, transforms, alphas);
+		updateVBOs(vertices, null, texCoords, transforms, alphas, segments);
 	}
 	
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -340,8 +373,16 @@ public class RenderBatch{
 		
 		// Take only visible entities
 		for(GameEntity e:(ArrayList<GameEntity>)entityList){
-			if(e.isVisible() && !e.isDeleted() && (e instanceof Bullet || e instanceof Player || e instanceof Enemy))
+			if(e.isVisible() && !e.isDeleted()){
+				
+				if(e instanceof Bullet && !((Bullet)e).collisionsEnabled())
+					continue;
+				
+				if(e instanceof Enemy && !((Enemy)e).collisionsEnabled())
+					continue;
+				
 				el.add(e);
+			}
 		}
 		
 		size = el.size();
@@ -373,10 +414,10 @@ public class RenderBatch{
 			}
 		}
 		
-		updateVBOs(vertices, sizes, null, null, null);
+		updateVBOs(vertices, sizes, null, null, null, null);
 	}
 	
-	private void updateVBOs(float[] vertices, short[] sizes, float[] texCoords, float[] transforms, float[] alphas){
+	private void updateVBOs(float[] vertices, short[] sizes, float[] texCoords, float[] transforms, float[] alphas, short[] segments){
 		
 		glBindVertexArray(vao);
 		
@@ -413,7 +454,7 @@ public class RenderBatch{
 			glBindBuffer(GL_ARRAY_BUFFER, sze);
 			glBufferData(GL_ARRAY_BUFFER, szeBuffer, GL_STATIC_DRAW);
 			
-			if(shader != 1)
+			if(shader == 0 || shader == 1)
 				glVertexAttribPointer(1, 2, GL_SHORT, false, 0, 0);
 			else
 				glVertexAttribIPointer(1, 1, GL_SHORT, 0, 0);
@@ -460,6 +501,19 @@ public class RenderBatch{
 			
 			if((updates & UPDATE_ALP) == 0)
 				uALP = false;
+		}
+		
+		if(uSEG){
+			segBuffer.clear();
+			segBuffer.put(segments);
+			segBuffer.flip();
+			
+			glBindBuffer(GL_ARRAY_BUFFER, seg);
+			glBufferData(GL_ARRAY_BUFFER, segBuffer, GL_DYNAMIC_DRAW);
+			glVertexAttribIPointer(5, 1, GL_SHORT, 0, 0);
+			
+			if((updates & UPDATE_SZE) == 0)
+				uSZE = false;
 		}
 		
 		glBindBuffer(GL_ARRAY_BUFFER, 0);

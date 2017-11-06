@@ -1,5 +1,64 @@
 
+
 // DScript Function Reference
+
+
+
+// Built-in variables
+
+_time // Time, same as scriptTime()
+
+_cx // Center X, 224
+_cy // Center Y, 240
+
+// Border positions
+_lx // Left X, 32
+_rx // Right X, 416
+_tx // Top Y, 16
+_bx // Bottom Y, 464
+
+_px // Player X, same as playerX()
+_py // Player Y, same as playerY()
+
+// Bullet types
+_orb
+_scale
+_crystal
+_rice
+_star
+_star4
+_plus
+_wall
+_needle
+_ring
+_orbit
+_missile
+_mine
+_laser
+_laser_dist
+_laser_helix
+
+// Bullet colors
+// Add "_d" to use dark variant
+_red
+_dark_red
+_orange
+_yellow
+_gold
+_green
+_dark_green
+_cyan
+_light_blue
+_blue
+_dark_blue
+_purple
+_pink
+_white
+_gray
+_black
+
+
+
 
 
 // General
@@ -13,17 +72,8 @@ int(a);
 // How long script has been running (frames)
 scriptTime();
 
-// Center of screen position
-centerX();// 224
-centerY();// 240
+// Center of screen, [x, y]
 centerPos();
-
-// Border positions
-leftX();// 32
-rightX();// 416
-topY();// 16
-bottomY();// 464
-
 
 // Player position
 playerX();
