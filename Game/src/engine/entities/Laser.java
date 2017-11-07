@@ -55,7 +55,7 @@ public class Laser extends Bullet{
 		
 		baseFlare = new Effect(frameList.getEffect(EffectList.TYPE_FLARE, color % 16), x, y);
 		baseFlare.setLifetime(0);
-		//screen.addEffect(baseFlare);
+		screen.addEffect(baseFlare);
 	}
 	
 	public void initFrameProperties(){

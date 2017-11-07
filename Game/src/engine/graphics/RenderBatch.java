@@ -351,7 +351,7 @@ public class RenderBatch{
 					transforms[i*3 + 1]	*= l.getScaleY();
 					
 					if(uSEG)
-						segments[i] = (short)Math.max((int)((float)l.getLength()/l.getActualWidth()), 1);
+						segments[i] = (short)Math.max((int)(l.getLength()/(l.getActualWidth()/2f)), 1);
 				}
 				
 				// For hitboxes

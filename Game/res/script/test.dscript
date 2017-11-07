@@ -1,6 +1,6 @@
 
 set const c = 8;
-set const r = 100;
+set const r = 50;
 
 set dir = 0;
 set inv = false;
@@ -17,15 +17,17 @@ while(true){
 }
 
 task laser(dir){
+    set type = _laser_helix;
     set color = _red;
     set angvel = 0.05;
     
     if(inv){
+        type = _laser_dist;
         color = _blue;
         angvel *= -1;
     }
     
-    set l = laser(_laser_helix, color, _cx + r*cos(dir), 140 + r*sin(dir), dir, 200, 64, 30);
+    set l = laser(type, color, _cx + r*cos(dir), 140 + r*sin(dir), dir, 400, 64, 30);
     l.setAdditive();
     
     set c = 0;

@@ -4,7 +4,7 @@ layout(points) in;
 layout(triangle_strip, max_vertices = 80) out;
 
 uniform int time;
-const int period = 60;
+const int period = 15;
 
 in vec2 gSize[];
 in vec4 gTexCoords[];
@@ -48,33 +48,33 @@ void main(){
     float y = gSize[0].y/4;
     
     int seg = gSegments[0];
-    seg = 2;
     
-    float sl = (y*2)/seg;
+    float sl = (y*2)/(seg - 1);
+    float tl = tx.w - tx.z;
     float tm = (time % period)/float(period);
     
     for(int i = 0; i < seg; i++){
         
-        // Base
+        // Start
         if(i == 0){
-            vertex(vec2(x, y), tx.y, tx.z + tm*(tx.w - tx.z));
-            vertex(vec2(-x, y), tx.x, tx.z + tm*(tx.w - tx.z));
+            vertex(vec2(x, y), tx.x, tx.z + tm*tl);
+            vertex(vec2(-x, y), tx.y, tx.z + tm*tl);
         }
         // Segment start
         else{
-            vertex(vec2(x, y - (i - 1 + tm)*sl), tx.y, tx.w);
-            vertex(vec2(-x, y - (i - 1 + tm)*sl), tx.x, tx.w);
+            vertex(vec2(x, y - (i - 1+ tm)*sl), tx.x, tx.w);
+            vertex(vec2(-x, y - (i - 1 + tm)*sl), tx.y, tx.w);
         }
         
         // End
         if(i == seg - 1){
-            vertex(vec2(x, y - (i + 1)*sl), tx.y, tx.z + tm*(tx.w - tx.z));
-            vertex(vec2(-x, y - (i + 1)*sl), tx.x, tx.z + tm*(tx.w - tx.z));
+            vertex(vec2(x, -y), tx.x, tx.z + tm*tl);
+            vertex(vec2(-x, -y), tx.y, tx.z + tm*tl);
         }
         // Segment end
         else{
-            vertex(vec2(x, y - (i + tm)*sl), tx.y, tx.z);
-            vertex(vec2(-x, y - (i + tm)*sl), tx.x, tx.z);
+            vertex(vec2(x, y - (i + tm)*sl), tx.x, tx.z);
+            vertex(vec2(-x, y - (i + tm)*sl), tx.y, tx.z);
         }
         
         EndPrimitive();
