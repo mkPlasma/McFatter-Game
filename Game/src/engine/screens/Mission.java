@@ -1,6 +1,5 @@
 package engine.screens;
 
-import content.BulletList;
 import content.FrameList;
 import engine.entities.Player;
 import engine.graphics.Renderer;
@@ -29,7 +28,7 @@ public class Mission extends GameStage{
 		super.init();
 		
 		frameList = new FrameList(tc);
-		player = new Player(224, 450, frameList.getBullet(BulletList.TYPE_CRYSTAL, FrameList.COLOR_LIGHT_BLUE), frameList, screen);
+		player = new Player(224, 450, frameList, screen);
 		
 		tc.loadSprite(player.getSprite());
 		

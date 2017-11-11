@@ -1,5 +1,6 @@
 
 set const c = 8;
+set const c2 = 72;
 set const r = 50;
 
 set dir = 0;
@@ -15,7 +16,17 @@ while(!enemy.isDeleted()){
     dir += 15;
     inv = !inv;
     
-    wait 90;
+    for(i in 90){
+        wait;
+        
+        if(enemy.isDeleted()){
+            break;
+        }
+    }
+}
+
+for(d in 0, 360/c2, 360){
+    bullet(_orb, _orange, _cx, 140, d, 0, 0, 10, 0.05, 10);
 }
 
 task laser(dir){
@@ -42,7 +53,7 @@ task laser(dir){
         dir += angvel;
         c++;
         
-        if(c > 120){
+        if(c > 120 || enemy.isDeleted()){
             l.delete();
         }
         

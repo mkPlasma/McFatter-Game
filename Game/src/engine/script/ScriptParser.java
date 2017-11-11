@@ -65,6 +65,7 @@ public class ScriptParser{
 	// Loop index
 	private int loopNum;
 	private int forLoopNum;
+	private ArrayList<Integer> prevLoops;
 	
 	// Stops compilation
 	private boolean haltCompiler = false;
@@ -82,17 +83,18 @@ public class ScriptParser{
 		}
 		
 		// Initialize/reset lists
-		bytecode	= new ArrayList<Long>();
-		expressions	= new Stack<ArrayList<Object>>();
-		tmpExp		= new ArrayList<ArrayList<ArrayList<Long>>>();
-		states		= new Stack<String>();
-		variables	= new ArrayList<String>();
-		forVars		= new ArrayList<String>();
-		functions	= new ArrayList<String>();
-		funcNames	= new Stack<String>();
-		tempBc		= new ArrayList<ArrayList<Long>>();
-		funcBrackets= new Stack<Integer>();
-		funcParams	= new Stack<Integer>();
+		bytecode		= new ArrayList<Long>();
+		expressions		= new Stack<ArrayList<Object>>();
+		tmpExp			= new ArrayList<ArrayList<ArrayList<Long>>>();
+		states			= new Stack<String>();
+		variables		= new ArrayList<String>();
+		forVars			= new ArrayList<String>();
+		functions		= new ArrayList<String>();
+		funcNames		= new Stack<String>();
+		tempBc			= new ArrayList<ArrayList<Long>>();
+		funcBrackets	= new Stack<Integer>();
+		funcParams		= new Stack<Integer>();
+		prevLoops		= new ArrayList<Integer>();
 		
 		expressions.add(new ArrayList<Object>());
 
@@ -116,6 +118,7 @@ public class ScriptParser{
 		// Remove bytecode and variables from function definition
 		bytecode.clear();
 		variables.clear();
+		prevLoops.clear();
 		variables.add("");
 		
 		tmpExpInd = -1;
@@ -708,7 +711,15 @@ public class ScriptParser{
 								}
 								else if(statesPeek("while_body")){
 									states.pop();
-									bytecode.add(getInstruction("end_while", lineNum, loopNum));
+									
+									int n = loopNum;
+									
+									while(prevLoops.contains(n))
+										n--;
+									
+									bytecode.add(getInstruction("end_while", lineNum, n));
+									
+									prevLoops.add(loopNum);
 									loopNum--;
 								}
 								else if(statesPeek("for_body")){
@@ -733,11 +744,17 @@ public class ScriptParser{
 									tmpExp.get(tmpExpInd).clear();
 									
 									// Add loop point
-									bytecode.add(getInstruction("end_while", lineNum, loopNum));
+									int n = loopNum;
+									
+									while(prevLoops.contains(n))
+										n--;
+									
+									bytecode.add(getInstruction("end_while", lineNum, n));
 									
 									// Delete counter
 									bytecode.add(getInstruction("delete_var", lineNum, forVarIndex));
-									
+
+									prevLoops.add(loopNum);
 									loopNum--;
 									forLoopNum--;
 									tmpExpInd--;

@@ -125,18 +125,14 @@ public class RenderBatch{
 		vao = glGenVertexArrays();
 		vbo = glGenBuffers();
 		sze = glGenBuffers();
+		tex = 0;
+		alp = 0;
 		seg = 0;
 		
-		if(shader == 2){
-			tex = 0;
+		if(shader == 2)
 			tfm = 0;
-			alp = 0;
-		}
-		else{
-			tex = glGenBuffers();
+		else
 			tfm = glGenBuffers();
-			alp = glGenBuffers();
-		}
 		
 		init();
 	}
@@ -454,7 +450,7 @@ public class RenderBatch{
 			glBindBuffer(GL_ARRAY_BUFFER, sze);
 			glBufferData(GL_ARRAY_BUFFER, szeBuffer, GL_STATIC_DRAW);
 			
-			if(shader == 0 || shader == 1)
+			if(shader == 0 || shader == 1 || shader == 3)
 				glVertexAttribPointer(1, 2, GL_SHORT, false, 0, 0);
 			else
 				glVertexAttribIPointer(1, 1, GL_SHORT, 0, 0);

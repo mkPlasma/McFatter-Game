@@ -100,7 +100,7 @@ public class Renderer{
 		
 		// Effects
 		renderBatches.add(new RenderBatch(0, MAX_EFFECTS, 32, effectTex, UPDATE_ALL_BUT_SIZE, true));
-
+		
 		// Hitboxes
 		renderBatches.add(new RenderBatch(2, MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX));
 		
@@ -183,6 +183,9 @@ public class Renderer{
 	}
 	
 	public void updateHitboxes(ArrayList<Bullet> enemyBullets, ArrayList<Enemy> enemies, Player player){
+		
+		if(!renderHitboxes)
+			return;
 		
 		ArrayList<GameEntity> el = new ArrayList<GameEntity>();
 		

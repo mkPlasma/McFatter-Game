@@ -156,12 +156,19 @@ public class MainScreen extends GameScreen{
 	private void updateGameStage(){
 		
 		if(clearScreen > 0){
-			
+
 			for(Bullet b:enemyBullets){
 				if(clearScreen == 1)
 					b.onDestroy(true);
 				if(clearScreen == 2)
 					b.delete();
+			}
+			
+			for(Enemy e:enemies){
+				if(clearScreen == 1)
+					e.onDestroy();
+				if(clearScreen == 2)
+					e.delete();
 			}
 			
 			if(clearScreen == 2)

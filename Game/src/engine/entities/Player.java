@@ -3,6 +3,7 @@ package engine.entities;
 import static engine.KeyboardListener.*;
 import static org.lwjgl.glfw.GLFW.*;
 
+import content.BulletList;
 import content.FrameList;
 import engine.graphics.Sprite;
 import engine.screens.MainScreen;
@@ -40,14 +41,14 @@ public class Player extends GameEntity{
 	// Temporary
 	private Sprite sprite;
 	
-	public Player(float x, float y, BulletFrame shot, FrameList frameList, MainScreen screen){
+	public Player(float x, float y, FrameList frameList, MainScreen screen){
 		super(null, x, y);
 		
-		this.shot = shot;
 		this.frameList = frameList;
 		this.screen = screen;
 		
 		// temp
+		shot = frameList.getBullet(BulletList.TYPE_CRYSTAL, FrameList.COLOR_LIGHT_BLUE);
 		sprite = new Sprite("player.png", 0, 0, 64, 64);
 		
 		onCreate();
@@ -124,8 +125,8 @@ public class Player extends GameEntity{
 	}
 	
 	private void fire(){
-		screen.addPlayerBullet(new Bullet(shot, x - 10, y - 5, 270, 15, 0, 10, 0.1f, frameList, screen));
-		screen.addPlayerBullet(new Bullet(shot, x + 10, y - 5, 270, 15, 0, 10, 0.1f, frameList, screen));
+		screen.addPlayerBullet(new Bullet(shot, x - 10, y + 10, 270, 15, 0, 10, 0.1f, frameList, screen));
+		screen.addPlayerBullet(new Bullet(shot, x + 10, y + 10, 270, 15, 0, 10, 0.1f, frameList, screen));
 		shotCooldown = 4;
 	}
 	

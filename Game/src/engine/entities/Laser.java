@@ -78,20 +78,21 @@ public class Laser extends Bullet{
 			if(delay == 0)
 				collisions = true;
 		}
-		
-		// Despawn effect
-		if(deleteTime > 0){
-			
-			if(deleteTime > 10){
-				width = 2 + (int)((deleteTime - 10)*((aWidth - 2)/15f));
-				updateScale(0);
-			}
-			
-			deleteTime--;
-			
-			if(deleteTime == 0){
-				deleted = true;
-				baseFlare.delete();
+		else{
+			// Despawn effect
+			if(deleteTime > 0){
+				
+				if(deleteTime > 10){
+					width = 2 + (int)((deleteTime - 10)*((aWidth - 2)/15f));
+					updateScale(0);
+				}
+				
+				deleteTime--;
+				
+				if(deleteTime == 0){
+					deleted = true;
+					baseFlare.delete();
+				}
 			}
 		}
 		

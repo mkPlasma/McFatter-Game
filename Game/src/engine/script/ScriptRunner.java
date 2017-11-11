@@ -41,7 +41,7 @@ public class ScriptRunner{
 	private boolean finished = false;
 	
 	// Used for deleted variables
-	private final Object EMPTY = (byte)0;
+	private final Object EMPTY = null;
 	
 	
 	// Stored in ScriptState
@@ -878,7 +878,6 @@ public class ScriptRunner{
 		
 		// Number operation
 		if(isNumberOp(op) && !isBoolean){
-			
 			if((!(o1 instanceof Integer) && !(o1 instanceof Float)) || (!(o2 instanceof Integer) && !(o2 instanceof Float))){
 				runtimeError("Type mismatch", lineNum);
 				return null;
