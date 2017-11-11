@@ -14,8 +14,8 @@ _cy // Center Y, 240
 // Border positions
 _lx // Left X, 32
 _rx // Right X, 416
-_tx // Top Y, 16
-_bx // Bottom Y, 464
+_ty // Top Y, 16
+_by // Bottom Y, 464
 
 _px // Player X, same as playerX()
 _py // Player Y, same as playerY()
@@ -56,6 +56,76 @@ _pink
 _white
 _gray
 _black
+
+
+
+
+
+// Entities
+
+// Note that "x, y" can be replaced by an array [x, y]
+
+// Bullets
+set b = bullet(type, color, x, y, dir, spd, delay);
+bullet(type, color, x, y, dir, spd, minSpd, maxSpd, accel, delay);
+
+// Lasers
+laser(type, color, x, y, dir, length, width, delay);
+
+// Enemies
+enemy(x, y, hp);
+
+// Delete entity
+b.delete();
+
+// Location
+b.setX(x);
+b.setY(y);
+b.getX();
+b.getY();
+// As an array, [x, y]
+b.setPos(pos);
+b.getPos();
+
+// How many frames entity has existed
+b.getTime();
+
+// Is entity removed
+b.isDeleted();
+
+// Direction and speed
+b.setDir(d);
+b.setSpd(s);
+b.getDir();
+b.getSpd();
+
+// Acceleration, min/max speed
+b.setAccel(a);
+b.setMinSpd(s);
+b.setMaxSpd(s);
+b.getAccel();
+b.getMinSpd();
+b.getMaxSpd();
+
+// Angular velocity, value gets added to direction, causing bullet to curve
+b.setAngVel(a);
+b.getAngVel();
+
+// Type/Color of bullet
+b.setType(t);
+b.setColor(c);
+b.setFrame(t, c);
+b.getType();
+b.getColor();
+// As array, [type, color]
+b.setFrame(frame);
+b.getFrame();
+
+// Additive rendering
+b.setAdditive(a);
+b.isAdditive();
+// Set to true
+b.setAdditive();
 
 
 
@@ -159,70 +229,6 @@ array.add(a);
 array.remove();
 // Removes n values
 array.remove(n);
-
-
-
-
-
-// Entities
-
-// Creates a bullet with given parameters
-set b = bullet(type, color, x, y, dir, spd);
-
-// Delete entity
-b.delete();
-
-// Location
-b.setX(x);
-b.setY(y);
-b.getX();
-b.getY();
-// As an array, [x, y]
-b.setPos(pos);
-b.getPos();
-
-// How many frames entity has existed
-b.getTime();
-
-// Is entity removed
-b.isDeleted();
-
-// Direction and speed
-b.setDir(d);
-b.setSpd(s);
-b.getDir();
-b.getSpd();
-
-// Acceleration, min/max speed
-b.setAccel(a);
-b.setMinSpd(s);
-b.setMaxSpd(s);
-b.getAccel();
-b.getMinSpd();
-b.getMaxSpd();
-
-// Angular velocity, value gets added to direction, causing bullet to curve
-b.setAngVel(a);
-b.getAngVel();
-
-// Type/Color of bullet
-b.setType(t);
-b.setColor(c);
-b.setFrame(t, c);
-b.getType();
-b.getColor();
-// As array, [type, color]
-b.setFrame(frame);
-b.getFrame();
-
-// Additive rendering
-b.setAdditive(a);
-b.isAdditive();
-// Set to true
-b.setAdditive();
-
-
-
 
 
 

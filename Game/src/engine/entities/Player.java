@@ -33,22 +33,22 @@ public class Player extends GameEntity{
 	
 	// Timer variables counts up for timing shots/bombs
 	private int shotCooldown = 0, bombCooldown = 0;
-	
-	private MainScreen screen;
+
+	private final FrameList frameList;
+	private final MainScreen screen;
 	
 	// Temporary
 	private Sprite sprite;
-	private FrameList frameList;
 	
 	public Player(float x, float y, BulletFrame shot, FrameList frameList, MainScreen screen){
 		super(null, x, y);
 		
 		this.shot = shot;
+		this.frameList = frameList;
 		this.screen = screen;
 		
 		// temp
 		sprite = new Sprite("player.png", 0, 0, 64, 64);
-		this.frameList = frameList;
 		
 		onCreate();
 	}
@@ -124,8 +124,8 @@ public class Player extends GameEntity{
 	}
 	
 	private void fire(){
-		screen.addPlayerBullet(new Bullet(shot, x - 10, y - 5, 270, 15, 0, 500, 5, frameList, null));
-		screen.addPlayerBullet(new Bullet(shot, x + 10, y - 5, 270, 15, 0, 500, 5, frameList, null));
+		screen.addPlayerBullet(new Bullet(shot, x - 10, y - 5, 270, 15, 0, 10, 0.1f, frameList, screen));
+		screen.addPlayerBullet(new Bullet(shot, x + 10, y - 5, 270, 15, 0, 10, 0.1f, frameList, screen));
 		shotCooldown = 4;
 	}
 	

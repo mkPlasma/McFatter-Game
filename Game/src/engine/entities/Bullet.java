@@ -29,7 +29,7 @@ public class Bullet extends MovableEntity{
 	protected Sprite sprite;
 	
 	// Player shots only
-	protected int damage, dmgReduce;
+	protected float damage, dmgReduce;
 	
 	// Won't despawn from bomb or player hit
 	protected boolean bombResist;
@@ -52,7 +52,7 @@ public class Bullet extends MovableEntity{
 	protected final FrameList frameList;
 	
 	// Screen to add effects to
-	protected MainScreen screen;
+	protected final MainScreen screen;
 	
 	
 	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, int delay, FrameList frameList, MainScreen screen){
@@ -67,7 +67,19 @@ public class Bullet extends MovableEntity{
 		onCreate();
 	}
 	
-	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, int delay, int damage, int dmgReduce, FrameList frameList, MainScreen screen){
+	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, float minSpd, float maxSpd, float accel, int delay, FrameList frameList, MainScreen screen){
+		super(frame, x, y, dir, spd, minSpd, maxSpd, accel);
+		
+		this.frame = frame;
+		delayFlare = delay > 0;
+		this.delay = Math.abs(delay);
+		this.frameList = frameList;
+		this.screen = screen;
+		
+		onCreate();
+	}
+	
+	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, int delay, float damage, float dmgReduce, FrameList frameList, MainScreen screen){
 		super(frame, x, y, dir, spd);
 		
 		this.frame = frame;
@@ -141,6 +153,9 @@ public class Bullet extends MovableEntity{
 		
 		deleted = true;
 		
+		
+		// Explosion effect
+		
 		int effectCol = color % 16;
 		
 		// Black bullets use gray despawn effect
@@ -151,13 +166,10 @@ public class Bullet extends MovableEntity{
 		if(type == BulletList.TYPE_MISSILE || type == BulletList.TYPE_MINE)
 			effectCol = FrameList.COLOR_BLACK;
 		
-		// check temporary
-		if(screen != null){
-			Effect e = new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, effectCol), x, y);
-			e.getSprite().rotate((float)Math.random()*360);
-			e.getSprite().setScale(effectCol == FrameList.COLOR_BLACK ? 3 : 2);
-			screen.addEffect(e);
-		}
+		Effect e = new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, effectCol), x, y);
+		e.getSprite().rotate((float)Math.random()*360);
+		e.getSprite().setScale(effectCol == FrameList.COLOR_BLACK ? 3 : 2);
+		screen.addEffect(e);
 	}
 	
 	public void update(){
@@ -237,7 +249,7 @@ public class Bullet extends MovableEntity{
 		this.damage = damage;
 	}
 	
-	public int getDamage(){
+	public float getDamage(){
 		return damage;
 	}
 	
@@ -245,7 +257,7 @@ public class Bullet extends MovableEntity{
 		this.dmgReduce = dmgReduce;
 	}
 	
-	public int getDamageReduce(){
+	public float getDamageReduce(){
 		return dmgReduce;
 	}
 

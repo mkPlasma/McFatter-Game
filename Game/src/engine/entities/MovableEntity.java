@@ -23,12 +23,22 @@ public abstract class MovableEntity extends GameEntity{
 	public MovableEntity(EntityFrame frame, float x, float y){
 		super(frame, x, y);
 	}
-	
+
 	public MovableEntity(EntityFrame frame, float x, float y, float dir, float spd){
 		super(frame, x, y);
 		
 		this.dir = dir;
 		this.spd = spd;
+	}
+	
+	public MovableEntity(EntityFrame frame, float x, float y, float dir, float spd, float minSpd, float maxSpd, float accel){
+		super(frame, x, y);
+		
+		this.dir = dir;
+		this.spd = spd;
+		this.minSpd = minSpd;
+		this.maxSpd = maxSpd;
+		this.accel = accel;
 	}
 	
 	public void update(){

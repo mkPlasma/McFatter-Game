@@ -62,12 +62,14 @@ public class MainScreen extends GameScreen{
 		paused = false;
 
 		// Load textures
-		int tPlayer = tc.cache("player.png").getID();
-		int tBullets1 = tc.cache("bullets/01.png").getID();
-		int tBullets2 = tc.cache("bullets/02.png").getID();
-		int tEffects = tc.cache("effects.png").getID();
 		
-		r.initMainScreen(tPlayer, tBullets1, tBullets2, tEffects);
+		r.initMainScreen(
+			tc.cache("player.png").getID(),
+			tc.cache("bullets/01.png").getID(),
+			tc.cache("bullets/02.png").getID(),
+			tc.cache("enemies.png").getID(),
+			tc.cache("effects.png").getID()
+		);
 		
 		// Temporary test
 		stage = new Mission("Game/res/script/test.dscript", this, r, tc);
@@ -87,6 +89,7 @@ public class MainScreen extends GameScreen{
 		r.updatePlayer(player);
 		r.updateEnemyBullets(enemyBullets);
 		r.updatePlayerBullets(playerBullets);
+		r.updateEnemies(enemies);
 		r.updateEffects(effects);
 		r.updateHitboxes(enemyBullets, enemies, player);
 		
@@ -286,7 +289,7 @@ public class MainScreen extends GameScreen{
 						float[] bpos = b.getPos();
 						
 						if(Math.hypot(epos[0] - bpos[0], epos[1] - bpos[1]) < e.getHitboxSize() + b.getHitboxSize()){
-							e.damage(b.getDamage());
+							e.damage((int)b.getDamage());
 							b.onDestroy(false);
 						}
 					}
@@ -295,15 +298,20 @@ public class MainScreen extends GameScreen{
 		}
 	}
 	
+	public void addEnemy(Enemy enemy){
+		
+		if(enemy == null || enemies.size() >= MAX_ENEMIES)
+			return;
+		
+		enemies.add(enemy);
+	}
+	
 	public void addEnemyBullet(Bullet bullet){
 		
 		if(bullet == null || enemyBullets.size() >= MAX_ENEMY_BULLETS)
 			return;
 		
 		enemyBullets.add(bullet);
-		
-		if(enemyBullets.size() >= MAX_ENEMY_BULLETS)
-			enemyBullets.remove(enemyBullets.size() - 1);
 	}
 	
 	public void addPlayerBullet(Bullet bullet){
@@ -312,9 +320,6 @@ public class MainScreen extends GameScreen{
 			return;
 		
 		playerBullets.add(bullet);
-		
-		if(playerBullets.size() >= MAX_PLAYER_BULLETS)
-			playerBullets.remove(playerBullets.size() - 1);
 	}
 	
 	public void addEffect(Effect effect){
@@ -323,8 +328,5 @@ public class MainScreen extends GameScreen{
 			return;
 		
 		effects.add(effect);
-		
-		if(effects.size() >= MAX_EFFECTS)
-			effects.remove(effects.size() - 1);
 	}
 }

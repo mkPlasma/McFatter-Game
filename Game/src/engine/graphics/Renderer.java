@@ -77,12 +77,15 @@ public class Renderer{
 	}
 	
 	// Initialize rendering for MainScreen
-	public void initMainScreen(int playerTex, int bulletTex1, int bulletTex2, int effectTex){
+	public void initMainScreen(int playerTex, int bulletTex1, int bulletTex2, int enemyTex, int effectTex){
 		
 		// Add in order of rendering
 		
 		// Player bullets
 		renderBatches.add(new RenderBatch(0, MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL_BUT_SIZE, false));
+		
+		// Enemies
+		renderBatches.add(new RenderBatch(0, MAX_ENEMIES, 64, enemyTex, UPDATE_VBO, false));
 		
 		// Player
 		renderBatches.add(new RenderBatch(0, 1, 64, playerTex, UPDATE_VBO, false));
@@ -119,7 +122,11 @@ public class Renderer{
 	}
 	
 	public void updatePlayer(Player player){
-		renderBatches.get(1).updateWithEntity(player, time);
+		renderBatches.get(2).updateWithEntity(player, time);
+	}
+	
+	public void updateEnemies(ArrayList<Enemy> enemies){
+		renderBatches.get(1).updateWithEntities(enemies, time);
 	}
 	
 	public void updateEnemyBullets(ArrayList<Bullet> bullets){
@@ -159,12 +166,12 @@ public class Renderer{
 			}
 		}
 		
-		renderBatches.get(2).updateWithEntities(b1, time);
-		renderBatches.get(3).updateWithEntities(b1a, time);
-		renderBatches.get(4).updateWithEntities(b2, time);
-		renderBatches.get(5).updateWithEntities(b2a, time);
-		renderBatches.get(6).updateWithEntities(l, time);
-		renderBatches.get(7).updateWithEntities(la, time);
+		renderBatches.get(3).updateWithEntities(b1, time);
+		renderBatches.get(4).updateWithEntities(b1a, time);
+		renderBatches.get(5).updateWithEntities(b2, time);
+		renderBatches.get(6).updateWithEntities(b2a, time);
+		renderBatches.get(7).updateWithEntities(l, time);
+		renderBatches.get(8).updateWithEntities(la, time);
 	}
 	
 	public void updatePlayerBullets(ArrayList<Bullet> bullets){
@@ -172,7 +179,7 @@ public class Renderer{
 	}
 	
 	public void updateEffects(ArrayList<Effect> effects){
-		renderBatches.get(8).updateWithEntities(effects, time);
+		renderBatches.get(9).updateWithEntities(effects, time);
 	}
 	
 	public void updateHitboxes(ArrayList<Bullet> enemyBullets, ArrayList<Enemy> enemies, Player player){
@@ -196,8 +203,8 @@ public class Renderer{
 			}
 		}
 		
-		renderBatches.get(9).updateHitboxes(el);
-		renderBatches.get(10).updateWithEntities(ll, 0);
+		renderBatches.get(10).updateHitboxes(el);
+		renderBatches.get(11).updateWithEntities(ll, 0);
 	}
 	
 	public void render(){

@@ -13,6 +13,7 @@ import java.util.Stack;
 
 import content.FrameList;
 import engine.entities.Bullet;
+import engine.entities.Enemy;
 import engine.entities.GameEntity;
 import engine.entities.Laser;
 import engine.entities.MovableEntity;
@@ -1258,42 +1259,135 @@ public class ScriptRunner{
 			
 			// Bullet functions
 			case "bullet":{
-				Object ox = params.remove();
-				Object oy = params.remove();
-				Object oDir = params.remove();
-				Object oSpd = params.remove();
-				Object oDel = params.remove();
+				switch(paramCount){
+					case 6:{
+						Object oPos = params.remove();
+						Object oDir = params.remove();
+						Object oSpd = params.remove();
+						Object oDel = params.remove();
+						
+						float[] pos = convertArray((ArrayList<Object>)oPos, "bullet", lineNum);
+						float dir = oDir instanceof Float ? (float)oDir : (float)(int)oDir;
+						float spd = oSpd instanceof Float ? (float)oSpd : (float)(int)oSpd;
+						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
+						
+						returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), pos[0], pos[1], dir, spd, del, frameList, screen);
+						break;
+					}
+					case 7:{
+						Object ox = params.remove();
+						Object oy = params.remove();
+						Object oDir = params.remove();
+						Object oSpd = params.remove();
+						Object oDel = params.remove();
+						
+						float x = ox instanceof Float ? (float)ox : (float)(int)ox;
+						float y = oy instanceof Float ? (float)oy : (float)(int)oy;
+						float dir = oDir instanceof Float ? (float)oDir : (float)(int)oDir;
+						float spd = oSpd instanceof Float ? (float)oSpd : (float)(int)oSpd;
+						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
+						
+						returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, spd, del, frameList, screen);
+						break;
+					}
+					case 9:{
+						Object oPos = params.remove();
+						Object oDir = params.remove();
+						Object oSpd = params.remove();
+						Object oMinSpd = params.remove();
+						Object oMaxSpd = params.remove();
+						Object oAccel = params.remove();
+						Object oDel = params.remove();
+						
+						float[] pos = convertArray((ArrayList<Object>)oPos, "bullet", lineNum);
+						float dir = oDir instanceof Float ? (float)oDir : (float)(int)oDir;
+						float spd = oSpd instanceof Float ? (float)oSpd : (float)(int)oSpd;
+						float minSpd = oMinSpd instanceof Float ? (float)oMinSpd : (float)(int)oMinSpd;
+						float maxSpd = oMaxSpd instanceof Float ? (float)oMaxSpd : (float)(int)oMaxSpd;
+						float accel = oAccel instanceof Float ? (float)oAccel : (float)(int)oAccel;
+						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
+						
+						returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), pos[0], pos[1], dir, spd, minSpd, maxSpd, accel, del, frameList, screen);
+						break;
+					}
+					case 10:{
+						Object ox = params.remove();
+						Object oy = params.remove();
+						Object oDir = params.remove();
+						Object oSpd = params.remove();
+						Object oMinSpd = params.remove();
+						Object oMaxSpd = params.remove();
+						Object oAccel = params.remove();
+						Object oDel = params.remove();
+						
+						float x = ox instanceof Float ? (float)ox : (float)(int)ox;
+						float y = oy instanceof Float ? (float)oy : (float)(int)oy;
+						float dir = oDir instanceof Float ? (float)oDir : (float)(int)oDir;
+						float spd = oSpd instanceof Float ? (float)oSpd : (float)(int)oSpd;
+						float minSpd = oMinSpd instanceof Float ? (float)oMinSpd : (float)(int)oMinSpd;
+						float maxSpd = oMaxSpd instanceof Float ? (float)oMaxSpd : (float)(int)oMaxSpd;
+						float accel = oAccel instanceof Float ? (float)oAccel : (float)(int)oAccel;
+						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
+						
+						returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, spd, minSpd, maxSpd, accel, del, frameList, screen);
+						break;
+					}
+				}
 				
-				float x = ox instanceof Float ? (float)ox : (float)(int)ox;
-				float y = oy instanceof Float ? (float)oy : (float)(int)oy;
-				float dir = oDir instanceof Float ? (float)oDir : (float)(int)oDir;
-				float spd = oSpd instanceof Float ? (float)oSpd : (float)(int)oSpd;
-				int del = (int)oDel;
-				
-				returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, spd, del, frameList, screen);
 				screen.addEnemyBullet((Bullet)returnValue);
 				return;
 			}
 			
 			case "laser":{
-				Object ox = params.remove();
-				Object oy = params.remove();
-				Object oDir = params.remove();
-				Object oLen = params.remove();
-				Object oWid = params.remove();
-				Object oDel = params.remove();
-				
-				float x = ox instanceof Float ? (float)ox : (float)(int)ox;
-				float y = oy instanceof Float ? (float)oy : (float)(int)oy;
-				float dir = oDir instanceof Float ? (float)oDir : (float)(int)oDir;
-				int len = oLen instanceof Integer ? (int)oLen : (int)(float)oLen;
-				int wid = oWid instanceof Integer ? (int)oWid : (int)(float)oWid;
-				int del = (int)oDel;
-				
-				returnValue = new Laser(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, len, wid, del, frameList, screen);
+				if(paramCount == 7){
+					Object oPos = params.remove();
+					Object oDir = params.remove();
+					Object oLen = params.remove();
+					Object oWid = params.remove();
+					Object oDel = params.remove();
+
+					float[] pos = convertArray((ArrayList<Object>)oPos, "bullet", lineNum);
+					float dir = oDir instanceof Float ? (float)oDir : (float)(int)oDir;
+					int len = oLen instanceof Integer ? (int)oLen : (int)(float)oLen;
+					int wid = oWid instanceof Integer ? (int)oWid : (int)(float)oWid;
+					int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
+					
+					returnValue = new Laser(frameList.getBullet((byte)i1, (byte)i2), pos[0], pos[1], dir, len, wid, del, frameList, screen);
+				}
+				else{
+					Object ox = params.remove();
+					Object oy = params.remove();
+					Object oDir = params.remove();
+					Object oLen = params.remove();
+					Object oWid = params.remove();
+					Object oDel = params.remove();
+					
+					float x = ox instanceof Float ? (float)ox : (float)(int)ox;
+					float y = oy instanceof Float ? (float)oy : (float)(int)oy;
+					float dir = oDir instanceof Float ? (float)oDir : (float)(int)oDir;
+					int len = oLen instanceof Integer ? (int)oLen : (int)(float)oLen;
+					int wid = oWid instanceof Integer ? (int)oWid : (int)(float)oWid;
+					int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
+					
+					returnValue = new Laser(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, len, wid, del, frameList, screen);
+				}
 				screen.addEnemyBullet((Laser)returnValue);
 				return;
 			}
+			
+			case "enemy":
+				Object oHp = params.remove();
+				
+				int hp = oHp instanceof Integer ? (int)oHp : (int)(float)oHp;
+				
+				if(!isFloat){
+					f1 = (float)i1;
+					f2 = (float)i2;
+				}
+				
+				returnValue = new Enemy(frameList.getEnemy(0), f1, f2, hp, frameList, screen);
+				screen.addEnemy((Enemy)returnValue);
+				return;
 			
 			case "delete":
 				bl.onDestroy(true);

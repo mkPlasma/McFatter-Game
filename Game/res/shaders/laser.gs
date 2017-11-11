@@ -1,10 +1,10 @@
 #version 150
 
 layout(points) in;
-layout(triangle_strip, max_vertices = 80) out;
+layout(triangle_strip, max_vertices = 256) out;
 
 uniform int time;
-const int period = 15;
+const int period = 10;
 
 in vec2 gSize[];
 in vec4 gTexCoords[];

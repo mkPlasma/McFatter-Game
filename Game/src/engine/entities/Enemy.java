@@ -1,5 +1,9 @@
 package engine.entities;
 
+import content.EffectList;
+import content.FrameList;
+import engine.screens.MainScreen;
+
 /*
  * 		Enemy.java
  * 		
@@ -19,24 +23,24 @@ public class Enemy extends MovableEntity{
 	// Whether entity can collide
 	private boolean collisions = true;
 	
-	private int health;
-	private int hpmax;
+	private int hp;
 	
-	public Enemy(EnemyFrame frame, float x, float y){
+	private final FrameList frameList;
+	private final MainScreen screen;
+	
+	public Enemy(EnemyFrame frame, float x, float y, int hp, FrameList frameList, MainScreen screen){
 		super(frame, x, y);
 		
-		visible = true;
-		
 		this.frame = frame;
+		this.hp = hp;
+		this.frameList = frameList;
+		this.screen = screen;
 		
-		hitboxSize = 8;
-		hpmax = 50000;
-		health = hpmax;
-		
+		// temporary
+		hitboxSize = 16;
 		
 		onCreate();
 	}
-	
 	
 	public void onCreate(){
 		
@@ -44,12 +48,20 @@ public class Enemy extends MovableEntity{
 	
 	public void onDestroy(){
 		deleted = true;
+		
+		
+		// Explosion effect
+		
+		Effect e = new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, FrameList.COLOR_BLACK, 2), x, y);
+		e.getSprite().rotate((float)Math.random()*360);
+		e.getSprite().setScale(4);
+		screen.addEffect(e);
 	}
 	
 	public void damage(int damage){
-		health -= damage;
+		hp -= damage;
 		
-		if(health <= 0)
+		if(hp <= 0)
 			onDestroy();
 	}
 	
@@ -59,7 +71,7 @@ public class Enemy extends MovableEntity{
 	}
 	
 	public int getHealth(){
-		return health;
+		return hp;
 	}
 	
 	public int getHitboxSize(){

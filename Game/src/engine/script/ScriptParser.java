@@ -527,7 +527,8 @@ public class ScriptParser{
 								
 								// Array item
 								else if(statesPeek("array", 1)){
-									tempBc.get(tempBc.size() - 1).addAll(parseExpression(lineNum));
+									ArrayList<Long> bc = parseExpression(lineNum);
+									tempBc.get(tempBc.size() - 1).addAll(bc);
 									states.push("exp");
 									continue;
 								}
@@ -663,9 +664,10 @@ public class ScriptParser{
 								if(statesPeek("exp") && statesPeek("array", 1)){
 									
 									// Parse values if not empty
-									if(!expressions.peek().isEmpty())
-										tempBc.get(tempBc.size() - 1).addAll(parseExpression(lineNum));
-									
+									if(!expressions.peek().isEmpty()){
+										ArrayList<Long> bc = parseExpression(lineNum);
+										tempBc.get(tempBc.size() - 1).addAll(bc);
+									}
 									// Pop "exp"
 									else
 										states.pop();
@@ -1205,7 +1207,7 @@ public class ScriptParser{
 						tempBc.add(new ArrayList<Long>());
 						
 						// Use new parameter queue if in function call
-						if(statesPeek("func_args", 1))
+						if(states.contains("func_args"))
 							tempBc.get(tempBc.size() - 1).add(getInstruction("param_inc", lineNum));
 						
 						// Use new expression for paramters

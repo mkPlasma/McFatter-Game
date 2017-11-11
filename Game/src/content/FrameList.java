@@ -2,6 +2,7 @@ package content;
 
 import engine.entities.BulletFrame;
 import engine.entities.EffectFrame;
+import engine.entities.EnemyFrame;
 import engine.graphics.TextureCache;
 
 /*
@@ -53,10 +54,12 @@ public class FrameList{
 	
 	public final BulletList bulletList;
 	public final EffectList effectList;
+	public final EnemyList enemyList;
 	
 	public FrameList(TextureCache tc){
 		bulletList = new BulletList(tc);
 		effectList = new EffectList(tc);
+		enemyList = new EnemyList(tc);
 	}
 	
 	public BulletFrame getBullet(int type, int color){
@@ -64,7 +67,15 @@ public class FrameList{
 	}
 	
 	public EffectFrame getEffect(int type, int color){
-		return effectList.get(type, color);
+		return effectList.get(type, color, 1);
+	}
+	
+	public EffectFrame getEffect(int type, int color, int animSpd){
+		return effectList.get(type, color, animSpd);
+	}
+	
+	public EnemyFrame getEnemy(int type){
+		return enemyList.get(type);
 	}
 	
 	public static int getVarNum(String var){

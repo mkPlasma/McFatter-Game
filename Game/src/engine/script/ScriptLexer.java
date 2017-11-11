@@ -502,7 +502,7 @@ public class ScriptLexer{
 							nextExpected = new String[]{"o", "{", ";", ",", "}", ")", "[", "]"};
 							break;
 						case "{":
-							lastExpected = new String[]{")", "(", "{", "o", "a", "else", "return", "in"};
+							lastExpected = new String[]{")", "(", "{", ",", "o", "a", "else", "return", "in"};
 							break;
 						case "[":
 							lastExpected = new String[]{"v", "}", ")"};
@@ -514,7 +514,7 @@ public class ScriptLexer{
 							break;
 						case ",":
 							lastExpected = new String[]{"v", "i", "l", "b", "t", ")", "]", "}"};
-							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "!", "-", ".", "global"};
+							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "{", "!", "-", ".", "global"};
 							break;
 						case ".":
 							lastExpected = new String[]{"v", ")", "]", "o", "a", ",", "{", "(", "[", "in", "return", "wait"};

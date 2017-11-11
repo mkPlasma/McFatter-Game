@@ -5,7 +5,9 @@ set const r = 50;
 set dir = 0;
 set inv = false;
 
-while(true){
+set enemy = enemy(_cx, 140, 1000);
+
+while(!enemy.isDeleted()){
     for(d in 0, 360/c, 360){
         laser(dir + d);
     }
@@ -27,15 +29,14 @@ task laser(dir){
         angvel *= -1;
     }
     
-    set l = laser(type, color, _cx + r*cos(dir), 140 + r*sin(dir), dir, 400, 64, 30);
+    set l = laser(type, color, {_cx + r*cos(dir), 140 + r*sin(dir)}, dir, 400, 64, 30);
     l.setAdditive();
     
     set c = 0;
     
     while(!l.isDeleted()){
         
-        l.setX(_cx + r*cos(dir));
-        l.setY(140 + r*sin(dir));
+        l.setPos({_cx + r*cos(dir), 140 + r*sin(dir)});
         l.setDir(dir);
         
         dir += angvel;

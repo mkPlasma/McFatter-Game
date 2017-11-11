@@ -192,8 +192,16 @@ public class ScriptFunctions{
 		"remove:d1",
 		
 		// Bullet
+		"bullet:6",
 		"bullet:7",
+		"bullet:9",
+		"bullet:10",
+		
+		"laser:7",
 		"laser:8",
+		
+		"enemy:2",
+		"enemy:3",
 		
 		"delete:d0",
 		"setX:d1",
@@ -253,7 +261,7 @@ public class ScriptFunctions{
 	
 	// Check for type mismatch
 	public static boolean builtInFunctionTypeMatch(int index, Object[] params){
-
+		
 		Object o1 = params.length > 0 ? params[0] : null;
 		Object o2 = params.length > 1 ? params[1] : null;
 		Object o3 = params.length > 2 ? params[2] : null;
@@ -293,10 +301,17 @@ public class ScriptFunctions{
 			
 			case "remove":
 				return o1 instanceof ArrayList && (p == 0 || o2 instanceof Integer);
-				
+			
 			case "bullet":{
 				Object o5 = params[4];
 				Object o6 = params[5];
+				
+				if(p == 6)
+					return o1 instanceof Integer && o2 instanceof Integer && o3 instanceof ArrayList &&
+						  (o4 instanceof Integer || o4 instanceof Float) &&
+						  (o5 instanceof Integer || o5 instanceof Float) &&
+						  (o6 instanceof Integer || o6 instanceof Float);
+				
 				Object o7 = params[6];
 				
 				return o1 instanceof Integer && o2 instanceof Integer &&
@@ -311,6 +326,14 @@ public class ScriptFunctions{
 				Object o5 = params[4];
 				Object o6 = params[5];
 				Object o7 = params[6];
+				
+				if(p == 7)
+					return o1 instanceof Integer && o2 instanceof Integer && o3 instanceof ArrayList &&
+						  (o4 instanceof Integer || o4 instanceof Float) &&
+						  (o5 instanceof Integer || o5 instanceof Float) &&
+						  (o6 instanceof Integer || o6 instanceof Float) &&
+						  (o7 instanceof Integer || o7 instanceof Float);
+				
 				Object o8 = params[7];
 				
 				return o1 instanceof Integer && o2 instanceof Integer &&
@@ -320,6 +343,17 @@ public class ScriptFunctions{
 					  (o6 instanceof Integer || o6 instanceof Float) &&
 					  (o7 instanceof Integer || o7 instanceof Float) &&
 					  (o8 instanceof Integer || o8 instanceof Float);
+			}
+			
+			case "enemy":{
+				
+				if(p == 2)
+					return o1 instanceof ArrayList &&
+						  (o2 instanceof Integer || o2 instanceof Float);
+				
+				return (o1 instanceof Integer || o1 instanceof Float) &&
+					  (o2 instanceof Integer || o2 instanceof Float) &&
+					  (o3 instanceof Integer || o3 instanceof Float);
 			}
 			
 			case "setX": case "setY":

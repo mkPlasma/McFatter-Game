@@ -19,19 +19,17 @@ public class EffectList{
 		TYPE_FLARE	= 0,
 		TYPE_CLOUD	= 1;
 	
-	private static final int animSpd = 1;
-	
 	private TextureCache tc;
 	
 	public EffectList(TextureCache tc){
 		this.tc = tc;
 	}
 	
-	public EffectFrame get(int type, int color){
-		return new EffectFrame(type, getSprite(type, color), false, 0, animSpd*8);
+	public EffectFrame get(int type, int color, int animSpd){
+		return new EffectFrame(type, getSprite(type, color, animSpd), false, 0, animSpd*8);
 	}
 	
-	private Sprite getSprite(int type, int color){
+	private Sprite getSprite(int type, int color, int animSpd){
 		// Path, sprite size
 		String path = "effects.png";
 		int size = 32;
