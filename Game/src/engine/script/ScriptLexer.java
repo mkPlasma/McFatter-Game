@@ -41,7 +41,7 @@ public class ScriptLexer{
 	rOperators = "\\+|-|\\*|/|%|\\^|!|\\|\\||&&|<|>|==|!=|<=|>=",
 	
 	// Assignment operators
-	rAssignments = "=|\\+\\+|--|\\+=|-=|\\*=|/=|%=",
+	rAssignments = "=|\\+\\+|--|!!|\\+=|-=|\\*=|/=|%=",
 	
 	// Identifiers
 	rIdentifiers = "\\w+",
@@ -481,12 +481,12 @@ public class ScriptLexer{
 						case "=":
 							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "{", "(", "!", "-", ".", "global"};
 							break;
-					
+						
 						case "+=":
 							nextExpected = new String[]{"v", "f", "i", "l", "b", "t", "(", "-", ".", "global"};
 							break;
-					
-						case "++": case "--":
+						
+						case "++": case "--": case "!!":
 							nextExpected = new String[]{";"};
 							break;
 					}
@@ -524,7 +524,7 @@ public class ScriptLexer{
 							nextExpected = new String[]{"f", "i"};
 							break;
 						case ";":
-							lastExpected = new String[]{"v", "i", "l", "b", "t", "}", ")", "]", "++", "--", "break", "return", "wait"};
+							lastExpected = new String[]{"v", "i", "l", "b", "t", "}", ")", "]", "++", "--", "!!", "break", "return", "wait"};
 							break;
 					}
 					break;

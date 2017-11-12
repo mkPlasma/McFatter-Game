@@ -54,8 +54,9 @@ public class ScriptFunctions{
 		"divide",			// 
 		"modulo",			// 
 		"exponent",			// 
-		"increment",		// Increments register/variable
-		"decrement",		// Decrements register/variable
+		"increment",		// Increments variable
+		"decrement",		// Decrements variable
+		"invert",			// Inverts variable
 		
 		// Logical
 		"not",				// Inverts register/variable
@@ -129,8 +130,8 @@ public class ScriptFunctions{
 	public static final String[] operations = {
 		"+", "-", "*", "/", "%", "^", "<", ">", "==", "!=", "<=", ">=", "!", "||", "&&",
 		
-		"add", "subtract", "multiply", "divide", "modulo", "exponent",
-		"less", "greater", "equals", "not_eq", "less_eq", "greater_eq", "not", "or", "and",
+		"add", "subtract", "multiply", "divide", "modulo", "exponent", "less", "greater",
+		"equals", "not_eq", "less_eq", "greater_eq", "not", "or", "and",
 	};
 	
 	public static final byte INT = 0, FLOAT = 1, BOOLEAN = 2, STRING = 3,
@@ -594,7 +595,7 @@ public class ScriptFunctions{
 	// Operations
 	
 	public static boolean isNumberOp(String op){
-		for(int i = 0; i < 12; i++)
+		for(int i = 0; i < 13; i++)
 			if(op.equals(operations[i]))
 				return true;
 		return false;

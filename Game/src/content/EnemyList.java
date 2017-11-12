@@ -24,7 +24,7 @@ public class EnemyList{
 	}
 	
 	public EnemyFrame get(int type){
-		return new EnemyFrame(type, getSprite(type), false, 0);
+		return new EnemyFrame(type, getSprite(type), true, 0);
 	}
 	
 	private Sprite getSprite(int type){

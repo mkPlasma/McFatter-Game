@@ -89,7 +89,7 @@ public class Renderer{
 		renderBatches.add(new RenderBatch(0, MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL_BUT_SIZE, false));
 		
 		// Enemies
-		renderBatches.add(new RenderBatch(0, MAX_ENEMIES, 64, tc.cache("enemies.png").getID(), UPDATE_VBO, false));
+		renderBatches.add(new RenderBatch(0, MAX_ENEMIES, 64, tc.cache("enemies.png").getID(), UPDATE_ALL_BUT_SIZE, false));
 		
 		// Player
 		renderBatches.add(new RenderBatch(0, 1, 64, tc.cache("player.png").getID(), UPDATE_VBO, false));

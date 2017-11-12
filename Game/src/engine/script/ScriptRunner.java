@@ -503,6 +503,7 @@ public class ScriptRunner{
 				}
 				
 				
+				
 				case "increment":{// Brackets required as not to leak o and n
 					Object o = variables[data];
 					
@@ -555,6 +556,38 @@ public class ScriptRunner{
 						variables[data] = (int)n - 1;
 					
 					continue;
+				}
+				
+				
+				
+				case "invert":{// Brackets required as not to leak o and n
+					Object o = variables[data];
+					
+					if(o == null){
+						runtimeError("Variable is not defined", lineNum);
+						return;
+					}
+					
+					// Check type
+					if(!(o instanceof Integer) && !(o instanceof Float) && !(o instanceof Boolean)){
+						runtimeError("Type mismatch", lineNum);
+						return;
+					}
+					
+					if(o instanceof Integer || o instanceof Float){
+						// Cast
+						float n = o instanceof Float ? (float) o : (float)((int) o);
+						
+						// Set data
+						if(o instanceof Float)
+							variables[data] = n*-1;
+						else
+							variables[data] = (int)n*-1;
+						
+						continue;
+					}
+					else
+						variables[data] = !(Boolean)o;
 				}
 				
 				
@@ -1407,7 +1440,10 @@ public class ScriptRunner{
 				return;
 			
 			case "delete":
-				bl.onDestroy(true);
+				if(o1 instanceof Bullet)
+					bl.onDestroy(true);
+				else
+					ge.delete();
 				return;
 			
 			case "setX":

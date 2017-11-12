@@ -1,62 +1,62 @@
 
-set const c = 8;
-set const c2 = 72;
-set const r = 50;
-
-set dir = 0;
-set inv = false;
-
-set enemy = enemy(_cx, 140, 1000);
-
-while(!enemy.isDeleted()){
-    for(d in 0, 360/c, 360){
-        laser(dir + d);
-    }
-    
-    dir += 15;
-    inv = !inv;
-    
-    for(i in 90){
-        wait;
-        
-        if(enemy.isDeleted()){
-            break;
-        }
-    }
+for(i in 10){
+    enemy(false);
+    wait 10;
 }
 
-for(d in 0, 360/c2, 360){
-    bullet(_orb, _orange, _cx, 140, d, 0, 0, 10, 0.05, 10);
+wait 20;
+
+for(i in 10){
+    enemy(true);
+    wait 10;
 }
 
-task laser(dir){
-    set type = _laser_helix;
-    set color = _red;
-    set angvel = 0.05;
+task enemy(inv){
+    set const c = 16;
+    set const fr = 40;
+    
+    set x = _rx + 50;
+    set dir = 140;
+    set angvel = 5;
+    set color = _green;
     
     if(inv){
-        type = _laser_dist;
         color = _blue;
-        angvel *= -1;
+        x = _lx - 50;
+        dir = 40;
+        angvel!!;
+        color = _blue;
     }
     
-    set l = laser(type, color, {_cx + r*cos(dir), 140 + r*sin(dir)}, dir, 400, 64, 30);
-    l.setAdditive();
+    set e = enemy(x, 100, 45);
+    e.setDir(dir);
+    e.setSpd(8);
     
-    set c = 0;
+    set fire = rand(0, fr);
     
-    while(!l.isDeleted()){
+    for(i in 145){
         
-        l.setPos({_cx + r*cos(dir), 140 + r*sin(dir)});
-        l.setDir(dir);
+        if(i % fr == fire){
+            set dir2 = angleToPlayer(e.getPos());
+            
+            for(d in 0, 360/c, 361){
+                bullet(_rice, color, e.getPos(), dir2 + d, 4, 10);
+            }
+        }
         
-        dir += angvel;
-        c++;
+        if(e.isDeleted()){
+            return;
+        }
         
-        if(c > 120 || enemy.isDeleted()){
-            l.delete();
+        if(i == 30){
+            e.setAngVel(angvel);
+        }
+        if(i == 115){
+            e.setAngVel(0);
         }
         
         wait;
     }
+    
+    e.delete();
 }

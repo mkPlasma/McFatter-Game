@@ -425,7 +425,15 @@ public class ScriptParser{
 					
 					// Increment/Decrement
 					states.pop();
-					bytecode.add(getInstruction(token.equals("++") ? "increment" : "decrement", lineNum, variables.indexOf(states.pop())));
+					
+					String op = "increment";
+					
+					if(token.equals("--"))
+						op = "decrement";
+					if(token.equals("!!"))
+						op = "invert";
+					
+					bytecode.add(getInstruction(op, lineNum, variables.indexOf(states.pop())));
 					
 					continue;
 				
