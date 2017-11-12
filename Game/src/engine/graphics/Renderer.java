@@ -121,7 +121,7 @@ public class Renderer{
 		renderBatches.add(borderBatch);
 		
 		// Text
-		renderBatches.add(new RenderBatch(MAX_TEXT, 16, 32, tc.cache("font.png").getID(), UPDATE_TEXT));
+		renderBatches.add(new RenderBatch(MAX_TEXT, 16, 32, tc.cache("font.png").getID(), UPDATE_ALL_BUT_SIZE));
 	}
 	
 	public void setTime(int time){

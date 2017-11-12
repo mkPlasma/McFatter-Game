@@ -20,16 +20,12 @@ public class ScriptController{
 	
 	private ArrayList<ScriptBranch> branches;
 	
-	private DScript script;
-	
 	private boolean haltRun = false;
 	private boolean finished = false;
 	
 	private int time;
 	
 	public ScriptController(DScript script, MainScreen screen){
-		this.script = script;
-		
 		runner = new ScriptRunner(script, this, screen);
 		branches = new ArrayList<ScriptBranch>();
 		
@@ -70,8 +66,6 @@ public class ScriptController{
 	
 	// Reload script
 	public void reload(){
-		System.out.println("Reloaded " + script.getFileName() + "!");
-		
 		branches.clear();
 		branches.add(runner.init());
 		

@@ -40,7 +40,7 @@ task enemy(inv){
             set dir2 = rand(0, 360);//angleToPlayer(e.getPos());
             
             for(d in 0, 360/c, 361){
-                bullet(_needler, color, e.getPos(), dir2 + d, 2, 10);
+                bullet(_needle, color, e.getPos(), dir2 + d, 2, 10);
             }
         }
         

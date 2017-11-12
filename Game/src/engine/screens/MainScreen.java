@@ -37,6 +37,7 @@ public class MainScreen extends GameScreen{
 	private ArrayList<Enemy> enemies;
 	private ArrayList<Effect> effects;
 	private ArrayList<Text> text;
+	private ArrayList<Text> fpsText;
 	
 	private Player player;
 	
@@ -60,6 +61,7 @@ public class MainScreen extends GameScreen{
 		enemies			= new ArrayList<Enemy>(MAX_ENEMIES);
 		effects			= new ArrayList<Effect>(MAX_EFFECTS);
 		text			= new ArrayList<Text>(MAX_TEXT);
+		fpsText			= new ArrayList<Text>(2);
 		
 		time = 0;
 		rTime = 0;
@@ -75,6 +77,16 @@ public class MainScreen extends GameScreen{
 		
 		if(stage instanceof Mission)
 			player = ((Mission)stage).getPlayer();
+	}
+	
+	public void setFPS(int fps){
+		
+		for(Text t:fpsText)
+			t.delete();
+		
+		fpsText.clear();
+		
+		fpsText = addText(Integer.toString(fps), 624, 472, -1, 1, 0);
 	}
 	
 	public void cleanup(){
@@ -146,10 +158,8 @@ public class MainScreen extends GameScreen{
 		}
 		
 		// Clear bullets with Alt+C
-		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && (KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_C))){
-			System.out.println("Cleared screen!");
+		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && (KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_C)))
 			clearScreen = 1;
-		}
 	}
 	
 	private void updateGameStage(){
@@ -361,27 +371,29 @@ public class MainScreen extends GameScreen{
 		int xl = 0;
 		int lastWord = 0;
 		
-		for(int i = 0; i < text.length(); i++){
-			
-			char c = text.charAt(i);
-			
-			// Reset on line break
-			if(c == '\n'){
-				xl = 0;
-				continue;
-			}
-			
-			// Wrap at last space
-			else if(c == ' '){
-				lastWord = i + 1;
-			}
-			
-			xl++;
-			
-			// Set wrap point
-			if(xl > wrap){
-				wrapPoints.add(lastWord);
-				xl = 0;
+		if(wrap >= 0){
+			for(int i = 0; i < text.length(); i++){
+				
+				char c = text.charAt(i);
+				
+				// Reset on line break
+				if(c == '\n'){
+					xl = 0;
+					continue;
+				}
+				
+				// Wrap at last space
+				else if(c == ' '){
+					lastWord = i + 1;
+				}
+				
+				xl++;
+				
+				// Set wrap point
+				if(xl > wrap){
+					wrapPoints.add(lastWord);
+					xl = 0;
+				}
 			}
 		}
 		

@@ -93,6 +93,7 @@ public class GameThread implements Runnable{
 		screenManager.init();
 		screenManager.setScreen(screenManager.mainScreen);
 		screenManager.initScreen();
+		screenManager.setFPS(0);
 	}
 	
 	public void run(){
@@ -138,7 +139,7 @@ public class GameThread implements Runnable{
 				fps = frameCount;
 				frameCount = 0;
 				lastSecondTime = currentSecond;
-				System.out.println("FPS: " + fps);
+				screenManager.setFPS(fps);
 			}
 			
 			// Timing

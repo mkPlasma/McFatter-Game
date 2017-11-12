@@ -1421,21 +1421,34 @@ public class ScriptRunner{
 					
 					returnValue = new Laser(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, len, wid, del, frameList, screen);
 				}
+				
 				screen.addEnemyBullet((Laser)returnValue);
 				return;
 			}
 			
 			case "enemy":
-				Object oHp = params.remove();
-				
-				int hp = oHp instanceof Integer ? (int)oHp : (int)(float)oHp;
-				
-				if(!isFloat){
-					f1 = (float)i1;
-					f2 = (float)i2;
+				if(paramCount == 2){
+					
+					if(isFloat){
+						i2 = (int)f2;
+					}
+					
+					float[] pos = convertArray((ArrayList<Object>)o1, "enemy", lineNum);
+					returnValue = new Enemy(frameList.getEnemy(0), pos[0], pos[1], i2, frameList, screen);
+				}
+				else{
+					Object oHp = params.remove();
+					
+					int hp = oHp instanceof Integer ? (int)oHp : (int)(float)oHp;
+					
+					if(!isFloat){
+						f1 = (float)i1;
+						f2 = (float)i2;
+					}
+					
+					returnValue = new Enemy(frameList.getEnemy(0), f1, f2, hp, frameList, screen);
 				}
 				
-				returnValue = new Enemy(frameList.getEnemy(0), f1, f2, hp, frameList, screen);
 				screen.addEnemy((Enemy)returnValue);
 				return;
 			
