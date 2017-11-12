@@ -10,6 +10,7 @@ import engine.entities.Enemy;
 import engine.entities.GameEntity;
 import engine.entities.Laser;
 import engine.entities.Player;
+import engine.entities.Text;
 
 import static engine.graphics.RenderBatch.*;
 import static engine.screens.MainScreen.*;
@@ -77,7 +78,10 @@ public class Renderer{
 	}
 	
 	// Initialize rendering for MainScreen
-	public void initMainScreen(int playerTex, int bulletTex1, int bulletTex2, int enemyTex, int effectTex){
+	public void initMainScreen(){
+
+		int bulletTex1 = tc.cache("bullets/01.png").getID();
+		int bulletTex2 = tc.cache("bullets/02.png").getID();
 		
 		// Add in order of rendering
 		
@@ -85,10 +89,10 @@ public class Renderer{
 		renderBatches.add(new RenderBatch(0, MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL_BUT_SIZE, false));
 		
 		// Enemies
-		renderBatches.add(new RenderBatch(0, MAX_ENEMIES, 64, enemyTex, UPDATE_VBO, false));
+		renderBatches.add(new RenderBatch(0, MAX_ENEMIES, 64, tc.cache("enemies.png").getID(), UPDATE_VBO, false));
 		
 		// Player
-		renderBatches.add(new RenderBatch(0, 1, 64, playerTex, UPDATE_VBO, false));
+		renderBatches.add(new RenderBatch(0, 1, 64, tc.cache("player.png").getID(), UPDATE_VBO, false));
 		
 		// Enemy bullets
 		renderBatches.add(new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL_BUT_SIZE, false));
@@ -99,7 +103,7 @@ public class Renderer{
 		renderBatches.add(new RenderBatch(1, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL_BUT_SIZE, true));
 		
 		// Effects
-		renderBatches.add(new RenderBatch(0, MAX_EFFECTS, 32, effectTex, UPDATE_ALL_BUT_SIZE, true));
+		renderBatches.add(new RenderBatch(0, MAX_EFFECTS, 32, tc.cache("effects.png").getID(), UPDATE_ALL_BUT_SIZE, true));
 		
 		// Hitboxes
 		renderBatches.add(new RenderBatch(2, MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX));
@@ -115,6 +119,9 @@ public class Renderer{
 		borderBatch.updateManual(320, 240, border.getTextureCoords());
 		
 		renderBatches.add(borderBatch);
+		
+		// Text
+		renderBatches.add(new RenderBatch(MAX_TEXT, 16, 32, tc.cache("font.png").getID(), UPDATE_VBO));
 	}
 	
 	public void setTime(int time){
@@ -208,6 +215,10 @@ public class Renderer{
 		
 		renderBatches.get(10).updateHitboxes(el);
 		renderBatches.get(11).updateWithEntities(ll, 0);
+	}
+	
+	public void updateText(ArrayList<Text> text){
+		renderBatches.get(13).updateWithEntities(text, 0);
 	}
 	
 	public void render(){

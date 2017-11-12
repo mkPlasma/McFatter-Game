@@ -39,7 +39,8 @@ public class Mission extends GameStage{
 	public void update(){
 		player.update();
 		
-		scriptController.run();
+		if(!scriptCompiler.failed())
+			scriptController.run();
 	}
 	
 	public void render(){

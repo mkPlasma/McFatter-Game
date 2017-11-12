@@ -18,6 +18,7 @@ import engine.entities.GameEntity;
 import engine.entities.Laser;
 import engine.entities.MovableEntity;
 import engine.entities.Player;
+import engine.entities.Text;
 import engine.screens.MainScreen;
 
 /*
@@ -34,8 +35,12 @@ public class ScriptRunner{
 	private static final int INFINITE_LOOP_LIMIT = 10000;
 	private int loopCount;
 	
+	// Initialized for the first time
+	private boolean initialized;
+	
 	// Stops script
 	private boolean haltRun = false;
+	private ArrayList<Text> errorText;
 	
 	// Finished running
 	private boolean finished = false;
@@ -107,29 +112,46 @@ public class ScriptRunner{
 		bytecode = script.getBytecode();
 		
 		if(bytecode == null){
-			System.err.println("\n" + script.getFileName() + " not compiled, not running");
 			haltRun = true;
 			return null;
 		}
 
 		haltRun = false;
 		finished = false;
-
+		
 		// Initialize/reset lists
-		loops 			= new ArrayList<Integer>();
-		functions		= new ArrayList<Integer>();
-		scopeVars		= new ArrayList<Integer>();
-		array			= new ArrayList<Object>();
-		arrayRef		= new ArrayList<Object>();
-		expressions		= new Stack<ArrayList<Object>>();
-		funcParams		= new Stack<Queue<Object>>();
-		//branches		= new ArrayList<ScriptBranch>();
-		dotValues		= new Stack<Object>();
+		if(!initialized){
+			loops 			= new ArrayList<Integer>();
+			functions		= new ArrayList<Integer>();
+			scopeVars		= new ArrayList<Integer>();
+			array			= new ArrayList<Object>();
+			arrayRef		= new ArrayList<Object>();
+			expressions		= new Stack<ArrayList<Object>>();
+			funcParams		= new Stack<Queue<Object>>();
+			dotValues		= new Stack<Object>();
+			
+			errorText = new ArrayList<Text>();
+			
+			random = new Random();
+		}
+		else{
+			loops.clear();
+			functions.clear();
+			scopeVars.clear();
+			array.clear();
+			arrayRef.clear();
+			expressions.clear();
+			funcParams.clear();
+			dotValues.clear();
+			
+			for(Text t:errorText)
+				t.delete();
+			
+			errorText.clear();
+		}
 		
 		expressions.push(new ArrayList<Object>());
 		funcParams.add(new LinkedList<Object>());
-		
-		random = new Random();
 		
 		// Account for register
 		int varCount = 1;
@@ -151,6 +173,8 @@ public class ScriptRunner{
 		}
 		
 		Object[] variables = new Object[varCount];
+		
+		initialized = true;
 		
 		return new ScriptBranch(0, variables, null, true);
 	}
@@ -174,13 +198,7 @@ public class ScriptRunner{
 	public boolean isFinished(){
 		return finished;
 	}
-	/*
-	public ArrayList<ScriptBranch> getBranches(){
-		ArrayList<ScriptBranch> temp = new ArrayList<ScriptBranch>(branches);
-		branches.clear();
-		return temp;
-	}
-	*/
+	
 	// Run bytecode
 	@SuppressWarnings("unchecked")
 	public void run(ScriptBranch branch){
@@ -1583,8 +1601,9 @@ public class ScriptRunner{
 	// Create syntax error and halt compilation
 	private void runtimeError(String type, int lineNum){
 		try{
-			System.err.println("\nDScript runtime error:\n" + type + " in " + script.getFileName() + " on line " + lineNum +
-				":\n>> " + Files.readAllLines(Paths.get(script.getPath())).get(lineNum - 1).trim());
+			errorText.addAll(screen.addText("\nDScript runtime error:\n" + type + " in " + script.getFileName() + " on line " + lineNum +
+				":\n>> " + Files.readAllLines(Paths.get(script.getPath())).get(lineNum - 1).trim(),
+				40, 24, 800, 0.8f, 0));
 		}
 		catch(IOException e){
 			e.printStackTrace();
@@ -1594,6 +1613,6 @@ public class ScriptRunner{
 	
 	// Condition that should not occur, may produce incorrect results
 	private void runtimeWarning(String type, int lineNum){
-		System.err.println("\nDScript runtime warning:\n" + type + " in " + script.getFileName() + " on line " + lineNum);
+		screen.addText("\nDScript runtime warning:\n" + type + " in " + script.getFileName() + " on line " + lineNum, 425, 420, 50, 0.5f, 180);
 	}
 }

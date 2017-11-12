@@ -10,6 +10,7 @@ import engine.entities.Effect;
 import engine.entities.Enemy;
 import engine.entities.Laser;
 import engine.entities.Player;
+import engine.entities.Text;
 import engine.graphics.Renderer;
 import engine.graphics.TextureCache;
 
@@ -27,13 +28,15 @@ public class MainScreen extends GameScreen{
 	public static final int MAX_ENEMY_BULLETS = 2048,
 							MAX_PLAYER_BULLETS = 128,
 							MAX_ENEMIES = 64,
-							MAX_EFFECTS = 2048;
+							MAX_EFFECTS = 2048,
+							MAX_TEXT = 1024;
 	
 	private GameStage stage;
 	
 	private ArrayList<Bullet> enemyBullets, playerBullets;
 	private ArrayList<Enemy> enemies;
 	private ArrayList<Effect> effects;
+	private ArrayList<Text> text;
 	
 	private Player player;
 	
@@ -56,6 +59,7 @@ public class MainScreen extends GameScreen{
 		playerBullets	= new ArrayList<Bullet>(MAX_PLAYER_BULLETS);
 		enemies			= new ArrayList<Enemy>(MAX_ENEMIES);
 		effects			= new ArrayList<Effect>(MAX_EFFECTS);
+		text			= new ArrayList<Text>(MAX_TEXT);
 		
 		time = 0;
 		rTime = 0;
@@ -63,13 +67,7 @@ public class MainScreen extends GameScreen{
 
 		// Load textures
 		
-		r.initMainScreen(
-			tc.cache("player.png").getID(),
-			tc.cache("bullets/01.png").getID(),
-			tc.cache("bullets/02.png").getID(),
-			tc.cache("enemies.png").getID(),
-			tc.cache("effects.png").getID()
-		);
+		r.initMainScreen();
 		
 		// Temporary test
 		stage = new Mission("Game/res/script/test.dscript", this, r, tc);
@@ -92,6 +90,7 @@ public class MainScreen extends GameScreen{
 		r.updateEnemies(enemies);
 		r.updateEffects(effects);
 		r.updateHitboxes(enemyBullets, enemies, player);
+		r.updateText(text);
 		
 		r.render();
 		
@@ -184,6 +183,7 @@ public class MainScreen extends GameScreen{
 			updateEffects();
 			updateBullets();
 			updateEnemies();
+			updateText();
 			
 			checkCollisions();
 		}
@@ -233,6 +233,17 @@ public class MainScreen extends GameScreen{
 			}
 			else
 				effects.get(i).update();
+		}
+	}
+	
+	private void updateText(){
+		for(int i = 0; i < text.size(); i++){
+			if(text.get(i).isDeleted()){
+				text.remove(i);
+				i--;
+			}
+			else
+				text.get(i).update();
 		}
 	}
 	
@@ -335,5 +346,72 @@ public class MainScreen extends GameScreen{
 			return;
 		
 		effects.add(effect);
+	}
+	
+	public ArrayList<Text> addText(String text, float x, float y, int wrap, float scale, int lifetime){
+		
+		ArrayList<Text> tx = new ArrayList<Text>();
+		
+		if(text == null || text.isEmpty() || this.text.size() >= MAX_TEXT)
+			return tx;
+		
+		// Find where to wrap text
+		ArrayList<Integer> wrapPoints = new ArrayList<Integer>();
+		
+		int xl = 0;
+		int lastWord = 0;
+		
+		for(int i = 0; i < text.length(); i++){
+			
+			char c = text.charAt(i);
+			
+			// Reset on line break
+			if(c == '\n'){
+				xl = 0;
+				continue;
+			}
+			
+			// Wrap at last space
+			else if(c == ' '){
+				lastWord = i + 1;
+			}
+			
+			xl++;
+			
+			// Set wrap point
+			if(xl > wrap){
+				wrapPoints.add(lastWord);
+				xl = 0;
+			}
+		}
+		
+		int line = 0;
+		
+		for(int i = 0; i < text.length(); i++){
+			
+			char c = text.charAt(i);
+			
+			// Newline/wrap point
+			if(c == '\n' || wrapPoints.contains(i)){
+				xl = 0;
+				line++;
+				
+				if(c == '\n')
+					continue;
+			}
+			
+			// Create text object
+			Text t = new Text(x + xl*(7*scale), y + line*(24*scale), c, lifetime, tc);
+			t.getSprite().setScale(scale);
+			
+			tx.add(t);
+			xl++;
+			
+			if(this.text.size() >= MAX_TEXT)
+				return tx;
+		}
+		
+		this.text.addAll(tx);
+		return tx;
 	}
 }

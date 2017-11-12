@@ -70,6 +70,8 @@ public class ScriptParser{
 	// Stops compilation
 	private boolean haltCompiler = false;
 	
+	private String errorText;
+	
 	private DScript script;
 	
 	public void parse(DScript script){
@@ -77,10 +79,8 @@ public class ScriptParser{
 		this.script = script;
 		tokens = script.getTokens();
 		
-		if(tokens == null){
-			System.err.println("\n" + script.getFileName() + " not lexed, not parsing");
+		if(tokens == null)
 			return;
-		}
 		
 		// Initialize/reset lists
 		bytecode		= new ArrayList<Long>();
@@ -1961,13 +1961,21 @@ public class ScriptParser{
 	// Create syntax error and halt compilation
 	private void compilationError(String type, int lineNum){
 		try{
-			System.err.println("\nDScript compilation error (parser):\n" + type + " in " + script.getFileName() + " on line " + lineNum +
-				":\n>> " + Files.readAllLines(Paths.get(script.getPath())).get(lineNum - 1).trim());
+			errorText = "\nDScript compilation error (parser):\n" + type + " in " + script.getFileName() + " on line " + lineNum +
+				":\n>> " + Files.readAllLines(Paths.get(script.getPath())).get(lineNum - 1).trim();
 		}
 		catch(IOException e){
 			e.printStackTrace();
 		}
 		haltCompiler = true;
+	}
+	
+	public boolean failed(){
+		return haltCompiler;
+	}
+	
+	public String getErrorText(){
+		return errorText;
 	}
 	
 	private void compilationErrorIT(String token, int lineNum){

@@ -31,6 +31,8 @@ public class ScriptLexer{
 	// In multi-line comment
 	boolean inComment = false;
 	
+	private String errorText;
+	
 	// Regexes
 	
 	public static final String
@@ -86,6 +88,7 @@ public class ScriptLexer{
 		tokens = new ArrayList<String>();
 		
 		haltCompiler = false;
+		errorText = "";
 		
 		int lineNum = 1;
 		
@@ -704,8 +707,16 @@ public class ScriptLexer{
 	
 	// Create syntax error and halt compilation
 	private void compilationError(String type, String line, int lineNum){
-		System.err.println("\nDScript compilation error (lexer):\n" + type + " in " + script.getFileName() + " on line " + lineNum + ":\n>> " + line);
+		errorText = "\nDScript compilation error (lexer):\n" + type + " in " + script.getFileName() + " on line " + lineNum + ":\n>> " + line;
 		haltCompiler = true;
+	}
+	
+	public String getErrorText(){
+		return errorText;
+	}
+	
+	public boolean failed(){
+		return haltCompiler;
 	}
 	
 	// Print tokens (debug)

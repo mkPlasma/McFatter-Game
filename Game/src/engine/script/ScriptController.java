@@ -55,9 +55,6 @@ public class ScriptController{
 			// Run current branch
 			runner.run(branch);
 			
-			// Add new branches
-			//branches.addAll(runner.getBranches());
-			
 			// Remove branch
 			if(branch.toRemove()){
 				branches.remove(i);
