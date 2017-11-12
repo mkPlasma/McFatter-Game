@@ -1,7 +1,7 @@
 #version 150
 
 layout(points) in;
-layout(triangle_strip, max_vertices = 256) out;
+layout(triangle_strip, max_vertices = 80) out;
 
 uniform int time;
 const int period = 10;

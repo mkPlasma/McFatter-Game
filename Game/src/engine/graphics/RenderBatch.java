@@ -40,7 +40,8 @@ public class RenderBatch{
 		UPDATE_ALL_BUT_SIZE	= 0b011101,
 		UPDATE_LASER		= 0b111101,
 		UPDATE_HITBOX		= 0b000011,
-		UPDATE_LASER_HITBOX	= 0b001001;
+		UPDATE_LASER_HITBOX	= 0b001001,
+		UPDATE_TEXT			= 0b001101;
 	
 	
 	private final int shader;
