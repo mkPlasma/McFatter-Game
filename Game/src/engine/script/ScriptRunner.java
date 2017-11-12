@@ -80,6 +80,10 @@ public class ScriptRunner{
 	
 	// Holds value before dot separator
 	private Stack<Object> dotValues;
+
+	// Location of reset point marker
+	private int resetPoint = 0;
+	private boolean beforeResetPoint;
 	
 	private long[] bytecode;
 	
@@ -118,6 +122,8 @@ public class ScriptRunner{
 
 		haltRun = false;
 		finished = false;
+		
+		beforeResetPoint = false;
 		
 		// Initialize/reset lists
 		if(!initialized){
@@ -163,14 +169,22 @@ public class ScriptRunner{
 			
 			if(getType(inst) == STRING)
 				i += getData(inst) + 1;
-			else if(op.equals("create_var") || op.equals("get_param")) {
+			
+			else if(op.equals("create_var") || op.equals("get_param"))
 				varCount++;
-			}
+			
 			else if(op.equals("function") || op.equals("task"))
 				functions.add(i);
+			
 			else if(op.equals("while"))
 				loops.add(i);
+			
+			else if(op.equals("m_reset"))
+				resetPoint = i;
 		}
+		
+		if(resetPoint != 0)
+			beforeResetPoint = true;
 		
 		Object[] variables = new Object[varCount];
 		
@@ -199,6 +213,10 @@ public class ScriptRunner{
 		return finished;
 	}
 	
+	public boolean continueLoop(){
+		return beforeResetPoint;
+	}
+	
 	// Run bytecode
 	@SuppressWarnings("unchecked")
 	public void run(ScriptBranch branch){
@@ -206,8 +224,11 @@ public class ScriptRunner{
 		if(haltRun)
 			return;
 		
+		if(beforeResetPoint)
+			branch.skipWaitTime();
+		
 		// Return if waiting
-		if(!branch.tickWaitTime())
+		else if(!branch.tickWaitTime())
 			return;
 
 		branch.syncWithParent();
@@ -224,6 +245,9 @@ public class ScriptRunner{
 		
 		// Loop through
 		for(int i = branch.getBytecodeIndex(); i < bytecode.length; i++){
+			
+			if(i == resetPoint)
+				beforeResetPoint = false;
 			
 			// Instruction properties
 			long inst = bytecode[i];
@@ -1384,7 +1408,9 @@ public class ScriptRunner{
 					}
 				}
 				
-				screen.addEnemyBullet((Bullet)returnValue);
+				if(!beforeResetPoint)
+					screen.addEnemyBullet((Bullet)returnValue);
+				
 				return;
 			}
 			
@@ -1421,8 +1447,10 @@ public class ScriptRunner{
 					
 					returnValue = new Laser(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, len, wid, del, frameList, screen);
 				}
+
+				if(!beforeResetPoint)
+					screen.addEnemyBullet((Laser)returnValue);
 				
-				screen.addEnemyBullet((Laser)returnValue);
 				return;
 			}
 			
@@ -1448,8 +1476,10 @@ public class ScriptRunner{
 					
 					returnValue = new Enemy(frameList.getEnemy(0), f1, f2, hp, frameList, screen);
 				}
+
+				if(!beforeResetPoint)
+					screen.addEnemy((Enemy)returnValue);
 				
-				screen.addEnemy((Enemy)returnValue);
 				return;
 			
 			case "delete":

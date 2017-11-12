@@ -44,22 +44,27 @@ public class ScriptController{
 		
 		runner.setTime(time);
 		
-		for(int i = 0; i < branches.size(); i++){
-			
-			ScriptBranch branch = branches.get(i);
-			
-			// Run current branch
-			runner.run(branch);
-			
-			// Remove branch
-			if(branch.toRemove()){
-				branches.remove(i);
-				i--;
+		boolean loop = false;
+		
+		do{
+			for(int i = 0; i < branches.size(); i++){
+				
+				ScriptBranch branch = branches.get(i);
+				
+				// Run current branch
+				runner.run(branch);
+				
+				// Remove branch
+				if(branch.toRemove()){
+					branches.remove(i);
+					i--;
+				}
+				
+				haltRun = runner.haltRun();
+				finished = runner.isFinished() && branches.isEmpty();
+				loop = runner.continueLoop();
 			}
-			
-			haltRun = runner.haltRun();
-			finished = runner.isFinished() && branches.isEmpty();
-		}
+		}while(loop);
 		
 		time++;
 	}

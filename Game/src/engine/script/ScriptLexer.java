@@ -66,6 +66,7 @@ public class ScriptLexer{
 	/* 	Types
 	 * 	
 	 * 	k - keyword
+	 *  m - marker
 	 * 	o - operator
 	 *  a - assignment operator
 	 * 	s - separator
@@ -93,7 +94,6 @@ public class ScriptLexer{
 		int lineNum = 1;
 		
 		// Load file and read line by line
-		// First readthrough to define functions and tasks
 		try(BufferedReader br = new BufferedReader(new FileReader(script.getPath()))){
 			for(String line; (line = br.readLine()) != null;){
 				
@@ -311,6 +311,12 @@ public class ScriptLexer{
 				i -= p2.trim().length();
 			}
 			
+			// Reset point
+			else if(token.equals("#reset")){
+				tokens.add(lineNum + "m:reset");
+				token = "";
+			}
+			
 			// Finish if at end of line
 			if(i >= line.length() - 1){
 				
@@ -390,7 +396,7 @@ public class ScriptLexer{
 			switch(type){
 				// Keyword
 				case 'k':
-					lastExpected = new String[]{";", "{", "}"};
+					lastExpected = new String[]{";", "m", "{", "}"};
 					lastExpectedStrict = false;
 					
 					switch(token){
@@ -408,7 +414,7 @@ public class ScriptLexer{
 							lastExpectedStrict = true;
 							break;
 						case "if":
-							lastExpected = new String[]{";", "{", "}", "else"};
+							lastExpected = new String[]{";", "m", "{", "}", "else"};
 							nextExpected = new String[]{"("};
 							break;
 						case "else":
@@ -531,14 +537,14 @@ public class ScriptLexer{
 				
 				// Function/task
 				case 'f':
-					lastExpected = new String[]{"function", "task", "o", "a", ";", ",", "{", "}", "(", "[", ".", "in", "return", "wait"};
+					lastExpected = new String[]{"function", "task", "o", "a", ";", "m", ",", "{", "}", "(", "[", ".", "in", "return", "wait"};
 					nextExpected = new String[]{"("};
 					lastExpectedStrict = false;
 					break;
 				
 				// Variable
 				case 'v':
-					lastExpected = new String[]{"o", "a", ";", ",", "{", "}", "(", "[", "set", "const", "global", "in", "return", "wait"};
+					lastExpected = new String[]{"o", "a", ";", "m", ",", "{", "}", "(", "[", "set", "const", "global", "in", "return", "wait"};
 					nextExpected = new String[]{"o", "a", ";", ",", "}", ")", "[", "]", ".", "in"};
 					break;
 				
@@ -691,6 +697,7 @@ public class ScriptLexer{
 	private String getTypeName(char type){
 		switch(type){
 			case 'k':	return "keyword";
+			case 'm':	return "marker";
 			case 'o':	return "operator";
 			case 'a':	return "assignment";
 			case 's':	return "separator";

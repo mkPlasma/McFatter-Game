@@ -102,6 +102,10 @@ public class ScriptBranch{
 		return waitTime == 0;
 	}
 	
+	public void skipWaitTime(){
+		waitTime = 0;
+	}
+	
 	public void setWaitTime(int waitTime){
 		this.waitTime = waitTime;
 	}

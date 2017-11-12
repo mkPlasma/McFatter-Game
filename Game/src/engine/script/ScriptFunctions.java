@@ -97,6 +97,9 @@ public class ScriptFunctions{
 		// Misc
 		"dot",				// Dot separator
 		"wait",				// Wait number of frames in register
+		
+		// Markers
+		"m_reset"			// Point for script to start after reset
 	};
 	
 	public static final String[] reservedWords = {

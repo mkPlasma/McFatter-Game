@@ -4,6 +4,8 @@ for(i in 10){
     wait 10;
 }
 
+#reset
+
 wait 20;
 
 for(i in 10){

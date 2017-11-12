@@ -365,6 +365,23 @@ public class ScriptParser{
 				
 				
 				
+				// Markers
+				case 'm':
+					if(!stAccept && !token.equals("const") && !token.equals("global") && !token.equals("in")){
+						compilationErrorIT(token, lineNum);
+						return;
+					}
+					
+					switch(token){
+						case "reset":
+							bytecode.add(getInstruction("m_reset", lineNum));
+							continue;
+					}
+					
+					continue;
+				
+				
+				
 				// Operators
 				case 'o':
 					
