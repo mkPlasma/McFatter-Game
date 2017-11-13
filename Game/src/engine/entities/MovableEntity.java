@@ -39,6 +39,9 @@ public abstract class MovableEntity extends GameEntity{
 		this.minSpd = minSpd;
 		this.maxSpd = maxSpd;
 		this.accel = accel;
+		
+		useMinSpd = true;
+		useMaxSpd = true;
 	}
 	
 	public void update(){

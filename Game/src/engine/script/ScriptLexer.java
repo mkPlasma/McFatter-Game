@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 import content.FrameList;
 
-import static engine.script.ScriptFunctions.*;
+import static engine.script.ScriptUtil.*;
 
 /*
  * 		ScriptLexer.java

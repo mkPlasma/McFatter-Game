@@ -157,18 +157,21 @@ public class Bullet extends MovableEntity{
 		// Explosion effect
 		
 		int effectCol = color % 16;
+		boolean explosion = false;
 		
 		// Black bullets use gray despawn effect
 		if(color == FrameList.COLOR_BLACK || color == BulletList.COLOR_BLACK_D)
 			effectCol--;
 		
 		// "Explosion" despawn effect
-		if(type == BulletList.TYPE_MISSILE || type == BulletList.TYPE_MINE)
+		if(type == BulletList.TYPE_MISSILE || type == BulletList.TYPE_MINE){
 			effectCol = FrameList.COLOR_BLACK;
+			explosion = true;
+		}
 		
-		Effect e = new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, effectCol), x, y);
+		Effect e = new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, effectCol, explosion ? 2 : 1), x, y);
 		e.getSprite().rotate((float)Math.random()*360);
-		e.getSprite().setScale(effectCol == FrameList.COLOR_BLACK ? 3 : 2);
+		e.getSprite().setScale(explosion ? 3 : 2);
 		screen.addEffect(e);
 	}
 	
@@ -267,5 +270,21 @@ public class Bullet extends MovableEntity{
 	
 	public boolean collisionsEnabled(){
 		return collisions;
+	}
+	
+	public void setBorderDespawn(boolean borderDespawn){
+		this.borderDespawn = borderDespawn;
+	}
+	
+	public boolean getBorderDespawn(){
+		return borderDespawn;
+	}
+	
+	public void setDespawnRange(int despawnRange){
+		this.despawnRange = despawnRange;
+	}
+	
+	public int getDespawnRange(){
+		return despawnRange;
 	}
 }

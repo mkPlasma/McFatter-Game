@@ -1,5 +1,6 @@
 package engine.script;
 
+import static engine.script.ScriptUtil.*;
 import static engine.script.ScriptFunctions.*;
 
 import java.io.IOException;
@@ -119,7 +120,7 @@ public class ScriptRunner{
 			haltRun = true;
 			return null;
 		}
-
+		
 		haltRun = false;
 		finished = false;
 		
@@ -1094,6 +1095,8 @@ public class ScriptRunner{
 		GameEntity ge = o1 instanceof GameEntity ? (GameEntity)o1 : null;
 		MovableEntity me = o1 instanceof MovableEntity ? (MovableEntity)o1 : null;
 		Bullet bl = o1 instanceof Bullet ? (Bullet)o1 : null;
+		Laser ls = o1 instanceof Laser ? (Laser)o1 : null;
+		Enemy en = o1 instanceof Enemy ? (Enemy)o1 : null;
 		
 		// No return value by default
 		returnValue = null;
@@ -1570,12 +1573,110 @@ public class ScriptRunner{
 				return;
 			}
 			
-			case "setAdditive":{
-				boolean add = paramCount == 1 ? true : (boolean)o2;
+			case "setLength":
 				
-				bl.getSprite().setAdditive(add);
+				if(isFloat)
+					i2 = (int)f2;
+				
+				ls.setLength(i2);
 				return;
-			}
+			
+			case "setWidth":
+				
+				if(isFloat)
+					i2 = (int)f2;
+				
+				ls.setWidth(i2);
+				return;
+			
+			case "setSegmented":
+				ls.setSegmented(paramCount == 1 ? true : (boolean)o2);
+				return;
+			
+			case "setVisible":
+				ge.setVisible((boolean)o2);
+				return;
+			
+			case "setCollisions":
+				if(bl != null) bl.setCollisions((boolean)o2);
+				if(en != null) en.setCollisions((boolean)o2);
+				return;
+			
+			case "setHitboxSize":
+				if(bl != null) bl.setHitboxSize(i2);
+				if(en != null) en.setHitboxSize(i2);
+				return;
+			
+			case "setBombResist":
+				bl.setBombResist(paramCount == 1 ? true : (boolean)o2);
+				return;
+			
+			case "setBorderDespawn":
+				bl.setBorderDespawn((boolean)o2);
+				return;
+			
+			case "setDespawnRange":
+				
+				if(isFloat)
+					i2 = (int)f2;
+				
+				bl.setDespawnRange(i2);
+				return;
+			
+			case "setHealth":
+				if(!isFloat)
+					f2 = (int)i2;
+				
+				en.setHealth(i2);
+				return;
+			
+			case "setInvulnerable":
+				en.setInvulnerable(paramCount == 1 ? true : (boolean)o2);
+				return;
+			
+			case "setAdditive":
+				me.getSprite().setAdditive(paramCount == 1 ? true : (boolean)o2);
+				return;
+			
+			case "setScale":
+				
+				if(!isFloat)
+					f2 = (int)i2;
+				
+				if(paramCount == 2){
+					me.getSprite().setScale(f2);
+					return;
+				}
+				
+				Object oy = params.remove();
+				float y = oy instanceof Float ? (float)oy : (float)(int)oy;
+				
+				me.getSprite().setScale(f2, y);
+				return;
+
+			case "setScaleX":
+
+				if(!isFloat)
+					f2 = (int)i2;
+				
+				me.getSprite().setScaleX(f2);
+				return;
+
+			case "setScaleY":
+
+				if(!isFloat)
+					f2 = (int)i2;
+				
+				me.getSprite().setScaleY(f2);
+				return;
+			
+			case "setAlpha":
+				
+				if(!isFloat)
+					f2 = (int)i2;
+				
+				me.getSprite().setAlpha(f2);
+				return;
 			
 			
 			case "getX":
@@ -1647,8 +1748,75 @@ public class ScriptRunner{
 				return;
 			}
 			
+			case "getLength":
+				returnValue = ls.getLength();
+				return;
+			
+			case "getWidth":
+				returnValue = ls.getWidth();
+				return;
+			
+			case "isSegmented":
+				returnValue = ls.isSegmented();
+				return;
+			
+			case "isVisible":
+				returnValue = ge.isVisible();
+				return;
+			
+			case "getCollisions":
+				if(bl != null) returnValue = bl.collisionsEnabled();
+				if(en != null) returnValue = en.collisionsEnabled();
+				return;
+			
+			case "getHitboxSize":
+				if(bl != null) returnValue = bl.getHitboxSize();
+				if(en != null) returnValue = en.getHitboxSize();
+				return;
+			
+			case "isBombResist":
+				returnValue = bl.bombResist();
+				return;
+			
+			case "getBorderDespawn":
+				returnValue = bl.getBorderDespawn();
+				return;
+			
+			case "getDespawnRange":
+				returnValue = bl.getDespawnRange();
+				return;
+
+			case "getHealth":
+				returnValue = en.getHealth();
+				return;
+			
+			case "isInvulnerable":
+				returnValue = en.isInvulnerable();
+				return;
+			
 			case "isAdditive":
-				returnValue = bl.getSprite().isAdditive();
+				returnValue = me.getSprite().isAdditive();
+				return;
+			
+			case "getScale":
+				ArrayList<Object> sc = new ArrayList<Object>();
+
+				sc.add(me.getSprite().getScaleX());
+				sc.add(me.getSprite().getScaleY());
+				
+				returnValue = sc;
+				return;
+			
+			case "getScaleX":
+				returnValue = me.getSprite().getScaleX();
+				return;
+			
+			case "getScaleY":
+				returnValue = me.getSprite().getScaleY();
+				return;
+			
+			case "getAlpha":
+				returnValue = me.getSprite().getAlpha();
 				return;
 		}
 	}

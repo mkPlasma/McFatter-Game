@@ -2,6 +2,7 @@ package engine.script;
 
 import java.util.ArrayList;
 
+import static engine.script.ScriptUtil.*;
 import static engine.script.ScriptFunctions.*;
 
 /*

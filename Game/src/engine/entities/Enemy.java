@@ -2,6 +2,7 @@ package engine.entities;
 
 import content.EffectList;
 import content.FrameList;
+import engine.graphics.Sprite;
 import engine.screens.MainScreen;
 
 /*
@@ -18,11 +19,15 @@ import engine.screens.MainScreen;
 
 public class Enemy extends MovableEntity{
 	
-	private final int hitboxSize;
+	// Customizable sprite
+	private Sprite sprite;
 	
 	// Whether entity can collide
 	private boolean collisions = true;
 	
+	private int hitboxSize;
+	
+	private boolean invulnerable;
 	private int hp;
 	
 	private final FrameList frameList;
@@ -43,7 +48,11 @@ public class Enemy extends MovableEntity{
 	}
 	
 	public void onCreate(){
-		
+		initFrameProperties();
+	}
+	
+	private void initFrameProperties(){
+		sprite = new Sprite(frame.getSprite());
 	}
 	
 	public void onDestroy(){
@@ -59,7 +68,9 @@ public class Enemy extends MovableEntity{
 	}
 	
 	public void damage(int damage){
-		hp -= damage;
+		
+		if(!invulnerable)
+			hp -= damage;
 		
 		if(hp <= 0)
 			onDestroy();
@@ -70,8 +81,28 @@ public class Enemy extends MovableEntity{
 		return (EnemyFrame)frame;
 	}
 	
+	public Sprite getSprite(){
+		return sprite;
+	}
+	
+	public void setHealth(int hp){
+		this.hp = hp;
+	}
+	
 	public int getHealth(){
 		return hp;
+	}
+	
+	public void setInvulnerable(boolean invulnerable){
+		this.invulnerable = invulnerable;
+	}
+	
+	public boolean isInvulnerable(){
+		return invulnerable;
+	}
+	
+	public void setHitboxSize(int hitboxSize){
+		this.hitboxSize = hitboxSize;
 	}
 	
 	public int getHitboxSize(){

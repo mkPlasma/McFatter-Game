@@ -70,13 +70,15 @@ set b = bullet(type, color, x, y, dir, spd, delay);
 bullet(type, color, x, y, dir, spd, minSpd, maxSpd, accel, delay);
 
 // Lasers
-laser(type, color, x, y, dir, length, width, delay);
+set l = laser(type, color, x, y, dir, length, width, delay);
 
 // Enemies
-enemy(x, y, hp);
+set e = enemy(x, y, hp);
 
 // Delete entity
 b.delete();
+// Delete without effects
+b.deleteImmediate();
 
 // Location
 b.setX(x);
@@ -111,7 +113,46 @@ b.getMaxSpd();
 b.setAngVel(a);
 b.getAngVel();
 
-// Type/Color of bullet
+// Laser size
+l.setLength(l);
+l.setWidth(w);
+l.getLength();
+l.getWidth();
+
+// Laser sprite segmenting (default true for dist and helix types)
+l.setSegmented();
+l.setSegmented(s);
+l.isSegmented();
+
+// Visibility
+b.setVisible(v);
+b.isVisible();
+
+// Collisions
+b.setCollisions(c);
+b.getCollisions();
+b.setHitboxSize(h);
+b.getHitboxSize();
+
+// Bullet can be deleted by bombs/Collisions
+b.setBombResist();
+b.setBombResist(b);
+b.getBombResist();
+
+// Off-screen despawning
+b.setBorderDespawn(b);
+b.setDespawnRange(b);
+b.getBorderDespawn();
+b.getDespawnRange();
+
+// Enemy health
+e.setHealth(h);
+e.getHealth();
+e.setInvulnerable();
+e.setInvulnerable(i);
+e.isInvulnerable();
+
+// Type/Color of entity
 b.setType(t);
 b.setColor(c);
 b.setFrame(t, c);
@@ -127,8 +168,19 @@ b.isAdditive();
 // Set to true
 b.setAdditive();
 
+// Sprite scale
+b.setScale(s);
+b.setScale(x, y);
+b.setScaleX(x);
+b.setScaleY(x);
+// As array
+b.getScale();
+b.getScaleX();
+b.getScaleY();
 
-
+// Sprite alpha
+b.setAlpha(a);
+b.getAlpha();
 
 
 // General

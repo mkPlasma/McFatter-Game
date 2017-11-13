@@ -67,6 +67,10 @@ x %= 1;
 x++;
 x--;
 
+// If x is a boolean, it will be inverted.
+// If x is a number, its sign will be flipped.
+x!!;
+
 // Strings and variables can be concatenized with +.
 set somePhrase = "The value of y is " + y + ".";
 
@@ -340,6 +344,19 @@ if(test == 0){
 
 
 
+
+
+
+
+
+
+
+// Markers
+// ==================================================
+
+// Used to set where the script will start when reloaded.
+// Everything beforehand will run, but waits will be skipped and entities will not be created.
+#reset
 
 
 

@@ -4,8 +4,6 @@ for(i in 10){
     wait 10;
 }
 
-#reset
-
 wait 20;
 
 for(i in 10){
@@ -14,18 +12,18 @@ for(i in 10){
 }
 
 task enemy(inv){
-    set const c = 10;
-    set const fr = 40;
+    set const c = 1;
+    set const fr = 5;
     
     set x = _rx + 50;
-    set dir = 140;
+    set dir = 150;
     set angvel = 5;
     set color = _green;
     
     if(inv){
         color = _blue;
         x = _lx - 50;
-        dir = 40;
+        dir = 90 - (dir - 90);
         angvel!!;
         color = _blue;
     }
@@ -38,16 +36,16 @@ task enemy(inv){
     
     for(i in 145){
         
-        if(i % fr == fire){
-            set dir2 = rand(0, 360);//angleToPlayer(e.getPos());
-            
-            for(d in 0, 360/c, 361){
-                bullet(_needle, color, e.getPos(), dir2 + d, 2, 10);
-            }
-        }
-        
         if(e.isDeleted()){
             return;
+        }
+        
+        if(i % fr == fire){
+            set dir2 = rand(0, 360);
+            
+            for(d in 0, 360/c, 361){
+                set b = bullet(_orb, color, e.getPos(), dir2 + d, 0, 0, 1.5, 0.02, -10);
+            }
         }
         
         if(i == 30){

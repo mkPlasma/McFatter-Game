@@ -1,5 +1,6 @@
 package engine.script;
 
+import static engine.script.ScriptUtil.*;
 import static engine.script.ScriptFunctions.*;
 
 import java.io.IOException;
