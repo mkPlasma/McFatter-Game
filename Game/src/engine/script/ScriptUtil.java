@@ -335,7 +335,7 @@ public class ScriptUtil{
 	// Operations
 	
 	public static boolean isNumberOp(String op){
-		for(int i = 0; i < 13; i++)
+		for(int i = 0; i < 12; i++)
 			if(op.equals(operations[i]))
 				return true;
 		return false;
