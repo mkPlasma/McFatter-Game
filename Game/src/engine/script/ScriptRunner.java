@@ -1492,6 +1492,10 @@ public class ScriptRunner{
 					ge.delete();
 				return;
 			
+			case "deleteImmediate":
+				ge.delete();
+				return;
+			
 			case "setX":
 				if(isFloat) ge.setX(f2);
 				else		ge.setX(i2);
