@@ -86,6 +86,8 @@ public class ScriptRunner{
 	private int resetPoint = 0;
 	private boolean beforeResetPoint;
 	
+	private boolean addedBranch;
+	
 	private long[] bytecode;
 	
 	private DScript script;
@@ -218,6 +220,10 @@ public class ScriptRunner{
 		return beforeResetPoint;
 	}
 	
+	public boolean added(){
+		return addedBranch;
+	}
+	
 	// Run bytecode
 	@SuppressWarnings("unchecked")
 	public void run(ScriptBranch branch){
@@ -238,6 +244,8 @@ public class ScriptRunner{
 		scopeVars = branch.getScopeVars();
 		
 		loopCount = 0;
+		
+		addedBranch = false;
 		
 		// Go into else block
 		boolean doElse = false;
@@ -686,6 +694,10 @@ public class ScriptRunner{
 						// Current branch enters task
 						branch.setPrimary(false);
 						branch.setParent(newBranch);
+						
+						addedBranch = true;
+						
+						return;
 					}
 					
 					// For functions add return point and use new expression

@@ -81,7 +81,7 @@ public class ScriptController{
 	}
 	
 	public void addBranch(ScriptBranch branch){
-		branches.add(branch);
+		branches.add(branches.size() - 1, branch);
 	}
 	
 	public void setPlayer(Player player){

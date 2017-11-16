@@ -71,11 +71,12 @@ public class ScriptBranch{
 		
 		for(int i:syncVariables)
 			this.variables[i] = variables[i];
+		
 	}
 	
 	// Copy variables to parent
 	public void syncToParent(){
-
+		
 		if(parent == null || parent.toRemove())
 			return;
 		
@@ -132,11 +133,17 @@ public class ScriptBranch{
 	}
 	
 	public void setVariables(Object[] variables){
-		this.variables = variables.clone();
+		this.variables = variables;
 	}
 	
 	public Object[] getVariables(){
-		return variables;
+		
+		Object[] vars = new Object[variables.length];
+		
+		for(int i = 0; i < variables.length; i++)
+			vars[i] = variables[i];
+		
+		return variables.clone();
 	}
 	
 	public void setScopeVars(ArrayList<Integer> scopeVars){
