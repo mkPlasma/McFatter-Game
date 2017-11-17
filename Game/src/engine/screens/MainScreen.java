@@ -89,22 +89,31 @@ public class MainScreen extends GameScreen{
 	// temp
 	private void scriptSelectInit(){
 		
-		// Add files
-		File[] files = new File("Game/res/script").listFiles();
-		
-		for(File file:files){
-			if(file.isFile() && file.getName().endsWith(".dscript") && !file.getName().startsWith("res/")){
-				
-				scriptTexts.addAll(addText(file.getName(), 50, 32 + scriptNum*12, -1, 0.75f, 0));
-				scriptNames.add(file.getName());
-				
-				scriptNum++;
-			}
-		}
+		addFiles("");
 		
 		scriptCursor = addText(">", 40, 32, -1, 0.75f, 0).get(0);
 		
 		scriptSelect = true;
+	}
+	
+	private void addFiles(String directory){
+		
+		File[] files = new File("Game/res/script/" + directory).listFiles();
+		
+		if(files == null || directory.equals("ref"))
+			return;
+		
+		for(File file:files){
+			if(file.isFile() && file.getName().endsWith(".dscript")){
+				
+				scriptTexts.addAll(addText(directory + "/" + file.getName(), 50, 32 + scriptNum*12, -1, 0.75f, 0));
+				scriptNames.add(directory + "/" + file.getName());
+				
+				scriptNum++;
+			}
+			else if(file.isDirectory())
+				addFiles(file.getName());
+		}
 	}
 	
 	public void setFPS(int fps){
