@@ -1,62 +1,73 @@
 
-for(i in 10){
-    enemy(false);
-    wait 10;
-}
 
-wait 20;
+laserEnemy(_cx - 100);
+wait 10;
+laserEnemy(_cx);
+wait 10;
+laserEnemy(_cx + 100);
 
-for(i in 10){
-    enemy(true);
-    wait 10;
-}
-
-task enemy(inv){
-    set const c = 1;
-    set const fr = 5;
+task laserEnemy(x){
     
-    set x = _rx + 50;
-    set dir = 150;
-    set angvel = 5;
-    set color = _green;
+    set c = 6;
     
-    if(inv){
-        color = _blue;
-        x = _lx - 50;
-        dir = 90 - (dir - 90);
-        angvel!!;
-        color = _blue;
-    }
+    set e = enemy(x, _ty - 32, 500);
+    e.setDir(90);
     
-    set e = enemy(x, 100, 45);
-    e.setDir(dir);
-    e.setSpd(8);
+    e.setSpd(7);
+    e.setMinSpd(0);
+    e.setAccel(-0.2);
     
-    set fire = rand(0, fr);
+    wait 60;
     
-    for(i in 145){
-        
-        if(e.isDeleted()){
-            return;
+    set dir = rand(0, 360);
+    set inv = false;
+    
+    while(!e.isDeleted()){
+        for(d in 0, 360/c, 360){
+            laser(dir + d);
         }
         
-        if(i % fr == fire){
-            set dir2 = rand(0, 360);
+        dir += rand(15, 30);
+        inv!!;
+        
+        wait 30;
+    }
+    
+    task laser(d2){
+        
+        set r = 50;
+        set angvel = 0.1;
+        set col = _red;
+        
+        if(inv){
+            col = _purple;
+            angvel!!;
+        }
+        
+        set l = laser(_laser, col, e.getPos(), d2, 500, 16, 45);
+        l.setAdditive();
+        
+        for(d in 0, 360/c, 360){
+            bullet(_orb, col, e.getPos(), d2 +  d, 2, -15);
+        }
+        
+        set ct = 0;
+        
+        for(i in 60){
             
-            for(d in 0, 360/c, 361){
-                set b = bullet(_orb, color, e.getPos(), dir2 + d, 0, 0, 1.5, 0.02, -10);
+            l.setX(e.getX() + r*cos(d2));
+            l.setY(e.getY() + r*sin(d2));
+            l.setDir(d2);
+            
+            d2 += angvel;
+            
+            if(e.isDeleted()){
+                break;
             }
+            
+            wait;
         }
         
-        if(i == 30){
-            e.setAngVel(angvel);
-        }
-        if(i == 115){
-            e.setAngVel(0);
-        }
-        
-        wait;
+        l.delete();
     }
-    
-    e.delete();
 }

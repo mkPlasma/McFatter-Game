@@ -1,9 +1,11 @@
 package engine.screens;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.lwjgl.glfw.GLFW;
 
+import content.FrameList;
 import engine.KeyboardListener;
 import engine.entities.Bullet;
 import engine.entities.Effect;
@@ -49,6 +51,13 @@ public class MainScreen extends GameScreen{
 	
 	private int clearScreen;
 	private boolean slowMode;
+
+	// temp
+	private ArrayList<Text> scriptTexts = new ArrayList<Text>();
+	private ArrayList<String> scriptNames = new ArrayList<String>();
+	private Text scriptCursor;
+	private boolean scriptSelect;
+	private int scriptNum, scriptIndex;
 	
 	public MainScreen(Renderer r, TextureCache tc){
 		super(r, tc);
@@ -72,11 +81,30 @@ public class MainScreen extends GameScreen{
 		r.initMainScreen();
 		
 		// Temporary test
-		stage = new Mission("Game/res/script/test.dscript", this, r, tc);
-		stage.init();
+		player = new Player(0, 0, new FrameList(tc), this);
+		tc.loadSprite(player.getSprite());
+		scriptSelectInit();
+	}
+	
+	// temp
+	private void scriptSelectInit(){
 		
-		if(stage instanceof Mission)
-			player = ((Mission)stage).getPlayer();
+		// Add files
+		File[] files = new File("Game/res/script").listFiles();
+		
+		for(File file:files){
+			if(file.isFile() && file.getName().endsWith(".dscript") && !file.getName().startsWith("res/")){
+				
+				scriptTexts.addAll(addText(file.getName(), 50, 32 + scriptNum*12, -1, 0.75f, 0));
+				scriptNames.add(file.getName());
+				
+				scriptNum++;
+			}
+		}
+		
+		scriptCursor = addText(">", 40, 32, -1, 0.75f, 0).get(0);
+		
+		scriptSelect = true;
 	}
 	
 	public void setFPS(int fps){
@@ -113,6 +141,39 @@ public class MainScreen extends GameScreen{
 	}
 	
 	public void update(){
+		
+		if(scriptSelect){
+			
+			// Cursor up
+			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_UP) && scriptIndex > 0)
+				scriptIndex--;
+			
+			// Cursor down
+			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_DOWN) && scriptIndex < scriptNum - 1)
+				scriptIndex++;
+			
+			scriptCursor.setY(32 + scriptIndex*12);
+			
+			if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_Z)){
+			
+				String script = "Game/res/script/" + scriptNames.get(scriptIndex);
+				
+				stage = new Mission(script, this, r, tc);
+				stage.init();
+				
+				if(stage instanceof Mission)
+					player = ((Mission)stage).getPlayer();
+				
+				scriptSelect = false;
+				
+				for(Text t:scriptTexts)
+					t.delete();
+				
+				scriptCursor.delete();
+			}
+			
+			return;
+		}
 		
 		// Pause
 		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_ESCAPE) && time > pauseTime + 30){

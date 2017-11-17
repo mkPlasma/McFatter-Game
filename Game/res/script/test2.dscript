@@ -1,0 +1,12 @@
+
+set c = 72;
+
+while(true){
+    set dir = rand(0, 360);
+    
+    for(d in 0, 360/c, 360){
+        bullet(_orb, _blue, _cx, 140, dir + d, 2, 2, 5, 0.05, 10);
+    }
+    
+    wait 30;
+}
