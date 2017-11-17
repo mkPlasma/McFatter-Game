@@ -15,7 +15,7 @@ import java.util.Stack;
 public class ScriptBranch{
 	
 	// Parent to sync variables with
-	private ScriptBranch parent;
+	private final ScriptBranch parent;
 	
 	// Where in bytecode state is running
 	private int bytecodeIndex;
@@ -25,7 +25,7 @@ public class ScriptBranch{
 	
 	// Is primary branch
 	// Primary branch runs outside of any tasks
-	private boolean primary;
+	private final boolean primary;
 	
 	// Branch ended
 	private boolean remove;
@@ -43,11 +43,12 @@ public class ScriptBranch{
 	private Stack<Integer> returnPoints;
 	
 	
-	public ScriptBranch(int bytecodeIndex, Object[] variables, ArrayList<Integer> scopeVars, boolean primary){
+	public ScriptBranch(int bytecodeIndex, Object[] variables, ArrayList<Integer> scopeVars, boolean primary, ScriptBranch parent){
 		this.bytecodeIndex = bytecodeIndex;
 		this.variables = variables;
 		this.scopeVars = scopeVars;
 		this.primary = primary;
+		this.parent = parent;
 		
 		syncVariables = new ArrayList<Integer>();
 		returnPoints = new Stack<Integer>();
@@ -55,10 +56,6 @@ public class ScriptBranch{
 		for(int i = 0; i < variables.length; i++)
 			if(variables[i] != null && (scopeVars == null || !scopeVars.contains(i)))
 				syncVariables.add(i);
-	}
-	
-	public void setParent(ScriptBranch parent){
-		this.parent = parent;
 	}
 	
 	// Copy variables from parent
@@ -115,10 +112,6 @@ public class ScriptBranch{
 		return waitTime;
 	}
 	
-	public void setPrimary(boolean primary){
-		this.primary = primary;
-	}
-	
 	public boolean isPrimary(){
 		return primary;
 	}
@@ -137,12 +130,6 @@ public class ScriptBranch{
 	}
 	
 	public Object[] getVariables(){
-		
-		Object[] vars = new Object[variables.length];
-		
-		for(int i = 0; i < variables.length; i++)
-			vars[i] = variables[i];
-		
 		return variables.clone();
 	}
 	

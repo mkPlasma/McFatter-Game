@@ -26,7 +26,7 @@ public class ScriptController{
 	private int time;
 	
 	public ScriptController(DScript script, MainScreen screen){
-		runner = new ScriptRunner(script, this, screen);
+		runner = new ScriptRunner(script, screen);
 		branches = new ArrayList<ScriptBranch>();
 		
 		time = 0;
@@ -60,9 +60,22 @@ public class ScriptController{
 					i--;
 				}
 				
+				// Add branch
+				ScriptBranch newBranch = runner.getAddedBranch();
+				
+				if(newBranch != null){
+					branches.add(i, newBranch);
+					i--;
+				}
+				
 				haltRun = runner.haltRun();
 				finished = runner.isFinished() && branches.isEmpty();
 				loop = runner.continueLoop();
+				
+				if(haltRun){
+					loop = false;
+					break;
+				}
 			}
 		}while(loop);
 		

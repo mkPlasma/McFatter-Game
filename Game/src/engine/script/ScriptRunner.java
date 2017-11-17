@@ -86,13 +86,12 @@ public class ScriptRunner{
 	private int resetPoint = 0;
 	private boolean beforeResetPoint;
 	
-	private boolean addedBranch;
-	
 	private long[] bytecode;
 	
 	private DScript script;
 	
-	private ScriptController controller;
+	private ScriptBranch addedBranch;
+	private boolean added;
 	
 	// Branched states
 	//private ArrayList<ScriptBranch> branches;
@@ -107,9 +106,8 @@ public class ScriptRunner{
 	
 	private int time;
 	
-	public ScriptRunner(DScript script, ScriptController controller, MainScreen screen){
+	public ScriptRunner(DScript script, MainScreen screen){
 		this.script = script;
-		this.controller = controller;
 		this.screen = screen;
 	}
 	
@@ -193,7 +191,7 @@ public class ScriptRunner{
 		
 		initialized = true;
 		
-		return new ScriptBranch(0, variables, null, true);
+		return new ScriptBranch(0, variables, null, true, null);
 	}
 	
 	public void setPlayer(Player player){
@@ -220,7 +218,12 @@ public class ScriptRunner{
 		return beforeResetPoint;
 	}
 	
-	public boolean added(){
+	public ScriptBranch getAddedBranch(){
+		
+		if(!added)
+			return null;
+		
+		added = false;
 		return addedBranch;
 	}
 	
@@ -237,7 +240,7 @@ public class ScriptRunner{
 		// Return if waiting
 		else if(!branch.tickWaitTime())
 			return;
-
+		
 		branch.syncWithParent();
 		variables = branch.getVariables();
 		returnPoints = branch.getReturnPoints();
@@ -245,7 +248,7 @@ public class ScriptRunner{
 		
 		loopCount = 0;
 		
-		addedBranch = false;
+		added = false;
 		
 		// Go into else block
 		boolean doElse = false;
@@ -687,15 +690,16 @@ public class ScriptRunner{
 					
 					// Branch if task
 					if(getOpcodeName(bytecode[i]).equals("task")){
-						// New branch continues outside of task
-						ScriptBranch newBranch = new ScriptBranch(index + 1, variables, scopeVars, branch.isPrimary());
-						controller.addBranch(newBranch);
 						
-						// Current branch enters task
-						branch.setPrimary(false);
-						branch.setParent(newBranch);
+						// New branch continues in task, but runs first
+						addedBranch = new ScriptBranch(i + 1, variables, scopeVars, false, branch);
 						
-						addedBranch = true;
+						// Current branch continues outside of task
+						branch.setBytecodeIndex(index + 1);
+						branch.setVariables(variables);
+						branch.setReturnPoints(returnPoints);
+						branch.syncToParent();
+						added = true;
 						
 						return;
 					}
