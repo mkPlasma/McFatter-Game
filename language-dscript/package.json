@@ -1,0 +1,12 @@
+{
+  "name": "language-dscript",
+  "version": "0.0.0",
+  "description": "DScript support in Atom",
+  "engines": {
+    "atom": "*"
+  },
+  "dependencies": {},
+  "repository": {},
+  "bugs": {},
+  "license": ""
+}

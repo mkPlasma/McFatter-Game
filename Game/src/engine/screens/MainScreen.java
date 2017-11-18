@@ -89,6 +89,8 @@ public class MainScreen extends GameScreen{
 	// temp
 	private void scriptSelectInit(){
 		
+		scriptNum = 0;
+		
 		addFiles("");
 		
 		scriptCursor = addText(">", 40, 32, -1, 0.75f, 0).get(0);
@@ -230,6 +232,12 @@ public class MainScreen extends GameScreen{
 		// Clear bullets with Alt+C
 		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && (KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_C)))
 			clearScreen = 1;
+		
+		// Re-select script with ~
+		if((KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_GRAVE_ACCENT))){
+			scriptSelectInit();
+			clearScreen = 2;
+		}
 	}
 	
 	private void updateGameStage(){

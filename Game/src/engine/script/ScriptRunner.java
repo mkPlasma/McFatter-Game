@@ -622,8 +622,9 @@ public class ScriptRunner{
 						
 						continue;
 					}
-					else
-						variables[data] = !(Boolean)o;
+					
+					variables[data] = !(Boolean)o;
+					continue;
 				}
 				
 				
