@@ -124,6 +124,7 @@ public class ScriptRunner{
 		haltRun = false;
 		finished = false;
 		
+		resetPoint = 0;
 		beforeResetPoint = false;
 		
 		// Initialize/reset lists
@@ -234,11 +235,8 @@ public class ScriptRunner{
 		if(haltRun)
 			return;
 		
-		if(beforeResetPoint)
-			branch.skipWaitTime();
-		
 		// Return if waiting
-		else if(!branch.tickWaitTime())
+		if(!branch.tickWaitTime())
 			return;
 		
 		branch.syncWithParent();
@@ -797,6 +795,10 @@ public class ScriptRunner{
 						runtimeError("Type mismatch", lineNum);
 						return;
 					}
+					
+					// Skip if before reset
+					if(beforeResetPoint)
+						continue;
 					
 					// Cast to int
 					obj = obj instanceof Float ? (int)(float)obj : obj;

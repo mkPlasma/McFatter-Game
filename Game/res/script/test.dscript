@@ -1,73 +1,106 @@
 
+spiralsEnemy(_cx);
 
-laserEnemy(_cx - 100);
-wait 10;
-laserEnemy(_cx);
-wait 10;
-laserEnemy(_cx + 100);
+wait 250;
 
-task laserEnemy(x){
+for(j in 2){
+    for(i in 10){
+        aimEnemy(_lx + i*40, false);
+        wait 5;
+    }
+    for(i in 10){
+        aimEnemy(_rx - i*40, true);
+        wait 5;
+    }
+}
+
+wait 30;
+spiralsEnemy(_cx - 75);
+spiralsEnemy(_cx + 75);
+
+
+
+task aimEnemy(x, inv){
+    set c = 4;
     
-    set c = 6;
-    
-    set e = enemy(x, _ty - 32, 500);
+    set e = enemy(x, _ty - 32, 50);
     e.setDir(90);
+    e.setSpd(1);
+    e.setAccel(0.05);
     
-    e.setSpd(7);
+    set angvel = -0.5;
+    if(inv){angvel!!;}
+    
+    e.setAngVel(angvel);
+    
+    wait 70;
+    
+    if(!e.isDeleted()){
+        for(i in c){
+            bullet(_orb, _red, e.getPos(), angleToPlayer(e.getPos()), 1.5 + i*0.5, 5);
+        }
+    }
+}
+
+task spiralsEnemy(x){
+    set c = 30;
+    
+    set e = enemy(x, _ty - 32, 1000);
+    e.setDir(90);
+    e.setSpd(6);
     e.setMinSpd(0);
-    e.setAccel(-0.2);
+    e.setAccel(-0.1);
     
-    wait 60;
+    e.setInvulnerable();
     
-    set dir = rand(0, 360);
     set inv = false;
     
-    while(!e.isDeleted()){
-        for(d in 0, 360/c, 360){
-            laser(dir + d);
-        }
-        
-        dir += rand(15, 30);
-        inv!!;
-        
-        wait 30;
-    }
+    wait 90;
     
-    task laser(d2){
+    e.setInvulnerable(false);
+    
+    set count;
+    
+    for(i in 50){
         
-        set r = 50;
-        set angvel = 0.1;
-        set col = _red;
+        set d = rand(0, 360);
+        set angvel = 2;
+        set col = _yellow;
         
         if(inv){
-            col = _purple;
             angvel!!;
+            col = _light_blue;
         }
         
-        set l = laser(_laser, col, e.getPos(), d2, 500, 16, 45);
-        l.setAdditive();
-        
-        for(d in 0, 360/c, 360){
-            bullet(_orb, col, e.getPos(), d2 +  d, 2, -15);
+        for(d2 in 0, 360/c, 360){
+            bullet(d + d2, col, angvel);
         }
         
-        set ct = 0;
-        
-        for(i in 60){
-            
-            l.setX(e.getX() + r*cos(d2));
-            l.setY(e.getY() + r*sin(d2));
-            l.setDir(d2);
-            
-            d2 += angvel;
-            
-            if(e.isDeleted()){
-                break;
-            }
-            
-            wait;
+        if(e.isDeleted()){
+            return;
         }
         
-        l.delete();
+        if(count == 20){
+            e.setAccel(-0.05);
+            e.setMinSpd(-2);
+        }
+        
+        if(e.getY() < _ty - 32){
+            e.delete();
+            return;
+        }
+        
+        inv!!;
+        count++;
+        
+        wait 15;
+    }
+    
+    task bullet(dir, color, av){
+        set b = bullet(_rice, color, e.getPos(), dir, 1.2, 10);
+        b.setAngVel(av);
+        
+        wait 60;
+        b.setAngVel(0);
     }
 }
