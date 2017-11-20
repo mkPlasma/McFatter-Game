@@ -3,9 +3,6 @@ package engine.script;
 import static engine.script.ScriptUtil.*;
 import static engine.script.ScriptFunctions.*;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -1986,13 +1983,8 @@ public class ScriptParser{
 	
 	// Create syntax error and halt compilation
 	private void compilationError(String type, int lineNum){
-		try{
-			errorText = "\nDScript compilation error (parser):\n" + type + " in " + script.getFileName() + " on line " + lineNum +
-				":\n>> " + Files.readAllLines(Paths.get(script.getPath())).get(lineNum - 1).trim();
-		}
-		catch(IOException e){
-			e.printStackTrace();
-		}
+		errorText = "\nDScript compilation error (parser):\n" + type + " in " + script.getFileName() + " on line " + lineNum +
+			":\n>> " + script.getLine(lineNum);
 		haltCompiler = true;
 	}
 	

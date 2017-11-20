@@ -89,6 +89,8 @@ public class MainScreen extends GameScreen{
 	// temp
 	private void scriptSelectInit(){
 		
+		text.clear();
+		
 		scriptNum = 0;
 		
 		addFiles("");

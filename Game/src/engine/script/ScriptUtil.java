@@ -124,6 +124,7 @@ public class ScriptUtil{
 		"false",
 		
 		"wait",
+		"run"
 	};
 	
 	public static final String[] operations = {

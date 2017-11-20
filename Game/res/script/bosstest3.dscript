@@ -1,0 +1,16 @@
+
+
+set c2 = 12;
+set r2 = 20;
+set dir = rand(0, 360);
+
+while(!boss.isDeleted()){
+    
+    for(d in 0, 360/c2, 360){
+        bullet(_scale, _cyan, boss.getPos() + {r2*cos(dir + d), r2*sin(dir + d)}, dir + d, 2, -10);
+    }
+    
+    dir += 8;
+    
+    wait 5;
+}

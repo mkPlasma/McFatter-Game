@@ -4,7 +4,7 @@
 
 'patterns': [
 	{# Control keywords
-		'match': '\\b(set|const|global|if|else|break|while|for|forG|forE|forNE|forLE|forGE|in|function|task|return|wait)\\b'
+		'match': '\\b(set|const|global|if|else|break|while|for|forG|forE|forNE|forLE|forGE|in|function|task|return|wait|run)\\b'
 		'name': 'keyword.control.dscript'
 	},
 	

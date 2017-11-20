@@ -1,0 +1,18 @@
+
+boss.setDir(90);
+
+set c = 32;
+set r = 40;
+
+while(!boss.isDeleted()){
+    set dir = rand(0, 360);
+    
+    for(d in 0, 360/c, 360){
+        bullet(_orb, _red, boss.getPos() + {r*cos(dir + d), r*sin(dir + d)}, dir + d, 3, 3, 5, 0.01, 10);
+    }
+    wait 15;
+    
+    if(boss.getHealth() < 2000){
+        break;
+    }
+}

@@ -3,9 +3,6 @@ package engine.script;
 import static engine.script.ScriptUtil.*;
 import static engine.script.ScriptFunctions.*;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -33,8 +30,9 @@ import engine.screens.MainScreen;
 public class ScriptRunner{
 	
 	// Stop script if infinite loop
-	private static final int INFINITE_LOOP_LIMIT = 10000;
-	private int loopCount;
+	private static final int INFINITE_LOOP_LIMIT = 10000,
+							 LOOP_SKIP_LIMIT = 100;
+	private int[] loopCounts;
 	
 	// Initialized for the first time
 	private boolean initialized;
@@ -185,6 +183,8 @@ public class ScriptRunner{
 				resetPoint = i;
 		}
 		
+		loopCounts = new int[loops.size()];
+		
 		if(resetPoint != 0)
 			beforeResetPoint = true;
 		
@@ -244,7 +244,8 @@ public class ScriptRunner{
 		returnPoints = branch.getReturnPoints();
 		scopeVars = branch.getScopeVars();
 		
-		loopCount = 0;
+		for(int i = 0; i < loopCounts.length; i++)
+			loopCounts[i] = 0;
 		
 		added = false;
 		
@@ -252,6 +253,9 @@ public class ScriptRunner{
 		boolean doElse = false;
 		boolean resetDoElse = false;
 		boolean elseAhead = false;
+		
+		// Skip infinite loop if before reset
+		boolean[] skipLoop = new boolean[loopCounts.length];
 		
 		// Loop through
 		for(int i = branch.getBytecodeIndex(); i < bytecode.length; i++){
@@ -267,9 +271,15 @@ public class ScriptRunner{
 			int data = getData(inst);
 			
 			// Check for infiinite loops
-			if(loopCount > INFINITE_LOOP_LIMIT){
-				runtimeError("Infinite loop", lineNum);
-				return;
+			for(int j = 0; j < loopCounts.length; j++){
+				if(loopCounts[j] > INFINITE_LOOP_LIMIT && !beforeResetPoint){
+					runtimeError("Infinite loop", lineNum);
+					return;
+				}
+				else if(beforeResetPoint && loopCounts[j] > LOOP_SKIP_LIMIT){
+					skipLoop[j] = true;
+					loopCounts[j] = 0;
+				}
 			}
 			
 			// Set doElse to false after one loop
@@ -662,8 +672,14 @@ public class ScriptRunner{
 					continue;
 				
 				case "end_while":
+					
+					if(skipLoop[data]){
+						skipLoop[data] = false;
+						continue;
+					}
+					
 					i = loops.get(data);
-					loopCount++;
+					loopCounts[data]++;
 					continue;
 				
 				
@@ -1367,7 +1383,8 @@ public class ScriptRunner{
 						float spd = oSpd instanceof Float ? (float)oSpd : (float)(int)oSpd;
 						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 						
-						returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), pos[0], pos[1], dir, spd, del, frameList, screen);
+						if(!beforeResetPoint)
+							returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), pos[0], pos[1], dir, spd, del, frameList, screen);
 						break;
 					}
 					case 7:{
@@ -1383,7 +1400,8 @@ public class ScriptRunner{
 						float spd = oSpd instanceof Float ? (float)oSpd : (float)(int)oSpd;
 						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 						
-						returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, spd, del, frameList, screen);
+						if(!beforeResetPoint)
+							returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, spd, del, frameList, screen);
 						break;
 					}
 					case 9:{
@@ -1403,7 +1421,8 @@ public class ScriptRunner{
 						float accel = oAccel instanceof Float ? (float)oAccel : (float)(int)oAccel;
 						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 						
-						returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), pos[0], pos[1], dir, spd, minSpd, maxSpd, accel, del, frameList, screen);
+						if(!beforeResetPoint)
+							returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), pos[0], pos[1], dir, spd, minSpd, maxSpd, accel, del, frameList, screen);
 						break;
 					}
 					case 10:{
@@ -1425,7 +1444,8 @@ public class ScriptRunner{
 						float accel = oAccel instanceof Float ? (float)oAccel : (float)(int)oAccel;
 						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 						
-						returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, spd, minSpd, maxSpd, accel, del, frameList, screen);
+						if(!beforeResetPoint)
+							returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, spd, minSpd, maxSpd, accel, del, frameList, screen);
 						break;
 					}
 				}
@@ -1450,7 +1470,8 @@ public class ScriptRunner{
 					int wid = oWid instanceof Integer ? (int)oWid : (int)(float)oWid;
 					int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 					
-					returnValue = new Laser(frameList.getBullet((byte)i1, (byte)i2), pos[0], pos[1], dir, len, wid, del, frameList, screen);
+					if(!beforeResetPoint)
+						returnValue = new Laser(frameList.getBullet((byte)i1, (byte)i2), pos[0], pos[1], dir, len, wid, del, frameList, screen);
 				}
 				else{
 					Object ox = params.remove();
@@ -1467,7 +1488,8 @@ public class ScriptRunner{
 					int wid = oWid instanceof Integer ? (int)oWid : (int)(float)oWid;
 					int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 					
-					returnValue = new Laser(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, len, wid, del, frameList, screen);
+					if(!beforeResetPoint)
+						returnValue = new Laser(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, len, wid, del, frameList, screen);
 				}
 
 				if(!beforeResetPoint)
@@ -1496,9 +1518,10 @@ public class ScriptRunner{
 						f2 = (float)i2;
 					}
 					
-					returnValue = new Enemy(frameList.getEnemy(0), f1, f2, hp, frameList, screen);
+					if(!beforeResetPoint)
+						returnValue = new Enemy(frameList.getEnemy(0), f1, f2, hp, frameList, screen);
 				}
-
+				
 				if(!beforeResetPoint)
 					screen.addEnemy((Enemy)returnValue);
 				
@@ -1870,14 +1893,9 @@ public class ScriptRunner{
 	
 	// Create syntax error and halt compilation
 	private void runtimeError(String type, int lineNum){
-		try{
-			errorText.addAll(screen.addText("\nDScript runtime error:\n" + type + " in " + script.getFileName() + " on line " + lineNum +
-				":\n>> " + Files.readAllLines(Paths.get(script.getPath())).get(lineNum - 1).trim(),
-				40, 24, 800, 0.8f, 0));
-		}
-		catch(IOException e){
-			e.printStackTrace();
-		}
+		errorText.addAll(screen.addText("\nDScript runtime error:\n" + type + " in " + script.getFileName() + " on line " + lineNum +
+			":\n>> " + script.getLine(lineNum),
+			40, 24, 800, 0.8f, 0));
 		haltRun = true;
 	}
 	

@@ -72,12 +72,12 @@ task spiralsEnemy(x){
             col = _light_blue;
         }
         
-        for(d2 in 0, 360/c, 360){
-            bullet(d + d2, col, angvel);
-        }
-        
         if(e.isDeleted()){
             return;
+        }
+        
+        for(d2 in 0, 360/c, 360){
+            bullet(d + d2, col, angvel);
         }
         
         if(count == 20){

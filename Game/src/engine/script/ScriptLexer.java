@@ -1,6 +1,12 @@
 package engine.script;
 
+import static engine.script.ScriptUtil.getData;
+import static engine.script.ScriptUtil.getLineNum;
+import static engine.script.ScriptUtil.getType;
+import static engine.script.ScriptUtil.isReservedWord;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,8 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import content.FrameList;
-
-import static engine.script.ScriptUtil.*;
+import engine.IOFunctions;
 
 /*
  * 		ScriptLexer.java
@@ -30,6 +35,9 @@ public class ScriptLexer{
 	
 	// In multi-line comment
 	boolean inComment = false;
+	
+	// Offset line num for extra script files
+	private int lineNumOffset, lineNumOffsetHighest;
 	
 	private String errorText;
 	
@@ -60,7 +68,10 @@ public class ScriptLexer{
 	rWordDelim = "(" + rIdentifiers + ")\\s*?(" + rDelimiters + ")",
 	
 	// Number literal + delimiters (remove period delimiter for floats)
-	rNumDelim = "(" + rInt + "|" + rFloat + ")\\s*?(" + rDelimiters.replace("|\\.", "") + ")";
+	rNumDelim = "(" + rInt + "|" + rFloat + ")\\s*?(" + rDelimiters.replace("|\\.", "") + ")",
+	
+	// Run command
+	rRun = "run\\s+\"(.+?)\";";
 	
 	
 	/* 	Types
@@ -91,26 +102,7 @@ public class ScriptLexer{
 		haltCompiler = false;
 		errorText = "";
 		
-		int lineNum = 1;
-		
-		// Load file and read line by line
-		try(BufferedReader br = new BufferedReader(new FileReader(script.getPath()))){
-			for(String line; (line = br.readLine()) != null;){
-				
-				line = line.trim();
-				
-				if(!line.isEmpty())
-		    			process(line, lineNum);
-				
-				if(haltCompiler)
-					return;
-				
-				lineNum++;
-			}
-		}
-		catch(IOException e){
-			e.printStackTrace();
-		}
+		analyzeScript(script);
 		
 		// Check for syntax errors
 		checkTokens();
@@ -132,6 +124,34 @@ public class ScriptLexer{
 		script.setTokens(tokensArray);
 	}
 	
+	// Single script analyze
+	private void analyzeScript(DScript script){
+		int lineNum = 1;
+		
+		lineNumOffsetHighest += IOFunctions.getLineCount(script.getPath());
+		
+		// Load file and read line by line
+		try(BufferedReader br = new BufferedReader(new FileReader(script.getPath()))){
+			for(String line; (line = br.readLine()) != null;){
+				
+				line = line.trim();
+				
+				if(!line.isEmpty())
+		    			process(line, lineNum);
+				
+				if(haltCompiler)
+					return;
+				
+				lineNum++;
+			}
+		}
+		catch(IOException e){
+			e.printStackTrace();
+		}
+		
+		lineNumOffset = 0;
+	}
+	
 	// Process line into tokens
 	private void process(String line, int lineNum){
 		
@@ -150,14 +170,33 @@ public class ScriptLexer{
 			// Add next characters until a match
 			token += line.charAt(i);
 			
+			// Run command
+			if(token.matches(rRun)){
+				pattern = Pattern.compile(rRun);
+				matcher = pattern.matcher(token);
+				matcher.find();
+				
+				// Analyze whole script
+				String path = script.getPath().replace(script.getFileName(), matcher.group(1) + ".dscript");
+				
+				if(new File(path).exists()){
+					script.addFile(path);
+					analyzeScript(new DScript(path));
+					lineNumOffset = lineNumOffsetHighest;
+				}
+				else
+					compilationError("Missing script file", line, lineNum);
+				
+				token = "";
+			}
 			// Add number literals directly
-			if(token.matches(rNumDelim)){
+			else if(token.matches(rNumDelim)){
 				pattern = Pattern.compile(rNumDelim);
 				matcher = pattern.matcher(token);
 				matcher.find();
 				
 				// Add token
-				if(!inComment) tokens.add(lineNum + (token.contains(".") ? "l:" : "i:") + matcher.group(1));
+				if(!inComment) tokens.add((lineNumOffset + lineNum) + (token.contains(".") ? "l:" : "i:") + matcher.group(1));
 				token = "";
 				
 				// Push back i as not to miss data
@@ -197,7 +236,7 @@ public class ScriptLexer{
 					}
 				}
 				
-				if(!inComment) tokens.add(lineNum + (token.matches(rOperators) ? "o" : "a") + ":" + token);
+				if(!inComment) tokens.add((lineNumOffset + lineNum) + (token.matches(rOperators) ? "o" : "a") + ":" + token);
 				token = "";
 				
 				skipWhitespace = true;
@@ -205,7 +244,7 @@ public class ScriptLexer{
 			
 			// Add separators directly
 			else if(token.matches(rSeparators)){
-				if(!inComment) tokens.add(lineNum + "s:" + token);
+				if(!inComment) tokens.add((lineNumOffset + lineNum) + "s:" + token);
 				token = "";
 				
 				skipWhitespace = true;
@@ -251,7 +290,7 @@ public class ScriptLexer{
 					i++;
 				}
 				
-				if(!inComment) tokens.add(lineNum + "t:" + s);
+				if(!inComment) tokens.add((lineNumOffset + lineNum) + "t:" + s);
 				token = "";
 				
 				skipWhitespace = true;
@@ -276,32 +315,44 @@ public class ScriptLexer{
 					// Check if reserved word
 					if(isReservedWord(token2)){
 						if(token2.equals("true") || token2.equals("false"))
-							tokens.add(lineNum + "b:" + token2);
+							tokens.add((lineNumOffset + lineNum) + "b:" + token2);
 						else
-							tokens.add(lineNum + "k:" + token2);
+							tokens.add((lineNumOffset + lineNum) + "k:" + token2);
 					}
 					
 					// Add function
 					else if(p2.contains("("))
-						tokens.add(lineNum + "f:" + token2);
+						tokens.add((lineNumOffset + lineNum) + "f:" + token2);
 					
 					// Pre-defined variables
 					else if(FrameList.getVarNum(token2) != -1)
-						tokens.add(lineNum + "i:" + FrameList.getVarNum(token2));
+						tokens.add((lineNumOffset + lineNum) + "i:" + FrameList.getVarNum(token2));
 					
-					else if(token2.equals("_cx"))	tokens.add(lineNum + "i:224");
-					else if(token2.equals("_cy"))	tokens.add(lineNum + "i:240");
-					else if(token2.equals("_lx"))	tokens.add(lineNum + "i:32");
-					else if(token2.equals("_rx"))	tokens.add(lineNum + "i:416");
-					else if(token2.equals("_ty"))	tokens.add(lineNum + "i:16");
-					else if(token2.equals("_by"))	tokens.add(lineNum + "i:464");
-					else if(token2.equals("_time")){tokens.add(lineNum + "f:scriptTime");	tokens.add(lineNum + "s:(");	tokens.add(lineNum + "s:)");}
-					else if(token2.equals("_px")){tokens.add(lineNum + "f:playerX");	tokens.add(lineNum + "s:(");	tokens.add(lineNum + "s:)");}
-					else if(token2.equals("_py")){tokens.add(lineNum + "f:playerY");	tokens.add(lineNum + "s:(");	tokens.add(lineNum + "s:)");}
+					else if(token2.equals("_cx"))	tokens.add((lineNumOffset + lineNum) + "i:224");
+					else if(token2.equals("_cy"))	tokens.add((lineNumOffset + lineNum) + "i:240");
+					else if(token2.equals("_lx"))	tokens.add((lineNumOffset + lineNum) + "i:32");
+					else if(token2.equals("_rx"))	tokens.add((lineNumOffset + lineNum) + "i:416");
+					else if(token2.equals("_ty"))	tokens.add((lineNumOffset + lineNum) + "i:16");
+					else if(token2.equals("_by"))	tokens.add((lineNumOffset + lineNum) + "i:464");
+					else if(token2.equals("_time")){
+						tokens.add((lineNumOffset + lineNum) + "f:scriptTime");
+						tokens.add((lineNumOffset + lineNum) + "s:(");
+						tokens.add((lineNumOffset + lineNum) + "s:)");
+					}
+					else if(token2.equals("_px")){
+						tokens.add((lineNumOffset + lineNum) + "f:playerX");
+						tokens.add((lineNumOffset + lineNum) + "s:(");
+						tokens.add((lineNumOffset + lineNum) + "s:)");
+					}
+					else if(token2.equals("_py")){
+						tokens.add((lineNumOffset + lineNum) + "f:playerY");
+						tokens.add((lineNumOffset + lineNum) + "s:(");
+						tokens.add((lineNumOffset + lineNum) + "s:)");
+					}
 					
 					// Add variable
 					else
-						tokens.add(lineNum + "v:" + token2);
+						tokens.add((lineNumOffset + lineNum) + "v:" + token2);
 				}
 				
 				// Clear token
@@ -313,7 +364,7 @@ public class ScriptLexer{
 			
 			// Reset point
 			else if(token.equals("#reset")){
-				tokens.add(lineNum + "m:reset");
+				tokens.add((lineNumOffset + lineNum) + "m:reset");
 				token = "";
 			}
 			
