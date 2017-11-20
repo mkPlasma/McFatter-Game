@@ -19,19 +19,21 @@ import engine.screens.MainScreen;
 
 public class Enemy extends MovableEntity{
 	
+	protected EnemyFrame frame;
+	
 	// Customizable sprite
-	private Sprite sprite;
+	protected Sprite sprite;
 	
 	// Whether entity can collide
-	private boolean collisions = true;
+	protected boolean collisions = true;
 	
-	private int hitboxSize;
+	protected int hitboxSize;
 	
-	private boolean invulnerable;
-	private int hp;
+	protected boolean invulnerable;
+	protected int hp;
 	
-	private final FrameList frameList;
-	private final MainScreen screen;
+	protected final FrameList frameList;
+	protected final MainScreen screen;
 	
 	public Enemy(EnemyFrame frame, float x, float y, int hp, FrameList frameList, MainScreen screen){
 		super(frame, x, y);
@@ -40,9 +42,6 @@ public class Enemy extends MovableEntity{
 		this.hp = hp;
 		this.frameList = frameList;
 		this.screen = screen;
-		
-		// temporary
-		hitboxSize = 16;
 		
 		onCreate();
 	}
@@ -53,6 +52,7 @@ public class Enemy extends MovableEntity{
 	
 	private void initFrameProperties(){
 		sprite = new Sprite(frame.getSprite());
+		hitboxSize = frame.getHitboxSize();
 	}
 	
 	public void onDestroy(){

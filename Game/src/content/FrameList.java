@@ -85,6 +85,11 @@ public class FrameList{
 			if(var.equals("_" + BulletList.types[i]))
 				return i;
 		
+		// Enemy types
+		for(int i = 0; i < EnemyList.types.length; i++)
+			if(var.equals("_" + EnemyList.types[i]))
+				return i;
+		
 		// Colors
 		for(int i = 0; i < colors.length; i++){
 			

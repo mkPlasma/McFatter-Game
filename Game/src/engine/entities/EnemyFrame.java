@@ -11,12 +11,14 @@ import engine.graphics.Sprite;
  */
 public class EnemyFrame extends EntityFrame{
 	
-	public EnemyFrame(){
-		super(0, null, false, 0);
-	}
+	private final int hitboxSize;
 	
-	public EnemyFrame(int type, Sprite sprite, boolean spriteAlign, float spriteRotation){
+	public EnemyFrame(int type, Sprite sprite, int hitboxSize, boolean spriteAlign, float spriteRotation){
 		super(type, sprite, spriteAlign, spriteRotation);
+		this.hitboxSize = hitboxSize;
 	}
 	
+	public int getHitboxSize(){
+		return hitboxSize;
+	}
 }

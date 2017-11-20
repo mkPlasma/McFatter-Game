@@ -15,7 +15,12 @@ import engine.graphics.TextureCache;
 public class EnemyList{
 
 	public static final byte
-		TYPE_STANDARD	= 0;
+		TYPE_FIGHTER		= 0;
+	
+	
+	public static final String[] types = {
+		"fighter",	
+	};
 	
 	private TextureCache tc;
 	
@@ -24,7 +29,7 @@ public class EnemyList{
 	}
 	
 	public EnemyFrame get(int type){
-		return new EnemyFrame(type, getSprite(type), true, 0);
+		return new EnemyFrame(type, getSprite(type), 16, true, 0);
 	}
 	
 	private Sprite getSprite(int type){

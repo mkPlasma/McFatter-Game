@@ -110,7 +110,7 @@ public class MainScreen extends GameScreen{
 		for(File file:files){
 			if(file.isFile() && file.getName().endsWith(".dscript")){
 				
-				scriptTexts.addAll(addText(directory + "/" + file.getName(), 50, 32 + scriptNum*12, -1, 0.75f, 0));
+				scriptTexts.addAll(addText((directory.isEmpty() ? "" : directory + "/") + file.getName(), 50, 32 + scriptNum*12, -1, 0.75f, 0));
 				scriptNames.add(directory + "/" + file.getName());
 				
 				scriptNum++;
@@ -158,12 +158,20 @@ public class MainScreen extends GameScreen{
 		if(scriptSelect){
 			
 			// Cursor up
-			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_UP) && scriptIndex > 0)
-				scriptIndex--;
+			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_UP)){
+				if(scriptIndex > 0)
+					scriptIndex--;
+				else
+					scriptIndex = scriptNum - 1;
+			}
 			
 			// Cursor down
-			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_DOWN) && scriptIndex < scriptNum - 1)
-				scriptIndex++;
+			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_DOWN)){
+				if(scriptIndex < scriptNum - 1)
+					scriptIndex++;
+				else
+					scriptIndex = 0;
+			}
 			
 			scriptCursor.setY(32 + scriptIndex*12);
 			
@@ -236,9 +244,15 @@ public class MainScreen extends GameScreen{
 			clearScreen = 1;
 		
 		// Re-select script with ~
-		if((KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_GRAVE_ACCENT))){
+		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_GRAVE_ACCENT)){
 			scriptSelectInit();
-			clearScreen = 2;
+			
+			for(Bullet b:enemyBullets)
+				b.delete();
+			for(Enemy e:enemies)
+				e.delete();
+			for(Effect e:effects)
+				e.delete();
 		}
 	}
 	
@@ -342,8 +356,7 @@ public class MainScreen extends GameScreen{
 		int pHitbox = player.getHitboxSize();
 		
 		// Enemy bullets
-		for(int i = 0; i < enemyBullets.size(); i++){
-			Bullet b = enemyBullets.get(i);
+		for(Bullet b:enemyBullets){
 			
 			if(b.collisionsEnabled()){
 				float[] bpos = b.getPos();
@@ -351,7 +364,7 @@ public class MainScreen extends GameScreen{
 				// Bullet collisions
 				if(!(b instanceof Laser)){
 					if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) < pHitbox + b.getHitboxSize()){
-						//player.death();
+						player.death();
 						b.onDestroy(false);
 					}
 				}
@@ -376,22 +389,26 @@ public class MainScreen extends GameScreen{
 					
 					// Check collision
 					if(d2 < pHitbox + l.getHitboxSize() && d3 > crop && d3 < l.getLength() - crop){
-						//player.death();
+						player.death();
 						b.onDestroy(false);
 					}
 				}
 			}
 		}
 		
-		// Player bullets
-		for(int i = 0; i < enemies.size(); i++){
-			Enemy e = enemies.get(i);
+		// Enemy collisions
+		for(Enemy e:enemies){
 			
 			if(e.collisionsEnabled()){
 				float[] epos = e.getPos();
 				
-				for(int j = 0; j < playerBullets.size(); j++){
-					Bullet b = playerBullets.get(j);
+				if(Math.hypot(ppos[0] - epos[0], ppos[1] - epos[1]) < pHitbox + e.getHitboxSize()){
+					player.death();
+					e.damage(50);
+					continue;
+				}
+				
+				for(Bullet b:playerBullets){
 					
 					if(b.collisionsEnabled()){
 						float[] bpos = b.getPos();

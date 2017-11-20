@@ -4,6 +4,7 @@ import static engine.KeyboardListener.*;
 import static org.lwjgl.glfw.GLFW.*;
 
 import content.BulletList;
+import content.EffectList;
 import content.FrameList;
 import engine.graphics.Sprite;
 import engine.screens.MainScreen;
@@ -155,7 +156,13 @@ public class Player extends GameEntity{
 	}
 	
 	public void death(){
-		alive = false;
+		//x = 224;		y = 450;
+		//alive = false;
+		
+		Effect e = new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, FrameList.COLOR_BLACK, 2), x, y);
+		e.getSprite().rotate((float)Math.random()*360);
+		e.getSprite().setScale(4);
+		screen.addEffect(e);
 	}
 	
 	public boolean isAlive(){

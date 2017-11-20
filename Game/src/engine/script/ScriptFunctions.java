@@ -82,8 +82,10 @@ public class ScriptFunctions{
 		"laser:7",
 		"laser:8",
 		
-		"enemy:2",
 		"enemy:3",
+		"enemy:4",
+		"boss:3",
+		"boss:4",
 		
 		
 		"setX:d1",
@@ -305,13 +307,14 @@ public class ScriptFunctions{
 			
 			case "enemy":{
 				
-				if(p == 2)
-					return o1 instanceof ArrayList &&
-						  (o2 instanceof Integer || o2 instanceof Float);
+				if(p == 3)
+					return o1 instanceof Integer && o2 instanceof ArrayList &&
+						  (o3 instanceof Integer || o3 instanceof Float);
 				
-				return (o1 instanceof Integer || o1 instanceof Float) &&
+				return o1 instanceof Integer &&
 					  (o2 instanceof Integer || o2 instanceof Float) &&
-					  (o3 instanceof Integer || o3 instanceof Float);
+					  (o3 instanceof Integer || o3 instanceof Float) &&
+					  (o4 instanceof Integer || o4 instanceof Float);
 			}
 			
 			case "setX": case "setY":

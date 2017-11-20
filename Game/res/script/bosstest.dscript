@@ -1,4 +1,4 @@
-set boss = enemy(_cx, 140, 4000);
+set boss = boss(_fighter, _cx, 140, 4000);
 
 run "bosstest2";
 run "bosstest3";

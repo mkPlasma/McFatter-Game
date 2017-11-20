@@ -10,6 +10,7 @@ import java.util.Random;
 import java.util.Stack;
 
 import content.FrameList;
+import engine.entities.BossEnemy;
 import engine.entities.Bullet;
 import engine.entities.Enemy;
 import engine.entities.GameEntity;
@@ -1389,7 +1390,7 @@ public class ScriptRunner{
 						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 						
 						if(!beforeResetPoint)
-							returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), pos[0], pos[1], dir, spd, del, frameList, screen);
+							returnValue = new Bullet(frameList.getBullet(i1, i2), pos[0], pos[1], dir, spd, del, frameList, screen);
 						break;
 					}
 					case 7:{
@@ -1406,7 +1407,7 @@ public class ScriptRunner{
 						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 						
 						if(!beforeResetPoint)
-							returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, spd, del, frameList, screen);
+							returnValue = new Bullet(frameList.getBullet(i1, i2), x, y, dir, spd, del, frameList, screen);
 						break;
 					}
 					case 9:{
@@ -1427,7 +1428,7 @@ public class ScriptRunner{
 						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 						
 						if(!beforeResetPoint)
-							returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), pos[0], pos[1], dir, spd, minSpd, maxSpd, accel, del, frameList, screen);
+							returnValue = new Bullet(frameList.getBullet(i1, i2), pos[0], pos[1], dir, spd, minSpd, maxSpd, accel, del, frameList, screen);
 						break;
 					}
 					case 10:{
@@ -1450,7 +1451,7 @@ public class ScriptRunner{
 						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 						
 						if(!beforeResetPoint)
-							returnValue = new Bullet(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, spd, minSpd, maxSpd, accel, del, frameList, screen);
+							returnValue = new Bullet(frameList.getBullet(i1, i2), x, y, dir, spd, minSpd, maxSpd, accel, del, frameList, screen);
 						break;
 					}
 				}
@@ -1476,7 +1477,7 @@ public class ScriptRunner{
 					int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 					
 					if(!beforeResetPoint)
-						returnValue = new Laser(frameList.getBullet((byte)i1, (byte)i2), pos[0], pos[1], dir, len, wid, del, frameList, screen);
+						returnValue = new Laser(frameList.getBullet(i1, i2), pos[0], pos[1], dir, len, wid, del, frameList, screen);
 				}
 				else{
 					Object ox = params.remove();
@@ -1494,7 +1495,7 @@ public class ScriptRunner{
 					int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 					
 					if(!beforeResetPoint)
-						returnValue = new Laser(frameList.getBullet((byte)i1, (byte)i2), x, y, dir, len, wid, del, frameList, screen);
+						returnValue = new Laser(frameList.getBullet(i1, i2), x, y, dir, len, wid, del, frameList, screen);
 				}
 
 				if(!beforeResetPoint)
@@ -1503,28 +1504,32 @@ public class ScriptRunner{
 				return;
 			}
 			
-			case "enemy":
-				if(paramCount == 2){
-					
-					if(isFloat){
-						i2 = (int)f2;
-					}
-					
-					float[] pos = convertArray((ArrayList<Object>)o1, "enemy", lineNum);
-					returnValue = new Enemy(frameList.getEnemy(0), pos[0], pos[1], i2, frameList, screen);
-				}
-				else{
+			case "enemy": case "boss":
+				if(paramCount == 3){
 					Object oHp = params.remove();
-					
 					int hp = oHp instanceof Integer ? (int)oHp : (int)(float)oHp;
 					
-					if(!isFloat){
-						f1 = (float)i1;
-						f2 = (float)i2;
-					}
+					float[] pos = convertArray((ArrayList<Object>)o2, "enemy", lineNum);
 					
-					if(!beforeResetPoint)
-						returnValue = new Enemy(frameList.getEnemy(0), f1, f2, hp, frameList, screen);
+					if(func.equals("boss"))
+						returnValue = new BossEnemy(frameList.getEnemy(i1), pos[0], pos[1], hp, frameList, screen);
+					else
+						returnValue = new Enemy(frameList.getEnemy(i1), pos[0], pos[1], hp, frameList, screen);
+				}
+				else{
+					Object oy = params.remove();
+					Object oHp = params.remove();
+					
+					float y = oy instanceof Float ? (float)oy : (float)(int)oy;
+					int hp = oHp instanceof Integer ? (int)oHp : (int)(float)oHp;
+					
+					if(!isFloat)
+						f2 = (float)i2;
+
+					if(func.equals("boss"))
+						returnValue = new BossEnemy(frameList.getEnemy(i1), f2, y, hp, frameList, screen);
+					else
+						returnValue = new Enemy(frameList.getEnemy(i1), f2, y, hp, frameList, screen);
 				}
 				
 				if(!beforeResetPoint)
