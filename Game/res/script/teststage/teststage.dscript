@@ -1,0 +1,21 @@
+
+run "teststageenemies";
+
+spiralsEnemy(_cx);
+
+wait 250;
+
+for(j in 2){
+    for(i in 10){
+        aimEnemy(_lx + i*40, false);
+        wait 5;
+    }
+    for(i in 10){
+        aimEnemy(_rx - i*40, true);
+        wait 5;
+    }
+}
+
+wait 30;
+spiralsEnemy(_cx - 75);
+spiralsEnemy(_cx + 75);

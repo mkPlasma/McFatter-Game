@@ -128,7 +128,6 @@ public class Player extends GameEntity{
 	private void fire(){
 		screen.addPlayerBullet(new Bullet(shot, x - 10, y + 10, 270, 15, 0, 15, 0.1f, frameList, screen));
 		screen.addPlayerBullet(new Bullet(shot, x + 10, y + 10, 270, 15, 0, 15, 0.1f, frameList, screen));
-		
 		shotCooldown = 4;
 	}
 	

@@ -2,6 +2,7 @@ package engine.screens;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Stack;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -53,11 +54,13 @@ public class MainScreen extends GameScreen{
 	private boolean slowMode;
 
 	// temp
-	private ArrayList<Text> scriptTexts = new ArrayList<Text>();
-	private ArrayList<String> scriptNames = new ArrayList<String>();
+	private Stack<ArrayList<Text>> scriptTexts = new Stack<ArrayList<Text>>();
+	private Stack<ArrayList<String>> scriptNames = new Stack<ArrayList<String>>();
+	private Stack<Integer> numScripts = new Stack<Integer>();
+	private Stack<ArrayList<Text>> currentPath = new Stack<ArrayList<Text>>();
 	private Text scriptCursor;
 	private boolean scriptSelect;
-	private int scriptNum, scriptIndex;
+	private int scriptCursorIndex;
 	
 	public MainScreen(Renderer r, TextureCache tc){
 		super(r, tc);
@@ -90,12 +93,15 @@ public class MainScreen extends GameScreen{
 	private void scriptSelectInit(){
 		
 		text.clear();
-		
-		scriptNum = 0;
+		scriptTexts.clear();
+		scriptNames.clear();
+		numScripts.clear();
+		currentPath.clear();
 		
 		addFiles("");
 		
-		scriptCursor = addText(">", 40, 32, -1, 0.75f, 0).get(0);
+		scriptCursor = addText(">", 40, 50, -1, 0.75f, 0).get(0);
+		scriptCursorIndex = 0;
 		
 		scriptSelect = true;
 	}
@@ -104,19 +110,38 @@ public class MainScreen extends GameScreen{
 		
 		File[] files = new File("Game/res/script/" + directory).listFiles();
 		
-		if(files == null || directory.equals("ref"))
+		if(files == null)
 			return;
 		
+		if(!scriptTexts.isEmpty())
+			for(Text t:scriptTexts.peek())
+				t.setVisible(false);
+		
+		scriptTexts.push(new ArrayList<Text>());
+		scriptNames.push(new ArrayList<String>());
+		numScripts.push(0);
+		
+		currentPath.push(addText("script/" + directory, 50, 32, -1, 0.75f, 0));
+		
+		// Add folders first
+		for(File file:files){
+			if(file.isDirectory() && !file.getName().equals(".ref")){
+				scriptTexts.peek().addAll(addText(file.getName() + "/", 50, 50 + numScripts.peek()*12, -1, 0.75f, 0));
+				scriptNames.peek().add(directory + file.getName() + "/");
+				
+				numScripts.push(numScripts.pop() + 1);
+			}
+		}
+		
+		// Add files after
 		for(File file:files){
 			if(file.isFile() && file.getName().endsWith(".dscript")){
 				
-				scriptTexts.addAll(addText((directory.isEmpty() ? "" : directory + "/") + file.getName(), 50, 32 + scriptNum*12, -1, 0.75f, 0));
-				scriptNames.add(directory + "/" + file.getName());
-				
-				scriptNum++;
+				scriptTexts.peek().addAll(addText(file.getName(), 50, 50 + numScripts.peek()*12, -1, 0.75f, 0));
+				scriptNames.peek().add(directory + file.getName());
+
+				numScripts.push(numScripts.pop() + 1);
 			}
-			else if(file.isDirectory())
-				addFiles(file.getName());
 		}
 	}
 	
@@ -159,25 +184,33 @@ public class MainScreen extends GameScreen{
 			
 			// Cursor up
 			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_UP)){
-				if(scriptIndex > 0)
-					scriptIndex--;
+				if(scriptCursorIndex > 0)
+					scriptCursorIndex--;
 				else
-					scriptIndex = scriptNum - 1;
+					scriptCursorIndex = numScripts.peek() - 1;
 			}
 			
 			// Cursor down
 			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_DOWN)){
-				if(scriptIndex < scriptNum - 1)
-					scriptIndex++;
+				if(scriptCursorIndex < numScripts.peek() - 1)
+					scriptCursorIndex++;
 				else
-					scriptIndex = 0;
+					scriptCursorIndex = 0;
 			}
 			
-			scriptCursor.setY(32 + scriptIndex*12);
+			scriptCursor.setY(50 + scriptCursorIndex*12);
 			
-			if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_Z)){
-			
-				String script = "Game/res/script/" + scriptNames.get(scriptIndex);
+			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_Z)){
+				
+				String script = scriptNames.peek().get(scriptCursorIndex);
+				
+				if(script.endsWith("/")){
+					scriptCursorIndex = 0;
+					addFiles(script);
+					return;
+				}
+				
+				script = "Game/res/script/" + script;
 				
 				stage = new Mission(script, this, r, tc);
 				stage.init();
@@ -187,10 +220,46 @@ public class MainScreen extends GameScreen{
 				
 				scriptSelect = false;
 				
-				for(Text t:scriptTexts)
-					t.delete();
+				for(ArrayList<Text> tx:scriptTexts)
+					for(Text t:tx)
+						t.delete();
+				
+				for(ArrayList<Text> tx:currentPath)
+					for(Text t:tx)
+						t.delete();
+				
+				scriptTexts.clear();
+				scriptNames.clear();
+				numScripts.clear();
+				currentPath.clear();
 				
 				scriptCursor.delete();
+				
+				return;
+			}
+			
+			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_X)){
+				
+				scriptCursorIndex = 0;
+				
+				if(scriptTexts.size() == 1)
+					return;
+				
+				for(Text t:scriptTexts.peek())
+					t.delete();
+				
+				scriptTexts.pop();
+				scriptNames.pop();
+				numScripts.pop();
+				
+				if(!currentPath.isEmpty())
+					for(Text t:currentPath.peek())
+						t.delete();
+				
+				currentPath.pop();
+				
+				for(Text t:scriptTexts.peek())
+					t.setVisible(true);
 			}
 			
 			return;
