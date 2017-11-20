@@ -1235,6 +1235,11 @@ public class ScriptRunner{
 				returnValue = random.nextBoolean();
 				return;
 			
+			case "randChoice":{
+				ArrayList<Object> ar = (ArrayList<Object>)o1;
+				returnValue = ar.get(random.nextInt(ar.size()));
+				return;
+			}
 			
 			
 			

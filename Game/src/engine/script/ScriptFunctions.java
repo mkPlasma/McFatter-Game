@@ -41,6 +41,7 @@ public class ScriptFunctions{
 		"rand:2",
 		"randFloat:2",
 		"randBool:0",
+		"randChoice:1",
 		
 		// Math
 		"pi:0",
@@ -221,6 +222,9 @@ public class ScriptFunctions{
 			
 			case "rand": case "randFloat": case "atan2": case "min": case "max":
 				return (o1 instanceof Integer || o1 instanceof Float) && (o2 instanceof Integer || o2 instanceof Float);
+			
+			case "randChoice":
+				return o1 instanceof ArrayList;
 			
 			case "length":
 				return o1 instanceof ArrayList || o1 instanceof String;
