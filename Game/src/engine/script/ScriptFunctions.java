@@ -43,6 +43,8 @@ public class ScriptFunctions{
 		"randBool:0",
 		"randChoice:1",
 		
+		"clearBullets:0",
+		
 		// Math
 		"pi:0",
 		"abs:1",

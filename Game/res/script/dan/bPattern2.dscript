@@ -1,0 +1,58 @@
+
+boss.setInvulnerable();
+
+wait 60;
+
+set count;
+
+while(!boss.isDeleted()){
+    
+    set c = 64;
+    
+    for(i in 2){
+        set dir = rand(0, 360);
+        
+        for(d in 0, 360/c, 360){
+            bounceBullet(dir + d, 1.2 + i*0.2);
+        }
+    }
+    
+    wait 100;
+    
+    count++;
+    
+    if(count == 3){
+        boss.setInvulnerable(false);
+    }
+    
+    if(boss.getHealth() < 6000){
+        break;
+    }
+}
+
+clearBullets();
+
+
+task bounceBullet(dir, spd){
+    
+    set b = bullet(_orb, _blue, boss.getPos(), dir, spd, 5);
+    
+    set col2 = _red;
+    
+    while(!b.isDeleted()){
+        
+        if(b.getX() < _lx || b.getX() > _rx){
+            b.setDir(-dir + 180);
+            b.setColor(col2);
+            return;
+        }
+        
+        if(b.getY() < _ty){
+            b.setDir(-dir);
+            b.setColor(col2);
+            return;
+        }
+        
+        wait;
+    }
+}

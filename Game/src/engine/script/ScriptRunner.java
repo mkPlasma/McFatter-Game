@@ -1242,6 +1242,10 @@ public class ScriptRunner{
 				return;
 			}
 			
+			case "clearBullets":
+				screen.clearEnemyBullets();
+				return;
+			
 			
 			
 			

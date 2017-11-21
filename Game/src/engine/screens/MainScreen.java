@@ -592,4 +592,9 @@ public class MainScreen extends GameScreen{
 		this.text.addAll(tx);
 		return tx;
 	}
+	
+	public void clearEnemyBullets(){
+		for(Bullet b:enemyBullets)
+			b.onDestroy(true);
+	}
 }

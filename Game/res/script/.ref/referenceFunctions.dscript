@@ -73,7 +73,7 @@ bullet(type, color, x, y, dir, spd, minSpd, maxSpd, accel, delay);
 set l = laser(type, color, x, y, dir, length, width, delay);
 
 // Enemies
-set e = enemy(x, y, hp);
+set e = enemy(type, x, y, hp);
 
 // Delete entity
 b.delete();
@@ -219,6 +219,9 @@ rand(a, b);
 randFloat(a, b);
 // Random boolean
 randBool();
+
+// Delete all enemy bullets
+clearBullets();
 
 
 

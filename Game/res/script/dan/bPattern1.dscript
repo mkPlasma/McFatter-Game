@@ -1,0 +1,41 @@
+
+boss.setInvulnerable(false);
+
+set ended = false;
+
+spiral(false);
+wait 30;
+spiral(true);
+
+task spiral(inv){
+    set c = 12;
+    set dir = rand(0, 360);
+    set dirAdd = 3.7;
+    set col = _green;
+    
+    if(inv){
+        dirAdd!!;
+        col = _cyan;
+    }
+    
+    while(!boss.isDeleted()){
+        for(d in 0, 360/c, 360){
+            bullet(_crystal, col, boss.getPos(), dir + d, 2, 10);
+        }
+        
+        dir += dirAdd;
+        
+        wait 5;
+        
+        if(ended){
+            return;
+        }
+    }
+}
+
+while(boss.getHealth() > 9000){
+    wait;
+}
+
+ended = true;
+clearBullets();
