@@ -86,24 +86,24 @@ public class Renderer{
 		// Add in order of rendering
 		
 		// Player bullets
-		renderBatches.add(new RenderBatch(0, MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL_BUT_SIZE, false));
+		renderBatches.add(new RenderBatch(0, MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL, false));
 		
 		// Enemies
-		renderBatches.add(new RenderBatch(0, MAX_ENEMIES, 64, tc.cache("enemies.png").getID(), UPDATE_ALL_BUT_SIZE, false));
+		renderBatches.add(new RenderBatch(0, MAX_ENEMIES, 64, tc.cache("enemies.png").getID(), UPDATE_ALL, false));
 		
 		// Player
 		renderBatches.add(new RenderBatch(0, 1, 64, tc.cache("player.png").getID(), UPDATE_VBO, false));
 		
 		// Enemy bullets
-		renderBatches.add(new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL_BUT_SIZE, false));
-		renderBatches.add(new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL_BUT_SIZE, true));
-		renderBatches.add(new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL_BUT_SIZE, false));
-		renderBatches.add(new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL_BUT_SIZE, true));
-		renderBatches.add(new RenderBatch(1, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL_BUT_SIZE, false));
-		renderBatches.add(new RenderBatch(1, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL_BUT_SIZE, true));
+		renderBatches.add(new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false));
+		renderBatches.add(new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true));
+		renderBatches.add(new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, false));
+		renderBatches.add(new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, true));
+		renderBatches.add(new RenderBatch(1, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false));
+		renderBatches.add(new RenderBatch(1, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true));
 		
 		// Effects
-		renderBatches.add(new RenderBatch(0, MAX_EFFECTS, 32, tc.cache("effects.png").getID(), UPDATE_ALL_BUT_SIZE, true));
+		renderBatches.add(new RenderBatch(0, MAX_EFFECTS, 32, tc.cache("effects.png").getID(), UPDATE_ALL, true));
 		
 		// Hitboxes
 		renderBatches.add(new RenderBatch(2, MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX));
@@ -121,7 +121,7 @@ public class Renderer{
 		renderBatches.add(borderBatch);
 		
 		// Text
-		renderBatches.add(new RenderBatch(MAX_TEXT, 16, 32, tc.cache("font.png").getID(), UPDATE_ALL_BUT_SIZE));
+		renderBatches.add(new RenderBatch(MAX_TEXT, 16, 32, tc.cache("font.png").getID(), UPDATE_ALL));
 	}
 	
 	public void setTime(int time){

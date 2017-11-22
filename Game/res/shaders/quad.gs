@@ -5,7 +5,7 @@ layout(triangle_strip, max_vertices = 4) out;
 
 in vec2 gSize[];
 in vec4 gTexCoords[];
-in vec3 gTransforms[];
+in float gRotation[];
 in float gAlpha[];
 
 out vec2 fTexCoords;
@@ -14,14 +14,9 @@ out float fAlpha;
 void vertex(vec2 pos2, float tx, float ty){
     
     vec4 pos = gl_in[0].gl_Position;
-    vec3 trans = gTransforms[0];
-    
-    // Scale
-    pos2.x *= trans.x;
-    pos2.y *= trans.y;
     
     // Rotate
-    float r = trans.z;
+    float r = gRotation[0];
     pos2 *= mat2(cos(r), -sin(r), sin(r), cos(r));
     
     pos += vec4(pos2, 0.0, 0.0);

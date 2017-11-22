@@ -32,12 +32,12 @@ public class RenderBatch{
 		UPDATE_VBO = 0b000001,
 		UPDATE_SZE = 0b000010,
 		UPDATE_TEX = 0b000100,
-		UPDATE_TFM = 0b001000,
+		UPDATE_RTS = 0b001000,
 		UPDATE_ALP = 0b010000,
 		UPDATE_SEG = 0b100000,
 		
 		UPDATE_NONE			= 0,
-		UPDATE_ALL_BUT_SIZE	= 0b011101,
+		UPDATE_ALL			= 0b011111,
 		UPDATE_LASER		= 0b111101,
 		UPDATE_HITBOX		= 0b000011,
 		UPDATE_LASER_HITBOX	= 0b001001;
@@ -53,16 +53,16 @@ public class RenderBatch{
 	// Size in pixels of quad
 	private final short sizePixelsX, sizePixelsY;
 	
-	private FloatBuffer vboBuffer, texBuffer, tfmBuffer, alpBuffer;
+	private FloatBuffer vboBuffer, texBuffer, rtsBuffer, alpBuffer;
 	private ShortBuffer szeBuffer, segBuffer;
 	
-	private final int vao, vbo, sze, tex, tfm, alp, seg;
+	private final int vao, vbo, sze, tex, rts, alp, seg;
 	
 	private final int textureID;
 	
 	// Which buffers to update
 	private int updates;
-	private boolean uVBO, uSZE, uTEX, uTFM, uALP, uSEG;
+	private boolean uVBO, uSZE, uTEX, uRTS, uALP, uSEG;
 	
 	// Additive rendering
 	private boolean additive;
@@ -81,7 +81,7 @@ public class RenderBatch{
 		vbo = glGenBuffers();
 		sze = glGenBuffers();
 		tex = glGenBuffers();
-		tfm = glGenBuffers();
+		rts = glGenBuffers();
 		alp = glGenBuffers();
 		
 		if(shader == 1)
@@ -105,7 +105,7 @@ public class RenderBatch{
 		vbo = glGenBuffers();
 		sze = glGenBuffers();
 		tex = glGenBuffers();
-		tfm = glGenBuffers();
+		rts = glGenBuffers();
 		alp = glGenBuffers();
 		seg = 0;
 		
@@ -130,9 +130,9 @@ public class RenderBatch{
 		seg = 0;
 		
 		if(shader == 2)
-			tfm = 0;
+			rts = 0;
 		else
-			tfm = glGenBuffers();
+			rts = glGenBuffers();
 		
 		init();
 	}
@@ -143,7 +143,7 @@ public class RenderBatch{
 		if(shader == 0 || shader == 1 || shader == 3){
 			szeBuffer = BufferUtils.createShortBuffer(capacity*2);
 			texBuffer = BufferUtils.createFloatBuffer(capacity*4);
-			tfmBuffer = BufferUtils.createFloatBuffer(capacity*3);
+			rtsBuffer = BufferUtils.createFloatBuffer(capacity*3);
 			alpBuffer = BufferUtils.createFloatBuffer(capacity);
 			
 			if(shader == 1)
@@ -152,7 +152,7 @@ public class RenderBatch{
 			uVBO = true;
 			uSZE = true;
 			uTEX = true;
-			uTFM = true;
+			uRTS = true;
 			uALP = true;
 			uSEG = shader == 1;
 			
@@ -238,14 +238,14 @@ public class RenderBatch{
 		glDeleteBuffers(vbo);
 		glDeleteBuffers(sze);
 		glDeleteBuffers(tex);
-		glDeleteBuffers(tfm);
+		glDeleteBuffers(rts);
 		glDeleteBuffers(alp);
 	}
 	
 	// Update batch
 	public void updateManual(float x, float y, float[] texCoords){
 		size = 1;
-		updateVBOs(new float[]{x, y}, null, texCoords, new float[]{1, 1, 0}, new float[]{1}, null);
+		updateVBOs(new float[]{x, y}, null, texCoords, new float[]{0}, new float[]{1}, null);
 	}
 	
 	public void updateWithEntity(GameEntity e, int time){
@@ -279,14 +279,17 @@ public class RenderBatch{
 		float[]
 			vertices	= null,
 			texCoords	= null,
-			transforms	= null,
+			rotations	= null,
 			alphas		= null;
 		
-		short[] segments = null;
+		short[]
+			sizes = null,
+			segments = null;
 		
 		if(uVBO) vertices	= new float[size*2];
+		if(uSZE) sizes		= new short[size*2];
 		if(uTEX) texCoords	= new float[size*4];
-		if(uTFM) transforms	= new float[size*3];
+		if(uRTS) rotations	= new float[size];
 		if(uALP) alphas		= new float[size];
 		if(uSEG) segments	= new short[size];
 		
@@ -316,16 +319,18 @@ public class RenderBatch{
 				vertices[i*2 + 1]	= e.getY();
 			}
 			
+			if(uSZE){
+				sizes[i*2]		= (short)s.getScaledWidth();
+				sizes[i*2 + 1]	= (short)s.getScaledHeight();
+			}
+			
 			if(uTEX){
 				for(int j = 0; j < 4; j++)
 					texCoords[i*4 + j] = t[j];
 			}
 			
-			if(uTFM){
-				transforms[i*3]		= s.getScaleX();
-				transforms[i*3 + 1]	= s.getScaleY();
-				transforms[i*3 + 2]	= (float)Math.toRadians(r);
-			}
+			if(uRTS)
+				rotations[i] = (float)Math.toRadians(r);
 			
 			if(uALP)
 				alphas[i] = s.getAlpha();
@@ -343,8 +348,8 @@ public class RenderBatch{
 
 				// Set scale
 				if(shader == 0 || shader == 1){
-					transforms[i*3]		*= l.getScaleX();
-					transforms[i*3 + 1]	*= l.getScaleY();
+					sizes[i*2]		*= l.getScaleX();
+					sizes[i*2 + 1]	*= l.getScaleY();
 					
 					if(uSEG)
 						segments[i] = (short)Math.max((int)(l.getLength()/(l.getActualWidth()/2f)), 1);
@@ -353,13 +358,13 @@ public class RenderBatch{
 				// For hitboxes
 				if(shader == 3){
 					int crop = l.getHBLengthCrop();
-					transforms[i*3]		= l.getHitboxSize()/8f;
-					transforms[i*3 + 1]	= (l.getLength() - crop*2)/16f;
+					sizes[i*2]		= (short)(l.getHitboxSize()/8f);
+					sizes[i*2 + 1]	= (short)((l.getLength() - crop*2)/16f);
 				}
 			}
 		}
 		
-		updateVBOs(vertices, null, texCoords, transforms, alphas, segments);
+		updateVBOs(vertices, sizes, texCoords, rotations, alphas, segments);
 	}
 	
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -473,17 +478,17 @@ public class RenderBatch{
 				uTEX = false;
 		}
 		
-		if(uTFM){
-			tfmBuffer.clear();
-			tfmBuffer.put(transforms);
-			tfmBuffer.flip();
+		if(uRTS){
+			rtsBuffer.clear();
+			rtsBuffer.put(transforms);
+			rtsBuffer.flip();
 			
-			glBindBuffer(GL_ARRAY_BUFFER, tfm);
-			glBufferData(GL_ARRAY_BUFFER, tfmBuffer, GL_DYNAMIC_DRAW);
-			glVertexAttribPointer(3, 3, GL_FLOAT, false, 0, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, rts);
+			glBufferData(GL_ARRAY_BUFFER, rtsBuffer, GL_DYNAMIC_DRAW);
+			glVertexAttribPointer(3, 1, GL_FLOAT, false, 0, 0);
 			
-			if((updates & UPDATE_TFM) == 0)
-				uTFM = false;
+			if((updates & UPDATE_RTS) == 0)
+				uRTS = false;
 		}
 		
 		if(uALP){
