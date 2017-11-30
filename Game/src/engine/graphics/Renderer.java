@@ -11,6 +11,7 @@ import engine.entities.GameEntity;
 import engine.entities.Laser;
 import engine.entities.Player;
 import engine.entities.Text;
+import engine.entities.TextChar;
 
 import static engine.graphics.RenderBatch.*;
 import static engine.screens.MainScreen.*;
@@ -121,7 +122,7 @@ public class Renderer{
 		renderBatches.add(borderBatch);
 		
 		// Text
-		renderBatches.add(new RenderBatch(MAX_TEXT, 16, 32, tc.cache("font.png").getID(), UPDATE_ALL));
+		renderBatches.add(new RenderBatch(MAX_TEXTS, 16, 32, tc.cache("font.png").getID(), UPDATE_ALL));
 	}
 	
 	public void setTime(int time){
@@ -217,8 +218,14 @@ public class Renderer{
 		renderBatches.get(11).updateWithEntities(ll, 0);
 	}
 	
-	public void updateText(ArrayList<Text> text){
-		renderBatches.get(13).updateWithEntities(text, 0);
+	public void updateText(ArrayList<Text> texts){
+		
+		ArrayList<TextChar> chars = new ArrayList<TextChar>();
+		
+		for(Text t:texts)
+			chars.addAll(t.getChars());
+		
+		renderBatches.get(13).updateWithEntities(chars, 0);
 	}
 	
 	public void render(){

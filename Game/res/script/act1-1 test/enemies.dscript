@@ -1,0 +1,13 @@
+
+task streamEnemy(inv){
+    
+    set x = _rx + 50;
+    
+    if(inv){
+        x = _lx - 50;
+    }
+    
+    set e = enemy(_fighter, x, -16, 250);
+    e.setDir(90);
+    e.setSpd(2);
+}
