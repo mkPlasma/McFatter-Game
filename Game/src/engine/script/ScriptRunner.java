@@ -1215,6 +1215,11 @@ public class ScriptRunner{
 					i2 = (int)f2;
 				}
 				
+				if(paramCount == 1){
+					returnValue = -i1 + random.nextInt(i1*2);
+					return;
+				}
+				
 				returnValue = i1 + random.nextInt(i2 - i1);
 				return;
 			
@@ -1223,6 +1228,11 @@ public class ScriptRunner{
 				if(!isFloat){
 					f1 = (float)i1;
 					f2 = (float)i2;
+				}
+				
+				if(paramCount == 1){
+					returnValue = -f1 + random.nextFloat()*(f1*2);
+					return;
 				}
 				
 				returnValue = f1 + random.nextFloat()*(f2 - f1);

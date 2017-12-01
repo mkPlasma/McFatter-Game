@@ -1,0 +1,14 @@
+
+run "enemies";
+
+set inv = false;
+
+for(i in 4){
+    for(j in 16){
+        streamEnemy(inv);
+        wait 5;
+    }
+    
+    wait 60;
+    inv!!;
+}

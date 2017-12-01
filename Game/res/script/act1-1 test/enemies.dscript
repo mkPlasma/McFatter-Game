@@ -1,13 +1,38 @@
 
 task streamEnemy(inv){
     
-    set x = _rx + 50;
+    set c = 4;
+    
+    set x = _rx - 80;
+    set av = 2;
     
     if(inv){
-        x = _lx - 50;
+        x = _lx + 80;
+        av!!;
     }
     
-    set e = enemy(_fighter, x, -16, 250);
+    x += rand(30);
+    
+    set e = enemy(_fighter, x, -16, 50);
     e.setDir(90);
-    e.setSpd(2);
+    e.setSpd(6);
+    e.setAccel(-0.05);
+    e.setMinSpd(4);
+    
+    wait 30;
+    if(e.isDeleted()){return;}
+    
+    e.setAngVel(av);
+    
+    wait 30;
+    if(e.isDeleted()){return;}
+    
+    for(i in c){
+        bullet(_rice, _red, e.getPos(), angleToPlayer(e.getPos()) + rand(5), 2 + i/2, 5);
+    }
+    
+    wait 30;
+    if(e.isDeleted()){return;}
+    
+    e.setAngVel(0);
 }

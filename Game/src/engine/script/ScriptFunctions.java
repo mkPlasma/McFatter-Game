@@ -37,9 +37,11 @@ public class ScriptFunctions{
 		"angleToPlayer:2",
 		"angleToLocation:2",
 		"angleToLocation:4",
-
+		
 		"rand:2",
+		"rand:1",
 		"randFloat:2",
+		"randFloat:1",
 		"randBool:0",
 		"randChoice:1",
 		
@@ -204,9 +206,6 @@ public class ScriptFunctions{
 		int p = getBuiltInFunctionParameterCount(index);
 		
 		switch(getBuiltInFunctionName(index)){
-			case "int":
-				return o1 instanceof Integer || o1 instanceof Float;
-			
 			case "angleToPlayer":
 				if(p == 1)
 					return o1 instanceof ArrayList;
@@ -220,12 +219,18 @@ public class ScriptFunctions{
 				return (o1 instanceof Integer || o1 instanceof Float) && (o2 instanceof Integer || o2 instanceof Float) &&
 					   (o3 instanceof Integer || o3 instanceof Float) && (o4 instanceof Integer || o4 instanceof Float);
 			
-			case "abs": case "round": case "trunc": case "floor": case "ceil": case "sqrt": case "log": case "log10": case "degrees": case "radians":
+			case "int": case "abs": case "round": case "trunc": case "floor": case "ceil": case "sqrt": case "log": case "log10": case "degrees": case "radians":
 			case "sin": case "cos": case "tan": case "asin": case "acos": case "atan":
 				return o1 instanceof Integer || o1 instanceof Float;
 			
-			case "rand": case "randFloat": case "atan2": case "min": case "max":
+			case "atan2": case "min": case "max":
 				return (o1 instanceof Integer || o1 instanceof Float) && (o2 instanceof Integer || o2 instanceof Float);
+			
+			case "rand": case "randFloat":
+				if(p == 1)
+					return o1 instanceof Integer || o1 instanceof Float;
+				else
+					return (o1 instanceof Integer || o1 instanceof Float) && (o2 instanceof Integer || o2 instanceof Float);
 			
 			case "randChoice":
 				return o1 instanceof ArrayList;

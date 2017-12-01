@@ -215,8 +215,12 @@ angleToLocation(pos1, pos2);
 
 // Random int between a (inclusive) and b (exclusive)
 rand(a, b);
+// Between -a and a
+rand(a);
+
 // Random float
 randFloat(a, b);
+randFloat(a);
 // Random boolean
 randBool();
 

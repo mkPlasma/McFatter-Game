@@ -33,6 +33,26 @@ public class Renderer{
 	
 	private ArrayList<RenderBatch> renderBatches;
 	
+	private RenderBatch
+		rbPlayer,
+		
+		rbEnemyBullets1,
+		rbEnemyBullets1a,
+		rbEnemyBullets2,
+		rbEnemyBullets2a,
+		rbEnemyBulletsL,
+		rbEnemyBulletsLa,
+		
+		rbPlayerBullets,
+		
+		rbEnemies,
+		rbEffects,
+		
+		rbHitboxes,
+		rbLaserHitboxes,
+		
+		rbText;
+	
 	private TextureCache tc;
 	
 	private int time;
@@ -84,45 +104,68 @@ public class Renderer{
 		int bulletTex1 = tc.cache("bullets/01.png").getID();
 		int bulletTex2 = tc.cache("bullets/02.png").getID();
 		
-		// Add in order of rendering
+		// Player
+		rbPlayer = new RenderBatch(0, 1, 64, tc.cache("player.png").getID(), UPDATE_VBO, false);
 		
 		// Player bullets
-		renderBatches.add(new RenderBatch(0, MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL, false));
+		rbPlayerBullets = new RenderBatch(0, MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
+
+		// Enemy bullets
+		rbEnemyBullets1		= new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
+		rbEnemyBullets1a		= new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true);
+		rbEnemyBullets2		= new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, false);
+		rbEnemyBullets2a		= new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, true);
+		rbEnemyBulletsL		= new RenderBatch(1, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
+		rbEnemyBulletsLa		= new RenderBatch(1, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true);
 		
 		// Enemies
-		renderBatches.add(new RenderBatch(0, MAX_ENEMIES, 64, tc.cache("enemies.png").getID(), UPDATE_ALL, false));
-		
-		// Player
-		renderBatches.add(new RenderBatch(0, 1, 64, tc.cache("player.png").getID(), UPDATE_VBO, false));
-		
-		// Enemy bullets
-		renderBatches.add(new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false));
-		renderBatches.add(new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true));
-		renderBatches.add(new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, false));
-		renderBatches.add(new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, true));
-		renderBatches.add(new RenderBatch(1, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false));
-		renderBatches.add(new RenderBatch(1, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true));
+		rbEnemies = new RenderBatch(0, MAX_ENEMIES, 64, tc.cache("enemies.png").getID(), UPDATE_ALL, false);
 		
 		// Effects
-		renderBatches.add(new RenderBatch(0, MAX_EFFECTS, 32, tc.cache("effects.png").getID(), UPDATE_ALL, true));
+		rbEffects = new RenderBatch(0, MAX_EFFECTS, 32, tc.cache("effects.png").getID(), UPDATE_ALL, true);
 		
 		// Hitboxes
-		renderBatches.add(new RenderBatch(2, MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX));
+		rbHitboxes = new RenderBatch(2, MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX);
+		rbLaserHitboxes = new RenderBatch(3, MAX_ENEMY_BULLETS, UPDATE_LASER_HITBOX);
 		
-		// Laser hitboxes
-		renderBatches.add(new RenderBatch(3, MAX_ENEMY_BULLETS, UPDATE_LASER_HITBOX));
+		// Text
+		rbText = new RenderBatch(MAX_TEXTS, 16, 32, tc.cache("font.png").getID(), UPDATE_ALL);
+		
+		
+		// Background (temp)
+		Sprite bg = new Sprite("bg.png", 0, 0, 768, 896);
+		tc.loadSprite(bg);
+		
+		RenderBatch rbBackground = new RenderBatch(1, 768, 896, bg.getTexture().getID(), UPDATE_NONE);
+		rbBackground.updateManual(224, 240, bg.getTextureCoords());
 		
 		// Border
 		Sprite border = new Sprite("border.png", 0, 0, 1280, 960);
 		tc.loadSprite(border);
 		
-		RenderBatch borderBatch = new RenderBatch(1, 1280, 960, border.getTexture().getID(), UPDATE_NONE);
-		borderBatch.updateManual(320, 240, border.getTextureCoords());
+		RenderBatch rbBorder = new RenderBatch(1, 1280, 960, border.getTexture().getID(), UPDATE_NONE);
+		rbBorder.updateManual(320, 240, border.getTextureCoords());
 		
-		renderBatches.add(borderBatch);
 		
-		// Text
-		renderBatches.add(new RenderBatch(MAX_TEXTS, 16, 32, tc.cache("font.png").getID(), UPDATE_ALL));
+		// Add in order of rendering
+		renderBatches.add(rbBackground);
+		
+		renderBatches.add(rbEnemies);
+		renderBatches.add(rbPlayerBullets);
+		renderBatches.add(rbPlayer);
+		
+		renderBatches.add(rbEnemyBullets1);
+		renderBatches.add(rbEnemyBullets1a);
+		renderBatches.add(rbEnemyBullets2);
+		renderBatches.add(rbEnemyBullets2a);
+		renderBatches.add(rbEnemyBulletsL);
+		renderBatches.add(rbEnemyBulletsLa);
+
+		renderBatches.add(rbEffects);
+		
+		renderBatches.add(rbBorder);
+		
+		renderBatches.add(rbText);
 	}
 	
 	public void setTime(int time){
@@ -130,11 +173,11 @@ public class Renderer{
 	}
 	
 	public void updatePlayer(Player player){
-		renderBatches.get(2).updateWithEntity(player, time);
+		rbPlayer.updateWithEntity(player, time);
 	}
 	
 	public void updateEnemies(ArrayList<Enemy> enemies){
-		renderBatches.get(1).updateWithEntities(enemies, time);
+		rbEnemies.updateWithEntities(enemies, time);
 	}
 	
 	public void updateEnemyBullets(ArrayList<Bullet> bullets){
@@ -174,20 +217,20 @@ public class Renderer{
 			}
 		}
 		
-		renderBatches.get(3).updateWithEntities(b1, time);
-		renderBatches.get(4).updateWithEntities(b1a, time);
-		renderBatches.get(5).updateWithEntities(b2, time);
-		renderBatches.get(6).updateWithEntities(b2a, time);
-		renderBatches.get(7).updateWithEntities(l, time);
-		renderBatches.get(8).updateWithEntities(la, time);
+		rbEnemyBullets1.updateWithEntities(b1, time);
+		rbEnemyBullets1a.updateWithEntities(b1a, time);
+		rbEnemyBullets2.updateWithEntities(b2, time);
+		rbEnemyBullets2a.updateWithEntities(b2a, time);
+		rbEnemyBulletsL.updateWithEntities(l, time);
+		rbEnemyBulletsLa.updateWithEntities(la, time);
 	}
 	
 	public void updatePlayerBullets(ArrayList<Bullet> bullets){
-		renderBatches.get(0).updateWithEntities(bullets, time);
+		rbPlayerBullets.updateWithEntities(bullets, time);
 	}
 	
 	public void updateEffects(ArrayList<Effect> effects){
-		renderBatches.get(9).updateWithEntities(effects, time);
+		rbEffects.updateWithEntities(effects, time);
 	}
 	
 	public void updateHitboxes(ArrayList<Bullet> enemyBullets, ArrayList<Enemy> enemies, Player player){
@@ -214,8 +257,8 @@ public class Renderer{
 			}
 		}
 		
-		renderBatches.get(10).updateHitboxes(el);
-		renderBatches.get(11).updateWithEntities(ll, 0);
+		rbHitboxes.updateHitboxes(el);
+		rbLaserHitboxes.updateWithEntities(ll, 0);
 	}
 	
 	public void updateText(ArrayList<Text> texts){
@@ -225,7 +268,7 @@ public class Renderer{
 		for(Text t:texts)
 			chars.addAll(t.getChars());
 		
-		renderBatches.get(13).updateWithEntities(chars, 0);
+		rbText.updateWithEntities(chars, 0);
 	}
 	
 	public void render(){
