@@ -1341,8 +1341,8 @@ public class ScriptRunner{
 				return;
 				
 			case "atan2":
-				if(isFloat) returnValue = (float)Math.toDegrees(Math.atan2(i1, i2));
-				else		returnValue = (float)Math.toDegrees(Math.atan2(f1, f2));
+				if(isFloat) returnValue = (float)Math.toDegrees(Math.atan2(f1, f2));
+				else		returnValue = (float)Math.toDegrees(Math.atan2(i1, i2));
 				return;
 				
 			case "min":
