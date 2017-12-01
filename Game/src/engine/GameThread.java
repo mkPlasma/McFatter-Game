@@ -132,7 +132,6 @@ public class GameThread implements Runnable{
 			
 			
 			// Timing
-			/*
 			try{
 				long wait = (long)((lastLoopTime - System.nanoTime() + OPTIMAL_TIME)/1000000);
 				wait = wait < 0 ? 0 : wait;
@@ -141,7 +140,6 @@ public class GameThread implements Runnable{
 			catch(Exception e){
 				e.printStackTrace();
 			}
-			*/
 		}
 		
 		cleanup();
