@@ -1,7 +1,5 @@
 package engine.screens;
 
-import java.util.ArrayList;
-
 import engine.entities.Text;
 import engine.graphics.Renderer;
 import engine.graphics.TextureCache;
@@ -29,18 +27,16 @@ public abstract class GameStage{
 	protected ScriptController scriptController;
 	protected DScript script;
 	
-	protected ArrayList<Text> errorText;
+	protected Text errorText;
 	
 	protected Renderer r;
 	protected TextureCache tc;
 	
-	public GameStage(String scriptPath, MainScreen screen, Renderer r, TextureCache sc){
+	public GameStage(String scriptPath, MainScreen screen, Renderer r, TextureCache tc){
 		this.scriptPath = scriptPath;
 		this.screen = screen;
 		this.r = r;
-		this.tc = sc;
-		
-		errorText = new ArrayList<Text>();
+		this.tc = tc;
 	}
 	
 	public void init(){
@@ -61,13 +57,13 @@ public abstract class GameStage{
 	private void compileScript(){
 		scriptCompiler.compile(script);
 		
-		for(Text t:errorText)
-			t.delete();
+		if(errorText != null)
+			errorText.delete();
 		
-		errorText.clear();
-		
-		if(scriptCompiler.failed())
-			errorText.addAll(screen.addText(scriptCompiler.getErrorText(), 40, 24, 800, 0.8f, 0));
+		if(scriptCompiler.failed()){
+			errorText = new Text(scriptCompiler.getErrorText(), 40, 24, 800, 0.8f, -1, tc);
+			screen.addText(errorText);
+		}
 	}
 	
 	public abstract void update();

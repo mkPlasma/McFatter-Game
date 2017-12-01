@@ -52,8 +52,4 @@ public class ScreenManager{
 	public void setScreen(GameScreen screen){
 		this.screen = screen;
 	}
-	
-	public void setFPS(int fps){
-		mainScreen.setFPS(fps);
-	}
 }

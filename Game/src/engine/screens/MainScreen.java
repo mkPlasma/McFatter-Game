@@ -2,7 +2,6 @@ package engine.screens;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Stack;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -21,26 +20,26 @@ import engine.graphics.TextureCache;
  * 		MainScreen.java
  * 		
  * 		Purpose:	Controls the main game screen.
- * 		Notes:		Any gameplay or cutscenes will be
- * 					processed by this class.
+ * 		Notes:		Any gameplay will be processed by this class.
  * 		
  */
 
 public class MainScreen extends GameScreen{
 	
-	public static final int MAX_ENEMY_BULLETS = 2048,
+	public static final int MAX_ENEMY_BULLETS = 204800,
 							MAX_PLAYER_BULLETS = 128,
 							MAX_ENEMIES = 64,
 							MAX_EFFECTS = 2048,
-							MAX_TEXT = 1024;
+							MAX_TEXTS = 1024;
 	
 	private GameStage stage;
 	
 	private ArrayList<Bullet> enemyBullets, playerBullets;
 	private ArrayList<Enemy> enemies;
 	private ArrayList<Effect> effects;
-	private ArrayList<Text> text;
-	private ArrayList<Text> fpsText;
+	private ArrayList<Text> texts;
+	private Text fpsText;
+	private Text fpspText;
 	
 	private Player player;
 	
@@ -52,15 +51,15 @@ public class MainScreen extends GameScreen{
 	
 	private int clearScreen;
 	private boolean slowMode;
-
+	
 	// temp
-	private Stack<ArrayList<Text>> scriptTexts = new Stack<ArrayList<Text>>();
-	private Stack<ArrayList<String>> scriptNames = new Stack<ArrayList<String>>();
-	private Stack<Integer> numScripts = new Stack<Integer>();
-	private Stack<ArrayList<Text>> currentPath = new Stack<ArrayList<Text>>();
+	private Text scriptText;
+	private ArrayList<String> scriptNames = new ArrayList<String>();
+	private Text currentPath;
 	private Text scriptCursor;
 	private boolean scriptSelect;
 	private int scriptCursorIndex;
+	private String currentDir;
 	
 	public MainScreen(Renderer r, TextureCache tc){
 		super(r, tc);
@@ -72,8 +71,12 @@ public class MainScreen extends GameScreen{
 		playerBullets	= new ArrayList<Bullet>(MAX_PLAYER_BULLETS);
 		enemies			= new ArrayList<Enemy>(MAX_ENEMIES);
 		effects			= new ArrayList<Effect>(MAX_EFFECTS);
-		text			= new ArrayList<Text>(MAX_TEXT);
-		fpsText			= new ArrayList<Text>(2);
+		texts			= new ArrayList<Text>(MAX_TEXTS);
+
+		fpsText = new Text("", 624, 454, 1, tc);
+		fpspText = new Text("", 624, 472, 0.75f, tc);
+		addText(fpsText);
+		addText(fpspText);
 		
 		time = 0;
 		rTime = 0;
@@ -92,15 +95,29 @@ public class MainScreen extends GameScreen{
 	// temp
 	private void scriptSelectInit(){
 		
-		text.clear();
-		scriptTexts.clear();
+		paused = false;
+		
 		scriptNames.clear();
-		numScripts.clear();
-		currentPath.clear();
+		
+		if(scriptText != null)
+			scriptText.delete();
+		
+		if(currentPath != null)
+			currentPath.delete();
+		
+		scriptText = new Text("", 50, 50, 0.75f, tc);
+		currentPath = new Text("", 50, 32, 0.75f, tc);
+		addText(scriptText);
+		addText(currentPath);
 		
 		addFiles("");
 		
-		scriptCursor = addText(">", 40, 50, -1, 0.75f, 0).get(0);
+		if(scriptCursor != null)
+			scriptCursor.delete();
+		
+		scriptCursor = new Text(">", 40, 68, 0.75f, tc);
+		addText(scriptCursor);
+		
 		scriptCursorIndex = 0;
 		
 		scriptSelect = true;
@@ -113,46 +130,44 @@ public class MainScreen extends GameScreen{
 		if(files == null)
 			return;
 		
-		if(!scriptTexts.isEmpty())
-			for(Text t:scriptTexts.peek())
-				t.setVisible(false);
+		currentDir = directory;
+		currentPath.setText("script/" + directory);
 		
-		scriptTexts.push(new ArrayList<Text>());
-		scriptNames.push(new ArrayList<String>());
-		numScripts.push(0);
-		
-		currentPath.push(addText("script/" + directory, 50, 32, -1, 0.75f, 0));
+		scriptNames.clear();
+		scriptText.setText("");
 		
 		// Add folders first
 		for(File file:files){
 			if(file.isDirectory() && !file.getName().equals(".ref")){
-				scriptTexts.peek().addAll(addText(file.getName() + "/", 50, 50 + numScripts.peek()*12, -1, 0.75f, 0));
-				scriptNames.peek().add(directory + file.getName() + "/");
-				
-				numScripts.push(numScripts.pop() + 1);
+				scriptText.setText(scriptText.getText() + "\n" + file.getName() + "/");
+				scriptNames.add(directory + file.getName() + "/");
 			}
 		}
 		
 		// Add files after
 		for(File file:files){
 			if(file.isFile() && file.getName().endsWith(".dscript")){
-				
-				scriptTexts.peek().addAll(addText(file.getName(), 50, 50 + numScripts.peek()*12, -1, 0.75f, 0));
-				scriptNames.peek().add(directory + file.getName());
 
-				numScripts.push(numScripts.pop() + 1);
+				scriptText.setText(scriptText.getText() + "\n" + file.getName());
+				scriptNames.add(directory + file.getName());
 			}
 		}
 	}
+
+	public void setFPS(float fps){
+		String text = Float.toString(fps);
+		text = text.substring(0, Math.min(text.indexOf('.') + 3, text.length()));
+		
+		fpsText.setText(text);
+		fpsText.setX(630 - fpsText.getWidth());
+	}
 	
-	public void setFPS(int fps){
+	public void setFPSP(float fpsp){
+		String text = Float.toString(fpsp*100);
+		text = text.substring(0, Math.min(text.indexOf('.') + 3, text.length()));
 		
-		for(Text t:fpsText)
-			t.delete();
-		
-		fpsText.clear();
-		
-		fpsText = addText(Integer.toString(fps), 624, 472, -1, 1, 0);
+		fpspText.setText(text + "%");
+		fpspText.setX(630 - fpspText.getWidth());
 	}
 	
 	public void cleanup(){
@@ -168,7 +183,7 @@ public class MainScreen extends GameScreen{
 		r.updateEnemies(enemies);
 		r.updateEffects(effects);
 		r.updateHitboxes(enemyBullets, enemies, player);
-		r.updateText(text);
+		r.updateText(texts);
 		
 		r.render();
 		
@@ -180,6 +195,33 @@ public class MainScreen extends GameScreen{
 	
 	public void update(){
 		
+		// Re-select script with ~
+		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_GRAVE_ACCENT)){
+			
+			scriptSelect = !scriptSelect;
+			
+			if(stage == null){
+				scriptSelect = true;
+				return;
+			}
+			else if(scriptSelect){
+				scriptSelectInit();
+				
+				for(Bullet b:enemyBullets)
+					b.delete();
+				for(Enemy e:enemies)
+					e.delete();
+				for(Effect e:effects)
+					e.delete();
+			}
+			else{
+				scriptText.delete();
+				currentPath.delete();
+				scriptNames.clear();
+				scriptCursor.delete();
+			}
+		}
+		
 		if(scriptSelect){
 			
 			// Cursor up
@@ -187,22 +229,22 @@ public class MainScreen extends GameScreen{
 				if(scriptCursorIndex > 0)
 					scriptCursorIndex--;
 				else
-					scriptCursorIndex = numScripts.peek() - 1;
+					scriptCursorIndex = scriptNames.size() - 1;
 			}
 			
 			// Cursor down
 			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_DOWN)){
-				if(scriptCursorIndex < numScripts.peek() - 1)
+				if(scriptCursorIndex < scriptNames.size() - 1)
 					scriptCursorIndex++;
 				else
 					scriptCursorIndex = 0;
 			}
 			
-			scriptCursor.setY(50 + scriptCursorIndex*12);
+			scriptCursor.setY(68 + scriptCursorIndex*18);
 			
 			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_Z)){
 				
-				String script = scriptNames.peek().get(scriptCursorIndex);
+				String script = scriptNames.get(scriptCursorIndex);
 				
 				if(script.endsWith("/")){
 					scriptCursorIndex = 0;
@@ -220,19 +262,9 @@ public class MainScreen extends GameScreen{
 				
 				scriptSelect = false;
 				
-				for(ArrayList<Text> tx:scriptTexts)
-					for(Text t:tx)
-						t.delete();
-				
-				for(ArrayList<Text> tx:currentPath)
-					for(Text t:tx)
-						t.delete();
-				
-				scriptTexts.clear();
+				scriptText.delete();
+				currentPath.delete();
 				scriptNames.clear();
-				numScripts.clear();
-				currentPath.clear();
-				
 				scriptCursor.delete();
 				
 				return;
@@ -242,24 +274,21 @@ public class MainScreen extends GameScreen{
 				
 				scriptCursorIndex = 0;
 				
-				if(scriptTexts.size() == 1)
+				if(currentDir.isEmpty())
 					return;
 				
-				for(Text t:scriptTexts.peek())
-					t.delete();
+				scriptCursorIndex = 0;
 				
-				scriptTexts.pop();
-				scriptNames.pop();
-				numScripts.pop();
+				String dir = currentDir.substring(0, currentDir.length() - 1);
 				
-				if(!currentPath.isEmpty())
-					for(Text t:currentPath.peek())
-						t.delete();
+				int i = dir.lastIndexOf('/');
 				
-				currentPath.pop();
+				if(i > 0)
+					dir = dir.substring(0, i);
+				else
+					dir = "";
 				
-				for(Text t:scriptTexts.peek())
-					t.setVisible(true);
+				addFiles(dir);
 			}
 			
 			return;
@@ -301,7 +330,7 @@ public class MainScreen extends GameScreen{
 			updateGameStage();
 			rTime += 2;
 		}
-
+		
 		// Reload script with Alt+R
 		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_R)){
 			stage.reloadScript();
@@ -311,18 +340,6 @@ public class MainScreen extends GameScreen{
 		// Clear bullets with Alt+C
 		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && (KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_C)))
 			clearScreen = 1;
-		
-		// Re-select script with ~
-		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_GRAVE_ACCENT)){
-			scriptSelectInit();
-			
-			for(Bullet b:enemyBullets)
-				b.delete();
-			for(Enemy e:enemies)
-				e.delete();
-			for(Effect e:effects)
-				e.delete();
-		}
 	}
 	
 	private void updateGameStage(){
@@ -410,13 +427,13 @@ public class MainScreen extends GameScreen{
 	}
 	
 	private void updateText(){
-		for(int i = 0; i < text.size(); i++){
-			if(text.get(i).isDeleted()){
-				text.remove(i);
+		for(int i = 0; i < texts.size(); i++){
+			if(texts.get(i).isDeleted()){
+				texts.remove(i);
 				i--;
 			}
 			else
-				text.get(i).update();
+				texts.get(i).update();
 		}
 	}
 	
@@ -524,77 +541,20 @@ public class MainScreen extends GameScreen{
 		effects.add(effect);
 	}
 	
-	public ArrayList<Text> addText(String text, float x, float y, int wrap, float scale, int lifetime){
+	public void addText(Text text){
+
+		if(text == null || texts.size() >= MAX_TEXTS)
+			return;
 		
-		ArrayList<Text> tx = new ArrayList<Text>();
-		
-		if(text == null || text.isEmpty() || this.text.size() >= MAX_TEXT)
-			return tx;
-		
-		// Find where to wrap text
-		ArrayList<Integer> wrapPoints = new ArrayList<Integer>();
-		
-		int xl = 0;
-		int lastWord = 0;
-		
-		if(wrap >= 0){
-			for(int i = 0; i < text.length(); i++){
-				
-				char c = text.charAt(i);
-				
-				// Reset on line break
-				if(c == '\n'){
-					xl = 0;
-					continue;
-				}
-				
-				// Wrap at last space
-				else if(c == ' '){
-					lastWord = i + 1;
-				}
-				
-				xl++;
-				
-				// Set wrap point
-				if(xl > wrap){
-					wrapPoints.add(lastWord);
-					xl = 0;
-				}
-			}
-		}
-		
-		int line = 0;
-		
-		for(int i = 0; i < text.length(); i++){
-			
-			char c = text.charAt(i);
-			
-			// Newline/wrap point
-			if(c == '\n' || wrapPoints.contains(i)){
-				xl = 0;
-				line++;
-				
-				if(c == '\n')
-					continue;
-			}
-			
-			// Create text object
-			Text t = new Text(x + xl*(7*scale), y + line*(24*scale), c, lifetime, tc);
-			t.getSprite().setScale(scale);
-			
-			tx.add(t);
-			xl++;
-			
-			if(this.text.size() >= MAX_TEXT)
-				return tx;
-		}
-		
-		this.text.addAll(tx);
-		return tx;
+		texts.add(text);
 	}
 	
 	public void clearEnemyBullets(){
 		for(Bullet b:enemyBullets)
 			b.onDestroy(true);
+	}
+	
+	public TextureCache getTextureCache(){
+		return tc;
 	}
 }

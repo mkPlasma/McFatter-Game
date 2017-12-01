@@ -26,9 +26,12 @@ public class Player extends GameEntity{
 	private boolean alive = true;
 	
 	
-	private final float focusedSpeed = 1.5f, unfocusedSpeed = 3;
+	private final float unfocusSpd = 3;
+	private final float focusSpd = 1.5f;
+	private final float unfocusSpdDiag	= (float)(unfocusSpd/Math.sqrt(2));
+	private final float focusSpdDiag		= (float)(focusSpd/Math.sqrt(2));
 	
-	private float speed;
+	private float spd;
 	private boolean focused, firing;
 	
 	private BulletFrame shot;
@@ -75,22 +78,36 @@ public class Player extends GameEntity{
 		
 		// Keypresses
 		
-		// Movement
-		if(isKeyDown(GLFW_KEY_RIGHT))
-			x += speed;
-		else if(isKeyDown(GLFW_KEY_LEFT))
-			x -= speed;
-		if(isKeyDown(GLFW_KEY_DOWN))
-			y += speed;
-		else if(isKeyDown(GLFW_KEY_UP))
-			y -= speed;
-		
-		
+		boolean diag = false;
+
 		// Focusing
 		if(isKeyDown(GLFW_KEY_RIGHT_SHIFT) || isKeyDown(GLFW_KEY_LEFT_SHIFT))
 			focused = true;
 		else if(isKeyUp(GLFW_KEY_RIGHT_SHIFT) || isKeyUp(GLFW_KEY_LEFT_SHIFT))
 			focused = false;
+		
+		// Movement
+		if(isKeyDown(GLFW_KEY_RIGHT)){
+			x += spd;
+			diag = true;
+		}
+		else if(isKeyDown(GLFW_KEY_LEFT)){
+			x -= spd;
+			diag = true;
+		}
+		if(isKeyDown(GLFW_KEY_DOWN)){
+			y += spd;
+			diag = diag && true;
+		}
+		else if(isKeyDown(GLFW_KEY_UP)){
+			y -= spd;
+			diag = diag && true;
+		}
+		else
+			diag = false;
+		
+		spd = diag ? (focused ? focusSpdDiag : unfocusSpdDiag) : focused ? focusSpd : unfocusSpd;
+		
 		
 		// Firing
 		if(isKeyDown(GLFW_KEY_Z))
@@ -107,12 +124,6 @@ public class Player extends GameEntity{
 		if(x > 400)	x = 400;
 		if(y < 32)	y = 32;
 		if(y > 448)	y = 448;
-		
-		// Set speed
-		speed = unfocusedSpeed;
-		
-		if(focused)
-			speed = focusedSpeed;
 		
 		// Shots
 		if(shotCooldown > 0)

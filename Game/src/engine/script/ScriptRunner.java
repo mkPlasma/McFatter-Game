@@ -40,7 +40,7 @@ public class ScriptRunner{
 	
 	// Stops script
 	private boolean haltRun = false;
-	private ArrayList<Text> errorText;
+	private Text errorText;
 	
 	// Finished running
 	private boolean finished = false;
@@ -80,7 +80,7 @@ public class ScriptRunner{
 	
 	// Holds value before dot separator
 	private Stack<Object> dotValues;
-
+	
 	// Location of reset point marker
 	private int resetPoint = 0;
 	private boolean beforeResetPoint;
@@ -95,7 +95,7 @@ public class ScriptRunner{
 	// Branched states
 	//private ArrayList<ScriptBranch> branches;
 	
-	private MainScreen screen;
+	private final MainScreen screen;
 	private Player player;
 	
 	private FrameList frameList;
@@ -137,8 +137,6 @@ public class ScriptRunner{
 			funcParams		= new Stack<Queue<Object>>();
 			dotValues		= new Stack<Object>();
 			
-			errorText = new ArrayList<Text>();
-			
 			random = new Random();
 		}
 		else{
@@ -151,10 +149,8 @@ public class ScriptRunner{
 			funcParams.clear();
 			dotValues.clear();
 			
-			for(Text t:errorText)
-				t.delete();
-			
-			errorText.clear();
+			if(errorText != null)
+				errorText.delete();
 		}
 		
 		expressions.push(new ArrayList<Object>());
@@ -1907,14 +1903,14 @@ public class ScriptRunner{
 	
 	// Create syntax error and halt compilation
 	private void runtimeError(String type, int lineNum){
-		errorText.addAll(screen.addText("\nDScript runtime error:\n" + type + " in " + script.getFileName() + " on line " + lineNum +
+		errorText = new Text("\nDScript runtime error:\n" + type + " in " + script.getFileName() + " on line " + lineNum +
 			":\n>> " + script.getLine(lineNum),
-			40, 24, 800, 0.8f, 0));
+			40, 24, 800, 0.8f, 0, screen.getTextureCache());
 		haltRun = true;
 	}
 	
 	// Condition that should not occur, may produce incorrect results
 	private void runtimeWarning(String type, int lineNum){
-		screen.addText("\nDScript runtime warning:\n" + type + " in " + script.getFileName() + " on line " + lineNum, 425, 420, 50, 0.5f, 180);
+		screen.addText(new Text("\nDScript runtime warning:\n" + type + " in " + script.getFileName() + " on line " + lineNum, 425, 420, 50, 0.5f, 180, screen.getTextureCache()));
 	}
 }

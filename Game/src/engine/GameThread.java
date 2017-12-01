@@ -29,7 +29,8 @@ public class GameThread implements Runnable{
 	// Resolution scale
 	private float scale;
 	
-	private int fps;
+	final int TARGET_FPS = 60;
+	final long OPTIMAL_TIME = 1000000000/TARGET_FPS;
 	
 	private ScreenManager screenManager;
 	
@@ -93,7 +94,6 @@ public class GameThread implements Runnable{
 		screenManager.init();
 		screenManager.setScreen(screenManager.mainScreen);
 		screenManager.initScreen();
-		screenManager.setFPS(0);
 	}
 	
 	public void run(){
@@ -111,36 +111,37 @@ public class GameThread implements Runnable{
 	private void loop(){
 		
 		// Timing
-		double lastLoopTime = System.nanoTime();
-		
-		final int TARGET_FPS = 60;
-		final long OPTIMAL_TIME = 1000000000/TARGET_FPS;
+		long lastLoopTime = System.nanoTime();
 		
 		// FPS count
-		int lastSecondTime = (int)(lastLoopTime/1000000000);
+		long lastSecondTime		= lastLoopTime;
+		int lastSecond			= (int)(lastLoopTime/1000000000);
 		int frameCount = 0;
-		fps = 60;
 		
 		while(!glfwWindowShouldClose(window)){
 			// Timing
-			long startTime = System.nanoTime();
-			lastLoopTime = startTime;
+			lastLoopTime = System.nanoTime();
 			
 			// Game logic and drawing
 			update();
 			render();
 			
-			frameCount++;
-			
-			// FPS
 			int currentSecond = (int)(lastLoopTime/1000000000);
-			
-			if(currentSecond > lastSecondTime){
-				fps = frameCount;
+			frameCount++;
+
+			// FPS
+			if(currentSecond > lastSecond){
+				long currentSecondTime = System.nanoTime();
+				
+				screenManager.mainScreen.setFPS((currentSecondTime - lastSecondTime)/(OPTIMAL_TIME/(frameCount/60f)));
 				frameCount = 0;
-				lastSecondTime = currentSecond;
-				screenManager.setFPS(fps);
+				
+				screenManager.mainScreen.setFPSP((System.nanoTime() - lastLoopTime)/(float)OPTIMAL_TIME);
+				
+				lastSecondTime = currentSecondTime;
+				lastSecond = currentSecond;
 			}
+			
 			
 			// Timing
 			try{
