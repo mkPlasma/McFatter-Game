@@ -39,7 +39,6 @@ public class MainScreen extends GameScreen{
 	private ArrayList<Effect> effects;
 	private ArrayList<Text> texts;
 	private Text fpsText;
-	private Text fpspText;
 	
 	private Player player;
 	
@@ -73,10 +72,8 @@ public class MainScreen extends GameScreen{
 		effects			= new ArrayList<Effect>(MAX_EFFECTS);
 		texts			= new ArrayList<Text>(MAX_TEXTS);
 
-		fpsText = new Text("", 624, 454, 1, tc);
-		fpspText = new Text("", 624, 472, 0.75f, tc);
+		fpsText = new Text("", 0, 470, 1, tc);
 		addText(fpsText);
-		addText(fpspText);
 		
 		time = 0;
 		rTime = 0;
@@ -154,20 +151,9 @@ public class MainScreen extends GameScreen{
 		}
 	}
 
-	public void setFPS(float fps){
-		String text = Float.toString(fps);
-		text = text.substring(0, Math.min(text.indexOf('.') + 3, text.length()));
-		
-		fpsText.setText(text);
-		fpsText.setX(630 - fpsText.getWidth());
-	}
-	
-	public void setFPSP(float fpsp){
-		String text = Float.toString(fpsp*100);
-		text = text.substring(0, Math.min(text.indexOf('.') + 3, text.length()));
-		
-		fpspText.setText(text + "%");
-		fpspText.setX(630 - fpspText.getWidth());
+	public void setFPS(int fps){
+		fpsText.setText(Integer.toString(fps));
+		fpsText.setX(632 - fpsText.getWidth());
 	}
 	
 	public void cleanup(){

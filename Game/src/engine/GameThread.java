@@ -94,18 +94,13 @@ public class GameThread implements Runnable{
 		screenManager.init();
 		screenManager.setScreen(screenManager.mainScreen);
 		screenManager.initScreen();
+		
+		screenManager.mainScreen.setFPS(0);
 	}
 	
 	public void run(){
 		init();
 		loop();
-		
-		// Cleanup
-		glfwFreeCallbacks(window);
-		glfwDestroyWindow(window);
-		
-		glfwTerminate();
-		glfwSetErrorCallback(null).free();
 	}
 	
 	private void loop(){
@@ -114,8 +109,7 @@ public class GameThread implements Runnable{
 		long lastLoopTime = System.nanoTime();
 		
 		// FPS count
-		long lastSecondTime		= lastLoopTime;
-		int lastSecond			= (int)(lastLoopTime/1000000000);
+		int lastSecond = (int)(lastLoopTime/1000000000);
 		int frameCount = 0;
 		
 		while(!glfwWindowShouldClose(window)){
@@ -128,30 +122,26 @@ public class GameThread implements Runnable{
 			
 			int currentSecond = (int)(lastLoopTime/1000000000);
 			frameCount++;
-
+			
 			// FPS
 			if(currentSecond > lastSecond){
-				long currentSecondTime = System.nanoTime();
-				
-				screenManager.mainScreen.setFPS((currentSecondTime - lastSecondTime)/(OPTIMAL_TIME/(frameCount/60f)));
+				screenManager.mainScreen.setFPS(frameCount);
 				frameCount = 0;
-				
-				screenManager.mainScreen.setFPSP((System.nanoTime() - lastLoopTime)/(float)OPTIMAL_TIME);
-				
-				lastSecondTime = currentSecondTime;
 				lastSecond = currentSecond;
 			}
 			
 			
 			// Timing
+			/*
 			try{
 				long wait = (long)((lastLoopTime - System.nanoTime() + OPTIMAL_TIME)/1000000);
-				wait = wait < 0 ? 1 : wait;
+				wait = wait < 0 ? 0 : wait;
 				Thread.sleep(wait);
 			}
 			catch(Exception e){
 				e.printStackTrace();
 			}
+			*/
 		}
 		
 		cleanup();
@@ -173,5 +163,11 @@ public class GameThread implements Runnable{
 	
 	private void cleanup(){
 		screenManager.cleanup();
+		
+		glfwFreeCallbacks(window);
+		glfwDestroyWindow(window);
+
+		glfwSetErrorCallback(null).free();
+		glfwTerminate();
 	}
 }
