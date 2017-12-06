@@ -94,6 +94,11 @@ public class MainScreen extends GameScreen{
 		
 		paused = false;
 		
+		if(stage != null){
+			stage.deleteErrorText();
+			updateText();
+		}
+		
 		scriptNames.clear();
 		
 		if(scriptText != null)

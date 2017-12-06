@@ -1,9 +1,6 @@
 package engine.script;
 
-import static engine.script.ScriptUtil.getData;
-import static engine.script.ScriptUtil.getLineNum;
-import static engine.script.ScriptUtil.getType;
-import static engine.script.ScriptUtil.isReservedWord;
+import static engine.script.ScriptUtil.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -102,6 +99,8 @@ public class ScriptLexer{
 		haltCompiler = false;
 		errorText = "";
 		
+		lineNumOffset = IOFunctions.getLineCount(script.getPath());
+		
 		analyzeScript(script);
 		
 		// Check for syntax errors
@@ -128,8 +127,6 @@ public class ScriptLexer{
 	private void analyzeScript(DScript script){
 		int lineNum = 1;
 		
-		lineNumOffsetHighest += IOFunctions.getLineCount(script.getPath());
-		
 		// Load file and read line by line
 		try(BufferedReader br = new BufferedReader(new FileReader(script.getPath()))){
 			for(String line; (line = br.readLine()) != null;){
@@ -149,6 +146,7 @@ public class ScriptLexer{
 			e.printStackTrace();
 		}
 		
+		lineNumOffsetHighest += IOFunctions.getLineCount(script.getPath());
 		lineNumOffset = 0;
 	}
 	

@@ -160,8 +160,11 @@ public class Renderer{
 		renderBatches.add(rbEnemyBullets2a);
 		renderBatches.add(rbEnemyBulletsL);
 		renderBatches.add(rbEnemyBulletsLa);
-
+		
 		renderBatches.add(rbEffects);
+
+		renderBatches.add(rbHitboxes);
+		renderBatches.add(rbLaserHitboxes);
 		
 		renderBatches.add(rbBorder);
 		

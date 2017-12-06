@@ -25,6 +25,13 @@ public class BossEnemy extends Enemy{
 		hpText.setText(Integer.toString((int)(100*((float)hp/maxHp))) + "%");
 	}
 	
+	public void delete(){
+		super.delete();
+		
+		if(hpText != null)
+			hpText.delete();
+	}
+	
 	public void onDestroy(){
 		super.onDestroy();
 		hpText.delete();

@@ -66,6 +66,15 @@ public abstract class GameStage{
 		}
 	}
 	
+	public void deleteErrorText(){
+		
+		if(errorText == null)
+			return;
+		
+		errorText.delete();
+		errorText = null;
+	}
+	
 	public abstract void update();
 	public abstract void render();
 }
