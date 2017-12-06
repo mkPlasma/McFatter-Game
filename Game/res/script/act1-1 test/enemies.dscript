@@ -19,8 +19,6 @@ task streamEnemy(inv){
     e.setAccel(-0.05);
     e.setMinSpd(4);
     
-    g = f;
-    
     wait 30;
     if(e.isDeleted()){return;}
     
