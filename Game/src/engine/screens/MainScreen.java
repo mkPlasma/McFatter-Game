@@ -34,6 +34,8 @@ public class MainScreen extends GameScreen{
 	
 	private GameStage stage;
 	
+	private FrameList frameList;
+	
 	private ArrayList<Bullet> enemyBullets, playerBullets;
 	private ArrayList<Enemy> enemies;
 	private ArrayList<Effect> effects;
@@ -66,6 +68,8 @@ public class MainScreen extends GameScreen{
 	
 	public void init(){
 		
+		frameList = new FrameList(tc);
+		
 		enemyBullets	= new ArrayList<Bullet>(MAX_ENEMY_BULLETS);
 		playerBullets	= new ArrayList<Bullet>(MAX_PLAYER_BULLETS);
 		enemies			= new ArrayList<Enemy>(MAX_ENEMIES);
@@ -84,7 +88,7 @@ public class MainScreen extends GameScreen{
 		r.initMainScreen();
 		
 		// Temporary test
-		player = new Player(0, 0, new FrameList(tc), this);
+		player = new Player(224, 432, frameList, this);
 		tc.loadSprite(player.getSprite());
 		scriptSelectInit();
 	}
@@ -245,11 +249,10 @@ public class MainScreen extends GameScreen{
 				
 				script = "Game/res/script/" + script;
 				
-				stage = new Mission(script, this, r, tc);
+				player.setPos(224, 432);
+				player.resetDeaths();
+				stage = new GameStage(script, player, this, r);
 				stage.init();
-				
-				if(stage instanceof Mission)
-					player = ((Mission)stage).getPlayer();
 				
 				scriptSelect = false;
 				
@@ -335,39 +338,44 @@ public class MainScreen extends GameScreen{
 	
 	private void updateGameStage(){
 		
-		if(clearScreen > 0){
-
-			for(Bullet b:enemyBullets){
-				if(clearScreen == 1)
-					b.onDestroy(true);
-				if(clearScreen == 2)
-					b.delete();
-			}
-			
-			for(Enemy e:enemies){
-				if(clearScreen == 1)
-					e.onDestroy();
-				if(clearScreen == 2)
-					e.delete();
-			}
-			
-			if(clearScreen == 2)
-				for(Effect e:effects)
-					e.delete();
-			
-			clearScreen = 0;
-		}
+		clearScreen();
+		
+		player.update();
 		
 		stage.update();
 		
-		if(stage instanceof Mission){
-			updateEffects();
-			updateBullets();
-			updateEnemies();
-			updateText();
-			
-			checkCollisions();
+		updateEffects();
+		updateBullets();
+		updateEnemies();
+		updateText();
+		
+		checkCollisions();
+	}
+	
+	private void clearScreen(){
+		
+		if(clearScreen == 0)
+			return;
+		
+		for(Bullet b:enemyBullets){
+			if(clearScreen == 1)
+				b.onDestroy(true);
+			if(clearScreen == 2)
+				b.delete();
 		}
+		
+		for(Enemy e:enemies){
+			if(clearScreen == 1)
+				e.onDestroy();
+			if(clearScreen == 2)
+				e.delete();
+		}
+		
+		if(clearScreen == 2)
+			for(Effect e:effects)
+				e.delete();
+		
+		clearScreen = 0;
 	}
 	
 	private void updateBullets(){
@@ -547,5 +555,9 @@ public class MainScreen extends GameScreen{
 	
 	public TextureCache getTextureCache(){
 		return tc;
+	}
+	
+	public FrameList getFrameList(){
+		return frameList;
 	}
 }

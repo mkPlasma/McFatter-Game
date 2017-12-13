@@ -1,5 +1,7 @@
 package engine.screens;
 
+import content.FrameList;
+import engine.entities.Player;
 import engine.entities.Text;
 import engine.graphics.Renderer;
 import engine.graphics.TextureCache;
@@ -10,33 +12,34 @@ import engine.script.ScriptController;
 /*
  * 		GameStage.java
  * 		
- * 		Purpose:	Container for a stage, run in MainScreen.
- * 		Notes:		Either a mission or cutscene.
- * 		
- * 		Children:	Mission.java
+ * 		Purpose:	Abstract game mission.
+ * 		Notes:		Bullets, enemies, bosses, and gameplay
+ * 					will be handled here.
  * 		
  */
 
-public abstract class GameStage{
+public class GameStage{
+	
+	protected final MainScreen screen;
 	
 	protected String scriptPath;
 	protected int time;
 	
-	protected final MainScreen screen;
 	protected ScriptCompiler scriptCompiler;
 	protected ScriptController scriptController;
 	protected DScript script;
 	
 	protected Text errorText;
 	
-	protected Renderer r;
-	protected TextureCache tc;
+	private Player player;
 	
-	public GameStage(String scriptPath, MainScreen screen, Renderer r, TextureCache tc){
+	protected Renderer r;
+	
+	public GameStage(String scriptPath, Player player, MainScreen screen, Renderer r){
 		this.scriptPath = scriptPath;
+		this.player = player;
 		this.screen = screen;
 		this.r = r;
-		this.tc = tc;
 	}
 	
 	public void init(){
@@ -46,12 +49,19 @@ public abstract class GameStage{
 		
 		compileScript();
 		scriptController.init();
+		scriptController.setPlayer(player);
+	}
+	
+	public void update(){
+		if(!scriptCompiler.failed())
+			scriptController.run();
 	}
 	
 	// Recompile script
 	public void reloadScript(){
 		compileScript();
 		scriptController.reload();
+		player.resetDeaths();
 	}
 	
 	private void compileScript(){
@@ -61,7 +71,7 @@ public abstract class GameStage{
 			errorText.delete();
 		
 		if(scriptCompiler.failed()){
-			errorText = new Text(scriptCompiler.getErrorText(), 40, 24, 800, 0.8f, -1, tc);
+			errorText = new Text(scriptCompiler.getErrorText(), 40, 24, 800, 0.8f, -1, screen.getTextureCache());
 			screen.addText(errorText);
 		}
 	}
@@ -74,7 +84,4 @@ public abstract class GameStage{
 		errorText.delete();
 		errorText = null;
 	}
-	
-	public abstract void update();
-	public abstract void render();
 }

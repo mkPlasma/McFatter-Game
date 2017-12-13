@@ -25,6 +25,8 @@ public class Player extends GameEntity{
 	
 	private boolean alive = true;
 	
+	private int deaths;
+	private Text deathText;
 	
 	private final float unfocusSpd = 3;
 	private final float focusSpd = 1.5f;
@@ -55,6 +57,9 @@ public class Player extends GameEntity{
 		shot = frameList.getBullet(BulletList.TYPE_CRYSTAL, FrameList.COLOR_LIGHT_BLUE);
 		sprite = new Sprite("player.png", 0, 0, 64, 64);
 		
+		deathText = new Text("Deaths: 0", 430, 100, 1, screen.getTextureCache());
+		screen.addText(deathText);
+		
 		onCreate();
 	}
 	
@@ -64,6 +69,11 @@ public class Player extends GameEntity{
 	
 	public Sprite getSprite(){
 		return sprite;
+	}
+	
+	public void resetDeaths(){
+		deaths = 0;
+		deathText.setText("Deaths: " + deaths);
 	}
 	
 	public void onCreate(){
@@ -168,6 +178,9 @@ public class Player extends GameEntity{
 	public void death(){
 		//x = 224;		y = 450;
 		//alive = false;
+		
+		deaths++;
+		deathText.setText("Deaths: " + deaths);
 		
 		Effect e = new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, FrameList.COLOR_BLACK, 2), x, y);
 		e.getSprite().rotate((float)Math.random()*360);

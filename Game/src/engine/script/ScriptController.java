@@ -101,10 +101,6 @@ public class ScriptController{
 		runner.setPlayer(player);
 	}
 	
-	public void setFrameList(FrameList frameList){
-		runner.setFrameList(frameList);
-	}
-	
 	public boolean isFinished(){
 		return finished;
 	}

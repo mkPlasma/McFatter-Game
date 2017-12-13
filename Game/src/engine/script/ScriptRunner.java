@@ -108,6 +108,7 @@ public class ScriptRunner{
 	public ScriptRunner(DScript script, MainScreen screen){
 		this.script = script;
 		this.screen = screen;
+		frameList = screen.getFrameList();
 	}
 	
 	// Initializes and returns primary branch
@@ -194,10 +195,6 @@ public class ScriptRunner{
 	
 	public void setPlayer(Player player){
 		this.player = player;
-	}
-	
-	public void setFrameList(FrameList frameList){
-		this.frameList = frameList;
 	}
 	
 	public void setTime(int time){
