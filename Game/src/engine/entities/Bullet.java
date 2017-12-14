@@ -49,37 +49,33 @@ public class Bullet extends MovableEntity{
 	// How far outside screen to despawn
 	protected int despawnRange = 32;
 	
-	protected final FrameList frameList;
-	
 	// Screen to add effects to
 	protected final MainScreen screen;
 	
 	
-	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, int delay, FrameList frameList, MainScreen screen){
+	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, int delay, MainScreen screen){
 		super(frame, x, y, dir, spd);
 		
 		this.frame = frame;
 		delayFlare = delay > 0;
 		this.delay = Math.abs(delay);
-		this.frameList = frameList;
 		this.screen = screen;
 		
 		onCreate();
 	}
 	
-	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, float minSpd, float maxSpd, float accel, int delay, FrameList frameList, MainScreen screen){
+	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, float minSpd, float maxSpd, float accel, int delay, MainScreen screen){
 		super(frame, x, y, dir, spd, minSpd, maxSpd, accel);
 		
 		this.frame = frame;
 		delayFlare = delay > 0;
 		this.delay = Math.abs(delay);
-		this.frameList = frameList;
 		this.screen = screen;
 		
 		onCreate();
 	}
 	
-	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, int delay, float damage, float dmgReduce, FrameList frameList, MainScreen screen){
+	public Bullet(BulletFrame frame, float x, float y, float dir, float spd, int delay, float damage, float dmgReduce, MainScreen screen){
 		super(frame, x, y, dir, spd);
 		
 		this.frame = frame;
@@ -87,20 +83,18 @@ public class Bullet extends MovableEntity{
 		this.delay = Math.abs(delay);
 		this.damage = damage;
 		this.dmgReduce = dmgReduce;
-		this.frameList = frameList;
 		this.screen = screen;
 		
 		onCreate();
 	}
 	
 	// For lasers
-	public Bullet(BulletFrame frame, float x, float y, float dir, int delay, FrameList frameList, MainScreen screen){
+	public Bullet(BulletFrame frame, float x, float y, float dir, int delay, MainScreen screen){
 		super(frame, x, y, dir, 0);
 		
 		this.frame = frame;
 		delayFlare = delay > 0;
 		this.delay = Math.abs(delay);
-		this.frameList = frameList;
 		this.screen = screen;
 	}
 	
@@ -116,7 +110,7 @@ public class Bullet extends MovableEntity{
 				visible = false;
 				
 				int effectCol = color % 16;
-				Effect e = new Effect(frameList.getEffect(EffectList.TYPE_FLARE, effectCol), x, y);
+				Effect e = new Effect(screen.getFrameList().getEffect(EffectList.TYPE_FLARE, effectCol), x, y);
 				
 				e.setLifetime(delay);
 				
@@ -169,7 +163,7 @@ public class Bullet extends MovableEntity{
 			explosion = true;
 		}
 		
-		Effect e = new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, effectCol, explosion ? 2 : 1), x, y);
+		Effect e = new Effect(screen.getFrameList().getEffect(EffectList.TYPE_CLOUD, effectCol, explosion ? 2 : 1), x, y);
 		e.getSprite().rotate((float)Math.random()*360);
 		e.getSprite().setScale(explosion ? 3 : 2);
 		screen.addEffect(e);
@@ -200,7 +194,7 @@ public class Bullet extends MovableEntity{
 	}
 	
 	public void refreshSprite(){
-		sprite.setTextureCoords(frameList.bulletList.getSprite(type, color).getTextureCoords());
+		sprite.setTextureCoords(screen.getFrameList().bulletList.getSprite(type, color).getTextureCoords());
 	}
 	
 	

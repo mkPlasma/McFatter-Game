@@ -32,15 +32,13 @@ public class Enemy extends MovableEntity{
 	protected boolean invulnerable;
 	protected int hp;
 	
-	protected final FrameList frameList;
 	protected final MainScreen screen;
 	
-	public Enemy(EnemyFrame frame, float x, float y, int hp, FrameList frameList, MainScreen screen){
+	public Enemy(EnemyFrame frame, float x, float y, int hp, MainScreen screen){
 		super(frame, x, y);
 		
 		this.frame = frame;
 		this.hp = hp;
-		this.frameList = frameList;
 		this.screen = screen;
 		
 		onCreate();
@@ -61,7 +59,7 @@ public class Enemy extends MovableEntity{
 		
 		// Explosion effect
 		
-		Effect e = new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, FrameList.COLOR_BLACK, 2), x, y);
+		Effect e = new Effect(screen.getFrameList().getEffect(EffectList.TYPE_CLOUD, FrameList.COLOR_BLACK, 2), x, y);
 		e.getSprite().rotate((float)Math.random()*360);
 		e.getSprite().setScale(4);
 		screen.addEffect(e);

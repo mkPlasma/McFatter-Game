@@ -30,8 +30,8 @@ public class Laser extends Bullet{
 	
 	private Effect baseFlare;
 	
-	public Laser(BulletFrame frame, float x, float y, float dir, int length, int width, int delay, FrameList frameList, MainScreen screen){
-		super(frame, x, y, dir, delay, frameList, screen);
+	public Laser(BulletFrame frame, float x, float y, float dir, int length, int width, int delay, MainScreen screen){
+		super(frame, x, y, dir, delay, screen);
 		
 		this.length = length;
 		this.width = width;
@@ -53,7 +53,7 @@ public class Laser extends Bullet{
 		
 		updateScale(2);
 		
-		baseFlare = new Effect(frameList.getEffect(EffectList.TYPE_FLARE, color % 16), x, y);
+		baseFlare = new Effect(screen.getFrameList().getEffect(EffectList.TYPE_FLARE, color % 16), x, y);
 		baseFlare.setLifetime(0);
 		screen.addEffect(baseFlare);
 	}

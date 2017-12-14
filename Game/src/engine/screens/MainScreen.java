@@ -88,7 +88,7 @@ public class MainScreen extends GameScreen{
 		r.initMainScreen();
 		
 		// Temporary test
-		player = new Player(224, 432, frameList, this);
+		player = new Player(224, 432, this);
 		tc.loadSprite(player.getSprite());
 		scriptSelectInit();
 	}

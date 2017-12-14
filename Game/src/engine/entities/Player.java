@@ -40,21 +40,19 @@ public class Player extends GameEntity{
 	
 	// Timer variables counts up for timing shots/bombs
 	private int shotCooldown = 0, bombCooldown = 0;
-
-	private final FrameList frameList;
+	
 	private final MainScreen screen;
 	
 	// Temporary
 	private Sprite sprite;
 	
-	public Player(float x, float y, FrameList frameList, MainScreen screen){
+	public Player(float x, float y, MainScreen screen){
 		super(null, x, y);
 		
-		this.frameList = frameList;
 		this.screen = screen;
 		
 		// temp
-		shot = frameList.getBullet(BulletList.TYPE_CRYSTAL, FrameList.COLOR_LIGHT_BLUE);
+		shot = screen.getFrameList().getBullet(BulletList.TYPE_CRYSTAL, FrameList.COLOR_LIGHT_BLUE);
 		sprite = new Sprite("player.png", 0, 0, 64, 64);
 		
 		deathText = new Text("Deaths: 0", 430, 100, 1, screen.getTextureCache());
@@ -147,8 +145,8 @@ public class Player extends GameEntity{
 	}
 	
 	private void fire(){
-		screen.addPlayerBullet(new Bullet(shot, x - 10, y + 10, 270, 15, 0, 15, 0.1f, frameList, screen));
-		screen.addPlayerBullet(new Bullet(shot, x + 10, y + 10, 270, 15, 0, 15, 0.1f, frameList, screen));
+		screen.addPlayerBullet(new Bullet(shot, x - 10, y + 10, 270, 15, 0, 15, 0.1f, screen));
+		screen.addPlayerBullet(new Bullet(shot, x + 10, y + 10, 270, 15, 0, 15, 0.1f, screen));
 		shotCooldown = 4;
 	}
 	
@@ -182,7 +180,7 @@ public class Player extends GameEntity{
 		deaths++;
 		deathText.setText("Deaths: " + deaths);
 		
-		Effect e = new Effect(frameList.getEffect(EffectList.TYPE_CLOUD, FrameList.COLOR_BLACK, 2), x, y);
+		Effect e = new Effect(screen.getFrameList().getEffect(EffectList.TYPE_CLOUD, FrameList.COLOR_BLACK, 2), x, y);
 		e.getSprite().rotate((float)Math.random()*360);
 		e.getSprite().setScale(4);
 		screen.addEffect(e);

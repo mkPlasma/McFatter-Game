@@ -1,6 +1,7 @@
 package content;
 
 import engine.entities.EnemyFrame;
+import engine.graphics.Animation;
 import engine.graphics.Sprite;
 import engine.graphics.TextureCache;
 
@@ -15,11 +16,13 @@ import engine.graphics.TextureCache;
 public class EnemyList{
 
 	public static final byte
-		TYPE_FIGHTER		= 0;
+		TYPE_FIGHTER		= 0,
+		TYPE_RADIAL		= 1;
 	
 	
 	public static final String[] types = {
-		"fighter",	
+		"fighter",
+		"radial",
 	};
 	
 	private TextureCache tc;
@@ -29,7 +32,7 @@ public class EnemyList{
 	}
 	
 	public EnemyFrame get(int type){
-		return new EnemyFrame(type, getSprite(type), 16, true, 0);
+		return new EnemyFrame(type, getSprite(type), 16, type == TYPE_FIGHTER, 0);
 	}
 	
 	private Sprite getSprite(int type){
@@ -41,11 +44,21 @@ public class EnemyList{
 		int sx = 0;
 		int sy = 0;
 		
+		switch(type){
+			case TYPE_RADIAL:
+				sy = 64;
+				break;
+		}
+		
+		
 		// Create sprite
 		Sprite sprite = new Sprite(path, sx, sy, size, size);
 		
-		tc.loadSprite(sprite);
+		if(type == TYPE_RADIAL)
+			sprite.addAnimation(new Animation(Animation.ANIM_ROTATION, 1, false, new float[]{15}));
 		
+		
+		tc.loadSprite(sprite);		
 		return sprite;
 	}
 }

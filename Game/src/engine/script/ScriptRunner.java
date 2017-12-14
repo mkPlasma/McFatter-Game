@@ -1397,7 +1397,7 @@ public class ScriptRunner{
 						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 						
 						if(!beforeResetPoint)
-							returnValue = new Bullet(frameList.getBullet(i1, i2), pos[0], pos[1], dir, spd, del, frameList, screen);
+							returnValue = new Bullet(frameList.getBullet(i1, i2), pos[0], pos[1], dir, spd, del, screen);
 						break;
 					}
 					case 7:{
@@ -1414,7 +1414,7 @@ public class ScriptRunner{
 						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 						
 						if(!beforeResetPoint)
-							returnValue = new Bullet(frameList.getBullet(i1, i2), x, y, dir, spd, del, frameList, screen);
+							returnValue = new Bullet(frameList.getBullet(i1, i2), x, y, dir, spd, del, screen);
 						break;
 					}
 					case 9:{
@@ -1435,7 +1435,7 @@ public class ScriptRunner{
 						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 						
 						if(!beforeResetPoint)
-							returnValue = new Bullet(frameList.getBullet(i1, i2), pos[0], pos[1], dir, spd, minSpd, maxSpd, accel, del, frameList, screen);
+							returnValue = new Bullet(frameList.getBullet(i1, i2), pos[0], pos[1], dir, spd, minSpd, maxSpd, accel, del, screen);
 						break;
 					}
 					case 10:{
@@ -1458,7 +1458,7 @@ public class ScriptRunner{
 						int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 						
 						if(!beforeResetPoint)
-							returnValue = new Bullet(frameList.getBullet(i1, i2), x, y, dir, spd, minSpd, maxSpd, accel, del, frameList, screen);
+							returnValue = new Bullet(frameList.getBullet(i1, i2), x, y, dir, spd, minSpd, maxSpd, accel, del, screen);
 						break;
 					}
 				}
@@ -1484,7 +1484,7 @@ public class ScriptRunner{
 					int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 					
 					if(!beforeResetPoint)
-						returnValue = new Laser(frameList.getBullet(i1, i2), pos[0], pos[1], dir, len, wid, del, frameList, screen);
+						returnValue = new Laser(frameList.getBullet(i1, i2), pos[0], pos[1], dir, len, wid, del, screen);
 				}
 				else{
 					Object ox = params.remove();
@@ -1502,7 +1502,7 @@ public class ScriptRunner{
 					int del = oDel instanceof Integer ? (int)oDel : (int)(float)oDel;
 					
 					if(!beforeResetPoint)
-						returnValue = new Laser(frameList.getBullet(i1, i2), x, y, dir, len, wid, del, frameList, screen);
+						returnValue = new Laser(frameList.getBullet(i1, i2), x, y, dir, len, wid, del, screen);
 				}
 
 				if(!beforeResetPoint)
@@ -1519,9 +1519,9 @@ public class ScriptRunner{
 					float[] pos = convertArray((ArrayList<Object>)o2, "enemy", lineNum);
 					
 					if(func.equals("boss"))
-						returnValue = new BossEnemy(frameList.getEnemy(i1), pos[0], pos[1], hp, frameList, screen);
+						returnValue = new BossEnemy(frameList.getEnemy(i1), pos[0], pos[1], hp, screen);
 					else
-						returnValue = new Enemy(frameList.getEnemy(i1), pos[0], pos[1], hp, frameList, screen);
+						returnValue = new Enemy(frameList.getEnemy(i1), pos[0], pos[1], hp, screen);
 				}
 				else{
 					Object oy = params.remove();
@@ -1534,9 +1534,9 @@ public class ScriptRunner{
 						f2 = (float)i2;
 
 					if(func.equals("boss"))
-						returnValue = new BossEnemy(frameList.getEnemy(i1), f2, y, hp, frameList, screen);
+						returnValue = new BossEnemy(frameList.getEnemy(i1), f2, y, hp, screen);
 					else
-						returnValue = new Enemy(frameList.getEnemy(i1), f2, y, hp, frameList, screen);
+						returnValue = new Enemy(frameList.getEnemy(i1), f2, y, hp, screen);
 				}
 				
 				if(!beforeResetPoint)

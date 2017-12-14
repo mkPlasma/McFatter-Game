@@ -13,7 +13,7 @@ task streamEnemy(inv){
     
     x += rand(30);
     
-    set e = enemy(_fighter, x, -16, 50);
+    set e = enemy(_radial, x, -16, 50);
     e.setDir(90);
     e.setSpd(6);
     e.setAccel(-0.05);

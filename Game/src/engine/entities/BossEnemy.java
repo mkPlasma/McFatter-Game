@@ -10,8 +10,8 @@ public class BossEnemy extends Enemy{
 	// temp
 	private Text hpText;
 	
-	public BossEnemy(EnemyFrame frame, float x, float y, int hp, FrameList frameList, MainScreen screen){
-		super(frame, x, y, hp, frameList, screen);
+	public BossEnemy(EnemyFrame frame, float x, float y, int hp, MainScreen screen){
+		super(frame, x, y, hp, screen);
 		maxHp = hp;
 		
 		hpText = new Text("100%", 422, 460, -1, 0.8f, -1, screen.getTextureCache());
