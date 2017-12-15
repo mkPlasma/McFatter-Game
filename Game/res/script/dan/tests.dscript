@@ -1,0 +1,75 @@
+
+set boss = boss(_fighter, _cx, 120, 3000);
+boss.setDir(90);
+
+set inv = false;
+set move = false;
+
+clear();
+
+while(!boss.isDeleted()){
+    
+    for(i in 250){
+        for(j in 4){
+            freezeBullet(inv, 9 - i/(250/8.5));
+        }
+        
+        wait;
+    }
+    
+    inv!!;
+    
+    aimFire();
+    
+    wait 120;
+    move = true;
+    
+    wait 210;
+    move = false;
+}
+
+task clear(){
+    while(!boss.isDeleted()){wait;}
+    clearBullets();
+}
+
+task freezeBullet(inv, spd){
+    
+    set type = _crystal;
+    set color = _blue;
+    
+    if(inv){
+        type = _scale;
+        color = _green;
+    }
+    
+    set b = bullet(type, color, boss.getPos(), rand(0, 360), spd, 0, spd, -0.1, -10);
+    
+    while(!move){wait;}
+    if(b.isDeleted()){return;}
+    
+    set negative = randBool();
+    set av = 0.2;
+    
+    if(negative){av!!;}
+    
+    b.setAngVel(av);
+    b.setAccel(0.02);
+    b.setMaxSpd(1.5);
+}
+
+task aimFire(){
+    
+    set const ang = 15;
+    
+    for(i in 10){
+        for(j in 5){
+            for(k in 10){
+                bullet(_star, _pink, boss.getPos(), angleToPlayer(boss.getPos()) - ang*2 + ang*j, 1 + k/2, 10);
+            }
+        }
+        
+        wait 5;
+        if(boss.isDeleted()){return;}
+    }
+}

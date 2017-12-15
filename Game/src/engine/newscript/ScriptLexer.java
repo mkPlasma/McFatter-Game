@@ -8,4 +8,15 @@ public class ScriptLexer{
 	rgxIdentifier = "[a-zA-Z_]\\w*",
 	
 	rgxInteger = "\\d+";
+	
+	
+	
+	private DScript script;
+	
+	
+	public void process(DScript script){
+		this.script = script;
+		
+		
+	}
 }
