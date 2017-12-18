@@ -9,13 +9,17 @@
 	},
 	
 	{# Operators
-		'match': '(\\b|\\s)(\\+|-|\\*|/|%|\\^|!|\\|\\||&&|<|>|==|!=|<=|>=|=|\\+\\+|--|\\+=|-=|\\*=|/=|%=)(\\b|\\s|;)'
+		'match': '(\\b|\\s)(\\+|-|\\*|/|%|\\^|!|\\|\\||&&|<|>|==|!=|<=|>=|=|\\+\\+|--|!!|\\+=|-=|\\*=|/=|%=)(\\b|\\s|;)'
 		'name': 'keyword.operator.dscript'
 	},
 	
-	{# Reset point
-		'match': '#reset'
-		'name': 'support.other.dscript'
+	{# Properties
+		'match': '(#include)\\s+(.+);'
+		'captures':
+			'1':
+				'name': 'support.other.dscript'
+			'2':
+				'name': 'string.quoted.dscript'
 	},
 	
 	{# Comments

@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 import org.lwjgl.BufferUtils;
 
@@ -65,5 +66,20 @@ public class IOFunctions{
 		}
 		
 		return -1;
+	}
+	
+	public static ArrayList<String> readToArrayList(String path){
+		
+		ArrayList<String> file = new ArrayList<String>();
+		
+		try(BufferedReader br = new BufferedReader(new FileReader(path))){
+			for(String line; (line = br.readLine()) != null;)
+				file.add(line.trim());
+		}
+		catch(IOException e){
+			return null;
+		}
+		
+		return file;
 	}
 }
