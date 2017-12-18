@@ -45,6 +45,8 @@ public class Preprocessor extends CompilerUnit{
 			
 			String line = file.get(i);
 			
+			
+			// Include statement
 			if(line.startsWith("#include")){
 				
 				// Get contents of file
@@ -56,6 +58,24 @@ public class Preprocessor extends CompilerUnit{
 				// Replace include statement
 				file.remove(i);
 				file.addAll(i, file2);
+			}
+			
+			// Single-line comment
+			int ind = line.indexOf("//");
+			
+			if(ind > -1){
+				
+				// Check that comment is not in string
+				int q = 0;
+				
+				for(int j = 0; j < ind; j++){
+					if(line.charAt(j) == '"' && (j == 0 || (j > 0 && line.charAt(j - 1) != '\\')))
+						q++;
+				}
+				
+				// If not in string, remove and replace
+				if(q%2 == 0)
+					file.set(i, line.substring(0, ind));
 			}
 			
 			lineNum++;
