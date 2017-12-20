@@ -1,0 +1,44 @@
+run "enemies";
+
+wait 120;
+
+bigSpiral();
+
+for(i in 10){
+    explosiveEnemy(_cx - 100);
+    explosiveEnemy(_cx + 100);
+    wait 30;
+}
+
+wait 300;
+
+bigSpiral();
+
+for(i in 20){
+    mineEnemy(_lx + 50);
+    wait 15;
+}
+
+wait 60;
+
+for(i in 20){
+    mineEnemy(_rx - 50);
+    wait 15;
+}
+
+wait 120;
+clearBullets();
+
+for(i in 50){
+    explosiveEnemy(_cx + rand(1 + i*3));
+    wait 10;
+}
+
+wait 120;
+
+bigEnemy(_cx, randBool(), 2000);
+
+wait 600;
+
+bigEnemy(_cx - 50, true, 1000);
+bigEnemy(_cx + 50, false, 1000);

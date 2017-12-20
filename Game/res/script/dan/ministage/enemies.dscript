@@ -1,0 +1,201 @@
+
+task explosiveEnemy(x){
+    set e = enemy(_radial, x, _ty - 32, 50);
+    
+    e.setDir(90);
+    e.setAccel(0.05);
+    e.setMaxSpd(8);
+    
+    while(!e.isDeleted()){
+        
+        if(e.getY() < _by - 100){
+            for(i in 3){
+                bullet(_orb, _dark_red, e.getPos(), rand(0, 360), 1.8, 5);
+            }
+            
+            //bullet(_orb, _red, e.getPos(), angleToPlayer(e.getPos()), 2, 5);
+        }
+        
+        set t = rand(40, 70);
+        for(i in t){
+            if(e.isDeleted()){break;}
+            wait;
+        }
+        
+        if(e.getY() > _by + 64){
+            e.delete();
+            break;
+        }
+    }
+    
+    set const c = 8;
+    set dir = rand(0, 360);
+    
+    for(d in 0, 360/c, 360){
+        bullet(_crystal, _orange, e.getPos(), dir + d, 0.05, 0, 1.5, 0.01, 10);
+    }
+}
+
+task mineEnemy(x){
+    set e = enemy(_fighter, x, _ty - 32, 100);
+    
+    e.setDir(90);
+    e.setSpd(4);
+    
+    wait rand(20, 40);
+    
+    while(!e.isDeleted()){
+        
+        mine();
+        
+        wait rand(40, 70);
+        
+        if(e.getY() > _by + 64){
+            e.delete();
+            break;
+        }
+    }
+    
+    task mine(){
+        set b = bullet(_mine, _blue_d, e.getPos(), rand(0, 360), 0.5, 5);
+        
+        wait 60;
+        
+        if(b.isDeleted()){return;}
+        b.delete();
+        
+        set const c = 6;
+        set dir = rand(0, 360);
+        
+        for(d in 0, 360/c, 360){
+            bullet(_star4, _blue, b.getPos(), dir + d, 1.5, 5);
+        }
+    }
+}
+
+task bigSpiral(){
+    set e = enemy(_fighter, _cx, _ty - 32, 1500);
+    e.setInvulnerable();
+    
+    e.setDir(90);
+    e.setSpd(5.5);
+    e.setAccel(-0.08);
+    e.setMinSpd(0);
+    
+    wait 60;
+    
+    e.setInvulnerable(false);
+    
+    set const c = 8;
+    set dir;
+    
+    while(!e.isDeleted()){
+        
+        for(d in 0, 360/c, 360){
+            bullet(_scale, _purple, e.getPos(), dir + d, 2, -5);
+            aimBullet(dir + d + 180/c);
+        }
+        
+        dir -= 25;
+        
+        wait 20;
+    }
+    
+    task aimBullet(dir2){
+        set b = bullet(_scale, _pink, e.getPos(), dir2, 2, 0, 5, -0.03, -5);
+        
+        wait 60;
+        
+        if(b.isDeleted()){return;}
+        
+        b.setDir(angleToPlayer(b.getPos()));
+        b.setAccel(0);
+        b.setSpd(1);
+    }
+}
+
+
+
+task bigEnemy(x, inv, hp){
+    set e = enemy(_fighter, x, _ty - 32, hp);
+    e.setInvulnerable();
+    
+    e.setDir(90);
+    e.setSpd(5.5);
+    e.setAccel(-0.08);
+    e.setMinSpd(0);
+    
+    wait 60;
+    
+    set const time = 540;
+    spiral1();
+    
+    wait 60;
+    
+    spiral2();
+    e.setInvulnerable(false);
+    
+    wait time;
+    
+    if(e.isDeleted()){return;}
+    
+    e.setAccel(0.04);
+    e.setMaxSpd(4);
+    
+    while(!e.isDeleted()){
+        if(e.getY() > _by + 64){
+            e.delete();
+            break;
+        }
+    }
+    
+    task spiral1(){
+        set const c = 6;
+        set const c2 = 5;
+        set const r = 20;
+        
+        set dirAdd = 55;
+        if(inv){dirAdd!!;}
+        
+        set col = _green;
+        set dir = 0;
+        
+        for(i in time/20){
+            for(d in 0, 360/c, 360){
+                for(d2 in 0, 40/c2, 40){
+                    bullet(_crystal, col, e.getPos() + {r*cos(dir + d), r*sin(dir + d)}, dir + d + d2 - 20, 1.5, -10);
+                }
+            }
+            
+            dir += dirAdd;
+            if(col == _green){col = _green_d;}
+            else{col = _green;}
+            
+            wait 20;
+            if(e.isDeleted()){return;}
+        }
+    }
+    
+    task spiral2(){
+        set const c = 8;
+        
+        set dirAdd = 36;
+        if(inv){dirAdd!!;}
+        
+        set col = _blue;
+        set dir = 0;
+        
+        for(i in 0 + (time - 60)/14){
+            for(d in 0, 360/c, 360){
+                bullet(_orb, col, e.getPos(), dir + d , 2, -15);
+            }
+            
+            dir -= dirAdd;
+            if(col == _blue){col = _purple;}
+            else{col = _blue;}
+            
+            wait 14;
+            if(e.isDeleted()){return;}
+        }
+    }
+}
