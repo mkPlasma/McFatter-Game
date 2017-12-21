@@ -29,7 +29,10 @@ task thiccBoiDeathFairyKnockOff(x, boolBullet, c, color){
     }
 
     wait 45;
+    
   }
+  
+  
 
 }
 
@@ -60,6 +63,10 @@ task streamShip(x, bool){
     }
 
     wait;
+    if(e.getY() < _ty - 64){
+        e.delete();
+        break;
+    }
   }
 
   task bulletTrack(dir){
@@ -103,6 +110,14 @@ task minionADD(x, bool){
     }
 
     wait;
+    if(e.getX() < _lx - 64 && !bool){
+        e.delete();
+        break;
+    }
+    if(e.getX() < _rx + 64 && bool){
+        e.delete();
+        break;
+    }
   }
 
   task bulletTrack(dir){
