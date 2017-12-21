@@ -20,8 +20,8 @@ for(i in 10){
 wait 300;
 
 set boolBullet = true;
-thiccBoiDeathFairyKnockOff(130, boolBullet, 32);
-thiccBoiDeathFairyKnockOff(330, !boolBullet, 32);
+thiccBoiDeathFairyKnockOff(130, boolBullet, 32, _red);
+thiccBoiDeathFairyKnockOff(330, !boolBullet, 32, _red);
 
 wait 300;
 
@@ -31,7 +31,7 @@ for(i in 20){
   wait 10;
 }
 
-wait 120;
+wait 600;
 
 for(i in 10){
 
@@ -39,16 +39,18 @@ for(i in 10){
   wait 20;
 }
 
+wait 120;
+
 for(i in 10){
 
   streamShip(_lx, bool);
   wait 20;
 }
 
-wait 120;
+wait 240;
 
-thiccBoiDeathFairyKnockOff(_cx, !boolBullet, 56);
-thiccBoiDeathFairyKnockOff(_cx, boolBullet, 56);
+thiccBoiDeathFairyKnockOff(_cx, !boolBullet, 56, _blue);
+thiccBoiDeathFairyKnockOff(_cx, boolBullet, 56, _cyan);
 
 wait 600;
 clearBullets();

@@ -1,5 +1,5 @@
 
-task thiccBoiDeathFairyKnockOff(x, boolBullet, c){
+task thiccBoiDeathFairyKnockOff(x, boolBullet, c, color){
   set e = enemy(_fighter, x, _ty - 30, 1500);
 
   e.setDir(90);
@@ -13,7 +13,7 @@ task thiccBoiDeathFairyKnockOff(x, boolBullet, c){
     for(i in 3){
 
       for(d in 0, 360/c, 360){
-        set b = bullet(_orb, _red, e.getPos(), d , 4, 3);
+        set b = bullet(_orb, color, e.getPos(), d , 4, 3);
 
         if (boolBullet){
           b.setAngVel(.9);
