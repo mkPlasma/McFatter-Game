@@ -31,6 +31,8 @@ for(i in 20){
   wait 10;
 }
 
+wait 120;
+
 for(i in 10){
 
   streamShip(_rx, !bool);
