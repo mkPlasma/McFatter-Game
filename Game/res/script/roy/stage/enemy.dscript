@@ -1,0 +1,146 @@
+
+task thiccBoiDeathFairyKnockOff(x, boolBullet, c){
+  set e = enemy(_fighter, x, _ty - 30, 1500);
+
+  e.setDir(90);
+  e.setSpd(3);
+  e.setAccel(-0.029);
+  e.setMinSpd(0);
+
+  wait 85;
+
+  while(!e.isDeleted()){
+    for(i in 3){
+
+      for(d in 0, 360/c, 360){
+        set b = bullet(_orb, _red, e.getPos(), d , 4, 3);
+
+        if (boolBullet){
+          b.setAngVel(.9);
+        }
+
+        else if (!boolBullet){
+          b.setAngVel(-0.9);
+        }
+
+      }
+
+      wait 10;
+    }
+
+    wait 45;
+  }
+
+}
+
+task streamShip(x, bool){
+
+  set const c = 2;
+  set e = enemy(_radial, x, _by + 300, 25);
+
+  e.setDir(270);
+  e.setAccel(0.03);
+  e.setMaxSpd(5);
+
+  if (bool){
+    e.setAngVel(.1);
+  }
+
+  else if(!bool){
+    e.setAngVel(-0.1);
+  }
+
+  while(!e.isDeleted()){
+
+    if(e.getY() < _by - 100){
+
+      for(d in 0, 360/c, 360){
+          bulletTrack(d + 180/c);
+      }
+    }
+
+    wait;
+  }
+
+  task bulletTrack(dir){
+    set b = bullet(_rice, _blue, e.getPos(), dir, 6, 0, 6, 0.01, 3);
+
+    wait 30;
+
+    if(b.isDeleted()){
+      return;
+    }
+
+    b.setDir(angleToPlayer(b.getPos()));
+    b.setSpd(10);
+  }
+}
+
+task minionADD(x, bool){
+  set e = enemy(_fighter, x, _ty - 70, 25);
+
+  e.setDir(90);
+  e.setAccel(0.03);
+  e.setMaxSpd(5);
+
+  if(bool){
+    e.setAngVel(-0.5);
+  }
+
+  else if(!bool){
+    e.setAngVel(0.5);
+  }
+
+  set const c = 2;
+
+  while(!e.isDeleted()){
+
+    if(e.getY() < _by - 100){
+
+      for(d in 0, 360/c, 360){
+          bulletTrack(d + 90/c);
+      }
+    }
+
+    wait;
+  }
+
+  task bulletTrack(dir){
+    set b = bullet(_scale, _purple, e.getPos(), dir, 6, 0, 6, 0.01, 3);
+
+    wait 30;
+
+    if(b.isDeleted()){
+      return;
+    }
+
+    b.setDir(angleToPlayer(b.getPos()));
+    b.setSpd(10);
+  }
+}
+
+task midBoss(c){
+
+  set e = enemy(_fighter, _cx, _ty - 30, 3000);
+  e.setDir(90);
+  e.setSpd(3);
+  e.setAccel(-0.022);
+  e.setMinSpd(0);
+
+
+  wait 180;
+
+  while(!e.isDeleted()){
+
+  set dir = rand(0,360);
+
+    for(d in 0, 360/c, 360){
+        bullet(_star4, _cyan, e.getPos(), rand(0,360) + d, randFloat(4,6), 0, 6, 0.001, 3);
+        bullet(_scale, _pink, e.getPos(), rand(0,360) + d, randFloat(4,6), 0, 6, 0.001, 3);
+        bullet(_needle, _green, e.getPos(), rand(0,360) + d, randFloat(4,6), 0, 6, 0.001, 3);
+        bullet(_mine, _white, e.getPos(), rand(0,360) + d, randFloat(4,6), 0, 6, 0.001, 3);
+        wait;
+    }
+
+  }
+}
