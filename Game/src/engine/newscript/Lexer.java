@@ -1,5 +1,7 @@
 package engine.newscript;
 
+import static engine.newscript.Token.TokenType.*;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -7,7 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import engine.newscript.Token.TokenType;
-import static engine.newscript.Token.TokenType.*;
 
 public class Lexer extends CompilerUnit{
 	
@@ -52,18 +53,16 @@ public class Lexer extends CompilerUnit{
 		lexmap.put(DOT,				"(\\.)");
 		lexmap.put(SEMICOLON,		"(;)");
 		
-		lexmap.put(NUM_OP,			"([\\+\\-\\*/%\\^]{1})");
-		lexmap.put(COMPARISON,		"([<>(==)(<=)(>=)(\\!=)])");
-		lexmap.put(BOOL_OP,			"([\\|&]{2})");
-		lexmap.put(BOOL_UNARY,		"(\\!)");
-		lexmap.put(ASSIGNMENT,		"([=(\\+=)(-=)(\\*=)(/=)(%=)(\\^=)])");
-		lexmap.put(UNARY_ASSIGN,	"([\\+\\-\\!]{2})");
-		
-		lexmap.put(INT,				"(\\d++)");
-		lexmap.put(FLOAT,			"(\\d++\\.\\d++)");
-		lexmap.put(TRUE,			"(true)\\b");
-		lexmap.put(FALSE,			"(false)\\b");
+		lexmap.put(INT,				"((-\\s*)?\\d++)");
+		lexmap.put(FLOAT,			"((-\\s*)?\\d++\\.\\d++)");
+		lexmap.put(BOOLEAN,			"([(true)(false)])\\b");
 		lexmap.put(STRING,			"((\".*?[^\\\\]\")|(\"\"))");
+		
+		lexmap.put(UNARY_ASSIGN,	"([\\+\\-\\!]{2})");
+		lexmap.put(AUG_ASSIGN,		"([(\\+=)(\\-=)(\\*=)(/=)(%=)(\\^=)])");
+		lexmap.put(OPERATOR,		"([\\+\\-\\*/%\\^<>]|[\\|&]{2}|==|<=|>=|\\!=)");
+		lexmap.put(BOOL_UNARY,		"(\\!)");
+		lexmap.put(EQUALS,			"(=)");
 	}
 	
 	public void reset(){
@@ -73,8 +72,9 @@ public class Lexer extends CompilerUnit{
 	public void process(DScript script){
 		
 		String[] file = script.getFile();
+		script.clearFile();
 		
-		// Build tokens for each lien
+		// Build tokens for each line
 		for(String line:file){
 			
 			if(line.isEmpty() || line.startsWith("$"))
@@ -82,6 +82,11 @@ public class Lexer extends CompilerUnit{
 			
 			buildTokens(line);
 		}
+		
+		script.setTokens(tokens.toArray(new Token[0]));
+		
+		
+		//ScriptPrinter.printTokens(script.getTokens());
 	}
 	
 	private void buildTokens(String line){
@@ -109,8 +114,18 @@ public class Lexer extends CompilerUnit{
 					// Cut token out of line
 					line = line.substring(token.length()).trim();
 					
+					TokenType type = e.getKey();
+					
+					// Remove space if negative number
+					if(type == INT || type == FLOAT)
+						token = token.replace(" ", "");
+					
+					// Remove quotes if string
+					if(type == STRING)
+						token = token.substring(0, token.length() - 1).substring(1);
+					
 					// Add token
-					tokens.add(new Token(e.getKey(), token));
+					tokens.add(new Token(type, token));
 					
 					invalid = false;
 					break;

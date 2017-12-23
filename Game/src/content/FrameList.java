@@ -78,6 +78,44 @@ public class FrameList{
 		return enemyList.get(type);
 	}
 	
+	public static String[][] getVars(){
+		
+		int len = BulletList.types.length + 
+			EnemyList.types.length + 
+			colors.length*2;
+		
+		String[][] vars = new String[len][2];
+		
+		int offset = 0;
+		len = BulletList.types.length;
+
+		for(int i = 0; i < len; i++){
+			vars[i][0] = "_" + BulletList.types[i];
+			vars[i][1] = Integer.toString(i);
+		}
+		
+		offset += len;
+		len = EnemyList.types.length;
+		
+		for(int i = 0; i < len; i++){
+			vars[i + offset][0] = "_" + EnemyList.types[i];
+			vars[i + offset][1] = Integer.toString(i);
+		}
+		
+		offset += len;
+		len = colors.length;
+		
+		for(int i = 0; i < len; i++){
+			vars[i + offset][0] = "_" + colors[i];
+			vars[i + offset][1] = Integer.toString(i);
+			vars[i + offset + len][0] = colors[i] + "_d";
+			vars[i + offset + len][1] = Integer.toString(i + len);
+		}
+		
+		return vars;
+	}
+	
+	// decaprated
 	public static int getVarNum(String var){
 		
 		// Bullet types

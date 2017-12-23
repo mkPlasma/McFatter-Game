@@ -1,6 +1,5 @@
 package engine.entities;
 
-import content.FrameList;
 import engine.screens.MainScreen;
 
 public class BossEnemy extends Enemy{

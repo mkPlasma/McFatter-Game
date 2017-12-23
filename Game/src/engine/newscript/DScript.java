@@ -5,6 +5,7 @@ public class DScript{
 	private final String path;
 	
 	private String[] file;
+	private Token[] tokens;
 	
 	public DScript(String path){
 		this.path = "Game/res/script/" + path;
@@ -22,7 +23,23 @@ public class DScript{
 		this.file = file;
 	}
 	
+	public void clearFile(){
+		file = null;
+	}
+	
 	public String[] getFile(){
 		return file;
+	}
+	
+	public void setTokens(Token[] tokens){
+		this.tokens = tokens;
+	}
+	
+	public void clearTokens(){
+		tokens = null;
+	}
+	
+	public Token[] getTokens(){
+		return tokens;
 	}
 }

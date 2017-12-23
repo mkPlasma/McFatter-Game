@@ -2,7 +2,6 @@ package engine.script;
 
 import java.util.ArrayList;
 
-import content.FrameList;
 import engine.entities.Player;
 import engine.screens.MainScreen;
 

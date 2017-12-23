@@ -6,6 +6,8 @@ import engine.IOFunctions;
 
 public class Preprocessor extends CompilerUnit{
 	
+	private final Sweetener sweetener;
+	
 	private DScript script;
 	
 	private ArrayList<String> file;
@@ -14,6 +16,7 @@ public class Preprocessor extends CompilerUnit{
 	
 	public Preprocessor(Compiler compiler){
 		super(compiler);
+		sweetener = new Sweetener(compiler);
 	}
 	
 	public void process(DScript script){
@@ -34,6 +37,7 @@ public class Preprocessor extends CompilerUnit{
 		}
 		
 		process();
+		sweetener.process(script);
 	}
 	
 	private void process(){
@@ -61,28 +65,33 @@ public class Preprocessor extends CompilerUnit{
 			}
 			
 			// Single-line comment
-			int ind = line.indexOf("//");
+			int ind = 0;
+			int offset = 0;
 			
-			if(ind > -1){
+			do{
+				ind = line.substring(offset).indexOf("//");
 				
-				// Check that comment is not in string
-				int q = 0;
-				
-				for(int j = 0; j < ind; j++){
-					if(line.charAt(j) == '"' && (j == 0 || (j > 0 && line.charAt(j - 1) != '\\')))
-						q++;
+				if(ind > -1){
+					ind += offset;
+					
+					// Check that comment is not in string
+					int q = 0;
+					
+					for(int j = 0; j < ind; j++){
+						if(line.charAt(j) == '"' && (j == 0 || (j > 0 && line.charAt(j - 1) != '\\')))
+							q++;
+					}
+					
+					// If not in string, remove and replace
+					if(q%2 == 0)
+						file.set(i, line.substring(0, ind));
+					
+					offset = ind + 2;
 				}
-				
-				// If not in string, remove and replace
-				if(q%2 == 0)
-					file.set(i, line.substring(0, ind));
-			}
+			}while(ind > -1);
 			
 			lineNum++;
 		}
-		
-		for(String l:file)
-			System.out.println(l);
 		
 		script.setFile(file.toArray(new String[0]));
 	}

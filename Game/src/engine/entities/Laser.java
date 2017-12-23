@@ -2,7 +2,6 @@ package engine.entities;
 
 import content.BulletList;
 import content.EffectList;
-import content.FrameList;
 import engine.screens.MainScreen;
 
 /*

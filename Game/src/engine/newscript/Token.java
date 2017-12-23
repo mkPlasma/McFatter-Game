@@ -29,18 +29,16 @@ public class Token{
 		DOT,
 		SEMICOLON,
 		
-		NUM_OP,
-		COMPARISON,
-		BOOL_OP,
-		BOOL_UNARY,
-		ASSIGNMENT,
-		UNARY_ASSIGN,
-		
 		INT,
 		FLOAT,
-		TRUE,
-		FALSE,
+		BOOLEAN,
 		STRING,
+		
+		OPERATOR,
+		BOOL_UNARY,
+		EQUALS,
+		AUG_ASSIGN,
+		UNARY_ASSIGN,
 		
 		LINE,
 		FILE;
