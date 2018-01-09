@@ -1,5 +1,8 @@
 package engine.newscript;
 
+import engine.newscript.lexer.Token;
+import engine.newscript.parser.ParseUnit;
+
 public class ScriptPrinter{
 	
 	public static void printTokens(Token[] tokens){
