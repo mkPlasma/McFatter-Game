@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
+import engine.newscript.ScriptPrinter;
 import engine.newscript.lexer.Token;
 
 public class ParseTreeSimplifier{
@@ -18,6 +19,8 @@ public class ParseTreeSimplifier{
 		parseTree = script.getParseTree();
 		
 		simplifyExpressions();
+		
+		ScriptPrinter.printParseTree(parseTree.toArray(new Object[0]));
 	}
 	
 	private void simplifyExpressions() throws ScriptException{

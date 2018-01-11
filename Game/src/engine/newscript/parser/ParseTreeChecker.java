@@ -15,9 +15,10 @@ public class ParseTreeChecker{
 	
 	private ArrayList<Object> tree;
 	
-	
+
 	private final ParseTreeExpressionChecker expressionChecker;
 	private final ParseTreeContextChecker contextChecker;
+	private final ParseTreeScopeChecker scopeChecker;
 	private final ParseTreeListChecker listChecker;
 	
 	public ParseTreeChecker(Grammar grammar){
@@ -29,6 +30,7 @@ public class ParseTreeChecker{
 
 		expressionChecker	= new ParseTreeExpressionChecker();
 		contextChecker		= new ParseTreeContextChecker();
+		scopeChecker			= new ParseTreeScopeChecker();
 		listChecker			= new ParseTreeListChecker();
 	}
 	

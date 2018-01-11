@@ -12,10 +12,10 @@ public class ParseTreeContextChecker{
 		ArrayList<Object> parseTree = script.getParseTree();
 		
 		for(Object o:parseTree)
-			check((ParseUnit)o);
+			check((ParseUnit)o, null);
 	}
 	
-	private void check(ParseUnit p) throws ScriptException{
+	private void check(ParseUnit p, ParseUnit prev) throws ScriptException{
 		
 		Object[] contents = p.getContents();
 		
@@ -53,9 +53,16 @@ public class ParseTreeContextChecker{
 		}
 		
 		
-		for(Object o:contents)
-			if(o instanceof ParseUnit)
-				check((ParseUnit)o);
+		for(int i = 0; i < contents.length; i++){
+			
+			Object o1 = contents[i];
+			
+			Object o2 = i > 0 ? contents[i - 1] : null;
+			o2 = o2 instanceof ParseUnit ? (ParseUnit)o2 : null;
+			
+			if(o1 instanceof ParseUnit)
+				check((ParseUnit)o1, (ParseUnit)o2);
+		}
 	}
 	
 	private boolean isWithin(ParseUnit p, String type){
