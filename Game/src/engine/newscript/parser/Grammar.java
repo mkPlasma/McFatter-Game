@@ -53,12 +53,17 @@ public class Grammar{
 				{FOR, PAREN_L, IDENTIFIER, IN, "list", PAREN_R},
 			}),
 			
-
+			
 			// Prioritize certain statements above expression
+			new Rule("func_call_pre", new Object[][]{
+				{IDENTIFIER, PAREN_L},
+				{IDENTIFIER, LESS_THAN, "expression", GREATER_THAN, PAREN_L},
+			}),
+			
 			new Rule("func_call", new Object[][]{
-				{IDENTIFIER, PAREN_L, PAREN_R},
-				{IDENTIFIER, PAREN_L, "expression", PAREN_R},
-				{IDENTIFIER, PAREN_L, "list", PAREN_R},
+				{"func_call_pre", PAREN_R},
+				{"func_call_pre", "expression", PAREN_R},
+				{"func_call_pre", "list", PAREN_R},
 			}),
 			
 			new Rule("dot_func_call", new Object[][]{
@@ -95,10 +100,14 @@ public class Grammar{
 				{BRACE_L, IDENTIFIER, BRACE_R},
 				{BRACE_L, "list", BRACE_R},
 			}),
-			
+
 			new Rule("array_elem", new Object[][]{
 				{IDENTIFIER, BRACKET_L, "expression", BRACKET_R},
 				{"array", BRACKET_L, "expression", BRACKET_R},
+			}),
+			
+			new Rule("scope_variable", new Object[][]{
+				{IDENTIFIER, LESS_THAN, "expression", GREATER_THAN},
 			}),
 			
 			
@@ -152,6 +161,11 @@ public class Grammar{
 				{WAIT, UNTIL, "expression"},
 			}),
 			
+			new Rule("conditional", new Object[][]{
+				{"expression", MINUS, "expression", COLON, "expression"},
+				{"conditional", COLON, "expression", CONCAT}
+			}),
+			
 			
 			// Expressions
 			new Rule("expression", new Object[][]{
@@ -172,6 +186,8 @@ public class Grammar{
 				{"expression", OPERATOR2, "expression"},
 				{"expression", OPERATOR3, "expression"},
 				{"expression", OPERATOR4, "expression"},
+				{"expression", LESS_THAN, "expression"},
+				{"expression", GREATER_THAN, "expression"},
 				{"expression", OPERATOR5, "expression"},
 			}),
 			

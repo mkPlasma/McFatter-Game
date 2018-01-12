@@ -1,5 +1,11 @@
 
 function test(x, y, z){
+	x++;
 	
-	set ty;
+	some(1, 2);
+	function some(x, y){
+		x++;
+	}
 }
+
+test2(1, 2);

@@ -27,27 +27,19 @@ public class ParseTreeFunctionChecker{
 			process((ParseUnit)o);
 	}
 	
-	private void process(ParseUnit p){
+	private void process(ParseUnit p) throws ScriptException{
 		
 		boolean isBlock = p.getType().equals("s_block");
 		
-		// Push new list for each new block
 		if(isBlock){
+			// Push new list for each new block
 			pushFunctionList();
+			
+			// Add all functions defined within the block
 			addFunctions(p);
 		}
-		
-		Object[] contents = p.getContents();
-		
-		for(Object o:contents){
-			
-		}
-		
-		if(isBlock)
-			popFunctionList();
-	}
-	
-	private void addFunctions(ParseUnit p){
+		else
+			checkFunctions(p);
 		
 		Object[] contents = p.getContents();
 		
@@ -56,31 +48,73 @@ public class ParseTreeFunctionChecker{
 			if(!(o instanceof ParseUnit))
 				continue;
 			
+			process((ParseUnit)o);
+		}
+		
+		if(isBlock)
+			popFunctionList();
+	}
+	
+	private void addFunctions(ParseUnit p) throws ScriptException{
+		
+		addFunction(p, 1);
+		
+		Object[] contents = p.getContents();
+		
+		for(Object o:contents){
+			
+			if(!(o instanceof ParseUnit))
+				continue;
 			
 			ParseUnit p2 = (ParseUnit)o;
 			
-			if(p2.getType().equals("s_block")){
-				
-				p2 = (ParseUnit)p2.getContents()[0];
-				String type = p2.getType();
-				
-				if(!type.equals("func_block") && !type.equals("task_block"))
-					continue;
-				
-				// func_def/task_def
-				p2 = (ParseUnit)p2.getContents()[0];
-				Object[] cont = p2.getContents();
-				
-				String name = ((Token)((ParseUnit)cont[0]).getContents()[0]).getValue();
-				int params = cont.length == 1 ? 0 : ((ParseUnit)cont[1]).getContents().length;
-				
-				addFunction(name, params);
-			}
+			if(p2.getType().equals("s_block"))
+				addFunction((ParseUnit)o, 0);
+			else
+				addFunctions((ParseUnit)o);
 		}
 	}
 	
-	private void checkFunctions(ParseUnit p){
+	private void addFunction(ParseUnit p, int scope) throws ScriptException{
 		
+		if(p.getType().equals("s_block")){
+			
+			p = (ParseUnit)p.getContents()[0];
+			String type = p.getType();
+			
+			if(!type.equals("func_block") && !type.equals("task_block"))
+				return;
+			
+			// func_def/task_def
+			p = (ParseUnit)p.getContents()[0];
+			Object[] cont = p.getContents();
+			
+			Token t = (Token)((ParseUnit)cont[0]).getContents()[0];
+			
+			String func = t.getValue();
+			int params = cont.length == 1 ? 0 : ((ParseUnit)cont[1]).getContents().length;
+			
+			if(functionExists(func, params))
+				throw new ScriptException("Duplicate function '" + func + "'", t.getFile(), t.getLineNum());
+			
+			addFunction(func, params, scope);
+		}
+	}
+	
+	private void checkFunctions(ParseUnit p) throws ScriptException{
+		
+		if(!p.getType().equals("func_call"))
+			return;
+		
+		Object[] contents = p.getContents();
+		
+		Token t = (Token)((ParseUnit)contents[0]).getContents()[0];
+		String func = t.getValue();
+		
+		int params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getContents().length;
+		
+		if(!functionExists(func, params))
+			throwUndefinedFunctionException(func, t);
 	}
 	
 	private void pushFunctionList(){
@@ -91,7 +125,29 @@ public class ParseTreeFunctionChecker{
 		functions.pop();
 	}
 	
-	private void addFunction(String name, int paramCount){
-		functions.peek().add(name + "," + paramCount);
+	private void addFunction(String name, int paramCount, int scope){
+		functions.get(functions.size() - 1 - scope).add(name + "," + paramCount);
+	}
+	
+	private boolean functionExists(String func, int paramCount){
+		
+		func += "," + paramCount;
+		
+		for(ArrayList<String> funcs:functions)
+			for(String f:funcs)
+				if(f.equals(func))
+					return true;
+		
+		return false;
+	}
+	
+	private void throwUndefinedFunctionException(String func, Token t) throws ScriptException{
+		
+		for(ArrayList<String> funcs:functions)
+			for(String f:funcs)
+				if(f.substring(0, f.indexOf(',')).equals(func))
+					throw new ScriptException("Incorrect parameter count for function/task '" + func + "'", t.getFile(), t.getLineNum());
+		
+		throw new ScriptException("Function/task '" + func + "' is not defined", t.getFile(), t.getLineNum());
 	}
 }
