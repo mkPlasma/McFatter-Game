@@ -1,10 +1,14 @@
-package engine.newscript.parser;
+package engine.newscript.parser.checker;
 
 import java.util.ArrayList;
 
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
+import engine.newscript.parser.Errors;
+import engine.newscript.parser.Grammar;
+import engine.newscript.parser.ParseUnit;
+import engine.newscript.parser.Rule;
 
 public class ParseTreeChecker{
 	
@@ -15,10 +19,10 @@ public class ParseTreeChecker{
 	
 	private ArrayList<Object> tree;
 	
-
+	private final ParseTreeVariableChecker variableChecker;
+	private final ParseTreeFunctionChecker functionChecker;
 	private final ParseTreeExpressionChecker expressionChecker;
 	private final ParseTreeContextChecker contextChecker;
-	private final ParseTreeScopeChecker scopeChecker;
 	private final ParseTreeListChecker listChecker;
 	
 	public ParseTreeChecker(Grammar grammar){
@@ -27,10 +31,11 @@ public class ParseTreeChecker{
 		
 		finalRules = grammar.getFinalValid();
 		errorRules = errors.getRules();
-
+		
+		variableChecker		= new ParseTreeVariableChecker();
+		functionChecker		= new ParseTreeFunctionChecker();
 		expressionChecker	= new ParseTreeExpressionChecker();
 		contextChecker		= new ParseTreeContextChecker();
-		scopeChecker			= new ParseTreeScopeChecker();
 		listChecker			= new ParseTreeListChecker();
 	}
 	
@@ -65,7 +70,9 @@ public class ParseTreeChecker{
 		for(Object o:tree)
 			if(o instanceof Token)
 				throw new ScriptException("Syntax error", ((Token)o).getFile(), ((Token)o).getLineNum());
-		
+
+		variableChecker.process(script);
+		functionChecker.process(script);
 		expressionChecker.process(script);
 		contextChecker.process(script);
 		listChecker.process(script);

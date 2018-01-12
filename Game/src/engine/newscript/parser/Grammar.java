@@ -14,41 +14,42 @@ public class Grammar{
 		rules = new Rule[]{
 			
 			// Define parts of blocks
+			new Rule("func_name_def", new Object[][]{
+				{FUNCTION, IDENTIFIER},
+			}),
+			
 			new Rule("func_def", new Object[][]{
-				{FUNCTION, IDENTIFIER, PAREN_L, PAREN_R},
-				{FUNCTION, IDENTIFIER, PAREN_L, IDENTIFIER, PAREN_R},
-				{FUNCTION, IDENTIFIER, PAREN_L, "list", PAREN_R},
+				{"func_name_def", PAREN_L, PAREN_R},
+				{"func_name_def", PAREN_L, "list", PAREN_R},
+			}),
+			
+			new Rule("task_name_def", new Object[][]{
+				{TASK, IDENTIFIER},
 			}),
 			
 			new Rule("task_def", new Object[][]{
-				{TASK, IDENTIFIER, PAREN_L, PAREN_R},
-				{TASK, IDENTIFIER, PAREN_L, IDENTIFIER, PAREN_R},
-				{TASK, IDENTIFIER, PAREN_L, "list", PAREN_R},
+				{"task_name_def", PAREN_L, PAREN_R},
+				{"task_name_def", PAREN_L, "list", PAREN_R},
 			}),
 			
 			new Rule("if_cond", new Object[][]{
 				{IF, PAREN_L, "expression", PAREN_R},
-				{IF, PAREN_L, IDENTIFIER, PAREN_R},
 			}),
 			
 			new Rule("if_else_cond", new Object[][]{
 				{IF, ELSE, PAREN_L, "expression", PAREN_R},
-				{IF, ELSE, PAREN_L, IDENTIFIER, PAREN_R},
 			}),
 			
 			new Rule("while_cond", new Object[][]{
 				{WHILE, PAREN_L, "expression", PAREN_R},
-				{WHILE, PAREN_L, IDENTIFIER, PAREN_R},
 			}),
 			
 			new Rule("until_cond", new Object[][]{
 				{UNTIL, PAREN_L, "expression", PAREN_R},
-				{UNTIL, PAREN_L, IDENTIFIER, PAREN_R},
 			}),
 			
 			new Rule("for_cond", new Object[][]{
 				{FOR, PAREN_L, IDENTIFIER, IN, "expression", PAREN_R},
-				{FOR, PAREN_L, IDENTIFIER, IN, IDENTIFIER, PAREN_R},
 				{FOR, PAREN_L, IDENTIFIER, IN, "list", PAREN_R},
 			}),
 			
@@ -57,7 +58,6 @@ public class Grammar{
 			new Rule("func_call", new Object[][]{
 				{IDENTIFIER, PAREN_L, PAREN_R},
 				{IDENTIFIER, PAREN_L, "expression", PAREN_R},
-				{IDENTIFIER, PAREN_L, IDENTIFIER, PAREN_R},
 				{IDENTIFIER, PAREN_L, "list", PAREN_R},
 			}),
 			
@@ -76,6 +76,19 @@ public class Grammar{
 				{"array_elem", UNARY_ASSIGN},
 			}),
 			
+			
+			// Values
+			new Rule("expression_p", new Object[][]{
+				{PAREN_L, "expression", PAREN_R},
+			}),
+			
+			new Rule("list", new Object[][]{
+				{"expression", COMMA, "expression"},
+				{"list", COMMA, "list", CONCAT},
+				{"list", COMMA, "expression", CONCAT},
+				{"expression", COMMA, "list", CONCAT},
+			}),
+			
 			new Rule("array", new Object[][]{
 				{BRACE_L, BRACE_R},
 				{BRACE_L, "expression", BRACE_R},
@@ -89,72 +102,21 @@ public class Grammar{
 			}),
 			
 			
-			// Expressions
-			new Rule("expression", new Object[][]{
-				{INT},
-				{FLOAT},
-				{BOOLEAN},
-				{STRING},
-				{"func_call"},
-				{"dot_func_call"},
-				{"array"},
-				{"array_elem"},
-				{"expression_p"},
-				
-				// Operator precedence
-				{BOOL_UNARY, "expression"},
-				{BOOL_UNARY, IDENTIFIER},
-				{"expression", OPERATOR1, "expression"},
-				{"expression", OPERATOR1, IDENTIFIER},
-				{IDENTIFIER, OPERATOR1, "expression"},
-				{IDENTIFIER, OPERATOR1, IDENTIFIER},
-				{"expression", OPERATOR2, "expression"},
-				{"expression", OPERATOR2, IDENTIFIER},
-				{IDENTIFIER, OPERATOR2, "expression"},
-				{IDENTIFIER, OPERATOR2, IDENTIFIER},
-				{"expression", OPERATOR3, "expression"},
-				{"expression", OPERATOR3, IDENTIFIER},
-				{IDENTIFIER, OPERATOR3, "expression"},
-				{IDENTIFIER, OPERATOR3, IDENTIFIER},
-				{"expression", OPERATOR4, "expression"},
-				{"expression", OPERATOR4, IDENTIFIER},
-				{IDENTIFIER, OPERATOR4, "expression"},
-				{IDENTIFIER, OPERATOR4, IDENTIFIER},
-				{"expression", OPERATOR5, "expression"},
-				{"expression", OPERATOR5, IDENTIFIER},
-				{IDENTIFIER, OPERATOR5, "expression"},
-				{IDENTIFIER, OPERATOR5, IDENTIFIER},
-			}),
-			
-			new Rule("expression_p", new Object[][]{
-				{PAREN_L, "expression", PAREN_R},
-				{PAREN_L, IDENTIFIER, PAREN_R},
-			}),
-			
-			new Rule("list", new Object[][]{
-				{"expression", COMMA, "expression"},
-				{"expression", COMMA, IDENTIFIER},
-				{IDENTIFIER, COMMA, "expression"},
-				{IDENTIFIER, COMMA, IDENTIFIER},
-				{"list", COMMA, "list", CONCAT},
-				{"list", COMMA, "expression", CONCAT},
-				{"list", COMMA, IDENTIFIER, CONCAT},
-				{"expression", COMMA, "list", CONCAT},
-				{IDENTIFIER, COMMA, "list", CONCAT},
-			}),
-			
-			
 			// Statements
 			new Rule("new_var", new Object[][]{
 				{SET, IDENTIFIER},
+			}),
+			
+			new Rule("new_const_var", new Object[][]{
+				{SET, CONST, IDENTIFIER},
 			}),
 			
 			new Rule("new_var_def", new Object[][]{
 				{"new_var", EQUALS, "expression"},
 			}),
 			
-			new Rule("new_const_var", new Object[][]{
-				{SET, CONST, IDENTIFIER, EQUALS, "expression"},
+			new Rule("const_var_def", new Object[][]{
+				{"new_const_var", EQUALS, "expression"},
 			}),
 			
 			new Rule("assignment", new Object[][]{
@@ -169,30 +131,48 @@ public class Grammar{
 			
 			new Rule("return", new Object[][]{
 				{RETURN, "expression"},
-				{RETURN, IDENTIFIER},
 				{RETURN},
 			}),
 			
 			new Rule("wait", new Object[][]{
 				{WAIT, "expression"},
-				{WAIT, IDENTIFIER},
 				{WAIT},
 			}),
 			
 			new Rule("waits", new Object[][]{
 				{WAITS, "expression"},
-				{WAITS, IDENTIFIER},
 				{WAITS},
 			}),
 			
 			new Rule("wait_while", new Object[][]{
 				{WAIT, WHILE, "expression"},
-				{WAIT, WHILE, IDENTIFIER},
 			}),
 			
 			new Rule("wait_until", new Object[][]{
 				{WAIT, UNTIL, "expression"},
-				{WAIT, UNTIL, IDENTIFIER},
+			}),
+			
+			
+			// Expressions
+			new Rule("expression", new Object[][]{
+				{INT},
+				{FLOAT},
+				{BOOLEAN},
+				{STRING},
+				{IDENTIFIER},
+				{"func_call"},
+				{"dot_func_call"},
+				{"array"},
+				{"array_elem"},
+				{"expression_p"},
+				
+				// Operator precedence
+				{BOOL_UNARY, "expression"},
+				{"expression", OPERATOR1, "expression"},
+				{"expression", OPERATOR2, "expression"},
+				{"expression", OPERATOR3, "expression"},
+				{"expression", OPERATOR4, "expression"},
+				{"expression", OPERATOR5, "expression"},
 			}),
 			
 			
@@ -200,7 +180,7 @@ public class Grammar{
 			new Rule("statement", new Object[][]{
 				{"new_var",			SEMICOLON},
 				{"new_var_def", 	SEMICOLON},
-				{"new_const_var",	SEMICOLON},
+				{"const_var_def",	SEMICOLON},
 				{"assignment",		SEMICOLON},
 				{"break",			SEMICOLON},
 				{"return",			SEMICOLON},

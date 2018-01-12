@@ -12,7 +12,7 @@ public class Errors{
 			new Object[][]{
 				{"new_var"},
 				{"new_var_def"},
-				{"new_const_var"},
+				{"const_var_def"},
 				{"assignment"},
 				{"break"},
 				{"return"},

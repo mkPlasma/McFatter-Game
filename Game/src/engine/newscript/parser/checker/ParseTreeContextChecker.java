@@ -1,9 +1,10 @@
-package engine.newscript.parser;
+package engine.newscript.parser.checker;
 
 import java.util.ArrayList;
 
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
+import engine.newscript.parser.ParseUnit;
 
 public class ParseTreeContextChecker{
 	

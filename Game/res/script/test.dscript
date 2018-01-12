@@ -1,1 +1,5 @@
-set x;
+
+function test(x, y, z){
+	
+	set ty;
+}

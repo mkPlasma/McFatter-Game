@@ -1,4 +1,4 @@
-package engine.newscript.parser;
+package engine.newscript.parser.checker;
 
 import static engine.newscript.parser.ParseUtil.*;
 
@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
+import engine.newscript.parser.ParseUnit;
 
 public class ParseTreeExpressionChecker{
 	
@@ -55,7 +56,7 @@ public class ParseTreeExpressionChecker{
 						
 						break;
 					
-					case "new_const_var":
+					case "const_var_def":
 						
 						if(t == T_ANY)
 							throw new ScriptException("Constant variable must be defined in terms of literals only", p.getFile(), p.getLineNum());

@@ -1,4 +1,4 @@
-package engine.newscript.parser;
+package engine.newscript.parser.checker;
 
 import static engine.newscript.lexer.TokenType.*;
 
@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
+import engine.newscript.parser.ParseUnit;
 
 public class ParseTreeListChecker{
 	
@@ -48,9 +49,12 @@ public class ParseTreeListChecker{
 		else if(parentType.equals("func_def") || parentType.equals("task_def")){
 			
 			Object[] contents = p.getContents();
-
+			
 			for(Object o:contents){
-				if(!(o instanceof Token) || (o instanceof Token && ((Token)o).getType() != IDENTIFIER))
+				
+				Object[] cont = ((ParseUnit)o).getContents();
+				
+				if(cont.length > 1 || !(cont[0] instanceof Token) || ((Token)cont[0]).getType() != IDENTIFIER)
 					throw new ScriptException("Invalid function/task parameters", p.getFile(), p.getLineNum());
 			}
 		}

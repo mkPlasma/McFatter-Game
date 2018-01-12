@@ -1,4 +1,4 @@
-package engine.newscript.parser;
+package engine.newscript.parser.checker;
 
 import static engine.newscript.lexer.TokenType.*;
 
@@ -8,14 +8,15 @@ import java.util.Stack;
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
+import engine.newscript.parser.ParseUnit;
 
-public class ParseTreeScopeChecker{
+public class ParseTreeVariableChecker{
 	
 	// Stack for each block
 	private Stack<ArrayList<String>> variables;
 	private Stack<ArrayList<String>> constVariables;
 	
-	public ParseTreeScopeChecker(){
+	public ParseTreeVariableChecker(){
 		variables		= new Stack<ArrayList<String>>();
 		constVariables	= new Stack<ArrayList<String>>();
 	}
@@ -40,12 +41,13 @@ public class ParseTreeScopeChecker{
 		if(isBlock)
 			pushVarList();
 		
-		// Check if used variables exist
-		checkVariables(p);
-		
-		// Add new variables in current ParseUnit
-		addVariables(p);
-		
+		else{
+			// Check if used variables exist
+			checkVariables(p);
+			
+			// Add new variables defined in current ParseUnit
+			addVariables(p);
+		}
 		
 		Object[] contents = p.getContents();
 		
@@ -71,17 +73,40 @@ public class ParseTreeScopeChecker{
 				
 			case "expression":
 				
-				for(Object o:contents){
-					
-					if(o instanceof ParseUnit || (o instanceof Token && ((Token)o).getType() != IDENTIFIER))
-						continue;
-					
-					Token t = (Token)o;
-					String var = t.getValue();
-					
-					if(!variableExists(var))
-						throwUndefinedVar(var, t);
-				}
+				if(contents.length > 1 || !(contents[0] instanceof Token))
+					return;
+				
+				Token t = (Token)contents[0];
+				
+				if(t.getType() != IDENTIFIER)
+					return;
+				
+				String var = t.getValue();
+				
+				if(!variableExists(var))
+					throwUndefinedVarException(var, t);
+				
+				break;
+				
+				
+			case "new_var": case "new_const_var": case "for_cond":
+				
+				t = (Token)contents[0];
+				var = t.getValue();
+				
+				if(variableExistsInScope(var))
+					throwVarExistsException(var, t);
+				
+				break;
+				
+				
+			case "assignment":
+
+				t = (Token)contents[0];
+				var = t.getValue();
+				
+				if(isConstantVariable(var))
+					throw new ScriptException("Constant variables cannot be modified", t.getFile(), t.getLineNum());
 				
 				break;
 		}
@@ -94,6 +119,16 @@ public class ParseTreeScopeChecker{
 		
 		switch(p.getType()){
 				
+			case "new_var": case "for_cond":
+				addVariable(((Token)contents[0]).getValue());
+				break;
+				
+				
+			case "new_const_var":
+				addConstVariable(((Token)contents[0]).getValue());
+				break;
+				
+				
 			case "func_def": case "task_def":
 				
 				if(contents.length < 2)
@@ -103,18 +138,8 @@ public class ParseTreeScopeChecker{
 				contents = list.getContents();
 				
 				for(Object o:contents)
-					addVariable(((Token)o).getValue());
+					addVariable(((Token)((ParseUnit)o).getContents()[0]).getValue());
 				
-				break;
-				
-				
-			case "for_cond": case "new_var":
-				addVariable(((Token)contents[0]).getValue());
-				break;
-				
-				
-			case "new_const_var":
-				addConstVariable(((Token)contents[0]).getValue());
 				break;
 		}
 	}
@@ -144,10 +169,42 @@ public class ParseTreeScopeChecker{
 				if(v.equals(var))
 					return true;
 		
+		return isConstantVariable(var);
+	}
+	
+	private boolean isConstantVariable(String var){
+		
+		for(ArrayList<String> vars:constVariables)
+			for(String v:vars)
+				if(v.equals(var))
+					return true;
+		
 		return false;
 	}
 	
-	private void throwUndefinedVar(String var, Token t) throws ScriptException{
+	private boolean variableExistsInScope(String var){
+		
+		ArrayList<String> vars = variables.peek();
+		
+		for(String v:vars)
+			if(v.equals(var))
+				return true;
+		
+		
+		vars = constVariables.peek();
+		
+		for(String v:vars)
+			if(v.equals(var))
+				return true;
+		
+		return false;
+	}
+	
+	private void throwUndefinedVarException(String var, Token t) throws ScriptException{
 		throw new ScriptException("Variable '" + var + "' is not defined", t.getFile(), t.getLineNum());
+	}
+	
+	private void throwVarExistsException(String var, Token t) throws ScriptException{
+		throw new ScriptException("Duplicate variable '" + var + "'", t.getFile(), t.getLineNum());
 	}
 }
