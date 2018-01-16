@@ -9,7 +9,7 @@ import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
-public class ParseTreeExpressionChecker{
+public class ExpressionChecker{
 	
 	private ArrayList<Object> parseTree;
 	
@@ -39,12 +39,13 @@ public class ParseTreeExpressionChecker{
 				
 				// Check required types
 				switch(p.getType()){
-					case "if_cond": case "if_else_cond": case "while_cond": case "until_cond":
+					case "if_cond": case "if_else_cond": case "while_cond": case "until_cond": case "returnif":
 						
 						if((t & T_BOOL) <= 0)
 							throw new ScriptException("Expression must output boolean", p.getFile(), p.getLineNum());
 						
 						break;
+						
 						
 					case "list":
 						
@@ -55,7 +56,8 @@ public class ParseTreeExpressionChecker{
 							throw new ScriptException("Expression must output number", p.getFile(), p.getLineNum());
 						
 						break;
-					
+						
+						
 					case "const_var_def":
 						
 						if(t == T_ANY)
@@ -81,6 +83,15 @@ public class ParseTreeExpressionChecker{
 			if(t != -1)
 				return t;
 			
+			// Parenthesized expression
+			Object o = contents[0];
+			
+			if(o instanceof ParseUnit && ((ParseUnit)o).getType().equals("expression_p"))
+				t = checkExpression((ParseUnit)((ParseUnit)o).getContents()[0]);
+			
+			if(t != -1)
+				return t;
+			
 			// Single non-value
 			checkExpressions(p);
 			return T_ANY;
@@ -95,7 +106,7 @@ public class ParseTreeExpressionChecker{
 			
 			Object val1 = getValue(c1);
 			Object val2 = getValue(c3);
-
+			
 			int t1 = getValueType(val1);
 			int t2 = getValueType(val2);
 			
@@ -117,11 +128,16 @@ public class ParseTreeExpressionChecker{
 				}
 			}
 			
-			// Variable/function call
-			if(t1 == -1 || t2 == -1 || !(c2 instanceof Token))
-				return T_ANY;
-
+			if(!(c2 instanceof Token))
+				return -1;
+			
+			
 			Token tk = (Token)c2;
+			
+			// Variable/function call
+			if(t1 == -1 || t2 == -1)
+				return getOperatorReturnType(tk.getValue());
+			
 			int rt = getReturnType(t1, t2, tk.getValue());
 			
 			if(rt == -1)
@@ -148,9 +164,12 @@ public class ParseTreeExpressionChecker{
 			}
 		}
 		
+		if(!(c1 instanceof Token))
+			return -1;
+		
 		// Variable/function call
-		if(t == -1 || !(c1 instanceof Token))
-			return T_ANY;
+		if(t == -1)
+			return T_BOOL;
 		
 		Token tk = (Token)c1;
 		int rt = getReturnType(t, -1, tk.getValue());

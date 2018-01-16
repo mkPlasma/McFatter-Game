@@ -19,11 +19,11 @@ public class ParseTreeChecker{
 	
 	private ArrayList<Object> tree;
 	
-	private final ParseTreeVariableChecker variableChecker;
-	private final ParseTreeFunctionChecker functionChecker;
-	private final ParseTreeExpressionChecker expressionChecker;
-	private final ParseTreeContextChecker contextChecker;
-	private final ParseTreeListChecker listChecker;
+	private final VariableChecker variableChecker;
+	private final FunctionChecker functionChecker;
+	private final ExpressionChecker expressionChecker;
+	private final ContextChecker contextChecker;
+	private final ListChecker listChecker;
 	
 	public ParseTreeChecker(Grammar grammar){
 		
@@ -32,11 +32,11 @@ public class ParseTreeChecker{
 		finalRules = grammar.getFinalValid();
 		errorRules = errors.getRules();
 		
-		variableChecker		= new ParseTreeVariableChecker();
-		functionChecker		= new ParseTreeFunctionChecker();
-		expressionChecker	= new ParseTreeExpressionChecker();
-		contextChecker		= new ParseTreeContextChecker();
-		listChecker			= new ParseTreeListChecker();
+		variableChecker		= new VariableChecker();
+		functionChecker		= new FunctionChecker();
+		expressionChecker	= new ExpressionChecker();
+		contextChecker		= new ContextChecker();
+		listChecker			= new ListChecker();
 	}
 	
 	public void process(DScript script) throws ScriptException{

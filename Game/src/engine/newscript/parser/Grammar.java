@@ -9,27 +9,22 @@ public class Grammar{
 	
 	private final Rule[] rules;
 	private final Rule[] finalValid;
+	private final Object[][] replacements;
 	
 	public Grammar(){
 		rules = new Rule[]{
 			
 			// Define parts of blocks
-			new Rule("func_name_def", new Object[][]{
-				{FUNCTION, IDENTIFIER},
-			}),
-			
 			new Rule("func_def", new Object[][]{
-				{"func_name_def", PAREN_L, PAREN_R},
-				{"func_name_def", PAREN_L, "list", PAREN_R},
-			}),
-			
-			new Rule("task_name_def", new Object[][]{
-				{TASK, IDENTIFIER},
+				{FUNCTION, IDENTIFIER, PAREN_L, PAREN_R},
+				{FUNCTION, IDENTIFIER, PAREN_L, IDENTIFIER, PAREN_R},
+				{FUNCTION, IDENTIFIER, PAREN_L, "list", PAREN_R},
 			}),
 			
 			new Rule("task_def", new Object[][]{
-				{"task_name_def", PAREN_L, PAREN_R},
-				{"task_name_def", PAREN_L, "list", PAREN_R},
+				{TASK, IDENTIFIER, PAREN_L, PAREN_R},
+				{TASK, IDENTIFIER, PAREN_L, IDENTIFIER, PAREN_R},
+				{TASK, IDENTIFIER, PAREN_L, "list", PAREN_R},
 			}),
 			
 			new Rule("if_cond", new Object[][]{
@@ -53,38 +48,30 @@ public class Grammar{
 				{FOR, PAREN_L, IDENTIFIER, IN, "list", PAREN_R},
 			}),
 			
-			
-			// Prioritize certain statements above expression
-			new Rule("func_call_pre", new Object[][]{
-				{IDENTIFIER, PAREN_L},
-				{IDENTIFIER, LESS_THAN, "expression", GREATER_THAN, PAREN_L},
+			new Rule("func_call", new Object[][]{
+				{IDENTIFIER, PAREN_L, PAREN_R},
+				{IDENTIFIER, PAREN_L, "expression", PAREN_R},
+				{IDENTIFIER, PAREN_L, "list", PAREN_R},
 			}),
 			
-			new Rule("func_call", new Object[][]{
-				{"func_call_pre", PAREN_R},
-				{"func_call_pre", "expression", PAREN_R},
-				{"func_call_pre", "list", PAREN_R},
+			new Rule("func_call_scope", new Object[][]{
+				{"id_scope", PAREN_L, PAREN_R},
+				{"id_scope", PAREN_L, "expression", PAREN_R},
+				{"id_scope", PAREN_L, "list", PAREN_R},
 			}),
 			
 			new Rule("dot_func_call", new Object[][]{
 				{IDENTIFIER, DOT, "func_call"},
 			}),
 			
-			new Rule("statement", new Object[][]{
-				{"func_call", SEMICOLON},
-				{"dot_func_call", SEMICOLON},
-			}),
-			
-			new Rule("assignment", new Object[][]{
-				{"array_elem", EQUALS, "expression"},
-				{"array_elem", AUG_ASSIGN, "expression"},
-				{"array_elem", UNARY_ASSIGN},
-			}),
-			
 			
 			// Values
 			new Rule("expression_p", new Object[][]{
 				{PAREN_L, "expression", PAREN_R},
+			}),
+			
+			new Rule("id_scope", new Object[][]{
+				{IDENTIFIER, LESS_THAN, INT, GREATER_THAN},
 			}),
 			
 			new Rule("list", new Object[][]{
@@ -106,8 +93,32 @@ public class Grammar{
 				{"array", BRACKET_L, "expression", BRACKET_R},
 			}),
 			
-			new Rule("scope_variable", new Object[][]{
-				{IDENTIFIER, LESS_THAN, "expression", GREATER_THAN},
+			new Rule("conditional", new Object[][]{
+				{"expression", MINUS, GREATER_THAN, "expression"},
+				{"expression", MINUS, GREATER_THAN, "list"},
+			}),
+			
+			
+			// Expressions
+			new Rule("expression", new Object[][]{
+				{INT},
+				{FLOAT},
+				{BOOLEAN},
+				{STRING},
+				{"expression_p"},
+				{"array"},
+				{"conditional"},
+				
+				// Operator precedence
+				{BOOL_UNARY, "expression"},
+				{"expression", OPERATOR1, "expression"},
+				{"expression", OPERATOR2, "expression"},
+				{"expression", OPERATOR3, "expression"},
+				{"expression", MINUS, "expression"},
+				{"expression", OPERATOR4, "expression"},
+				{"expression", LESS_THAN, "expression"},
+				{"expression", GREATER_THAN, "expression"},
+				{"expression", OPERATOR5, "expression"},
 			}),
 			
 			
@@ -132,6 +143,12 @@ public class Grammar{
 				{IDENTIFIER, EQUALS, "expression"},
 				{IDENTIFIER, AUG_ASSIGN, "expression"},
 				{IDENTIFIER, UNARY_ASSIGN},
+				{"array_elem", EQUALS, "expression"},
+				{"array_elem", AUG_ASSIGN, "expression"},
+				{"array_elem", UNARY_ASSIGN},
+				{"id_scope", EQUALS, "expression"},
+				{"id_scope", AUG_ASSIGN, "expression"},
+				{"id_scope", UNARY_ASSIGN},
 			}),
 			
 			new Rule("break", new Object[][]{
@@ -141,6 +158,10 @@ public class Grammar{
 			new Rule("return", new Object[][]{
 				{RETURN, "expression"},
 				{RETURN},
+			}),
+			
+			new Rule("returnif", new Object[][]{
+				{RETURNIF, "expression"},
 			}),
 			
 			new Rule("wait", new Object[][]{
@@ -161,36 +182,6 @@ public class Grammar{
 				{WAIT, UNTIL, "expression"},
 			}),
 			
-			new Rule("conditional", new Object[][]{
-				{"expression", MINUS, "expression", COLON, "expression"},
-				{"conditional", COLON, "expression", CONCAT}
-			}),
-			
-			
-			// Expressions
-			new Rule("expression", new Object[][]{
-				{INT},
-				{FLOAT},
-				{BOOLEAN},
-				{STRING},
-				{IDENTIFIER},
-				{"func_call"},
-				{"dot_func_call"},
-				{"array"},
-				{"array_elem"},
-				{"expression_p"},
-				
-				// Operator precedence
-				{BOOL_UNARY, "expression"},
-				{"expression", OPERATOR1, "expression"},
-				{"expression", OPERATOR2, "expression"},
-				{"expression", OPERATOR3, "expression"},
-				{"expression", OPERATOR4, "expression"},
-				{"expression", LESS_THAN, "expression"},
-				{"expression", GREATER_THAN, "expression"},
-				{"expression", OPERATOR5, "expression"},
-			}),
-			
 			
 			// Finals
 			new Rule("statement", new Object[][]{
@@ -198,8 +189,12 @@ public class Grammar{
 				{"new_var_def", 	SEMICOLON},
 				{"const_var_def",	SEMICOLON},
 				{"assignment",		SEMICOLON},
+				{"func_call",		SEMICOLON},
+				{"dot_func_call",	SEMICOLON},
+				{"func_call_scope",	SEMICOLON},
 				{"break",			SEMICOLON},
 				{"return",			SEMICOLON},
+				{"returnif",		SEMICOLON},
 				{"wait",			SEMICOLON},
 				{"waits",			SEMICOLON},
 				{"wait_while",		SEMICOLON},
@@ -274,6 +269,7 @@ public class Grammar{
 		};
 		
 		
+		// Add final rules
 		int n = 0;
 		
 		for(Rule r:rules)
@@ -286,6 +282,18 @@ public class Grammar{
 		for(Rule r:rules)
 			if(r.isFinalValid())
 				finalValid[n++] = r;
+		
+		
+		// Add replacements
+		// Identifier may be used in place of expression unit
+		replacements = new Object[][]{
+			{IDENTIFIER,		"expression"},
+			{"func_call",		"expression"},
+			{"func_call_scope",	"expression"},
+			{"dot_func_call",	"expression"},
+			{"array_elem",		"expression"},
+			{"id_scope",		"expression"},
+		};
 	}
 	
 	public Rule[] getRules(){
@@ -294,5 +302,9 @@ public class Grammar{
 	
 	public Rule[] getFinalValid(){
 		return finalValid;
+	}
+	
+	public Object[][] getReplacements(){
+		return replacements;
 	}
 }

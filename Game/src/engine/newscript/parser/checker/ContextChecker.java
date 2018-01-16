@@ -1,12 +1,14 @@
 package engine.newscript.parser.checker;
 
+import static engine.newscript.parser.ParseUtil.*;
+
 import java.util.ArrayList;
 
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
 import engine.newscript.parser.ParseUnit;
 
-public class ParseTreeContextChecker{
+public class ContextChecker{
 	
 	public void process(DScript script) throws ScriptException{
 		
@@ -23,31 +25,38 @@ public class ParseTreeContextChecker{
 		switch(p.getType()){
 			
 			case "break":
-				if(!isWithin(p, "while_block") && !isWithin(p, "until_block") && !isWithin(p, "for_block"))
+				if(!p.isWithin("while_block") && !p.isWithin("until_block") && !p.isWithin("for_block"))
 					throw new ScriptException("Break statement must be in a loop", p.getFile(), p.getLineNum());
 				
 				break;
-				
+
 			case "return":
 				
-				boolean withinTask = isWithin(p, "task_block");
+				boolean withinTask = p.isWithin("task_block");
 				
-				if(!isWithin(p, "func_block") && !withinTask)
+				if(!p.isWithin("func_block") && !withinTask)
 					throw new ScriptException("Return statement must be in a function or task", p.getFile(), p.getLineNum());
 				
 				if(withinTask && contents.length > 1)
 					throw new ScriptException("Task cannot return a value", p.getFile(), p.getLineNum());
 				
 				break;
+				
+			case "returnif":
+				
+				if(!p.isWithin("func_block") && !p.isWithin("task_block"))
+					throw new ScriptException("Returnif statement must be in a function or task", p.getFile(), p.getLineNum());
+				
+				break;
 			
 			case "function_block": case "task_block":
 				
-				if(isWithin(p, "if_block") ||
-					isWithin(p, "if_else_block") ||
-					isWithin(p, "else_block") ||
-					isWithin(p, "while_block") ||
-					isWithin(p, "until_block") ||
-					isWithin(p, "for_block"))
+				if(p.isWithin("if_block")		||
+					p.isWithin("if_else_block")	||
+					p.isWithin("else_block")	||
+					p.isWithin("while_block")	||
+					p.isWithin("until_block")	||
+					p.isWithin("for_block"))
 					throw new ScriptException("Function/task cannot be defined inside control block", p.getFile(), p.getLineNum());
 				
 				break;
@@ -64,18 +73,5 @@ public class ParseTreeContextChecker{
 			if(o1 instanceof ParseUnit)
 				check((ParseUnit)o1, (ParseUnit)o2);
 		}
-	}
-	
-	private boolean isWithin(ParseUnit p, String type){
-		
-		ParseUnit parent = p.getParent();
-		
-		if(parent == null)
-			return false;
-		
-		if(parent.getType().equals(type))
-			return true;
-		
-		return isWithin(parent, type);
 	}
 }

@@ -3,6 +3,7 @@ package engine.newscript.parser;
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
 import engine.newscript.parser.checker.ParseTreeChecker;
+import engine.newscript.parser.simplifier.ParseTreeSimplifier;
 
 public class Parser{
 	

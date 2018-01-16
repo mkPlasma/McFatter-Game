@@ -14,6 +14,7 @@ public enum TokenType{
 	FUNCTION		("(function)\\b",	true),
 	TASK			("(task)\\b",		true),
 	RETURN			("(return)\\b"),
+	RETURNIF		("(returnif)\\b",	true),
 	WAIT			("(wait)\\b"),
 	WAITS			("(waits)\\b"),
 	
@@ -24,9 +25,6 @@ public enum TokenType{
 	BRACKET_L		("(\\[)",	true),
 	BRACKET_R		("(\\])",	true),
 	COMMA			("(,)",		true),
-	QUESTION_MARK	("(?)",		true),
-	COLON			("(:)",		true),
-	DOT				("(\\.)",	true),
 	SEMICOLON		("(;)",		true),
 	
 	INT				("((-\\s*)?\\d++)"),
@@ -34,14 +32,17 @@ public enum TokenType{
 	BOOLEAN			("(true|false)\\b"),
 	STRING			("((\".*?[^\\\\]\")|(\"\"))"),
 	
+	DOT				("(\\.)",	true),
+	
 	UNARY_ASSIGN	("([\\+\\-\\!]{2})"),
 	AUG_ASSIGN		("(\\+=|\\-=|\\*=|/=|%=|\\^=)"),
 	OPERATOR1		("(\\^)"),
 	OPERATOR2		("([\\*/%])"),
-	OPERATOR3		("([\\+\\-])"),
+	OPERATOR3		("([\\+])"),
+	MINUS			("(\\-)"),
 	OPERATOR4		("(==|<=|>=|\\!=)"),
 	LESS_THAN		("(<)"),
-	GREATER_THAN		("(>)"),
+	GREATER_THAN	("(>)"),
 	OPERATOR5		("([\\|&]{2})"),
 	BOOL_UNARY		("(\\!)"),
 	EQUALS			("(=)"),

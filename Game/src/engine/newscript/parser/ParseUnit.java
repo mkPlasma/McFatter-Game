@@ -13,6 +13,11 @@ public class ParseUnit{
 	public ParseUnit(String type, Object[] contents){
 		this.type = type;
 		this.contents = contents;
+		
+		// Set parent of ParseUnits
+		for(Object o:contents)
+			if(o instanceof ParseUnit)
+				((ParseUnit)o).setParent(this);
 	}
 	
 	public String getFile(){
@@ -41,6 +46,22 @@ public class ParseUnit{
 		return ((Token)o).getLineNum();
 	}
 	
+	public boolean isWithin(String type){
+		return isWithin(this, type);
+	}
+	
+	public static boolean isWithin(ParseUnit p, String type){
+		
+		ParseUnit parent = p.getParent();
+		
+		if(parent == null)
+			return false;
+		
+		if(parent.getType().equals(type))
+			return true;
+		
+		return isWithin(parent, type);
+	}
 	
 	public String getType(){
 		return type;

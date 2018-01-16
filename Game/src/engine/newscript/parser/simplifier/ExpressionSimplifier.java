@@ -1,4 +1,4 @@
-package engine.newscript.parser;
+package engine.newscript.parser.simplifier;
 
 import static engine.newscript.lexer.TokenType.*;
 import static engine.newscript.parser.ParseUtil.*;
@@ -6,29 +6,21 @@ import static engine.newscript.parser.ParseUtil.*;
 import java.util.ArrayList;
 
 import engine.newscript.DScript;
-import engine.newscript.ScriptException;
-import engine.newscript.ScriptPrinter;
 import engine.newscript.lexer.Token;
+import engine.newscript.lexer.TokenType;
+import engine.newscript.parser.ParseUnit;
 
-public class ParseTreeSimplifier{
+public class ExpressionSimplifier{
 	
-	private ArrayList<Object> parseTree;
-	
-	public void process(DScript script) throws ScriptException{
+	public void process(DScript script){
 		
-		parseTree = script.getParseTree();
+		ArrayList<Object> parseTree = script.getParseTree();
 		
-		simplifyExpressions();
-		
-		ScriptPrinter.printParseTree(parseTree.toArray(new Object[0]));
-	}
-	
-	private void simplifyExpressions() throws ScriptException{
 		for(Object o:parseTree)
 			simplifyExpressions(((ParseUnit)o).getContents());
 	}
 	
-	private void simplifyExpressions(Object[] contents) throws ScriptException{
+	private void simplifyExpressions(Object[] contents){
 		for(Object o:contents){
 			
 			if(!(o instanceof ParseUnit))
@@ -43,7 +35,7 @@ public class ParseTreeSimplifier{
 		}
 	}
 	
-	private void simplifyExpression(ParseUnit p) throws ScriptException{
+	private void simplifyExpression(ParseUnit p){
 		
 		Object[] contents = p.getContents();
 		
@@ -99,9 +91,73 @@ public class ParseTreeSimplifier{
 		}
 		
 		// Unary operator
+		Object c1 = contents[0];
+		Object c2 = contents[1];
+		
+		Object val = getValue(c2);
+		
+		// Simplify function calls, etc.
+		if(val == null){
+			if(c2 instanceof ParseUnit){
+				ParseUnit p2 = (ParseUnit)c2;
+				
+				if(p2.getType().equals("expression"))
+					simplifyExpression(p2);
+				else
+					simplifyExpressions(p2.getContents());
+			}
+		}
+		
+		val = getValue(c2);
+		
+		// Check if able to simplify, invert comparisons if possible
+		if(val == null || !(c1 instanceof Token)){
+			
+			if(!(c2 instanceof ParseUnit))
+				return;
+			
+			// Get parenthesized expression
+			ParseUnit p2 = (ParseUnit)((ParseUnit)((ParseUnit)c2).getContents()[0]).getContents()[0];
+			Object[] cont = p2.getContents();
+			
+			// Check length
+			if(cont.length != 3)
+				return;
+			
+			String op = "";
+			TokenType type = OPERATOR4;
+			
+			Token t = (Token)cont[1];
+			
+			// Invert operator
+			switch(t.getValue()){
+				case "==":	op = "!=";	break;
+				case "!=":	op = "==";	break;
+				case "<":	op = ">=";	break;
+				case ">":	op = "<=";	break;
+				case "<=":	op = ">";	type = GREATER_THAN;	break;
+				case ">=":	op = "<";	type = LESS_THAN;		break;
+			}
+			
+			// Replace operator
+			cont[1] = new Token(type, op, t.getFile(), t.getLineNum());
+			
+			// Replace expression
+			((ParseUnit)c2).getParent().setContents(cont);
+			return;
+		}
+		
+		Token t = (Token)c1;
+		p.setContents(operate(val, null, t));
+		
+		return;
 	}
 	
-	private Object[] operate(Object o1, Object o2, Token op) throws ScriptException{
+	private Object[] operate(Object o1, Object o2, Token op){
+		
+		// Unary operation (oly binary op is !)
+		if(o2 == null)
+			return new Object[]{new Token(BOOLEAN, Boolean.toString(!(Boolean)o1), op.getFile(), op.getLineNum())};
 		
 		// Number operation
 		if(o1 instanceof Integer || o1 instanceof Float){

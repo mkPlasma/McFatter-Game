@@ -10,13 +10,13 @@ import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
-public class ParseTreeVariableChecker{
+public class VariableChecker{
 	
 	// Stack for each block
 	private Stack<ArrayList<String>> variables;
 	private Stack<ArrayList<String>> constVariables;
 	
-	public ParseTreeVariableChecker(){
+	public VariableChecker(){
 		variables		= new Stack<ArrayList<String>>();
 		constVariables	= new Stack<ArrayList<String>>();
 	}
@@ -89,20 +89,36 @@ public class ParseTreeVariableChecker{
 				break;
 				
 				
+			case "id_scope":
+				
+				if(p.getParent().getType().equals("func_call_scope"))
+					return;
+				
+				t = (Token)contents[0];
+				var = t.getValue();
+				
+				int scope = Integer.parseInt(((Token)contents[2]).getValue());
+				
+				if(!variableExistsInScope(var, scope))
+					throw new ScriptException("Variable '" + var + "' is not defined in scope " + scope, t.getFile(), t.getLineNum());
+				
+				break;
+				
+				
 			case "new_var": case "new_const_var": case "for_cond":
 				
 				t = (Token)contents[0];
 				var = t.getValue();
 				
-				if(variableExistsInScope(var))
+				if(variableExistsInScope(var, 0))
 					throwVarExistsException(var, t);
 				
 				break;
 				
 				
 			case "assignment":
-
-				t = (Token)contents[0];
+				
+				t = (Token)(contents[0] instanceof Token ? contents[0] : ((ParseUnit)contents[0]).getContents()[0]);
 				var = t.getValue();
 				
 				if(isConstantVariable(var))
@@ -121,12 +137,12 @@ public class ParseTreeVariableChecker{
 				
 			case "new_var": case "for_cond":
 				addVariable(((Token)contents[0]).getValue());
-				break;
+				return;
 				
 				
 			case "new_const_var":
 				addConstVariable(((Token)contents[0]).getValue());
-				break;
+				return;
 				
 				
 			case "func_def": case "task_def":
@@ -134,13 +150,20 @@ public class ParseTreeVariableChecker{
 				if(contents.length < 2)
 					return;
 				
+				// Single parameter
+				if(contents[1] instanceof Token){
+					addVariable(((Token)contents[1]).getValue());
+					return;
+				}
+				
+				// Parameter list
 				ParseUnit list = (ParseUnit)contents[1];
 				contents = list.getContents();
 				
 				for(Object o:contents)
 					addVariable(((Token)((ParseUnit)o).getContents()[0]).getValue());
 				
-				break;
+				return;
 		}
 	}
 	
@@ -182,16 +205,21 @@ public class ParseTreeVariableChecker{
 		return false;
 	}
 	
-	private boolean variableExistsInScope(String var){
+	private boolean variableExistsInScope(String var, int scope){
 		
-		ArrayList<String> vars = variables.peek();
+		int i = variables.size() - 1 - scope;
+		
+		if(i < 0 || i >= variables.size())
+			return false;
+		
+		ArrayList<String> vars = variables.get(i);
 		
 		for(String v:vars)
 			if(v.equals(var))
 				return true;
 		
 		
-		vars = constVariables.peek();
+		vars = constVariables.get(i);
 		
 		for(String v:vars)
 			if(v.equals(var))

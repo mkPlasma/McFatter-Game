@@ -8,11 +8,11 @@ import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
-public class ParseTreeFunctionChecker{
+public class FunctionChecker{
 
 	private Stack<ArrayList<String>> functions;
 	
-	public ParseTreeFunctionChecker(){
+	public FunctionChecker(){
 		functions	= new Stack<ArrayList<String>>();
 	}
 	
@@ -23,6 +23,11 @@ public class ParseTreeFunctionChecker{
 		
 		ArrayList<Object> parseTree = script.getParseTree();
 		
+		// Add top-level functions first
+		for(Object o:parseTree)
+			addFunctions((ParseUnit)o);
+		
+		// Process each item
 		for(Object o:parseTree)
 			process((ParseUnit)o);
 	}
@@ -57,8 +62,6 @@ public class ParseTreeFunctionChecker{
 	
 	private void addFunctions(ParseUnit p) throws ScriptException{
 		
-		addFunction(p, 1);
-		
 		Object[] contents = p.getContents();
 		
 		for(Object o:contents){
@@ -69,19 +72,20 @@ public class ParseTreeFunctionChecker{
 			ParseUnit p2 = (ParseUnit)o;
 			
 			if(p2.getType().equals("s_block"))
-				addFunction((ParseUnit)o, 0);
+				addFunction((ParseUnit)o);
 			else
 				addFunctions((ParseUnit)o);
 		}
 	}
 	
-	private void addFunction(ParseUnit p, int scope) throws ScriptException{
+	private void addFunction(ParseUnit p) throws ScriptException{
 		
 		if(p.getType().equals("s_block")){
 			
 			p = (ParseUnit)p.getContents()[0];
 			String type = p.getType();
 			
+			// Check type
 			if(!type.equals("func_block") && !type.equals("task_block"))
 				return;
 			
@@ -89,32 +93,56 @@ public class ParseTreeFunctionChecker{
 			p = (ParseUnit)p.getContents()[0];
 			Object[] cont = p.getContents();
 			
-			Token t = (Token)((ParseUnit)cont[0]).getContents()[0];
+			Token t = (Token)cont[0];
 			
 			String func = t.getValue();
-			int params = cont.length == 1 ? 0 : ((ParseUnit)cont[1]).getContents().length;
+			int params = cont.length == 1 ? 0 : cont[1] instanceof Token ? 1 : ((ParseUnit)cont[1]).getContents().length;
 			
-			if(functionExists(func, params))
+			if(functionExistsInScope(func, params, 0))
 				throw new ScriptException("Duplicate function '" + func + "'", t.getFile(), t.getLineNum());
 			
-			addFunction(func, params, scope);
+			addFunction(func, params);
 		}
 	}
 	
 	private void checkFunctions(ParseUnit p) throws ScriptException{
 		
-		if(!p.getType().equals("func_call"))
-			return;
-		
-		Object[] contents = p.getContents();
-		
-		Token t = (Token)((ParseUnit)contents[0]).getContents()[0];
-		String func = t.getValue();
-		
-		int params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getContents().length;
-		
-		if(!functionExists(func, params))
-			throwUndefinedFunctionException(func, t);
+		switch(p.getType()){
+			
+			case "func_call":
+				Object[] contents = p.getContents();
+				
+				Token t = (Token)contents[0];
+				String func = t.getValue();
+				
+				int params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getContents().length;
+				
+				if(p.getParent() != null && p.getParent().getType().equals("dot_func_call"))
+					params++;
+				
+				if(!functionExists(func, params))
+					throwUndefinedFunctionException(func, t);
+				
+				break;
+				
+				
+			case "func_call_scope":
+				contents = p.getContents();
+				
+				ParseUnit p2 = (ParseUnit)contents[0];
+				
+				t = (Token)p2.getContents()[0];
+				func = t.getValue();
+				
+				params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getContents().length;
+				
+				int scope = Integer.parseInt(((Token)p2.getContents()[2]).getValue());
+				
+				if(!functionExistsInScope(func, params, scope))
+					throwUndefinedFunctionExceptionInScope(func, t, scope);
+				
+				break;
+		}
 	}
 	
 	private void pushFunctionList(){
@@ -125,8 +153,8 @@ public class ParseTreeFunctionChecker{
 		functions.pop();
 	}
 	
-	private void addFunction(String name, int paramCount, int scope){
-		functions.get(functions.size() - 1 - scope).add(name + "," + paramCount);
+	private void addFunction(String name, int paramCount){
+		functions.peek().add(name + "," + paramCount);
 	}
 	
 	private boolean functionExists(String func, int paramCount){
@@ -141,6 +169,24 @@ public class ParseTreeFunctionChecker{
 		return false;
 	}
 	
+	private boolean functionExistsInScope(String func, int paramCount, int scope){
+		
+		int i = functions.size() - 1 - scope;
+		
+		if(i < 0 || i >= functions.size())
+			return false;
+		
+		func += "," + paramCount;
+		
+		ArrayList<String> funcs = functions.get(i);
+		
+		for(String f:funcs)
+			if(f.equals(func))
+				return true;
+		
+		return false;
+	}
+	
 	private void throwUndefinedFunctionException(String func, Token t) throws ScriptException{
 		
 		for(ArrayList<String> funcs:functions)
@@ -149,5 +195,22 @@ public class ParseTreeFunctionChecker{
 					throw new ScriptException("Incorrect parameter count for function/task '" + func + "'", t.getFile(), t.getLineNum());
 		
 		throw new ScriptException("Function/task '" + func + "' is not defined", t.getFile(), t.getLineNum());
+	}
+	
+	private void throwUndefinedFunctionExceptionInScope(String func, Token t, int scope) throws ScriptException{
+		
+		int i = functions.size() - 1 - scope;
+		
+		if(i >= 0 && i < functions.size()){
+			
+			ArrayList<String> funcs = functions.get(i);
+			
+			for(String f:funcs)
+				if(f.substring(0, f.indexOf(',')).equals(func))
+					throw new ScriptException("Incorrect parameter count for function/task '" + func + "'" + " in scope " + scope, t.getFile(), t.getLineNum());
+		}
+		
+		
+		throw new ScriptException("Function/task '" + func + "' is not defined in scope " + scope, t.getFile(), t.getLineNum());
 	}
 }

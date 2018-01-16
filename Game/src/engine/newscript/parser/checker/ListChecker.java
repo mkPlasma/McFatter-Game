@@ -9,7 +9,7 @@ import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
-public class ParseTreeListChecker{
+public class ListChecker{
 	
 	public void process(DScript script) throws ScriptException{
 		
