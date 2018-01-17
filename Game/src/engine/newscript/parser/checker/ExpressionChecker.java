@@ -39,7 +39,7 @@ public class ExpressionChecker{
 				
 				// Check required types
 				switch(p.getType()){
-					case "if_cond": case "if_else_cond": case "while_cond": case "until_cond": case "returnif":
+					case "if_cond": case "if_else_cond": case "while_cond": case "until_cond": case "returnif": case "wait_while": case "wait_until":
 						
 						if((t & T_BOOL) <= 0)
 							throw new ScriptException("Expression must output boolean", p.getFile(), p.getLineNum());

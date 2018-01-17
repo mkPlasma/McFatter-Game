@@ -27,8 +27,8 @@ public enum TokenType{
 	COMMA			("(,)",		true),
 	SEMICOLON		("(;)",		true),
 	
-	INT				("((-\\s*)?\\d++)"),
-	FLOAT			("((-\\s*)?\\d*+\\.\\d++)"),
+	INT				("(\\d++)"),
+	FLOAT			("(\\d*+\\.\\d++)"),
 	BOOLEAN			("(true|false)\\b"),
 	STRING			("((\".*?[^\\\\]\")|(\"\"))"),
 	

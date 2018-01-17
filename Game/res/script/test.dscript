@@ -1,7 +1,2 @@
 
-
-set x = !(true);
-
-until(x > 3){
-	set x;
-}
+wait until false;

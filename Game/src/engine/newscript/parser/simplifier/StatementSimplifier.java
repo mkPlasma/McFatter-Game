@@ -8,7 +8,7 @@ import engine.newscript.DScript;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
-public class BlockSimplifier{
+public class StatementSimplifier{
 	
 	public void process(DScript script){
 		
@@ -38,12 +38,12 @@ public class BlockSimplifier{
 		Object[] contents = p.getContents();
 		
 		switch(p.getType()){
-				
-				// Invert until loops into while loops
+			
+			// Invert until loops into while loops
 			case "until_block":
 				
 				// Invert condition
-				Object[] cont = ((ParseUnit)p.getContents()[0]).getContents();
+				Object[] cont = ((ParseUnit)contents[0]).getContents();
 				
 				cont[0] = new ParseUnit("expression", new Object[]{
 					
@@ -57,6 +57,24 @@ public class BlockSimplifier{
 				contents[0] = new ParseUnit("while_cond", cont);
 				p = new ParseUnit("while_block", contents);
 				
+				break;
+				
+			// Invert until loops into while loops
+			case "wait_until":
+				
+				// Invert condition
+				cont = ((ParseUnit)contents[1]).getContents();
+				
+				contents[1] = new ParseUnit("expression", new Object[]{
+					
+					new Token(BOOL_UNARY, "!", p.getFile(), p.getLineNum()),
+					
+					new ParseUnit("expression", new Object[]{
+						new ParseUnit("expression_p", cont.clone())
+					})
+				});
+				
+				p = new ParseUnit("wait_while", contents);
 				break;
 		}
 	}

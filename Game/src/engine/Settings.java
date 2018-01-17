@@ -12,7 +12,7 @@ public class Settings{
 	
 	// Scale of window/resolution
 	// Default 640x480
-	private static float windowScale = 1.5f;
+	private static float windowScale = 2f;
 	
 	public static void setWindowScale(float windowScale){
 		Settings.windowScale = windowScale;

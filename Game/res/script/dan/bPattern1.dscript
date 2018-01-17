@@ -20,7 +20,7 @@ task spiral(inv){
     
     while(!boss.isDeleted()){
         for(d in 0, 360/c, 360){
-            bullet(_crystal, col, boss.getPos(), dir + d, 2, 10);
+            bullet(_orb, col, boss.getPos(), dir + d, 2, 10);
         }
         
         dir += dirAdd;

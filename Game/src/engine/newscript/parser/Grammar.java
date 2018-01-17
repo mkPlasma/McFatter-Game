@@ -119,6 +119,7 @@ public class Grammar{
 				{"expression", LESS_THAN, "expression"},
 				{"expression", GREATER_THAN, "expression"},
 				{"expression", OPERATOR5, "expression"},
+				{MINUS, "expression"},
 			}),
 			
 			
@@ -164,6 +165,14 @@ public class Grammar{
 				{RETURNIF, "expression"},
 			}),
 			
+			new Rule("wait_while", new Object[][]{
+				{WAIT, WHILE, "expression"},
+			}),
+			
+			new Rule("wait_until", new Object[][]{
+				{WAIT, UNTIL, "expression"},
+			}),
+			
 			new Rule("wait", new Object[][]{
 				{WAIT, "expression"},
 				{WAIT},
@@ -172,14 +181,6 @@ public class Grammar{
 			new Rule("waits", new Object[][]{
 				{WAITS, "expression"},
 				{WAITS},
-			}),
-			
-			new Rule("wait_while", new Object[][]{
-				{WAIT, WHILE, "expression"},
-			}),
-			
-			new Rule("wait_until", new Object[][]{
-				{WAIT, UNTIL, "expression"},
 			}),
 			
 			

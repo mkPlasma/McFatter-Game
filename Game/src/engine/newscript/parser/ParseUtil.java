@@ -65,7 +65,7 @@ public class ParseUtil{
 			return T_STRING;
 		
 		
-		return (t1 == T_ANY || t2 == T_ANY || t1 == t2) && (ot & t1) > 0 ? getOperatorReturnType(op) : -1;
+		return (t1 == T_ANY || t2 == T_ANY || (t1 == T_NUM_STRING && t2 == T_NUM) || (t1 == T_NUM && t2 == T_NUM_STRING) || t1 == t2) && (ot & t1) > 0 ? getOperatorReturnType(op) : -1;
 	}
 	
 	public static int getOperatorType(String op){
