@@ -1,5 +1,6 @@
 package engine.newscript;
 
+import engine.newscript.bytecodegen.BytecodeCompiler;
 import engine.newscript.lexer.Lexer;
 import engine.newscript.parser.Parser;
 import engine.newscript.preprocess.Preprocessor;
@@ -9,6 +10,7 @@ public class Compiler{
 	private final Preprocessor preprocessor;
 	private final Lexer lexer;
 	private final Parser parser;
+	private final BytecodeCompiler bytecodeCompiler;
 	
 	private DScript script;
 	
@@ -16,6 +18,7 @@ public class Compiler{
 		preprocessor = new Preprocessor();
 		lexer = new Lexer();
 		parser = new Parser();
+		bytecodeCompiler = new BytecodeCompiler();
 	}
 	
 	public boolean compile(DScript script){
@@ -26,6 +29,7 @@ public class Compiler{
 			preprocessor.process(script);
 			lexer.process(script);
 			parser.process(script);
+			bytecodeCompiler.process(script);
 		}
 		catch(ScriptException e){
 			error(e, false);

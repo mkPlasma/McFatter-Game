@@ -1,2 +1,4 @@
 
-wait until false;
+set x = 1 + 2;
+
+set y = x/3;

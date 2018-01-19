@@ -1,7 +1,6 @@
 package engine.newscript.parser.simplifier;
 
 import engine.newscript.DScript;
-import engine.newscript.ScriptPrinter;
 
 public class ParseTreeSimplifier{
 	
@@ -18,12 +17,12 @@ public class ParseTreeSimplifier{
 	}
 	
 	public void process(DScript script){
+		expressionSimplifier.process(script);
 		variableReplacer.process(script);
 		functionReplacer.process(script);
 		statementSimplifier.process(script);
-		ScriptPrinter.printParseTree(script.getParseTree().toArray(new Object[0]));
-		expressionSimplifier.process(script);
 		
-		ScriptPrinter.printParseTree(script.getParseTree().toArray(new Object[0]));
+		// Simplify expressions again after constant variables have been replaced
+		expressionSimplifier.process(script);
 	}
 }

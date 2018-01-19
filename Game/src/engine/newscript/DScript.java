@@ -2,6 +2,7 @@ package engine.newscript;
 
 import java.util.ArrayList;
 
+import engine.newscript.bytecodegen.Instruction;
 import engine.newscript.lexer.Token;
 
 public class DScript{
@@ -14,6 +15,9 @@ public class DScript{
 	private String[] file;
 	private Token[] tokens;
 	private ArrayList<Object> parseTree;
+	
+	private Instruction[] bytecode;
+	private int numVariables;
 	
 	
 	public DScript(String path){
@@ -89,5 +93,21 @@ public class DScript{
 	
 	public ArrayList<Object> getParseTree(){
 		return parseTree;
+	}
+	
+	public void setBytecode(Instruction[] bytecode){
+		this.bytecode = bytecode;
+	}
+	
+	public Instruction[] getBytecode(){
+		return bytecode;
+	}
+	
+	public void setNumVariables(int numVariables){
+		this.numVariables = numVariables;
+	}
+	
+	public int getNumVariables(){
+		return numVariables;
 	}
 }

@@ -15,6 +15,18 @@ public class ParseUtil{
 	T_ANY			= T_NUM | T_BOOL | T_STRING;
 	
 	
+	public static void replaceParseUnit(ParseUnit a, Object b){
+		
+		Object[] cont = a.getParent().getContents();
+		
+		for(int i = 0; i < cont.length; i++){
+			if(cont[i] == a){
+				cont[i] = b;
+				break;
+			}
+		}
+	}
+	
 	public static Object getValue(Object o){
 		
 		if(!(o instanceof ParseUnit))

@@ -1,5 +1,9 @@
 package engine.newscript;
 
+import java.util.ArrayList;
+
+import engine.newscript.bytecodegen.Instruction;
+import engine.newscript.bytecodegen.InstructionSet;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
@@ -54,5 +58,15 @@ public class ScriptPrinter{
 	public static void printTabs(int tabs){
 		for(int i = 0; i < tabs; i++)
 			System.out.print("\t");
+	}
+	
+	public static void printBytecode(ArrayList<Instruction> bytecode){
+		for(Instruction i:bytecode){
+			
+			InstructionSet inst = InstructionSet.getName(i.getOpcode());
+			String name = inst.name();
+			
+			System.out.println(name + "\t" + (name.length() < 8 ? "\t" : "") + (inst.hasOperand() ? i.getOperand() : ""));
+		}
 	}
 }

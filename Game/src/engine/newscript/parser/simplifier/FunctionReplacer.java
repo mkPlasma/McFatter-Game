@@ -1,6 +1,7 @@
 package engine.newscript.parser.simplifier;
 
 import static engine.newscript.lexer.TokenType.*;
+import static engine.newscript.parser.ParseUtil.replaceParseUnit;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -135,16 +136,7 @@ public class FunctionReplacer{
 				contents[0] = n;
 				
 				// Replace func_call_scope
-				Object[] pCont = p.getParent().getContents();
-				
-				for(int i = 0; i < pCont.length; i++){
-					if(pCont[i] == p){
-						pCont[i] = new ParseUnit("func_call", contents);
-						break;
-					}
-				}
-				
-				
+				replaceParseUnit(p, new ParseUnit("func_call", contents));
 				
 				break;
 		}

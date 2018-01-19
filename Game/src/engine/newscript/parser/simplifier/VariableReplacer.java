@@ -1,11 +1,13 @@
 package engine.newscript.parser.simplifier;
 
 import static engine.newscript.lexer.TokenType.*;
+import static engine.newscript.parser.ParseUtil.*;
 
 import java.util.ArrayList;
 import java.util.Stack;
 
 import engine.newscript.DScript;
+import engine.newscript.ScriptPrinter;
 import engine.newscript.lexer.Token;
 import engine.newscript.lexer.TokenType;
 import engine.newscript.parser.ParseUnit;
@@ -102,14 +104,7 @@ public class VariableReplacer{
 				replaceVariable(p, 0, t, Integer.parseInt(((Token)contents[2]).getValue()));
 				
 				// Replace id_scope
-				Object[] pCont = parent.getContents();
-				
-				for(int i = 0; i < pCont.length; i++){
-					if(pCont[i] == p){
-						pCont[i] = contents[0];
-						break;
-					}
-				}
+				replaceParseUnit(p, contents[0]);
 				
 				return;
 				

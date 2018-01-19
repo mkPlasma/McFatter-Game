@@ -206,17 +206,6 @@ public class Grammar{
 				{BRACE_L, "statements", BRACE_R},
 			}),
 			
-			new Rule("s_block", FINAL, new Object[][]{
-				{"func_block"},
-				{"task_block"},
-				{"if_block"},
-				{"if_else_block"},
-				{"else_block"},
-				{"while_block"},
-				{"until_block"},
-				{"for_block"},
-			}),
-			
 			
 			// Block types
 			new Rule("func_block", FINAL, new Object[][]{
@@ -259,6 +248,18 @@ public class Grammar{
 			new Rule("for_block", FINAL, new Object[][]{
 				{"for_cond", "statement"},
 				{"for_cond", "block"},
+			}),
+			
+			new Rule("s_block", FINAL, new Object[][]{
+				{"func_block"},
+				{"task_block"},
+				{"if_block"},
+				{"if_else_block"},
+				{"else_block"},
+				{"while_block"},
+				{"until_block"},
+				{"for_block"},
+				{"block"},
 			}),
 			
 			// Statements below control blocks to allow single-statement blocks
