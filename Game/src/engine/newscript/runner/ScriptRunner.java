@@ -5,19 +5,24 @@ import static engine.newscript.bytecodegen.InstructionSet.*;
 import java.util.Stack;
 
 import engine.newscript.DScript;
+import engine.newscript.ScriptException;
 import engine.newscript.bytecodegen.Instruction;
 import engine.newscript.bytecodegen.InstructionSet;
 
 public class ScriptRunner{
 	
+	private DScript script;
 	private Instruction[] bytecode;
 	
 	private Object[] variables;
-	
 	private Stack<Object> stack;
+	
+	private Instruction currentInstruction;
 	
 	
 	public void init(DScript script){
+		this.script = script;
+		
 		bytecode = script.getBytecode();
 		variables = new Object[script.getNumVariables()];
 		
@@ -26,17 +31,27 @@ public class ScriptRunner{
 	
 	public void run(){
 		
-		for(Instruction i:bytecode)
-			runInstruction(i);
+		if(bytecode == null)
+			return;
 		
-		System.out.println("\nResult:");
-		
-		for(int i = 0; i < variables.length; i++)
-			System.out.println(i + ": " + variables[i]);
+		try{
+			for(Instruction i:bytecode)
+				runInstruction(i);
+			
+			System.out.println("\nResult:");
+			
+			for(int i = 0; i < variables.length; i++)
+				System.out.println(i + ": " + variables[i]);
+		}
+		catch(ScriptException e){
+			error(e);
+		}
 	}
 	
 	
-	private void runInstruction(Instruction i){
+	private void runInstruction(Instruction i) throws ScriptException{
+		
+		currentInstruction = i;
 		
 		InstructionSet name = getName(i.getOpcode());
 		int op = i.getOperand();
@@ -50,8 +65,6 @@ public class ScriptRunner{
 			case store_value:
 				variables[op] = pop();
 				return;
-				
-				
 				
 			case load_int:
 				push(op);
@@ -95,6 +108,14 @@ public class ScriptRunner{
 				push(!(Boolean)pop());
 				return;
 				
+			case op_inc: case op_dec: case op_inv:
+				unaryAssign(name, op);
+				break;
+				
+			case goto_if_true:
+				if((Boolean)pop()) 
+				break;
+				
 			default:
 				System.err.println("Unrecognized bytecode instruction '" + name + "'");
 				return;
@@ -102,10 +123,13 @@ public class ScriptRunner{
 	}
 	
 	// Numerical operation
-	private void numOperation(InstructionSet i){
+	private void numOperation(InstructionSet op) throws ScriptException{
 		
 		Object o1 = pop();
 		Object o2 = pop();
+		
+		if(!(o1 instanceof Float || o1 instanceof Integer) || !(o2 instanceof Float || o2 instanceof Integer))
+			throw new ScriptException("Type mismatch, expected numbers", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
 		
 		// Cast operands
 		float a = o1 instanceof Float ? (float)o1 : (float)(int)o1;
@@ -115,7 +139,7 @@ public class ScriptRunner{
 		float r = Float.NaN;
 		
 		// Operate
-		switch(i){
+		switch(op){
 			case op_add:	r = a + b;	break;
 			case op_sub:	r = a - b;	break;
 			case op_mult:	r = a * b;	break;
@@ -141,6 +165,46 @@ public class ScriptRunner{
 			push(r);
 	}
 	
+	private void unaryAssign(InstructionSet i, int op) throws ScriptException{
+		
+		Object v = variables[op];
+		
+		if(v instanceof Float){
+			float f = (float)v;
+			
+			switch(i){
+				case op_inc:	f++;		break;
+				case op_dec:	f--;		break;
+				case op_inv:	f = -f;		break;
+				
+				default:	return;
+			}
+			
+			variables[op] = f;
+			return;
+		}
+
+		if(v instanceof Integer){
+			int n = (int)v;
+			
+			switch(i){
+				case op_inc:	n++;		break;
+				case op_dec:	n--;		break;
+				case op_inv:	n = -n;		break;
+				
+				default:	return;
+			}
+			
+			variables[op] = n;
+			return;
+		}
+		
+		if(!(v instanceof Boolean) || i == op_inc || i == op_dec)
+			throw new ScriptException("Type mismatch, expected boolean", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+		
+		variables[op] = !(Boolean)v;
+	}
+	
 	// Shorthand functions
 	private void push(Object o){
 		stack.push(o);
@@ -148,5 +212,18 @@ public class ScriptRunner{
 	
 	private Object pop(){
 		return stack.pop();
+	}
+	
+	
+	private void error(ScriptException e){
+		
+		int file = e.getFileIndex();
+		int line = e.getLine();
+		
+		System.err.println(
+			"Runtime error in " + (file == 0 ? script.getFileName(): script.getFileName(file)) +
+			" on line " + line + ":\n" + e.getMessage() +
+			(line > 0 ? "\n" + line + ": " + script.getLine(file, line) : "")
+		);
 	}
 }

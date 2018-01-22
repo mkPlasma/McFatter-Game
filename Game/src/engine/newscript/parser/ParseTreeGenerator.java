@@ -38,7 +38,7 @@ public class ParseTreeGenerator{
 			i = -1;
 		}
 		
-		//ScriptPrinter.printParseTree(parseTree.toArray(new Object[0]));
+		ScriptPrinter.printParseTree(parseTree.toArray(new Object[0]));
 		
 		script.setParseTree(parseTree);
 	}

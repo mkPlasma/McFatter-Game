@@ -1,9 +1,10 @@
 package engine.newscript.parser;
 
+import static engine.newscript.lexer.TokenType.*;
+
+import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
 import engine.newscript.lexer.TokenType;
-
-import static engine.newscript.lexer.TokenType.*;
 
 public class ParseUtil{
 	
@@ -25,6 +26,41 @@ public class ParseUtil{
 				break;
 			}
 		}
+	}
+	
+	public static void removeParseUnit(ParseUnit p) throws ScriptException{
+		
+		ParseUnit parent = p.getParent();
+		
+		if(parent == null)
+			throw new ScriptException("Empty script after removing const variable", p.getFile(), p.getLineNum());
+		
+		Object[] pCont = parent.getContents();
+		
+		// Remove parent if empty
+		if(pCont.length == 1){
+			removeParseUnit(parent);
+			return;
+		}
+		
+		// Contents after removing
+		Object[] cont = new Object[pCont.length - 1];
+		
+		int index = 0;
+		
+		for(int i = 0; i < cont.length; i++){
+			if(pCont[i] == p){
+				index = i;
+				break;
+			}
+		}
+		
+		// Copy values
+		System.arraycopy(pCont, 0, cont, 0, index);
+		System.arraycopy(pCont, index + 1, cont, index, pCont.length - index - 1);
+		
+		// Set new contents
+		parent.setContents(cont);
 	}
 	
 	public static Object getValue(Object o){

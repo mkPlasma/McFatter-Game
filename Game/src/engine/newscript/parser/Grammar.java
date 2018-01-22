@@ -31,8 +31,8 @@ public class Grammar{
 				{IF, PAREN_L, "expression", PAREN_R},
 			}),
 			
-			new Rule("if_else_cond", new Object[][]{
-				{IF, ELSE, PAREN_L, "expression", PAREN_R},
+			new Rule("else_if_cond", new Object[][]{
+				{ELSE, "if_cond"},
 			}),
 			
 			new Rule("while_cond", new Object[][]{
@@ -140,16 +140,25 @@ public class Grammar{
 				{"new_const_var", EQUALS, "expression"},
 			}),
 			
-			new Rule("assignment", new Object[][]{
+			new Rule("assign", new Object[][]{
 				{IDENTIFIER, EQUALS, "expression"},
 				{IDENTIFIER, AUG_ASSIGN, "expression"},
-				{IDENTIFIER, UNARY_ASSIGN},
-				{"array_elem", EQUALS, "expression"},
-				{"array_elem", AUG_ASSIGN, "expression"},
-				{"array_elem", UNARY_ASSIGN},
 				{"id_scope", EQUALS, "expression"},
 				{"id_scope", AUG_ASSIGN, "expression"},
+			}),
+			
+			new Rule("assign_u", new Object[][]{
+				{IDENTIFIER, UNARY_ASSIGN},
 				{"id_scope", UNARY_ASSIGN},
+			}),
+			
+			new Rule("array_elem_assign", new Object[][]{
+				{"array_elem", EQUALS, "expression"},
+				{"array_elem", AUG_ASSIGN, "expression"},
+			}),
+			
+			new Rule("array_elem_assign_u", new Object[][]{
+				{"array_elem", UNARY_ASSIGN},
 			}),
 			
 			new Rule("break", new Object[][]{
@@ -186,20 +195,23 @@ public class Grammar{
 			
 			// Finals
 			new Rule("statement", new Object[][]{
-				{"new_var",			SEMICOLON},
-				{"new_var_def", 	SEMICOLON},
-				{"const_var_def",	SEMICOLON},
-				{"assignment",		SEMICOLON},
-				{"func_call",		SEMICOLON},
-				{"dot_func_call",	SEMICOLON},
-				{"func_call_scope",	SEMICOLON},
-				{"break",			SEMICOLON},
-				{"return",			SEMICOLON},
-				{"returnif",		SEMICOLON},
-				{"wait",			SEMICOLON},
-				{"waits",			SEMICOLON},
-				{"wait_while",		SEMICOLON},
-				{"wait_until",		SEMICOLON},
+				{"new_var",				SEMICOLON},
+				{"new_var_def", 		SEMICOLON},
+				{"const_var_def",		SEMICOLON},
+				{"assign",				SEMICOLON},
+				{"assign_u",			SEMICOLON},
+				{"array_elem_assign",	SEMICOLON},
+				{"array_elem_assign_u",	SEMICOLON},
+				{"func_call",			SEMICOLON},
+				{"dot_func_call",		SEMICOLON},
+				{"func_call_scope",		SEMICOLON},
+				{"break",				SEMICOLON},
+				{"return",				SEMICOLON},
+				{"returnif",			SEMICOLON},
+				{"wait",				SEMICOLON},
+				{"waits",				SEMICOLON},
+				{"wait_while",			SEMICOLON},
+				{"wait_until",			SEMICOLON},
 			}),
 			
 			new Rule("block", FINAL, new Object[][]{
@@ -223,9 +235,9 @@ public class Grammar{
 				{"if_cond", "block"},
 			}),
 			
-			new Rule("if_else_block", FINAL, new Object[][]{
-				{"if_cond", "statement"},
-				{"if_cond", "block"},
+			new Rule("else_if_block", FINAL, new Object[][]{
+				{"else_if_cond", "statement"},
+				{"else_if_cond", "block"},
 			}),
 			
 			new Rule("else_block", FINAL, new Object[][]{
@@ -254,7 +266,7 @@ public class Grammar{
 				{"func_block"},
 				{"task_block"},
 				{"if_block"},
-				{"if_else_block"},
+				{"else_if_block"},
 				{"else_block"},
 				{"while_block"},
 				{"until_block"},

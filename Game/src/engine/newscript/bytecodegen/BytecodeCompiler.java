@@ -16,6 +16,7 @@ public class BytecodeCompiler{
 	
 	private final DataGenerator dataGen;
 	
+	private DScript script;
 	
 	private ArrayList<Instruction> bytecode;
 	
@@ -29,6 +30,8 @@ public class BytecodeCompiler{
 	}
 	
 	public void process(DScript script){
+		
+		this.script = script;
 		
 		dataGen.process(script);
 		
@@ -52,15 +55,13 @@ public class BytecodeCompiler{
 		Object[] contents = p.getContents();
 		
 		switch(p.getType()){
-				
-				
+			
 			case "statements":
 				for(Object o:contents)
 					compile((ParseUnit)o);
 				return;
 				
-				
-			case "statement":
+			case "block": case "s_block": case "statement":
 				compile((ParseUnit)contents[0]);
 				return;
 				
@@ -70,17 +71,109 @@ public class BytecodeCompiler{
 				return;
 				
 				
+			case "new_var":
+				
+				// Get variable number
+				int var = Integer.parseInt(((Token)contents[0]).getValue());
+				
+				// Create variable
+				add(inst(store_zero, var, (Token)contents[0]));
+				
+				return;
+				
+				
 			case "new_var_def":
 				// Add expression
 				compileExpression((ParseUnit)contents[2]);
 				
 				// Get variable number
-				int var = Integer.parseInt(((Token)((ParseUnit)contents[0]).getContents()[0]).getValue());
+				var = Integer.parseInt(((Token)((ParseUnit)contents[0]).getContents()[0]).getValue());
 				
 				// Create variable
-				add(inst(store_value, var));
+				add(inst(store_value, var, (ParseUnit)contents[0]));
 				
 				return;
+				
+				
+			case "assign":
+				// Add expression
+				compileExpression((ParseUnit)contents[2]);
+				
+				// Get variable number
+				var = Integer.parseInt(((Token)contents[0]).getValue());
+				
+				Token t = (Token)contents[1];
+				String op = t.getValue();
+				
+				// Standard assignment
+				if(op.equals("=")){
+					add(inst(store_value, var, t));
+					return;
+				}
+				
+				// Augmented assign
+				add(inst(load_var, var, (Token)contents[0]));
+				add(inst(getOperationOpcode(op), t));
+				add(inst(store_value, var, t));
+				
+				return;
+				
+				
+			case "assign_u":
+				// Get variable number
+				var = Integer.parseInt(((Token)contents[0]).getValue());
+				
+				// Assignment
+				add(inst(getOperationOpcode(((Token)contents[1]).getValue()), var, (Token)contents[1]));
+				
+				return;
+				
+				
+				
+			case "while_block":
+				
+				// Get loop point
+				int index = bytecode.size();
+				
+				// Compile contents of block
+				compile((ParseUnit)contents[1]);
+				
+				// Add condition
+				compileExpression((ParseUnit)((ParseUnit)contents[0]).getContents()[0]);
+				
+				// Add loop
+				add(inst(goto_if_true, index, p));
+				
+				return;
+				
+				/*
+			case "if_block":
+				
+				// Check if followed by else if/else
+				ParseUnit p2 = p.getParent();
+				Object[] cont = p2.getParent().getContents();
+				int index = 0;
+				
+				for(int i = 0; i < cont.length; i++){
+					if(cont[i] == p2){
+						index = i;
+						break;
+					}
+				}
+				
+				
+				boolean followed = false;
+				
+				if(index < cont.length - 1 && cont[index + 1] instanceof ParseUnit && ((ParseUnit)cont[index + 1]).getType().equals("s_block")){
+					String type = ((ParseUnit)((ParseUnit)cont[index - 1]).getContents()[0]).getType();
+					followed = type.equals("else_if_block") || type.equals("else_block");
+				}
+				
+				
+				
+				
+				return;
+				*/
 		}
 	}
 	
@@ -97,17 +190,17 @@ public class BytecodeCompiler{
 			
 			// If literal, add instruction to load
 			if(o instanceof Integer){
-				add(inst(load_int, (int)o));
+				add(inst(load_int, (int)o, p));
 				return;
 			}
 			
 			if(o instanceof Float){
-				add(inst(load_float, Float.floatToIntBits((float)o)));
+				add(inst(load_float, Float.floatToIntBits((float)o), p));
 				return;
 			}
 			
 			if(o instanceof Boolean){
-				add(inst((Boolean)o ? load_true : load_false));
+				add(inst((Boolean)o ? load_true : load_false, p));
 				return;
 			}
 			
@@ -116,7 +209,7 @@ public class BytecodeCompiler{
 			
 			// Variable
 			if(o instanceof Token && ((Token)o).getType() == IDENTIFIER){
-				add(inst(load_var, Integer.parseInt(((Token)o).getValue())));
+				add(inst(load_var, Integer.parseInt(((Token)o).getValue()), (Token)o));
 				return;
 			}
 		}
@@ -129,10 +222,14 @@ public class BytecodeCompiler{
 			compileExpression((ParseUnit)contents[2]);
 			
 			// Add operation
-			add(inst(getOperationOpcode(((Token)contents[1]).getValue())));
+			add(inst(getOperationOpcode(((Token)contents[1]).getValue()), (Token)contents[1]));
 			
 			return;
 		}
+		
+		// Unary operation
+		compileExpression((ParseUnit)contents[1]);
+		add(inst(getOperationOpcode(((Token)contents[0]).getValue()), (Token)contents[0]));
 	}
 	
 	
@@ -141,7 +238,19 @@ public class BytecodeCompiler{
 		bytecode.add(i);
 	}
 	
-	private void add(ArrayList<Instruction> bc){
-		bytecode.addAll(bc);
+	public Instruction inst(InstructionSet i, Token t){
+		return new Instruction(InstructionSet.getOpcode(i), getFileIndex(t, script), getLineNum(t));
+	}
+	
+	public Instruction inst(InstructionSet i, ParseUnit p){
+		return new Instruction(InstructionSet.getOpcode(i), getFileIndex(p, script), getLineNum(p));
+	}
+	
+	public Instruction inst(InstructionSet i, int val, Token t){
+		return new Instruction(InstructionSet.getOpcode(i), val, getFileIndex(t, script), getLineNum(t));
+	}
+	
+	public Instruction inst(InstructionSet i, int val, ParseUnit p){
+		return new Instruction(InstructionSet.getOpcode(i), val, getFileIndex(p, script), getLineNum(p));
 	}
 }

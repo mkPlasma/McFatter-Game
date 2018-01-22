@@ -43,6 +43,11 @@ public class ParseTreeChecker{
 		
 		tree = script.getParseTree();
 		
+		// Check for tokens
+		for(Object o:tree)
+			if(o instanceof Token)
+				throw new ScriptException("Syntax error", ((Token)o).getFile(), ((Token)o).getLineNum());
+		
 		// Check specific errors first
 		for(Rule rule:errorRules)
 			check(rule);
@@ -65,11 +70,6 @@ public class ParseTreeChecker{
 					throw new ScriptException("Syntax error", p.getFile(), p.getLineNum());
 			}
 		}
-		
-		// Check for tokens
-		for(Object o:tree)
-			if(o instanceof Token)
-				throw new ScriptException("Syntax error", ((Token)o).getFile(), ((Token)o).getLineNum());
 
 		variableChecker.process(script);
 		functionChecker.process(script);

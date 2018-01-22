@@ -41,6 +41,18 @@ public enum InstructionSet{
 	op_and,
 	op_not,
 	
+	// Increment/decrement specified variable by 1
+	op_inc(true),
+	op_dec(true),
+	
+	// Invert specified variable
+	op_inv(true),
+	
+	
+	// Jump to specified bytecode index if stack top value is true/false (pops value)
+	goto_if_true(true),
+	goto_if_false(true),
+	
 	;
 	
 	private final boolean operand;

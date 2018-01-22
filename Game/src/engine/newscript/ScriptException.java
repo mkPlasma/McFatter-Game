@@ -5,6 +5,7 @@ public class ScriptException extends Exception{
 	private static final long serialVersionUID = 1L;
 	
 	private final String file;
+	private final int fileIndex;
 	private final int line;
 	
 	public ScriptException(String message, int line){
@@ -14,12 +15,24 @@ public class ScriptException extends Exception{
 	public ScriptException(String message, String file, int line){
 		super(message);
 		this.file = file;
+		fileIndex = 0;
 		this.line = line;
 	}
 	
+	public ScriptException(String message, int fileIndex, int line){
+		super(message);
+		file = null;
+		this.fileIndex = fileIndex;
+		this.line = line;
+	}
 	
+
 	public String getFile(){
 		return file;
+	}
+	
+	public int getFileIndex(){
+		return fileIndex;
 	}
 	
 	public int getLine(){

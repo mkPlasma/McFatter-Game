@@ -1,6 +1,8 @@
 package engine.newscript.parser.simplifier;
 
 import engine.newscript.DScript;
+import engine.newscript.ScriptException;
+import engine.newscript.ScriptPrinter;
 
 public class ParseTreeSimplifier{
 	
@@ -12,11 +14,11 @@ public class ParseTreeSimplifier{
 	public ParseTreeSimplifier(){
 		variableReplacer		= new VariableReplacer();
 		functionReplacer		= new FunctionReplacer();
-		statementSimplifier	= new StatementSimplifier();
+		statementSimplifier		= new StatementSimplifier();
 		expressionSimplifier	= new ExpressionSimplifier();
 	}
 	
-	public void process(DScript script){
+	public void process(DScript script) throws ScriptException{
 		expressionSimplifier.process(script);
 		variableReplacer.process(script);
 		functionReplacer.process(script);

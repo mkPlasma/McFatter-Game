@@ -1,11 +1,10 @@
 package engine.newscript.parser.checker;
 
-import static engine.newscript.parser.ParseUtil.*;
-
 import java.util.ArrayList;
 
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
+import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
 public class ContextChecker{
@@ -29,7 +28,8 @@ public class ContextChecker{
 					throw new ScriptException("Break statement must be in a loop", p.getFile(), p.getLineNum());
 				
 				break;
-
+				
+				
 			case "return":
 				
 				boolean withinTask = p.isWithin("task_block");
@@ -42,13 +42,48 @@ public class ContextChecker{
 				
 				break;
 				
+				
 			case "returnif":
 				
 				if(!p.isWithin("func_block") && !p.isWithin("task_block"))
 					throw new ScriptException("Returnif statement must be in a function or task", p.getFile(), p.getLineNum());
 				
 				break;
-			
+				
+				
+			case "else_if_block": case "else_block":
+				
+				// Check for preceding if/else if statements
+				
+				ParseUnit p2 = p.getParent();
+				ParseUnit p3 = p2.getParent();
+				
+				Object[] cont = p3.getContents();
+				int index = 0;
+				
+				for(int i = 0; i < cont.length; i++){
+					if(p2 == cont[i]){
+						index = i;
+						break;
+					}
+				}
+				
+				if(index == 0 || (index > 0 && cont[index - 1] instanceof Token))
+					throw new ScriptException("Else if/else statement must follow if/else if statement", p.getFile(), p.getLineNum());
+				
+				p3 = (ParseUnit)cont[index - 1];
+				
+				if(p3.getType() != "s_block" || p3.getContents()[0] instanceof Token)
+					throw new ScriptException("Else if/else statement must follow if/else if statement", p.getFile(), p.getLineNum());
+				
+				String type = ((ParseUnit)p3.getContents()[0]).getType();
+				
+				if(!type.equals("if_block") && !type.equals("else_if_block"))
+					throw new ScriptException("Else if/else statement must follow if/else if statement", p.getFile(), p.getLineNum());
+				
+				break;
+				
+				
 			case "function_block": case "task_block":
 				
 				if(p.isWithin("if_block")		||

@@ -32,20 +32,20 @@ public class Compiler{
 			bytecodeCompiler.process(script);
 		}
 		catch(ScriptException e){
-			error(e, false);
+			error(e);
 			return false;
 		}
 		
 		return true;
 	}
 	
-	private void error(ScriptException e, boolean runtime){
+	private void error(ScriptException e){
 		
 		String file = e.getFile();
 		int line = e.getLine();
 		
 		System.err.println(
-			(runtime ? "Runtime" : "Compilation") + " error in " + (file == null ? script.getFileName(): file.substring(16)) +
+			"Compilation error in " + (file == null ? script.getFileName(): file.substring(16)) +
 			" on line " + line + ":\n" + e.getMessage() +
 			(line > 0 ? "\n" + line + ": " + script.getLine(file, line) : "")
 		);

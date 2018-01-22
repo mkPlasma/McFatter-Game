@@ -2,19 +2,21 @@ package engine.newscript.bytecodegen;
 
 import static engine.newscript.bytecodegen.InstructionSet.*;
 
-import java.util.ArrayList;
+import engine.newscript.DScript;
+import engine.newscript.lexer.Token;
+import engine.newscript.parser.ParseUnit;
 
 public class CompilerUtil{
 	
 	public static InstructionSet getOperationOpcode(String op){
 		
 		switch(op){
-			case "+":	return op_add;
-			case "-":	return op_sub;
-			case "*":	return op_mult;
-			case "/":	return op_div;
-			case "%":	return op_mod;
-			case "^":	return op_exp;
+			case "+":	case "+=":	return op_add;
+			case "-":	case "-=":	return op_sub;
+			case "*":	case "*=":	return op_mult;
+			case "/":	case "/=":	return op_div;
+			case "%":	case "%=":	return op_mod;
+			case "^":	case "^=":	return op_exp;
 			
 			case "==":	return op_eq;
 			case "<":	return op_lt;
@@ -26,31 +28,20 @@ public class CompilerUtil{
 			case "||":	return op_or;
 			case "&&":	return op_and;
 			case "!":	return op_not;
+
+			case "++":	return op_inc;
+			case "--":	return op_dec;
+			case "!!":	return op_inv;
 		}
 		
 		return null;
 	}
 	
-	
-	// Shorthand functions
-	
-	public static Instruction inst(InstructionSet i){
-		return new Instruction(InstructionSet.getOpcode(i));
+	public static int getFileIndex(Object o, DScript script){
+		return script.getFileIndex(o instanceof Token ? ((Token)o).getFile() : ((ParseUnit)o).getFile());
 	}
 	
-	public static Instruction inst(InstructionSet i, int val){
-		return new Instruction(InstructionSet.getOpcode(i), val);
-	}
-	
-	public static ArrayList<Instruction> inst2(InstructionSet i){
-		ArrayList<Instruction> a = new ArrayList<Instruction>();
-		a.add(inst(i));
-		return a;
-	}
-
-	public static ArrayList<Instruction> inst2(InstructionSet i, int val){
-		ArrayList<Instruction> a = new ArrayList<Instruction>();
-		a.add(inst(i, val));
-		return a;
+	public static int getLineNum(Object o){
+		return o instanceof Token ? ((Token)o).getLineNum() : ((ParseUnit)o).getLineNum();
 	}
 }

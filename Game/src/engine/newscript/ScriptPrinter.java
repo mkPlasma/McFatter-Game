@@ -14,7 +14,7 @@ public class ScriptPrinter{
 			printToken(t);
 	}
 	
-	public static void printToken(Token t){
+	private static void printToken(Token t){
 		String name = t.getType().name();
 		System.out.println(name + (name.length() >= 8 ? "" : "\t") + "\t" + t.getValue());
 	}
@@ -24,7 +24,7 @@ public class ScriptPrinter{
 		printParseTree(elements, 0);
 	}
 	
-	public static void printParseTree(Object[] elements, int tabs){
+	private static void printParseTree(Object[] elements, int tabs){
 		
 		if(tabs > 0)
 			System.out.println("{");
@@ -50,12 +50,12 @@ public class ScriptPrinter{
 		}
 	}
 	
-	public static void printToken2(Token t){
+	private static void printToken2(Token t){
 		String name = t.getType().name();
 		System.out.println(name + " [" + t.getValue() + "]");
 	}
 	
-	public static void printTabs(int tabs){
+	private static void printTabs(int tabs){
 		for(int i = 0; i < tabs; i++)
 			System.out.print("\t");
 	}

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 import engine.newscript.DScript;
-import engine.newscript.ScriptPrinter;
+import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
 import engine.newscript.lexer.TokenType;
 import engine.newscript.parser.ParseUnit;
@@ -28,7 +28,7 @@ public class VariableReplacer{
 		preserved		= new ArrayList<Integer>();
 	}
 	
-	public void process(DScript script){
+	public void process(DScript script) throws ScriptException{
 
 		variables.clear();
 		constVariables.clear();
@@ -41,7 +41,7 @@ public class VariableReplacer{
 			process((ParseUnit)o);
 	}
 	
-	private void process(ParseUnit p){
+	private void process(ParseUnit p) throws ScriptException{
 		
 		boolean isBlock = p.getType().equals("s_block");
 		
@@ -64,7 +64,14 @@ public class VariableReplacer{
 			if(o instanceof Token)
 				continue;
 			
-			process((ParseUnit)o);
+			
+			ParseUnit p2 = (ParseUnit)o;
+			
+			process(p2);
+			
+			// Remove const var definitions
+			if(p2.getType().equals("const_var_def"))
+				removeParseUnit(p2);
 		}
 		
 		// Remove block variables
@@ -109,7 +116,7 @@ public class VariableReplacer{
 				return;
 				
 				
-			case "assignment":
+			case "assign": case "assign_u":
 				
 				Object o = contents[0];
 				

@@ -40,22 +40,33 @@ public class DScript{
 	public void setRawFiles(String[][] rFiles){
 		this.rFiles = rFiles;
 	}
-	
+
 	public String getLine(String file, int line){
-		return rFiles[file == null ? 0 : fileIndex(file)][line - 1];
+		return rFiles[getFileIndex(file)][line - 1];
+	}
+	
+	public String getLine(int fileIndex, int line){
+		return rFiles[fileIndex][line - 1];
 	}
 	
 	public void setFilePaths(String[] filePaths){
 		this.filePaths = filePaths;
 	}
 	
-	private int fileIndex(String file){
+	public int getFileIndex(String file){
+		
+		if(file == null)
+			return 0;
 		
 		for(int i = 0; i < filePaths.length; i++)
 			if(file.equals(filePaths[i]))
 				return i;
 		
 		return -1;
+	}
+	
+	public String getFileName(int fileIndex){
+		return filePaths[fileIndex].substring(16);
 	}
 	
 	

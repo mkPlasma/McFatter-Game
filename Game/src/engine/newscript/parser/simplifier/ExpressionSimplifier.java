@@ -116,9 +116,17 @@ public class ExpressionSimplifier{
 			if(!(c2 instanceof ParseUnit))
 				return;
 			
+			Object[] cont;
+			
 			// Get parenthesized expression
-			ParseUnit p2 = (ParseUnit)((ParseUnit)((ParseUnit)c2).getContents()[0]).getContents()[0];
-			Object[] cont = p2.getContents();
+			try{
+				ParseUnit p2 = (ParseUnit)((ParseUnit)((ParseUnit)c2).getContents()[0]).getContents()[0];
+				cont = p2.getContents();
+			}
+			// Not simplifiable
+			catch(ClassCastException e){
+				return;
+			}
 			
 			// Check length
 			if(cont.length != 3)
