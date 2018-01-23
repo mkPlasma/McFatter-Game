@@ -26,5 +26,7 @@ public class Parser{
 		treeGen.process(script);
 		treeCheck.process(script);
 		treeSimplify.process(script);
+		
+		ScriptPrinter.printParseTree(script.getParseTree().toArray(new Object[0]));
 	}
 }

@@ -6,7 +6,6 @@ import static engine.newscript.parser.ParseUtil.*;
 import java.util.ArrayList;
 
 import engine.newscript.DScript;
-import engine.newscript.ScriptPrinter;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
@@ -33,13 +32,23 @@ public class StatementSimplifier{
 			if(!(o instanceof ParseUnit))
 				continue;
 			
-			process((ParseUnit)o);
+			ParseUnit p2 = (ParseUnit)o;
+			
+			// Replace s_block with its contents
+			if(p2.getType().equals("s_block")){
+				contents[i] = p2.getContents()[0];
+				p2 = (ParseUnit)contents[i];
+				
+				p.setContents(contents);
+			}
+			
+			process(p2);
 		}
 	}
 	
 	private void simplify(ParseUnit p){
 		switch(p.getType()){
-			
+				
 			// Invert until loops into while loops
 			case "until_block":
 				replaceUntilLoop(p);
@@ -123,7 +132,7 @@ public class StatementSimplifier{
 				new Token(LESS_THAN, "<",
 					(exp instanceof Token ? ((Token)exp).getFile() : ((ParseUnit)exp).getFile()),
 					(exp instanceof Token ? ((Token)exp).getLineNum() : ((ParseUnit)exp).getLineNum())),
-				new ParseUnit("expression", new Object[]{exp})
+				exp,
 			})
 		});
 		
@@ -131,11 +140,16 @@ public class StatementSimplifier{
 		// Add increment to block
 		
 		// Get statements
-		ParseUnit st = (ParseUnit)((ParseUnit)contents[1]).getContents()[0];
+		boolean isBlock = ((ParseUnit)contents[1]).getType().equals("block");
+		ParseUnit st = isBlock ? (ParseUnit)((ParseUnit)contents[1]).getContents()[0] : (ParseUnit)contents[1];
 		Object[] stCont = st.getContents();
 		
 		Object[] cont = new Object[stCont.length + 1];
 		System.arraycopy(stCont, 0, cont, 0, stCont.length);
+		
+		// Add statement
+		if(!isBlock)
+			cont[0] = new ParseUnit("statement", new Object[]{cont[0]});
 		
 		exp = len == 1 ? id : exp2;
 		
@@ -143,14 +157,14 @@ public class StatementSimplifier{
 			len == 3 ?
 				
 				// List length 3
-				new ParseUnit("assignment", new Object[]{
+				new ParseUnit("assign", new Object[]{
 					id,
 					new Token(AUG_ASSIGN, "+=", exp2.getFile(), exp2.getLineNum()),
 					exp2
 				}) :
 				
 				// List length 1 or 2
-				new ParseUnit("assignment", new Object[]{
+				new ParseUnit("assign_u", new Object[]{
 					id,
 					new Token(UNARY_ASSIGN, "++",
 						(exp instanceof Token ? ((Token)exp).getFile() : ((ParseUnit)exp).getFile()),
@@ -160,14 +174,17 @@ public class StatementSimplifier{
 		});
 		
 		// Replace statements
-		replaceParseUnit(st, new ParseUnit("statements", cont));
+		if(isBlock)
+			replaceParseUnit(st, new ParseUnit("statements", cont));
+		else
+			replaceParseUnit(st, new ParseUnit("block", new Object[]{new ParseUnit("statements", cont)}));
 		
 		
 		// Create new block
 		cont = new Object[]{new ParseUnit("statements", new Object[]{
 			
 			new ParseUnit("statement", new Object[]{
-				len > 2 ?
+				len >= 2 ?
 				// List length 2 or 3
 				new ParseUnit("new_var_def", new Object[]{
 					new ParseUnit("new_var", new Object[]{id}),
@@ -181,9 +198,7 @@ public class StatementSimplifier{
 				new ParseUnit("new_var", new Object[]{id})
 			}),
 			
-			new ParseUnit("s_block", new Object[]{
-				new ParseUnit("while_block", contents)
-			})
+			new ParseUnit("while_block", contents)
 		})};
 		
 		// Replace for_block

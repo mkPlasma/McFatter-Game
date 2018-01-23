@@ -12,12 +12,7 @@ public class ParseUnit{
 	
 	public ParseUnit(String type, Object[] contents){
 		this.type = type;
-		this.contents = contents;
-		
-		// Set parent of ParseUnits
-		for(Object o:contents)
-			if(o instanceof ParseUnit)
-				((ParseUnit)o).setParent(this);
+		setContents(contents);
 	}
 	
 	public String getFile(){
@@ -77,6 +72,11 @@ public class ParseUnit{
 	
 	public void setContents(Object[] contents){
 		this.contents = contents;
+		
+		// Set parent of ParseUnits
+		for(Object o:contents)
+			if(o instanceof ParseUnit)
+				((ParseUnit)o).setParent(this);
 	}
 	
 	public Object[] getContents(){

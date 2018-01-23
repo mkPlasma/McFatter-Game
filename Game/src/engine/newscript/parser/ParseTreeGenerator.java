@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import engine.newscript.DScript;
-import engine.newscript.ScriptPrinter;
 import engine.newscript.lexer.Token;
 import engine.newscript.lexer.TokenType;
 
@@ -38,7 +37,7 @@ public class ParseTreeGenerator{
 			i = -1;
 		}
 		
-		ScriptPrinter.printParseTree(parseTree.toArray(new Object[0]));
+		//ScriptPrinter.printParseTree(parseTree.toArray(new Object[0]));
 		
 		script.setParseTree(parseTree);
 	}

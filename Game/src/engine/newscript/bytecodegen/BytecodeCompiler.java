@@ -135,45 +135,38 @@ public class BytecodeCompiler{
 				// Get loop point
 				int index = bytecode.size();
 				
-				// Compile contents of block
+				// Add condition to exit loop
+				compileExpression((ParseUnit)((ParseUnit)contents[0]).getContents()[0]);
+				
+				// Condition jump index
+				int jIndex = bytecode.size();
+				
+				// Add contents of block
 				compile((ParseUnit)contents[1]);
+				
+				// Add loop
+				add(inst(jump, index, p));
+				
+				// Add condition jump
+				bytecode.add(jIndex, inst(jump_if_false, bytecode.size() + 1, p));
+				
+				return;
+				
+			case "if_block":
 				
 				// Add condition
 				compileExpression((ParseUnit)((ParseUnit)contents[0]).getContents()[0]);
 				
-				// Add loop
-				add(inst(goto_if_true, index, p));
+				// Condition jump index
+				jIndex = bytecode.size();
+				
+				// Add contents of block
+				compile((ParseUnit)contents[1]);
+				
+				// Add condition jump
+				bytecode.add(jIndex, inst(jump_if_false, bytecode.size() + 1, p));
 				
 				return;
-				
-				/*
-			case "if_block":
-				
-				// Check if followed by else if/else
-				ParseUnit p2 = p.getParent();
-				Object[] cont = p2.getParent().getContents();
-				int index = 0;
-				
-				for(int i = 0; i < cont.length; i++){
-					if(cont[i] == p2){
-						index = i;
-						break;
-					}
-				}
-				
-				
-				boolean followed = false;
-				
-				if(index < cont.length - 1 && cont[index + 1] instanceof ParseUnit && ((ParseUnit)cont[index + 1]).getType().equals("s_block")){
-					String type = ((ParseUnit)((ParseUnit)cont[index - 1]).getContents()[0]).getType();
-					followed = type.equals("else_if_block") || type.equals("else_block");
-				}
-				
-				
-				
-				
-				return;
-				*/
 		}
 	}
 	

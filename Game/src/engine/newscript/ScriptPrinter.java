@@ -61,12 +61,15 @@ public class ScriptPrinter{
 	}
 	
 	public static void printBytecode(ArrayList<Instruction> bytecode){
-		for(Instruction i:bytecode){
+		
+		for(int i = 0; i < bytecode.size(); i++){
 			
-			InstructionSet inst = InstructionSet.getName(i.getOpcode());
-			String name = inst.name();
+			Instruction inst = bytecode.get(i);
+			InstructionSet instS = InstructionSet.getName(inst.getOpcode());
+			String num = Integer.toString(i);
+			String name = instS.name();
 			
-			System.out.println(name + "\t" + (name.length() < 8 ? "\t" : "") + (inst.hasOperand() ? i.getOperand() : ""));
+			System.out.println(num + "\t" + name + "\t" + (name.length() < 8 ? "\t" : "") + (instS.hasOperand() ? inst.getOperand() : ""));
 		}
 	}
 }

@@ -49,9 +49,12 @@ public enum InstructionSet{
 	op_inv(true),
 	
 	
+	// Unconditional jump to specified bytecode index
+	jump(true),
+	
 	// Jump to specified bytecode index if stack top value is true/false (pops value)
-	goto_if_true(true),
-	goto_if_false(true),
+	jump_if_true(true),
+	jump_if_false(true),
 	
 	;
 	

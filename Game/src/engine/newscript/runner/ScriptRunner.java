@@ -18,6 +18,7 @@ public class ScriptRunner{
 	private Stack<Object> stack;
 	
 	private Instruction currentInstruction;
+	private int instIndex;
 	
 	
 	public void init(DScript script){
@@ -35,8 +36,8 @@ public class ScriptRunner{
 			return;
 		
 		try{
-			for(Instruction i:bytecode)
-				runInstruction(i);
+			for(instIndex = 0; instIndex < bytecode.length; instIndex++)
+				runInstruction(bytecode[instIndex]);
 			
 			System.out.println("\nResult:");
 			
@@ -110,11 +111,21 @@ public class ScriptRunner{
 				
 			case op_inc: case op_dec: case op_inv:
 				unaryAssign(name, op);
-				break;
+				return;
 				
-			case goto_if_true:
-				if((Boolean)pop()) 
-				break;
+			case jump:
+				instIndex = op - 1;
+				return;
+				
+			case jump_if_true:
+				if((Boolean)pop())
+					instIndex = op - 1;
+				return;
+				
+			case jump_if_false:
+				if(!(Boolean)pop())
+					instIndex = op - 1;
+				return;
 				
 			default:
 				System.err.println("Unrecognized bytecode instruction '" + name + "'");
@@ -125,8 +136,8 @@ public class ScriptRunner{
 	// Numerical operation
 	private void numOperation(InstructionSet op) throws ScriptException{
 		
-		Object o1 = pop();
 		Object o2 = pop();
+		Object o1 = pop();
 		
 		if(!(o1 instanceof Float || o1 instanceof Integer) || !(o2 instanceof Float || o2 instanceof Integer))
 			throw new ScriptException("Type mismatch, expected numbers", currentInstruction.getFileIndex(), currentInstruction.getLineNum());

@@ -18,7 +18,8 @@ public class ParseUtil{
 	
 	public static void replaceParseUnit(ParseUnit a, Object b){
 		
-		Object[] cont = a.getParent().getContents();
+		ParseUnit p = a.getParent();
+		Object[] cont = p.getContents();
 		
 		for(int i = 0; i < cont.length; i++){
 			if(cont[i] == a){
@@ -26,6 +27,8 @@ public class ParseUtil{
 				break;
 			}
 		}
+		
+		p.setContents(cont);
 	}
 	
 	public static void removeParseUnit(ParseUnit p) throws ScriptException{
