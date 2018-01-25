@@ -59,11 +59,11 @@ public class ScriptRunner{
 		
 		switch(name){
 			
-			case store_zero:
+			case init_zero:
 				variables[op] = 0;
 				return;
 				
-			case store_value:
+			case init_value:
 				variables[op] = pop();
 				return;
 				

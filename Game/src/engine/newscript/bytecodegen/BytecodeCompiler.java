@@ -77,20 +77,42 @@ public class BytecodeCompiler{
 				int var = Integer.parseInt(((Token)contents[0]).getValue());
 				
 				// Create variable
-				add(inst(store_zero, var, (Token)contents[0]));
+				add(inst(init_zero, var, (Token)contents[0]));
 				
 				return;
 				
 				
 			case "new_var_def":
-				// Add expression
-				compileExpression((ParseUnit)contents[2]);
 				
 				// Get variable number
 				var = Integer.parseInt(((Token)((ParseUnit)contents[0]).getContents()[0]).getValue());
 				
+				// Check if literal value
+				Object o = getValue((ParseUnit)contents[2]);
+				
+				// If literal, add instruction to initialize
+				if(o instanceof Integer){
+					add(inst(init_int, (int)o, p));
+					return;
+				}
+				
+				if(o instanceof Float){
+					add(inst(init_float, Float.floatToIntBits((float)o), p));
+					return;
+				}
+				
+				if(o instanceof Boolean){
+					add(inst((Boolean)o ? init_true : init_false, p));
+					return;
+				}
+				
+				// Non-literals
+				
+				// Add expression
+				compileExpression((ParseUnit)contents[2]);
+				
 				// Create variable
-				add(inst(store_value, var, (ParseUnit)contents[0]));
+				add(inst(init_value, var, (ParseUnit)contents[0]));
 				
 				return;
 				
@@ -107,14 +129,14 @@ public class BytecodeCompiler{
 				
 				// Standard assignment
 				if(op.equals("=")){
-					add(inst(store_value, var, t));
+					add(inst(init_value, var, t));
 					return;
 				}
 				
 				// Augmented assign
 				add(inst(load_var, var, (Token)contents[0]));
 				add(inst(getOperationOpcode(op), t));
-				add(inst(store_value, var, t));
+				add(inst(init_value, var, t));
 				
 				return;
 				

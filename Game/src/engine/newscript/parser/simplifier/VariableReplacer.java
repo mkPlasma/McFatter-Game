@@ -15,25 +15,24 @@ import engine.newscript.parser.ParseUnit;
 public class VariableReplacer{
 	
 	// Stack for each block
-	private Stack<ArrayList<String>> variables;
+	private Stack<ArrayList<String>> globalVariables;
+	private Stack<ArrayList<String>> localVariables;
 	private Stack<ArrayList<String>> constVariables;
-	
-	// Variables used in tasks that need to be preserved
-	private ArrayList<Integer> preserved;
 	
 	
 	public VariableReplacer(){
-		variables		= new Stack<ArrayList<String>>();
+		globalVariables	= new Stack<ArrayList<String>>();
+		localVariables	= new Stack<ArrayList<String>>();
 		constVariables	= new Stack<ArrayList<String>>();
-		preserved		= new ArrayList<Integer>();
 	}
 	
 	public void process(DScript script) throws ScriptException{
-
-		variables.clear();
+		
+		globalVariables.clear();
+		localVariables.clear();
 		constVariables.clear();
-		preserved.clear();
-		pushVarList();
+		
+		pushGlobalVarList();
 		
 		ArrayList<Object> parseTree = script.getParseTree();
 		
@@ -44,10 +43,21 @@ public class VariableReplacer{
 	private void process(ParseUnit p) throws ScriptException{
 		
 		boolean isBlock = p.getType().equals("s_block");
+		boolean local = false;
+		
+		Object[] contents = p.getContents();
 		
 		// Push new list for each new block
-		if(isBlock)
-			pushVarList();
+		if(isBlock){
+			// Local variables
+			ParseUnit p2 = (ParseUnit)contents[0];
+			local = p2.getType().equals("func_block") || p2.getType().equals("task_block");
+			
+			if(!local)
+				pushGlobalVarList();
+			else
+				pushLocalVarList();
+		}
 		
 		else{
 			// Check if used variables exist
@@ -56,8 +66,6 @@ public class VariableReplacer{
 			// Add new variables defined in current ParseUnit
 			addVariables(p);
 		}
-		
-		Object[] contents = p.getContents();
 		
 		for(Object o:contents){
 			
@@ -75,8 +83,12 @@ public class VariableReplacer{
 		}
 		
 		// Remove block variables
-		if(isBlock)
-			popVarList();
+		if(isBlock){
+			if(!local)
+				popGlobalVarList();
+			else
+				popLocalVarList();
+		}
 	}
 	
 	private void replaceVariables(ParseUnit p){
@@ -133,16 +145,14 @@ public class VariableReplacer{
 	private void addVariables(ParseUnit p){
 		
 		Object[] contents = p.getContents();
-		
-		boolean preserve = p.isWithin("task_block");
-		
+		boolean local = p.isWithin("func_block") || p.isWithin("task_block");
 		
 		switch(p.getType()){
 				
 			case "new_var": case "for_cond":
 				Token t = (Token)contents[0];
 				
-				addVariable(t.getValue(), preserve);
+				addVariable(t.getValue(), local);
 				replaceVariable(p, 0, t, 0);
 				return;
 				
@@ -165,7 +175,7 @@ public class VariableReplacer{
 				
 				// Single parameter
 				if(contents[1] instanceof Token){
-					addVariable(((Token)contents[1]).getValue(), preserve);
+					addVariable(((Token)contents[1]).getValue(), local);
 					return;
 				}
 				
@@ -174,19 +184,29 @@ public class VariableReplacer{
 				contents = list.getContents();
 				
 				for(Object o:contents)
-					addVariable(((Token)((ParseUnit)o).getContents()[0]).getValue(), p.getType().equals("task_def"));
+					addVariable(((Token)((ParseUnit)o).getContents()[0]).getValue(), local);
 				
 				return;
 		}
 	}
 	
-	private void pushVarList(){
-		variables.push(new ArrayList<String>());
+	private void pushGlobalVarList(){
+		globalVariables.push(new ArrayList<String>());
 		constVariables.push(new ArrayList<String>());
 	}
 	
-	private void popVarList(){
-		variables.pop();
+	private void popGlobalVarList(){
+		globalVariables.pop();
+		constVariables.pop();
+	}
+	
+	private void pushLocalVarList(){
+		localVariables.push(new ArrayList<String>());
+		constVariables.push(new ArrayList<String>());
+	}
+	
+	private void popLocalVarList(){
+		localVariables.pop();
 		constVariables.pop();
 	}
 	
@@ -215,20 +235,22 @@ public class VariableReplacer{
 		contents[index] = new Token(IDENTIFIER, Integer.toString(n), t.getFile(), t.getLineNum());
 	}
 	
-	private void addVariable(String var, boolean preserve){
+	private void addVariable(String var, boolean local){
 		
 		int n = 0;
 		
-		for(ArrayList<String> vars:variables)
+		if(local){
+			for(ArrayList<String> vars:localVariables)
+				n += vars.size();
+			
+			localVariables.peek().add(var + "," + n);
+			return;
+		}
+		
+		for(ArrayList<String> vars:globalVariables)
 			n += vars.size();
 		
-		while(preserved.contains(n))
-			n++;
-		
-		variables.peek().add(var + "," + n);
-		
-		if(preserve)
-			preserved.add(n);
+		globalVariables.peek().add(var + "," + n);
 	}
 	
 	private void addConstVariable(String var, char type, String value){
@@ -237,9 +259,18 @@ public class VariableReplacer{
 	
 	private int getVariableNumber(String var){
 		
-		for(int i = variables.size() - 1; i >= 0; i--){
+		for(int i = localVariables.size() - 1; i >= 0; i--){
 			
-			ArrayList<String> vars = variables.get(i);
+			ArrayList<String> vars = localVariables.get(i);
+			
+			for(String v:vars)
+				if(getName(v).equals(var))
+					return getNum(v);
+		}
+		
+		for(int i = globalVariables.size() - 1; i >= 0; i--){
+			
+			ArrayList<String> vars = globalVariables.get(i);
 			
 			for(String v:vars)
 				if(getName(v).equals(var))
@@ -251,9 +282,10 @@ public class VariableReplacer{
 	
 	private int getVariableNumberInScope(String var, int scope){
 		
-		int i = variables.size() - 1 - scope;
+		// Positive - local		Negative - global
+		int i = localVariables.size() - 1 - scope;
 		
-		ArrayList<String> vars = variables.get(i);
+		ArrayList<String> vars = i <= 0 ? globalVariables.get(globalVariables.size() + i) : localVariables.get(i);
 		
 		for(String v:vars)
 			if(getName(v).equals(var))
@@ -274,7 +306,7 @@ public class VariableReplacer{
 	
 	private boolean isConstantVariableInScope(String var, int scope){
 		
-		int i = variables.size() - 1 - scope;
+		int i = constVariables.size() - 1 - scope;
 		
 		ArrayList<String> vars = constVariables.get(i);
 		
@@ -301,7 +333,7 @@ public class VariableReplacer{
 	
 	private String getConstantValueInScope(String var, int scope){
 		
-		int i = variables.size() - 1 - scope;
+		int i = constVariables.size() - 1 - scope;
 		
 		ArrayList<String> vars = constVariables.get(i);
 		

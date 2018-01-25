@@ -1,9 +1,19 @@
 package engine.newscript.bytecodegen;
 
 public enum InstructionSet{
+	
+	// Initialize variable to zero
+	init_zero,
 
-	// Stores an integer zero in specified value (default initialization)
-	store_zero(true),
+	// Initialize variable to top stack value (pops value)
+	init_value,
+	
+	// Initialize variable to specified value
+	init_int(true),
+	init_float(true),
+	init_false,
+	init_true,
+	
 	
 	// Store top stack value into specified variable (pops value)
 	store_value(true),
