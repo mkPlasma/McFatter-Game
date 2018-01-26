@@ -16,13 +16,13 @@ public class VariableReplacer{
 	
 	// Stack for each block
 	private Stack<ArrayList<String>> globalVariables;
-	private Stack<ArrayList<String>> localVariables;
+	private Stack<Stack<ArrayList<String>>> localVariables;
 	private Stack<ArrayList<String>> constVariables;
 	
 	
 	public VariableReplacer(){
 		globalVariables	= new Stack<ArrayList<String>>();
-		localVariables	= new Stack<ArrayList<String>>();
+		localVariables	= new Stack<Stack<ArrayList<String>>>();
 		constVariables	= new Stack<ArrayList<String>>();
 	}
 	
@@ -43,6 +43,7 @@ public class VariableReplacer{
 	private void process(ParseUnit p) throws ScriptException{
 		
 		boolean isBlock = p.getType().equals("s_block");
+		boolean func = false;
 		boolean local = false;
 		
 		Object[] contents = p.getContents();
@@ -51,12 +52,15 @@ public class VariableReplacer{
 		if(isBlock){
 			// Local variables
 			ParseUnit p2 = (ParseUnit)contents[0];
-			local = p2.getType().equals("func_block") || p2.getType().equals("task_block");
+			func = p2.getType().equals("func_block") || p2.getType().equals("task_block");
+			local = p.isWithin("func_block") || p.isWithin("task_block");
 			
-			if(!local)
-				pushGlobalVarList();
-			else
+			if(func)
+				pushLocalVarStack();
+			else if(local)
 				pushLocalVarList();
+			else
+				pushGlobalVarList();
 		}
 		
 		else{
@@ -84,10 +88,12 @@ public class VariableReplacer{
 		
 		// Remove block variables
 		if(isBlock){
-			if(!local)
-				popGlobalVarList();
-			else
+			if(func)
+				popLocalVarStack();
+			else if(local)
 				popLocalVarList();
+			else
+				popGlobalVarList();
 		}
 	}
 	
@@ -200,13 +206,23 @@ public class VariableReplacer{
 		constVariables.pop();
 	}
 	
+	private void pushLocalVarStack(){
+		localVariables.push(new Stack<ArrayList<String>>());
+		pushLocalVarList();
+	}
+	
+	private void popLocalVarStack(){
+		localVariables.pop();
+		constVariables.pop();
+	}
+	
 	private void pushLocalVarList(){
-		localVariables.push(new ArrayList<String>());
+		localVariables.peek().push(new ArrayList<String>());
 		constVariables.push(new ArrayList<String>());
 	}
 	
 	private void popLocalVarList(){
-		localVariables.pop();
+		localVariables.peek().pop();
 		constVariables.pop();
 	}
 	
@@ -230,9 +246,9 @@ public class VariableReplacer{
 			return;
 		}
 		
-		int n = scope == -1 ? getVariableNumber(t.getValue()) : getVariableNumberInScope(t.getValue(), scope);
+		int n = scope == -1 ? getVariableNumber(var) : getVariableNumberInScope(var, scope);
 		
-		contents[index] = new Token(IDENTIFIER, Integer.toString(n), t.getFile(), t.getLineNum());
+		contents[index] = new Token(IDENTIFIER, (isLocalVariable(var) ? "l" : "") + n, t.getFile(), t.getLineNum());
 	}
 	
 	private void addVariable(String var, boolean local){
@@ -240,10 +256,10 @@ public class VariableReplacer{
 		int n = 0;
 		
 		if(local){
-			for(ArrayList<String> vars:localVariables)
+			for(ArrayList<String> vars:localVariables.peek())
 				n += vars.size();
 			
-			localVariables.peek().add(var + "," + n);
+			localVariables.peek().peek().add(var + "," + n);
 			return;
 		}
 		
@@ -259,13 +275,15 @@ public class VariableReplacer{
 	
 	private int getVariableNumber(String var){
 		
-		for(int i = localVariables.size() - 1; i >= 0; i--){
-			
-			ArrayList<String> vars = localVariables.get(i);
-			
-			for(String v:vars)
-				if(getName(v).equals(var))
-					return getNum(v);
+		if(!localVariables.isEmpty()){
+			for(int i = localVariables.peek().size() - 1; i >= 0; i--){
+				
+				ArrayList<String> vars = localVariables.peek().get(i);
+				
+				for(String v:vars)
+					if(getName(v).equals(var))
+						return getNum(v);
+			}
 		}
 		
 		for(int i = globalVariables.size() - 1; i >= 0; i--){
@@ -283,15 +301,26 @@ public class VariableReplacer{
 	private int getVariableNumberInScope(String var, int scope){
 		
 		// Positive - local		Negative - global
-		int i = localVariables.size() - 1 - scope;
+		int i = localVariables.isEmpty() ? scope - 1 : localVariables.peek().size() - 1 - scope;
 		
-		ArrayList<String> vars = i <= 0 ? globalVariables.get(globalVariables.size() + i) : localVariables.get(i);
+		ArrayList<String> vars = i < 0 ? globalVariables.get(globalVariables.size() + i) : localVariables.peek().get(i);
 		
 		for(String v:vars)
 			if(getName(v).equals(var))
 				return getNum(v);
 		
 		return -1;
+	}
+	
+	private boolean isLocalVariable(String var){
+		
+		if(!localVariables.isEmpty())
+			for(ArrayList<String> vars:localVariables.peek())
+				for(String v:vars)
+					if(getName(v).equals(var))
+						return true;
+		
+		return false;
 	}
 	
 	private boolean isConstantVariable(String var){

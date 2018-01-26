@@ -2,6 +2,7 @@ package engine.newscript.runner;
 
 import static engine.newscript.bytecodegen.InstructionSet.*;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 import engine.newscript.DScript;
@@ -13,8 +14,9 @@ public class ScriptRunner{
 	
 	private DScript script;
 	private Instruction[] bytecode;
-	
-	private Object[] variables;
+
+	private ArrayList<Object> globalVariables;
+	private Stack<ArrayList<Object>> localVariables;
 	private Stack<Object> stack;
 	
 	private Instruction currentInstruction;
@@ -25,7 +27,9 @@ public class ScriptRunner{
 		this.script = script;
 		
 		bytecode = script.getBytecode();
-		variables = new Object[script.getNumVariables()];
+		
+		globalVariables	= new ArrayList<Object>();
+		localVariables	= new Stack<ArrayList<Object>>();
 		
 		stack = new Stack<Object>();
 	}
@@ -38,11 +42,16 @@ public class ScriptRunner{
 		try{
 			for(instIndex = 0; instIndex < bytecode.length; instIndex++)
 				runInstruction(bytecode[instIndex]);
-			
+
 			System.out.println("\nResult:");
+			System.out.println("\nGlobal:");
 			
-			for(int i = 0; i < variables.length; i++)
-				System.out.println(i + ": " + variables[i]);
+			for(int i = 0; i < globalVariables.size(); i++)
+				System.out.println(i + ": " + globalVariables.get(i));
+			
+			System.out.println("\nLocal:");
+			for(int i = 0; i < localVariables.size(); i++)
+				System.out.println(i + ": " + localVariables.get(i));
 		}
 		catch(ScriptException e){
 			error(e);
@@ -58,14 +67,65 @@ public class ScriptRunner{
 		int op = i.getOperand();
 		
 		switch(name){
-			
+				
 			case init_zero:
-				variables[op] = 0;
+				globalVariables.add(0);
 				return;
 				
-			case init_value:
-				variables[op] = pop();
+			case init_zero_l:
+				localVariables.peek().add(0);
 				return;
+
+			case init_value:
+				globalVariables.add(pop());
+				return;
+				
+			case init_value_l:
+				localVariables.peek().add(pop());
+				return;
+
+			case init_int:
+				globalVariables.add(op);
+				return;
+				
+			case init_int_l:
+				localVariables.peek().add(op);
+				return;
+
+			case init_float:
+				globalVariables.add(Float.intBitsToFloat(op));
+				return;
+				
+			case init_float_l:
+				localVariables.peek().add(Float.intBitsToFloat(op));
+				return;
+
+			case init_false:
+				globalVariables.add(false);
+				return;
+				
+			case init_false_l:
+				localVariables.peek().add(false);
+				return;
+
+			case init_true:
+				globalVariables.add(true);
+				return;
+				
+			case init_true_l:
+				localVariables.peek().add(true);
+				return;
+				
+				
+
+			case store_value:
+				globalVariables.set(op, pop());
+				return;
+				
+			case store_value_l:
+				localVariables.peek().set(op, pop());
+				return;
+				
 				
 			case load_int:
 				push(op);
@@ -88,8 +148,13 @@ public class ScriptRunner{
 				return;
 				
 			case load_var:
-				push(variables[op]);
+				push(globalVariables.get(op));
 				return;
+				
+			case load_var_l:
+				push(localVariables.peek().get(op));
+				return;
+				
 				
 				
 			case op_add: case op_sub: case op_mult: case op_div: case op_mod: case op_exp:
@@ -98,34 +163,59 @@ public class ScriptRunner{
 				return;
 				
 			case op_or:
-				push((Boolean)pop() || (Boolean)pop());
+				try{
+					push((Boolean)pop() || (Boolean)pop());
+				}catch(ClassCastException e){
+					throw new ScriptException("Type mismatch, expected boolean", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+				}
 				return;
 				
 			case op_and:
-				push((Boolean)pop() && (Boolean)pop());
+				try{
+					push((Boolean)pop() && (Boolean)pop());
+				}catch(ClassCastException e){
+					throw new ScriptException("Type mismatch, expected boolean", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+				}
 				return;
 				
 			case op_not:
-				push(!(Boolean)pop());
+				try{
+					push(!(Boolean)pop());
+				}catch(ClassCastException e){
+					throw new ScriptException("Type mismatch, expected boolean", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+				}
 				return;
-				
+
 			case op_inc: case op_dec: case op_inv:
+			case op_inc_l: case op_dec_l: case op_inv_l:
 				unaryAssign(name, op);
 				return;
+				
+				
 				
 			case jump:
 				instIndex = op - 1;
 				return;
 				
 			case jump_if_true:
-				if((Boolean)pop())
-					instIndex = op - 1;
+				try{
+					if((Boolean)pop())
+						instIndex = op - 1;
+				}catch(ClassCastException e){
+					throw new ScriptException("Type mismatch, expected boolean", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+				}
 				return;
 				
 			case jump_if_false:
-				if(!(Boolean)pop())
-					instIndex = op - 1;
+				try{
+					if(!(Boolean)pop())
+						instIndex = op - 1;
+				}catch(ClassCastException e){
+					throw new ScriptException("Type mismatch, expected boolean", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+				}
 				return;
+				
+				
 				
 			default:
 				System.err.println("Unrecognized bytecode instruction '" + name + "'");
@@ -178,7 +268,9 @@ public class ScriptRunner{
 	
 	private void unaryAssign(InstructionSet i, int op) throws ScriptException{
 		
-		Object v = variables[op];
+		boolean local = i == op_inc_l || i == op_dec_l || i == op_inc_l;
+		
+		Object v = local ? localVariables.peek().get(op) : globalVariables.get(op);
 		
 		if(v instanceof Float){
 			float f = (float)v;
@@ -191,7 +283,11 @@ public class ScriptRunner{
 				default:	return;
 			}
 			
-			variables[op] = f;
+			if(local)
+				localVariables.peek().set(op, f);
+			else
+				globalVariables.set(op, f);
+			
 			return;
 		}
 
@@ -206,14 +302,21 @@ public class ScriptRunner{
 				default:	return;
 			}
 			
-			variables[op] = n;
+			if(local)
+				localVariables.peek().set(op, n);
+			else
+				globalVariables.set(op, n);
+			
 			return;
 		}
 		
 		if(!(v instanceof Boolean) || i == op_inc || i == op_dec)
 			throw new ScriptException("Type mismatch, expected boolean", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
 		
-		variables[op] = !(Boolean)v;
+		if(local)
+			localVariables.peek().set(op, !(Boolean)v);
+		else
+			globalVariables.set(op, !(Boolean)v);
 	}
 	
 	// Shorthand functions

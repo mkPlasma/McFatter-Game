@@ -1,6 +1,15 @@
 
+set x = true;
+set y = false;
+set z = false;
 
-set x;
+set a;
 
-for(i in 5, 2, 10)
-	x++;
+if(x)
+	a++;
+else if(y)
+	a--;
+else if(z)
+	a += 2;
+else
+	a -= 2;

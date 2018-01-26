@@ -17,7 +17,6 @@ public class DScript{
 	private ArrayList<Object> parseTree;
 	
 	private Instruction[] bytecode;
-	private int numVariables;
 	
 	
 	public DScript(String path){
@@ -112,13 +111,5 @@ public class DScript{
 	
 	public Instruction[] getBytecode(){
 		return bytecode;
-	}
-	
-	public void setNumVariables(int numVariables){
-		this.numVariables = numVariables;
-	}
-	
-	public int getNumVariables(){
-		return numVariables;
 	}
 }

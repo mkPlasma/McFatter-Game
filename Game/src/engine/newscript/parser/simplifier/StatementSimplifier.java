@@ -132,7 +132,10 @@ public class StatementSimplifier{
 				new Token(LESS_THAN, "<",
 					(exp instanceof Token ? ((Token)exp).getFile() : ((ParseUnit)exp).getFile()),
 					(exp instanceof Token ? ((Token)exp).getLineNum() : ((ParseUnit)exp).getLineNum())),
-				exp,
+				
+				(len == 1 ?
+					new ParseUnit("expression", new Object[]{exp}) :
+					exp),
 			})
 		});
 		

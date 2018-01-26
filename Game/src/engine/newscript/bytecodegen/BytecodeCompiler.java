@@ -1,11 +1,28 @@
 package engine.newscript.bytecodegen;
 
-import static engine.newscript.bytecodegen.InstructionSet.*;
-import static engine.newscript.bytecodegen.CompilerUtil.*;
-import static engine.newscript.parser.ParseUtil.*;
-import static engine.newscript.lexer.TokenType.*;
+import static engine.newscript.bytecodegen.CompilerUtil.getFileIndex;
+import static engine.newscript.bytecodegen.CompilerUtil.getLineNum;
+import static engine.newscript.bytecodegen.CompilerUtil.getOperationOpcode;
+import static engine.newscript.bytecodegen.InstructionSet.init_false;
+import static engine.newscript.bytecodegen.InstructionSet.init_float;
+import static engine.newscript.bytecodegen.InstructionSet.init_int;
+import static engine.newscript.bytecodegen.InstructionSet.init_true;
+import static engine.newscript.bytecodegen.InstructionSet.init_value;
+import static engine.newscript.bytecodegen.InstructionSet.init_zero;
+import static engine.newscript.bytecodegen.InstructionSet.jump;
+import static engine.newscript.bytecodegen.InstructionSet.jump_if_false;
+import static engine.newscript.bytecodegen.InstructionSet.load_false;
+import static engine.newscript.bytecodegen.InstructionSet.load_float;
+import static engine.newscript.bytecodegen.InstructionSet.load_int;
+import static engine.newscript.bytecodegen.InstructionSet.load_true;
+import static engine.newscript.bytecodegen.InstructionSet.load_var;
+import static engine.newscript.bytecodegen.InstructionSet.store_value;
+import static engine.newscript.lexer.TokenType.IDENTIFIER;
+import static engine.newscript.parser.ParseUtil.getValue;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import engine.newscript.DScript;
 import engine.newscript.ScriptPrinter;
@@ -129,14 +146,14 @@ public class BytecodeCompiler{
 				
 				// Standard assignment
 				if(op.equals("=")){
-					add(inst(init_value, var, t));
+					add(inst(store_value, var, t));
 					return;
 				}
 				
 				// Augmented assign
 				add(inst(load_var, var, (Token)contents[0]));
 				add(inst(getOperationOpcode(op), t));
-				add(inst(init_value, var, t));
+				add(inst(store_value, var, t));
 				
 				return;
 				
@@ -149,7 +166,6 @@ public class BytecodeCompiler{
 				add(inst(getOperationOpcode(((Token)contents[1]).getValue()), var, (Token)contents[1]));
 				
 				return;
-				
 				
 				
 			case "while_block":
@@ -174,6 +190,7 @@ public class BytecodeCompiler{
 				
 				return;
 				
+				
 			case "if_block":
 				
 				// Add condition
@@ -187,6 +204,37 @@ public class BytecodeCompiler{
 				
 				// Add condition jump
 				bytecode.add(jIndex, inst(jump_if_false, bytecode.size() + 1, p));
+				
+				return;
+				
+				
+			case "if_else_chain":
+				
+				// cond
+				// jump
+				// cond
+				// jump
+				// if statements
+				// jump end
+				// else if statements
+				// jump end
+				// else statement
+				// end
+				
+				// Jumps into each instruction group
+				Queue<Integer> stJumps = new LinkedList<Integer>();
+				
+				// Add conditions
+				for(Object o2:contents){
+					ParseUnit p2 = (ParseUnit)o2;
+					
+					// End of chain
+					if(p2.getType().equals("else"))
+						break;
+					
+					// Add condition
+					ParseUnit p3 = p2.getContents()[0]
+				}
 				
 				return;
 		}

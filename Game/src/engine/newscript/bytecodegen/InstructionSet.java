@@ -4,19 +4,26 @@ public enum InstructionSet{
 	
 	// Initialize variable to zero
 	init_zero,
+	init_zero_l,
 
 	// Initialize variable to top stack value (pops value)
 	init_value,
+	init_value_l,
 	
 	// Initialize variable to specified value
 	init_int(true),
+	init_int_l(true),
 	init_float(true),
+	init_float_l(true),
 	init_false,
+	init_false_l,
 	init_true,
+	init_true_l,
 	
 	
 	// Store top stack value into specified variable (pops value)
 	store_value(true),
+	store_value_l(true),
 	
 	
 	// Push a specified value onto the stack
@@ -27,6 +34,7 @@ public enum InstructionSet{
 	
 	// Push value of a specified variable onto the stack
 	load_var(true),
+	load_var_l(true),
 	
 	// Push a specified predefined constant onto the stack (strings & arrays)
 	load_const(true),
@@ -53,10 +61,13 @@ public enum InstructionSet{
 	
 	// Increment/decrement specified variable by 1
 	op_inc(true),
+	op_inc_l(true),
 	op_dec(true),
+	op_dec_l(true),
 	
 	// Invert specified variable
 	op_inv(true),
+	op_inv_l(true),
 	
 	
 	// Unconditional jump to specified bytecode index
