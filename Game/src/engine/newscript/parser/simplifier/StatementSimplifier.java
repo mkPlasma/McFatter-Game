@@ -34,8 +34,8 @@ public class StatementSimplifier{
 			
 			ParseUnit p2 = (ParseUnit)o;
 			
-			// Replace s_block with its contents
-			if(p2.getType().equals("s_block")){
+			// Replace s_block and else_if_cond with its contents
+			if(p2.getType().equals("s_block") || p2.getType().equals("else_if_cond")){
 				contents[i] = p2.getContents()[0];
 				p2 = (ParseUnit)contents[i];
 				

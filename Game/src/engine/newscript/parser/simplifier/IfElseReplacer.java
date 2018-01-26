@@ -57,7 +57,6 @@ public class IfElseReplacer{
 						
 						Object[] cont = new Object[endIndex - i + 1];
 						Object[] newCont = new Object[contents.length - cont.length + 1];
-						System.out.println(newCont.length);
 						
 						
 						System.arraycopy(contents, 0, newCont, 0, i);

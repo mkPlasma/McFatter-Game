@@ -1,24 +1,9 @@
 package engine.newscript.bytecodegen;
 
-import static engine.newscript.bytecodegen.CompilerUtil.getFileIndex;
-import static engine.newscript.bytecodegen.CompilerUtil.getLineNum;
-import static engine.newscript.bytecodegen.CompilerUtil.getOperationOpcode;
-import static engine.newscript.bytecodegen.InstructionSet.init_false;
-import static engine.newscript.bytecodegen.InstructionSet.init_float;
-import static engine.newscript.bytecodegen.InstructionSet.init_int;
-import static engine.newscript.bytecodegen.InstructionSet.init_true;
-import static engine.newscript.bytecodegen.InstructionSet.init_value;
-import static engine.newscript.bytecodegen.InstructionSet.init_zero;
-import static engine.newscript.bytecodegen.InstructionSet.jump;
-import static engine.newscript.bytecodegen.InstructionSet.jump_if_false;
-import static engine.newscript.bytecodegen.InstructionSet.load_false;
-import static engine.newscript.bytecodegen.InstructionSet.load_float;
-import static engine.newscript.bytecodegen.InstructionSet.load_int;
-import static engine.newscript.bytecodegen.InstructionSet.load_true;
-import static engine.newscript.bytecodegen.InstructionSet.load_var;
-import static engine.newscript.bytecodegen.InstructionSet.store_value;
-import static engine.newscript.lexer.TokenType.IDENTIFIER;
-import static engine.newscript.parser.ParseUtil.getValue;
+import static engine.newscript.bytecodegen.CompilerUtil.*;
+import static engine.newscript.bytecodegen.InstructionSet.*;
+import static engine.newscript.lexer.TokenType.*;
+import static engine.newscript.parser.ParseUtil.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -135,24 +120,26 @@ public class BytecodeCompiler{
 				
 				
 			case "assign":
-				// Add expression
-				compileExpression((ParseUnit)contents[2]);
-				
-				// Get variable number
-				var = Integer.parseInt(((Token)contents[0]).getValue());
 				
 				Token t = (Token)contents[1];
 				String op = t.getValue();
 				
-				// Standard assignment
-				if(op.equals("=")){
-					add(inst(store_value, var, t));
-					return;
-				}
+				boolean aug = !op.equals("=");
 				
-				// Augmented assign
-				add(inst(load_var, var, (Token)contents[0]));
-				add(inst(getOperationOpcode(op), t));
+				// Get variable number
+				var = Integer.parseInt(((Token)contents[0]).getValue());
+				
+				// Augmented assign variable
+				if(aug)
+					add(inst(load_var, var, (Token)contents[0]));
+				
+				// Add expression
+				compileExpression((ParseUnit)contents[2]);
+				
+				// Augmented assign operation
+				if(aug)
+					add(inst(getOperationOpcode(op), t));
+				
 				add(inst(store_value, var, t));
 				
 				return;
@@ -228,13 +215,47 @@ public class BytecodeCompiler{
 				for(Object o2:contents){
 					ParseUnit p2 = (ParseUnit)o2;
 					
-					// End of chain
-					if(p2.getType().equals("else"))
+					// No condition for else
+					if(p2.getType().equals("else_block")){
+						bytecode.add(inst(jump, 0, p2));
+						stJumps.add(bytecode.size() - 1);
 						break;
+					}
 					
 					// Add condition
-					ParseUnit p3 = p2.getContents()[0]
+					compileExpression((ParseUnit)((ParseUnit)p2.getContents()[0]).getContents()[0]);
+					
+					// Add jump
+					bytecode.add(inst(jump_if_true, 0, p2));
+					stJumps.add(bytecode.size() - 1);
 				}
+				
+				// Jump to end of chain
+				ArrayList<Integer> endJumps = new ArrayList<Integer>();
+				
+				// Add contents of block
+				for(Object o2:contents){
+					ParseUnit p2 = (ParseUnit)o2;
+					
+					boolean isElse = p2.getType().equals("else_block");
+					
+					// Set initial jump into statements
+					int i = stJumps.remove();
+					bytecode.set(i, inst(bytecode.get(i).getOpcode(), bytecode.size(), p2));
+					
+					// Add contents
+					compile((ParseUnit)p2.getContents()[isElse ? 0 : 1]);
+					
+					 // Jump to end
+					if(!isElse){
+						bytecode.add(inst(jump, 0, p));
+						endJumps.add(bytecode.size() - 1);
+					}
+				}
+				
+				// Add end jumps
+				for(int i:endJumps)
+					bytecode.set(i, inst(jump, bytecode.size(), p));
 				
 				return;
 		}
@@ -315,5 +336,9 @@ public class BytecodeCompiler{
 	
 	public Instruction inst(InstructionSet i, int val, ParseUnit p){
 		return new Instruction(InstructionSet.getOpcode(i), val, getFileIndex(p, script), getLineNum(p));
+	}
+	
+	public Instruction inst(byte i, int val, ParseUnit p){
+		return new Instruction(i, val, getFileIndex(p, script), getLineNum(p));
 	}
 }

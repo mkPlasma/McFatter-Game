@@ -1,0 +1,49 @@
+
+set e = boss(_fighter, _cx, 120, 10000);
+e.setDir(90);
+
+spiral();
+
+task spiral(){
+    
+    set dir = 90;
+    set dir2 = 90;
+    set dir3 = 90;
+    
+    set col;
+    
+    set const t = 1;
+    set c;
+    
+    while(true){
+        for(s in 4){
+            bullet(dir3 + dir, dir2, col, 100*sin(0.8*dir), 1 + s/2);
+        }
+        
+        dir += 3.1;
+        dir2 -= 13.39;
+        dir3 -= 1.6;
+        
+        col++;
+        
+        if(col >= _white){col = _red;}
+        
+        c++;
+        if(c >= t){
+            c = 0;
+            wait 2;
+        }
+    }
+}
+
+task bullet(dir, dir2, col, r, s){
+    
+    set x = e.getX() + r*cos(dir);
+    set y = e.getY() + r*sin(dir);
+    
+    set b = bullet(_scale, col, x, y, dir2, 0, 15);
+    
+    wait 60;
+    b.setAccel(s/50);
+    b.setMaxSpd(s);
+}
