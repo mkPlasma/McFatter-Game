@@ -1,7 +1,6 @@
 package engine.newscript.parser.checker;
 
 import static engine.newscript.lexer.TokenType.*;
-import static engine.newscript.parser.ParseUtil.*;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -75,14 +74,7 @@ public class VariableChecker{
 			if(o instanceof Token)
 				continue;
 			
-			
-			ParseUnit p2 = (ParseUnit)o;
-			
-			process(p2);
-			
-			// Remove const var definitions
-			if(p2.getType().equals("const_var_def"))
-				removeParseUnit(p2);
+			process((ParseUnit)o);
 		}
 		
 		// Remove block variables
@@ -262,6 +254,15 @@ public class VariableChecker{
 		for(int i = globalVariables.size() - 1; i >= 0; i--){
 			
 			ArrayList<String> vars = globalVariables.get(i);
+			
+			for(String v:vars)
+				if(v.equals(var))
+					return true;
+		}
+		
+		for(int i = constVariables.size() - 1; i >= 0; i--){
+			
+			ArrayList<String> vars = constVariables.get(i);
 			
 			for(String v:vars)
 				if(v.equals(var))

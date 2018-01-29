@@ -70,7 +70,7 @@ public class ParseTreeChecker{
 					throw new ScriptException("Syntax error", p.getFile(), p.getLineNum());
 			}
 		}
-
+		
 		variableChecker.process(script);
 		functionChecker.process(script);
 		expressionChecker.process(script);

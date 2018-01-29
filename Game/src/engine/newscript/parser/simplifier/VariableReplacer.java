@@ -329,7 +329,6 @@ public class VariableReplacer{
 			for(String v:vars)
 				if(getName(v).equals(var))
 					return true;
-		
 		return false;
 	}
 	

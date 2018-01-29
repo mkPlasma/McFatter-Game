@@ -27,8 +27,8 @@ public enum TokenType{
 	COMMA			("(,)",		true),
 	SEMICOLON		("(;)",		true),
 	
-	INT				("(\\d++)"),
 	FLOAT			("(\\d*+\\.\\d++)"),
+	INT				("(\\d++)"),
 	BOOLEAN			("(true|false)\\b"),
 	STRING			("((\".*?[^\\\\]\")|(\"\"))"),
 	
@@ -49,8 +49,7 @@ public enum TokenType{
 	
 	IDENTIFIER		("([a-zA-Z_]\\w*+)\\b"),
 	
-	LINE(),
-	FILE();
+	CONSTANT;
 	
 	
 	// Regex defining token type

@@ -16,9 +16,12 @@ public class Lexer{
 	private String file;
 	private int lineNum;
 	
+	private final NegativeReplacer negativeReplacer;
+	
 	
 	public Lexer(){
 		tokens = new ArrayList<Token>();
+		negativeReplacer = new NegativeReplacer();
 	}
 	
 	public void process(DScript script) throws ScriptException{
@@ -54,7 +57,7 @@ public class Lexer{
 		
 		script.setTokens(tokens.toArray(new Token[0]));
 		
-		
+		negativeReplacer.process(script);
 		//ScriptPrinter.printTokens(script.getTokens());
 	}
 	

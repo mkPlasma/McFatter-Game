@@ -42,7 +42,7 @@ public class ScriptRunner{
 		try{
 			for(instIndex = 0; instIndex < bytecode.length; instIndex++)
 				runInstruction(bytecode[instIndex]);
-
+			
 			System.out.println("\nResult:");
 			System.out.println("\nGlobal:");
 			
@@ -158,31 +158,39 @@ public class ScriptRunner{
 				
 				
 			case op_add: case op_sub: case op_mult: case op_div: case op_mod: case op_exp:
-			case op_eq: case op_lt: case op_gt: case op_lte: case op_gte: case op_neq:
+			case op_lt: case op_gt: case op_lte: case op_gte:
 				numOperation(name);
+				return;
+				
+			case op_eq:
+				push(pop().equals(pop()));
+				return;
+				
+			case op_neq:
+				push(!pop().equals(pop()));
 				return;
 				
 			case op_or:
 				try{
-					push((Boolean)pop() || (Boolean)pop());
+					push((boolean)pop() || (boolean)pop());
 				}catch(ClassCastException e){
-					throw new ScriptException("Type mismatch, expected boolean", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+					throwException("Type mismatch, expected boolean");
 				}
 				return;
 				
 			case op_and:
 				try{
-					push((Boolean)pop() && (Boolean)pop());
+					push((boolean)pop() && (boolean)pop());
 				}catch(ClassCastException e){
-					throw new ScriptException("Type mismatch, expected boolean", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+					throwException("Type mismatch, expected boolean");
 				}
 				return;
 				
 			case op_not:
 				try{
-					push(!(Boolean)pop());
+					push(!(boolean)pop());
 				}catch(ClassCastException e){
-					throw new ScriptException("Type mismatch, expected boolean", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+					throwException("Type mismatch, expected boolean");
 				}
 				return;
 
@@ -199,22 +207,58 @@ public class ScriptRunner{
 				
 			case jump_if_true:
 				try{
-					if((Boolean)pop())
+					if((boolean)pop())
 						instIndex = op - 1;
 				}catch(ClassCastException e){
-					throw new ScriptException("Type mismatch, expected boolean", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+					throwException("Type mismatch, expected boolean");
 				}
 				return;
 				
 			case jump_if_false:
 				try{
-					if(!(Boolean)pop())
+					if(!(boolean)pop())
 						instIndex = op - 1;
 				}catch(ClassCastException e){
-					throw new ScriptException("Type mismatch, expected boolean", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+					throwException("Type mismatch, expected boolean");
 				}
 				return;
 				
+				
+			case move_to_top:{
+				Object o = pop();
+				int ind = 0;
+				
+				if(o instanceof Integer)		ind = (int)o;
+				else if(o instanceof Float)		ind = (int)(float)o;
+				else if(o instanceof Boolean)	ind = (Boolean)o ? 0 : 1;
+				else throwException("Type mismatch, expected number or boolean");
+				
+				ind = Math.max(Math.min(ind, op), 0) + 1;
+				o = stack.remove(stack.size() - ind);
+				push(o);
+				
+				return;
+			}
+			
+			case pop_count:{
+				Object top = pop();
+				
+				for(int j = 0; j < op; j++)
+					pop();
+				
+				push(top);
+				return;
+			}
+				
+			case array_create:
+				ArrayList<Object> array = new ArrayList<Object>();
+				int len = (int)pop();
+				
+				for(int j = 0; j < len; j++)
+					array.add(pop());
+				
+				push(array);
+				return;
 				
 				
 			default:
@@ -230,7 +274,7 @@ public class ScriptRunner{
 		Object o1 = pop();
 		
 		if(!(o1 instanceof Float || o1 instanceof Integer) || !(o2 instanceof Float || o2 instanceof Integer))
-			throw new ScriptException("Type mismatch, expected numbers", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+			throwException("Type mismatch, expected numbers");
 		
 		// Cast operands
 		float a = o1 instanceof Float ? (float)o1 : (float)(int)o1;
@@ -311,12 +355,12 @@ public class ScriptRunner{
 		}
 		
 		if(!(v instanceof Boolean) || i == op_inc || i == op_dec)
-			throw new ScriptException("Type mismatch, expected boolean", currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+			throwException("Type mismatch, expected boolean");
 		
 		if(local)
-			localVariables.peek().set(op, !(Boolean)v);
+			localVariables.peek().set(op, !(boolean)v);
 		else
-			globalVariables.set(op, !(Boolean)v);
+			globalVariables.set(op, !(boolean)v);
 	}
 	
 	// Shorthand functions
@@ -328,6 +372,10 @@ public class ScriptRunner{
 		return stack.pop();
 	}
 	
+	
+	private void throwException(String message) throws ScriptException{
+		throw new ScriptException(message, currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+	}
 	
 	private void error(ScriptException e){
 		

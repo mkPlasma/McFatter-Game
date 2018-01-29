@@ -74,13 +74,6 @@ public class Grammar{
 				{IDENTIFIER, LESS_THAN, INT, GREATER_THAN},
 			}),
 			
-			new Rule("list", new Object[][]{
-				{"expression", COMMA, "expression"},
-				{"list", COMMA, "list", CONCAT},
-				{"list", COMMA, "expression", CONCAT},
-				{"expression", COMMA, "list", CONCAT},
-			}),
-			
 			new Rule("array", new Object[][]{
 				{BRACE_L, BRACE_R},
 				{BRACE_L, "expression", BRACE_R},
@@ -91,11 +84,6 @@ public class Grammar{
 			new Rule("array_elem", new Object[][]{
 				{IDENTIFIER, BRACKET_L, "expression", BRACKET_R},
 				{"array", BRACKET_L, "expression", BRACKET_R},
-			}),
-			
-			new Rule("conditional", new Object[][]{
-				{"expression", MINUS, GREATER_THAN, "expression"},
-				{"expression", MINUS, GREATER_THAN, "list"},
 			}),
 			
 			
@@ -120,6 +108,18 @@ public class Grammar{
 				{"expression", GREATER_THAN, "expression"},
 				{"expression", OPERATOR5, "expression"},
 				{MINUS, "expression"},
+			}),
+			
+			new Rule("list", new Object[][]{
+				{"expression", COMMA, "expression"},
+				{"list", COMMA, "list", CONCAT},
+				{"list", COMMA, "expression", CONCAT},
+				{"expression", COMMA, "list", CONCAT},
+			}),
+			
+			new Rule("conditional", new Object[][]{
+				{"expression", MINUS, GREATER_THAN, "expression"},
+				{"expression", MINUS, GREATER_THAN, "list"},
 			}),
 			
 			

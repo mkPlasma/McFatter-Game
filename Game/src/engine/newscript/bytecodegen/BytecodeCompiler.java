@@ -8,6 +8,7 @@ import static engine.newscript.parser.ParseUtil.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Stack;
 
 import engine.newscript.DScript;
 import engine.newscript.ScriptPrinter;
@@ -22,6 +23,10 @@ public class BytecodeCompiler{
 	
 	private ArrayList<Instruction> bytecode;
 	
+
+	private Stack<ArrayList<Integer>> breakStatements;
+	private Stack<ArrayList<ParseUnit>> breakUnits;
+	
 	
 	
 	public BytecodeCompiler(){
@@ -29,6 +34,9 @@ public class BytecodeCompiler{
 		dataGen = new DataGenerator();
 		
 		bytecode = new ArrayList<Instruction>();
+		
+		breakStatements = new Stack<ArrayList<Integer>>();
+		breakUnits = new Stack<ArrayList<ParseUnit>>();
 	}
 	
 	public void process(DScript script){
@@ -84,7 +92,7 @@ public class BytecodeCompiler{
 				return;
 				
 				
-			case "new_var_def":
+			case "new_var_def":{
 				
 				// Get variable number
 				var = Integer.parseInt(((Token)((ParseUnit)contents[0]).getContents()[0]).getValue());
@@ -117,9 +125,9 @@ public class BytecodeCompiler{
 				add(inst(init_value, var, (ParseUnit)contents[0]));
 				
 				return;
+			}
 				
-				
-			case "assign":
+			case "assign":{
 				
 				Token t = (Token)contents[1];
 				String op = t.getValue();
@@ -143,7 +151,7 @@ public class BytecodeCompiler{
 				add(inst(store_value, var, t));
 				
 				return;
-				
+			}
 				
 			case "assign_u":
 				// Get variable number
@@ -152,6 +160,52 @@ public class BytecodeCompiler{
 				// Assignment
 				add(inst(getOperationOpcode(((Token)contents[1]).getValue()), var, (Token)contents[1]));
 				
+				return;
+				
+				
+			case "array":{
+				
+				Object[] list = ((ParseUnit)contents[0]).getContents();
+				
+				// Add elements
+				for(Object o:list)
+					compile((ParseUnit)o);
+				
+				// Add array length
+				add(inst(load_int, list.length, p));
+				
+				// Create array
+				add(inst(array_create, p));
+				
+				return;
+			}
+				
+			case "conditional":{
+				
+				// Get value list
+				Object[] list = ((ParseUnit)contents[3]).getContents();
+				
+				// Add values, backwards
+				for(int i = list.length - 1; i >= 0; i--)
+					compileExpression((ParseUnit)list[i]);
+				
+				// Add expresion
+				compileExpression((ParseUnit)contents[0]);
+				
+				// Retrieve value
+				add(inst(move_to_top, list.length - 1, p));
+				
+				// Remove other values
+				add(inst(pop_count, list.length - 1, p));
+				
+				return;
+			}
+				
+			case "break":
+				// Placeholder jump statement, replaced in while_block compile
+				breakStatements.peek().add(bytecode.size());
+				breakUnits.peek().add(p);
+				add(inst(jump, 0, p));
 				return;
 				
 				
@@ -165,6 +219,12 @@ public class BytecodeCompiler{
 				
 				// Condition jump index
 				int jIndex = bytecode.size();
+				// Placeholder jump
+				add(inst(jump_if_false, 0, p));
+				
+				// Add list for break statements inside loop
+				breakStatements.push(new ArrayList<Integer>());
+				breakUnits.push(new ArrayList<ParseUnit>());
 				
 				// Add contents of block
 				compile((ParseUnit)contents[1]);
@@ -173,7 +233,14 @@ public class BytecodeCompiler{
 				add(inst(jump, index, p));
 				
 				// Add condition jump
-				bytecode.add(jIndex, inst(jump_if_false, bytecode.size() + 1, p));
+				bytecode.set(jIndex, inst(jump_if_false, bytecode.size(), p));
+				
+				// Set jump locations for break statements
+				ArrayList<Integer> breaks = breakStatements.pop();
+				ArrayList<ParseUnit> bUnits = breakUnits.pop();
+				
+				for(int i = 0; i < breaks.size(); i++)
+					bytecode.set(breaks.get(i), inst(jump, bytecode.size(), bUnits.get(i)));
 				
 				return;
 				
@@ -185,28 +252,18 @@ public class BytecodeCompiler{
 				
 				// Condition jump index
 				jIndex = bytecode.size();
+				add(inst(jump_if_false, 0, p));
 				
 				// Add contents of block
 				compile((ParseUnit)contents[1]);
 				
 				// Add condition jump
-				bytecode.add(jIndex, inst(jump_if_false, bytecode.size() + 1, p));
+				bytecode.set(jIndex, inst(jump_if_false, bytecode.size(), p));
 				
 				return;
 				
 				
 			case "if_else_chain":
-				
-				// cond
-				// jump
-				// cond
-				// jump
-				// if statements
-				// jump end
-				// else if statements
-				// jump end
-				// else statement
-				// end
 				
 				// Jumps into each instruction group
 				Queue<Integer> stJumps = new LinkedList<Integer>();
@@ -217,8 +274,8 @@ public class BytecodeCompiler{
 					
 					// No condition for else
 					if(p2.getType().equals("else_block")){
+						stJumps.add(bytecode.size());
 						bytecode.add(inst(jump, 0, p2));
-						stJumps.add(bytecode.size() - 1);
 						break;
 					}
 					
@@ -248,8 +305,8 @@ public class BytecodeCompiler{
 					
 					 // Jump to end
 					if(!isElse){
+						endJumps.add(bytecode.size());
 						bytecode.add(inst(jump, 0, p));
-						endJumps.add(bytecode.size() - 1);
 					}
 				}
 				
@@ -296,6 +353,10 @@ public class BytecodeCompiler{
 				add(inst(load_var, Integer.parseInt(((Token)o).getValue()), (Token)o));
 				return;
 			}
+			
+			// Other (function calls, conditionals)
+			compile((ParseUnit)o);
+			return;
 		}
 		
 		// Standard expression

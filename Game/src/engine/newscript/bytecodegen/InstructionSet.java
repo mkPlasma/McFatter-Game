@@ -20,7 +20,6 @@ public enum InstructionSet{
 	init_true,
 	init_true_l,
 	
-	
 	// Store top stack value into specified variable (pops value)
 	store_value(true),
 	store_value_l(true),
@@ -76,6 +75,17 @@ public enum InstructionSet{
 	// Jump to specified bytecode index if stack top value is true/false (pops value)
 	jump_if_true(true),
 	jump_if_false(true),
+	
+	
+	// Uses stack top value to move another value to top of stack, operand is maximum, used for conditionals
+	move_to_top(true),
+	
+	// Pop a specified number of values below top value, used for conditionals
+	pop_count(true),
+	
+	
+	// Creates an array, uses top stack value as length and takes all top values
+	array_create,
 	
 	;
 	

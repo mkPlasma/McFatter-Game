@@ -9,13 +9,13 @@ import engine.newscript.DScript;
 
 public class NegativeReplacer{
 	
-	ArrayList<Token> tokens;
+	private ArrayList<Token> tokens;
 	
 	public void process(DScript script){
-		tokens = (ArrayList<Token>)Arrays.asList(script.getTokens());
+		tokens = new ArrayList<Token>(Arrays.asList(script.getTokens()));
 		
 		for(int i = 0; i < tokens.size() - 1; i++){
-
+			
 			Token t1 = tokens.get(i);
 			Token t2 = tokens.get(i + 1);
 			
@@ -26,24 +26,25 @@ public class NegativeReplacer{
 					continue;
 				}
 				
+				// Previous token
 				TokenType t3 = tokens.get(i - 1).getType();
 				
 				// Variable scope exception
 				if(t3 == GREATER_THAN){
-					if(i <= 3){
+					if(i <= 3)
 						replace(i);
-						continue;
-					}
-					else if(tokens.get(i - 2).getType() == INT && tokens.get(i - 3).getType() == LESS_THAN && tokens.get(i - 4).getType() == IDENTIFIER){
+					else if(tokens.get(i - 2).getType() != INT && tokens.get(i - 3).getType() != LESS_THAN && tokens.get(i - 4).getType() != IDENTIFIER)
 						replace(i);
-						continue;
-					}
+					
+					continue;
 				}
 				
-				if(t3 == INT || t3 == FLOAT || t3 == IDENTIFIER || t3 == BRACE_R || t3 == PAREN_R || t3 == BRACKET_R)
+				if(t3 != INT && t3 != FLOAT && t3 != IDENTIFIER && t3 != BRACE_R && t3 != PAREN_R && t3 != BRACKET_R)
 					replace(i);
 			}
 		}
+		
+		script.setTokens(tokens.toArray(new Token[0]));
 	}
 	
 	private void replace(int index){
@@ -52,7 +53,7 @@ public class NegativeReplacer{
 		tokens.remove(index);
 		
 		// Set value
-		Token t = tokens.get(index + 1);
+		Token t = tokens.get(index);
 		tokens.set(index, new Token(t.getType(), "-" + t.getValue(), t.getFile(), t.getLineNum()));
 	}
 }
