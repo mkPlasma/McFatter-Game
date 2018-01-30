@@ -187,7 +187,7 @@ public class BytecodeCompiler{
 				add(inst(load_var, var, p));
 				
 				// Add index
-				compileExpression((ParseUnit)contents[0]);
+				compileExpression((ParseUnit)contents[1]);
 				
 				// Get element
 				add(inst(array_elem, p));

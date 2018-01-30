@@ -1,6 +1,9 @@
 package engine.newscript.runner;
 
-import static engine.newscript.bytecodegen.InstructionSet.*;
+import static engine.newscript.bytecodegen.InstructionSet.getName;
+import static engine.newscript.bytecodegen.InstructionSet.op_dec_l;
+import static engine.newscript.bytecodegen.InstructionSet.op_inc_l;
+import static engine.newscript.bytecodegen.InstructionSet.op_inv;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -263,14 +266,22 @@ public class ScriptRunner{
 			}
 				
 			case array_elem:{
+				Object o = pop();
+				
+				if(!(o instanceof Integer) && !(o instanceof Float))
+					throwException("Type mismatch, expected number");
+				
+				int ind = o instanceof Integer ? (int)o : (int)(float)o;
 				
 				try{
-					int ind = (int)pop();
 					ArrayList<Object> array = (ArrayList<Object>)pop();
 					push(array.get(ind));
 				}
-				catch(){
-					
+				catch(ClassCastException e){
+					throwException("Type mismatch, expected array");
+				}
+				catch(ArrayIndexOutOfBoundsException e){
+					throwException("Array index " + ind + " is out of range");
 				}
 				
 				return;
