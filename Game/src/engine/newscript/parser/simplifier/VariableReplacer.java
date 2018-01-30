@@ -134,6 +134,14 @@ public class VariableReplacer{
 				return;
 				
 				
+			case "array_elem":
+				
+				t = (Token)contents[0];
+				
+				replaceVariable(p, 0, t, -1);
+				return;
+				
+				
 			case "assign": case "assign_u":
 				
 				Object o = contents[0];

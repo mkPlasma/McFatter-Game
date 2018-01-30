@@ -179,6 +179,21 @@ public class BytecodeCompiler{
 				
 				return;
 			}
+			
+			case "array_elem":
+				
+				// Add array
+				var = Integer.parseInt(((Token)contents[0]).getValue());
+				add(inst(load_var, var, p));
+				
+				// Add index
+				compileExpression((ParseUnit)contents[0]);
+				
+				// Get element
+				add(inst(array_elem, p));
+				
+				return;
+				
 				
 			case "conditional":{
 				

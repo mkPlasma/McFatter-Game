@@ -1,4 +1,3 @@
 
-set x = 1;
-set const z = 12;
-set y = x -> 11, z*2, z-4, z^3, 55;
+set x = {123, 456, 789};
+set y = x[0];

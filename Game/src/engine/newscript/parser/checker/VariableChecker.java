@@ -126,6 +126,16 @@ public class VariableChecker{
 				return;
 				
 				
+			case "array_elem":
+				
+				t = (Token)contents[0];
+				
+				if(!variableExists(t.getValue()))
+					throwUndefinedVarException(t.getValue(), t);
+				
+				return;
+				
+				
 			case "assign": case "assign_u":
 				
 				Object o = contents[0];

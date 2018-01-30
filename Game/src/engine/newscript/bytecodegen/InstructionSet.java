@@ -87,6 +87,9 @@ public enum InstructionSet{
 	// Creates an array, uses top stack value as length and takes all top values
 	array_create,
 	
+	// Uses top stack value as index for next value, then pushes element
+	array_elem,
+	
 	;
 	
 	private final boolean operand;

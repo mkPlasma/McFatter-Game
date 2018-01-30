@@ -249,8 +249,9 @@ public class ScriptRunner{
 				push(top);
 				return;
 			}
-				
-			case array_create:
+			
+			
+			case array_create:{
 				ArrayList<Object> array = new ArrayList<Object>();
 				int len = (int)pop();
 				
@@ -259,7 +260,21 @@ public class ScriptRunner{
 				
 				push(array);
 				return;
+			}
 				
+			case array_elem:{
+				
+				try{
+					int ind = (int)pop();
+					ArrayList<Object> array = (ArrayList<Object>)pop();
+					push(array.get(ind));
+				}
+				catch(){
+					
+				}
+				
+				return;
+			}
 				
 			default:
 				System.err.println("Unrecognized bytecode instruction '" + name + "'");
@@ -354,7 +369,11 @@ public class ScriptRunner{
 			return;
 		}
 		
-		if(!(v instanceof Boolean) || i == op_inc || i == op_dec)
+		if(i != op_inv)
+			throwException("Type mismatch, expected number");
+		
+		
+		if(!(v instanceof Boolean))
 			throwException("Type mismatch, expected boolean");
 		
 		if(local)
