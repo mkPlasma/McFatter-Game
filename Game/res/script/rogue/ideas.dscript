@@ -48,7 +48,7 @@ task arc(dir, spd, col){
 
 task wavy(dir, spd, inv, r){
     
-    set b = bullet(_scale, _purple, e.getPos() + {r*cos(dir), r*sin(dir)}, dir, spd, 50);
+    set b = bullet(_scale, _purple, e.getPos() + {r*cos(dir), r*sin(dir)}, dir, spd, 5);
     b.setAccel(-0.06);
     b.setMinSpd(0);
     

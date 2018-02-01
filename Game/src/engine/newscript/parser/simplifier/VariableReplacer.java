@@ -136,6 +136,9 @@ public class VariableReplacer{
 				
 			case "array_elem":
 				
+				if(!(contents[0] instanceof Token))
+					return;
+				
 				t = (Token)contents[0];
 				
 				replaceVariable(p, 0, t, -1);

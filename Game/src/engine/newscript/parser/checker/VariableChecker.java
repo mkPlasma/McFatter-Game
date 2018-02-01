@@ -128,6 +128,9 @@ public class VariableChecker{
 				
 			case "array_elem":
 				
+				if(!(contents[0] instanceof Token))
+					return;
+				
 				t = (Token)contents[0];
 				
 				if(!variableExists(t.getValue()))

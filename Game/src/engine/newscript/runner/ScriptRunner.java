@@ -6,6 +6,7 @@ import static engine.newscript.bytecodegen.InstructionSet.op_inc_l;
 import static engine.newscript.bytecodegen.InstructionSet.op_inv;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Stack;
 
 import engine.newscript.DScript;
@@ -261,6 +262,7 @@ public class ScriptRunner{
 				for(int j = 0; j < len; j++)
 					array.add(pop());
 				
+				Collections.reverse(array);
 				push(array);
 				return;
 			}
@@ -274,6 +276,7 @@ public class ScriptRunner{
 				int ind = o instanceof Integer ? (int)o : (int)(float)o;
 				
 				try{
+					@SuppressWarnings("unchecked")
 					ArrayList<Object> array = (ArrayList<Object>)pop();
 					push(array.get(ind));
 				}
@@ -296,8 +299,57 @@ public class ScriptRunner{
 	// Numerical operation
 	private void numOperation(InstructionSet op) throws ScriptException{
 		
+		// Pop in reverse order
 		Object o2 = pop();
 		Object o1 = pop();
+		
+		// Array operations
+		if(o1 instanceof ArrayList || o2 instanceof ArrayList){
+			
+			ArrayList<Object> result = new ArrayList<Object>();
+			@SuppressWarnings("unchecked")
+			ArrayList<Object> a1 = (ArrayList<Object>)o1;
+			@SuppressWarnings("unchecked")
+			ArrayList<Object> a2 = (ArrayList<Object>)o2;
+			
+			// If one is an array
+			if(o1 instanceof ArrayList ^ o2 instanceof ArrayList){
+				
+				// Copy objects
+				if(o1 instanceof ArrayList){
+					for(Object o:a1)
+						result.add(o);
+				}
+				else
+					for(Object o:a2)
+						result.add(operate(o, o1, op));
+				
+				push(result);
+				return;
+			}
+			
+			int minSize = Math.min(a1.size(), a2.size());
+			int maxSize = Math.max(a1.size(), a2.size());
+			
+			// Always make result larger if different sizes
+			for(int i = 0; i < maxSize; i++){
+				
+				if(i < minSize)
+					result.add(operate(a1.get(i), a2.get(i), op));
+				else
+					result.add(a1.size() > a2.size() ? a1.get(i) : a2.get(i));
+			}
+			
+			push(result);
+			return;
+		}
+		
+		// Standard operations
+		push(operate(o1, o2, op));
+	}
+	
+	// Perform operation and return value
+	private Object operate(Object o1, Object o2, InstructionSet op) throws ScriptException{
 		
 		if(!(o1 instanceof Float || o1 instanceof Integer) || !(o2 instanceof Float || o2 instanceof Integer))
 			throwException("Type mismatch, expected numbers");
@@ -318,22 +370,19 @@ public class ScriptRunner{
 			case op_mod:	r = a % b;	break;
 			case op_exp:	r = (float)Math.pow(a, b);	break;
 			
-			// Push boolean results directly
-			case op_lt:		push(a < b);	return;
-			case op_gt:		push(a > b);	return;
-			case op_lte:	push(a >= b);	return;
-			case op_gte:	push(a <= b);	return;
-			
-			default:	return;
+			// Return boolean results directly
+			case op_lt:	return a < b;
+			case op_gt:	return a > b;
+			case op_lte:	return a <= b;
+			case op_gte:	return a >= b;
 		}
 		
-		// If float and int are equal, use in
+		// If float and int are equal, use int
 		if(r == (int)r)
-			push((int)r);
+			return (int)r;
 		
 		// Otherwise use float value
-		else
-			push(r);
+		return r;
 	}
 	
 	private void unaryAssign(InstructionSet i, int op) throws ScriptException{

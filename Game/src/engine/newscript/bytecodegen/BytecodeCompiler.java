@@ -165,11 +165,19 @@ public class BytecodeCompiler{
 				
 			case "array":{
 				
-				Object[] list = ((ParseUnit)contents[0]).getContents();
+				ParseUnit pList = (ParseUnit)contents[0];
+				Object[] list = pList.getContents();
 				
 				// Add elements
-				for(Object o:list)
-					compile((ParseUnit)o);
+				
+				// Single value
+				if(list.length == 1)
+					compile(pList);
+				
+				// List
+				else
+					for(Object o:list)
+						compile((ParseUnit)o);
 				
 				// Add array length
 				add(inst(load_int, list.length, p));
@@ -183,8 +191,16 @@ public class BytecodeCompiler{
 			case "array_elem":
 				
 				// Add array
-				var = Integer.parseInt(((Token)contents[0]).getValue());
-				add(inst(load_var, var, p));
+				
+				// Defined array
+				if(!(contents[0] instanceof Token))
+					compile((ParseUnit)contents[0]);
+				
+				// Array in variable
+				else{
+					var = Integer.parseInt(((Token)contents[0]).getValue());
+					add(inst(load_var, var, p));
+				}
 				
 				// Add index
 				compileExpression((ParseUnit)contents[1]);
@@ -341,27 +357,12 @@ public class BytecodeCompiler{
 		// Value
 		if(contents.length == 1){
 			
-			// Check if literal value
-			Object o = getValue(p);
-			
 			// If literal, add instruction to load
-			if(o instanceof Integer){
-				add(inst(load_int, (int)o, p));
+			if(compileValue(p))
 				return;
-			}
-			
-			if(o instanceof Float){
-				add(inst(load_float, Float.floatToIntBits((float)o), p));
-				return;
-			}
-			
-			if(o instanceof Boolean){
-				add(inst((Boolean)o ? load_true : load_false, p));
-				return;
-			}
 			
 			// Other values
-			o = contents[0];
+			Object o = contents[0];
 			
 			// Variable
 			if(o instanceof Token && ((Token)o).getType() == IDENTIFIER){
@@ -392,6 +393,27 @@ public class BytecodeCompiler{
 		add(inst(getOperationOpcode(((Token)contents[0]).getValue()), (Token)contents[0]));
 	}
 	
+	private boolean compileValue(ParseUnit p){
+		
+		Object o = getValue(p);
+		
+		if(o instanceof Integer){
+			add(inst(load_int, (int)o, p));
+			return true;
+		}
+		
+		if(o instanceof Float){
+			add(inst(load_float, Float.floatToIntBits((float)o), p));
+			return true;
+		}
+		
+		if(o instanceof Boolean){
+			add(inst((Boolean)o ? load_true : load_false, p));
+			return true;
+		}
+		
+		return false;
+	}
 	
 	
 	private void add(Instruction i){
