@@ -1,9 +1,6 @@
 package engine.newscript.runner;
 
-import static engine.newscript.bytecodegen.InstructionSet.getName;
-import static engine.newscript.bytecodegen.InstructionSet.op_dec_l;
-import static engine.newscript.bytecodegen.InstructionSet.op_inc_l;
-import static engine.newscript.bytecodegen.InstructionSet.op_inv;
+import static engine.newscript.bytecodegen.InstructionSet.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -197,7 +194,11 @@ public class ScriptRunner{
 					throwException("Type mismatch, expected boolean");
 				}
 				return;
-
+				
+			case op_concat:
+				concat();
+				return;
+				
 			case op_inc: case op_dec: case op_inv:
 			case op_inc_l: case op_dec_l: case op_inv_l:
 				unaryAssign(name, op);
@@ -253,42 +254,46 @@ public class ScriptRunner{
 				push(top);
 				return;
 			}
-			
-			
-			case array_create:{
-				ArrayList<Object> array = new ArrayList<Object>();
-				int len = (int)pop();
 				
-				for(int j = 0; j < len; j++)
-					array.add(pop());
 				
-				Collections.reverse(array);
-				push(array);
+			case array_create:
+				push(createArray());
 				return;
-			}
 				
-			case array_elem:{
-				Object o = pop();
-				
-				if(!(o instanceof Integer) && !(o instanceof Float))
-					throwException("Type mismatch, expected number");
-				
-				int ind = o instanceof Integer ? (int)o : (int)(float)o;
-				
-				try{
-					@SuppressWarnings("unchecked")
-					ArrayList<Object> array = (ArrayList<Object>)pop();
-					push(array.get(ind));
-				}
-				catch(ClassCastException e){
-					throwException("Type mismatch, expected array");
-				}
-				catch(ArrayIndexOutOfBoundsException e){
-					throwException("Array index " + ind + " is out of range");
-				}
-				
+			case init_array:
+				globalVariables.set(op, createArray());
 				return;
-			}
+				
+			case init_array_l:
+				localVariables.peek().set(op, createArray());
+				return;
+
+				
+			case array_elem:
+				arrayElem(pop(), pop());
+				return;
+				
+			case array_elem_v:
+				arrayElem(pop(), globalVariables.get(op));
+				return;
+				
+			case array_elem_v_l:
+				arrayElem(pop(), localVariables.peek().get(op));
+				return;
+				
+				
+			case store_array_elem:
+				storeArrayElem(globalVariables.get(op));
+				return;
+				
+			case store_array_elem_l:
+				storeArrayElem(localVariables.peek().get(op));
+				return;
+				
+			case copy_top:
+				push(stack.peek());
+				return;
+				
 				
 			default:
 				System.err.println("Unrecognized bytecode instruction '" + name + "'");
@@ -297,6 +302,7 @@ public class ScriptRunner{
 	}
 	
 	// Numerical operation
+	@SuppressWarnings("unchecked")
 	private void numOperation(InstructionSet op) throws ScriptException{
 		
 		// Pop in reverse order
@@ -307,10 +313,8 @@ public class ScriptRunner{
 		if(o1 instanceof ArrayList || o2 instanceof ArrayList){
 			
 			ArrayList<Object> result = new ArrayList<Object>();
-			@SuppressWarnings("unchecked")
-			ArrayList<Object> a1 = (ArrayList<Object>)o1;
-			@SuppressWarnings("unchecked")
-			ArrayList<Object> a2 = (ArrayList<Object>)o2;
+			ArrayList<Object> a1 = o1 instanceof ArrayList ? (ArrayList<Object>)o1 : null;
+			ArrayList<Object> a2 = o2 instanceof ArrayList ? (ArrayList<Object>)o2 : null;
 			
 			// If one is an array
 			if(o1 instanceof ArrayList ^ o2 instanceof ArrayList){
@@ -318,7 +322,7 @@ public class ScriptRunner{
 				// Copy objects
 				if(o1 instanceof ArrayList){
 					for(Object o:a1)
-						result.add(o);
+						result.add(operate(o, o2, op));
 				}
 				else
 					for(Object o:a2)
@@ -349,10 +353,11 @@ public class ScriptRunner{
 	}
 	
 	// Perform operation and return value
+	@SuppressWarnings("incomplete-switch")
 	private Object operate(Object o1, Object o2, InstructionSet op) throws ScriptException{
 		
 		if(!(o1 instanceof Float || o1 instanceof Integer) || !(o2 instanceof Float || o2 instanceof Integer))
-			throwException("Type mismatch, expected numbers");
+			throwException("Type mismatch, expected numbers in operation");
 		
 		// Cast operands
 		float a = o1 instanceof Float ? (float)o1 : (float)(int)o1;
@@ -430,17 +435,109 @@ public class ScriptRunner{
 		}
 		
 		if(i != op_inv)
-			throwException("Type mismatch, expected number");
+			throwException("Type mismatch, expected number in assignment");
 		
 		
 		if(!(v instanceof Boolean))
-			throwException("Type mismatch, expected boolean");
+			throwException("Type mismatch, expected boolean in assignment");
 		
 		if(local)
 			localVariables.peek().set(op, !(boolean)v);
 		else
 			globalVariables.set(op, !(boolean)v);
 	}
+	
+	// Concatenation operation
+	@SuppressWarnings("unchecked")
+	private void concat(){
+
+		Object o2 = pop();
+		Object o1 = pop();
+		
+		// Both are arrays
+		if(o1 instanceof ArrayList && o2 instanceof ArrayList){
+			((ArrayList<Object>)o1).addAll((ArrayList<Object>)o2);
+			push(o1);
+			return;
+		}
+		
+		// First is array
+		if(o1 instanceof ArrayList && !(o2 instanceof ArrayList)){
+			((ArrayList<Object>)o1).add(o2);
+			push(o1);
+			return;
+		}
+		
+		// Second is array
+		if(!(o1 instanceof ArrayList) && o2 instanceof ArrayList){
+			((ArrayList<Object>)o2).add(0, o1);
+			push(o2);
+			return;
+		}
+		
+		// Both not arrays
+		ArrayList<Object> result = new ArrayList<Object>();
+		result.add(o1);
+		result.add(o2);
+		
+		push(result);
+	}
+	
+	// Create an array value
+	private ArrayList<Object> createArray(){
+		ArrayList<Object> array = new ArrayList<Object>();
+		int len = (int)pop();
+		
+		for(int j = 0; j < len; j++)
+			array.add(pop());
+		
+		Collections.reverse(array);
+		return array;
+	}
+	
+	// Get an array element
+	@SuppressWarnings("unchecked")
+	private void arrayElem(Object index, Object array) throws ScriptException{
+		
+		if(!(index instanceof Integer) && !(index instanceof Float))
+			throwException("Type mismatch, expected number in array index");
+		
+		int ind = index instanceof Integer ? (int)index : (int)(float)index;
+		
+		try{
+			push(((ArrayList<Object>)array).get(ind));
+		}
+		catch(ClassCastException e){
+			throwException("Type mismatch, expected array");
+		}
+		catch(IndexOutOfBoundsException e){
+			throwException("Array index out of bounds (index " + ind + ", size " + ((ArrayList<Object>)array).size() + ")");
+		}
+	}
+	
+	// Store an array element
+	@SuppressWarnings("unchecked")
+	private void storeArrayElem(Object array) throws ScriptException{
+		
+		Object value = pop();
+		Object index = pop();
+		
+		if(!(index instanceof Integer) && !(index instanceof Float))
+			throwException("Type mismatch, expected number in array index");
+		
+		int ind = index instanceof Integer ? (int)index : (int)(float)index;
+		
+		try{
+			((ArrayList<Object>)array).set(ind, value);
+		}
+		catch(ClassCastException e){
+			throwException("Type mismatch, expected array");
+		}
+		catch(IndexOutOfBoundsException e){
+			throwException("Array index out of bounds (index " + ind + ", size " + ((ArrayList<Object>)array).size() + ")");
+		}
+	}
+	
 	
 	// Shorthand functions
 	private void push(Object o){

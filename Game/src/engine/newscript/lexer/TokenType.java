@@ -35,7 +35,7 @@ public enum TokenType{
 	DOT				("(\\.)",	true),
 	
 	UNARY_ASSIGN	("([\\+\\-\\!]{2})"),
-	AUG_ASSIGN		("(\\+=|\\-=|\\*=|/=|%=|\\^=)"),
+	AUG_ASSIGN		("(\\+=|\\-=|\\*=|/=|%=|\\^=|~=)"),
 	OPERATOR1		("(\\^)"),
 	OPERATOR2		("([\\*/%])"),
 	OPERATOR3		("([\\+])"),
@@ -45,6 +45,7 @@ public enum TokenType{
 	GREATER_THAN	("(>)"),
 	OPERATOR5		("([\\|&]{2})"),
 	BOOL_UNARY		("(\\!)"),
+	CONCAT_OP		("(~)"),
 	EQUALS			("(=)"),
 	
 	IDENTIFIER		("([a-zA-Z_]\\w*+)\\b"),

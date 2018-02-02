@@ -9,11 +9,12 @@ import engine.newscript.lexer.TokenType;
 public class ParseUtil{
 	
 	public static final int
-	T_NUM			= 0b001,
-	T_BOOL			= 0b010,
-	T_STRING		= 0b100,
+	T_NUM			= 0b0001,
+	T_BOOL			= 0b0010,
+	T_STRING		= 0b0100,
+	T_ARRAY		= 0b1000,
 	T_NUM_STRING	= T_NUM | T_STRING,
-	T_ANY			= T_NUM | T_BOOL | T_STRING;
+	T_ANY			= T_NUM | T_BOOL | T_STRING | T_ARRAY;
 	
 	
 	public static void replaceParseUnit(ParseUnit a, Object b){
@@ -103,22 +104,14 @@ public class ParseUtil{
 		
 		int ot = getOperatorType(op);
 		
-		// Unary
-		if(op.equals("!"))
-			return t1 == T_BOOL ? T_BOOL : -1;
-		
-		// Equality comparison
-		if(ot == T_ANY)
-			return T_BOOL;
-		
 		// String concatenation
 		if((t1 == T_STRING || t2 == T_STRING) && ot == T_NUM_STRING)
 			return T_STRING;
 		
-		
-		return (t1 == T_ANY || t2 == T_ANY || (t1 == T_NUM_STRING && t2 == T_NUM) || (t1 == T_NUM && t2 == T_NUM_STRING) || t1 == t2) && (ot & t1) > 0 ? getOperatorReturnType(op) : -1;
+		return (t1 == T_ANY || t2 == T_ANY || (t1 == T_NUM_STRING && t2 == T_NUM) || (t1 == T_NUM && t2 == T_NUM_STRING) || t1 == t2) && (ot & t1) > 0 && (ot & t2) > 0 ? getOperatorReturnType(op) : -1;
 	}
 	
+	// Returns what operator takes
 	public static int getOperatorType(String op){
 		switch(op){
 			case "-": case "*": case "/": case "%": case "^":
@@ -130,26 +123,30 @@ public class ParseUtil{
 			
 			case "+":
 				return T_NUM_STRING;
-			
-			case "==": case "!=":
+				
+			case "==": case "!=": case "~":
 				return T_ANY;
 		}
 		
 		return -1;
 	}
 	
+	// Returns what operator returns
 	public static int getOperatorReturnType(String op){
 		switch(op){
 			case "-": case "*": case "/": case "%": case "^":
 				return T_NUM;
-			
+				
 			case "||": case "&&": case "!":
 			case "<": case ">": case "<=": case ">=":
 			case "==": case "!=":
 				return T_BOOL;
-			
+				
 			case "+":
 				return T_NUM_STRING;
+				
+			case "~":
+				return T_ARRAY;
 		}
 		
 		return -1;

@@ -188,6 +188,9 @@ public class ExpressionSimplifier{
 				case "<=":	r = n1 <= n2;	break;
 				case ">=":	r = n1 >= n2;	break;
 				case "!=":	r = n1 != n2;	break;
+				
+				// TODO: temporary, change to constant token
+				case "~":	r = n1;	break;
 			}
 			
 			String file = op.getFile();
@@ -197,7 +200,7 @@ public class ExpressionSimplifier{
 			if(r instanceof Boolean)
 				return new Object[]{new Token(BOOLEAN, r.toString(), file, lineNum)};
 			
-			float rf = (Float)r;
+			float rf = (float)r;
 			
 			// Check type
 			if(rf == (int)rf)

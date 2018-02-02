@@ -148,6 +148,7 @@ public class BytecodeCompiler{
 				if(aug)
 					add(inst(getOperationOpcode(op), t));
 				
+				// Store
 				add(inst(store_value, var, t));
 				
 				return;
@@ -210,6 +211,44 @@ public class BytecodeCompiler{
 				
 				return;
 				
+				
+			case "array_elem_assign":{
+				
+				// array_elem contents
+				Object[] eCont = ((ParseUnit)contents[0]).getContents();
+				
+				Token t = (Token)contents[1];
+				String op = t.getValue();
+				
+				boolean aug = !op.equals("=");
+				
+				// Get variable number
+				var = Integer.parseInt(((Token)eCont[0]).getValue());
+				
+				// Augmented assign variable
+				if(aug){
+					// Add index
+					compileExpression((ParseUnit)eCont[1]);
+					
+					// Copy index to use again
+					add(inst(copy_top, (ParseUnit)eCont[1]));
+					
+					// Get element
+					add(inst(array_elem_v, var, (ParseUnit)eCont[1]));
+				}
+				
+				// Add expression
+				compileExpression((ParseUnit)contents[2]);
+				
+				// Augmented assign operation
+				if(aug)
+					add(inst(getOperationOpcode(op), t));
+				
+				// Store
+				add(inst(store_array_elem, var, t));
+				
+				return;
+			}
 				
 			case "conditional":{
 				

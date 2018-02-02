@@ -107,6 +107,7 @@ public class Grammar{
 				{"expression", LESS_THAN, "expression"},
 				{"expression", GREATER_THAN, "expression"},
 				{"expression", OPERATOR5, "expression"},
+				{"expression", CONCAT_OP, "expression"},
 				{MINUS, "expression"},
 			}),
 			

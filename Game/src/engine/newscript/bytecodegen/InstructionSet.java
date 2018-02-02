@@ -53,10 +53,12 @@ public enum InstructionSet{
 	op_lte,
 	op_gte,
 	op_neq,
-
+	
 	op_or,
 	op_and,
 	op_not,
+	
+	op_concat,
 	
 	// Increment/decrement specified variable by 1
 	op_inc(true),
@@ -86,9 +88,20 @@ public enum InstructionSet{
 	
 	// Creates an array, uses top stack value as length and takes all top values
 	array_create,
+	init_array(true),
+	init_array_l(true),
 	
 	// Uses top stack value as index for next value, then pushes element
 	array_elem,
+	array_elem_v(true),
+	array_elem_v_l(true),
+	
+	// Stores top stack value into specified array, second stack value is used as index
+	store_array_elem(true),
+	store_array_elem_l(true),
+	
+	// Copies top stack value down, used for augmented array element assignment
+	copy_top,
 	
 	;
 	

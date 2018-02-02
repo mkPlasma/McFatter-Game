@@ -32,6 +32,8 @@ public class CompilerUtil{
 			case "++":	return op_inc;
 			case "--":	return op_dec;
 			case "!!":	return op_inv;
+			
+			case "~": case "~=":	return op_concat;
 		}
 		
 		return null;
