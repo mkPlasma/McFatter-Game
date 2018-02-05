@@ -23,6 +23,9 @@ public class BytecodeCompiler{
 	
 	private ArrayList<Instruction> bytecode;
 	
+	// Compiling function
+	private boolean functionsOnly, withinFunction;
+	
 
 	private Stack<ArrayList<Integer>> breakStatements;
 	private Stack<ArrayList<ParseUnit>> breakUnits;
@@ -51,6 +54,16 @@ public class BytecodeCompiler{
 		
 		bytecode.clear();
 		
+		// Compile functions first
+		functionsOnly = true;
+		withinFunction = false;
+		
+		for(Object o:parseTree)
+			compile((ParseUnit)o);
+		
+		functionsOnly = false;
+		withinFunction = false;
+		
 		for(Object o:parseTree)
 			compile((ParseUnit)o);
 		
@@ -71,7 +84,12 @@ public class BytecodeCompiler{
 					compile((ParseUnit)o);
 				return;
 				
-			case "block": case "s_block": case "statement":
+			case "statement":
+				if(!functionsOnly || (functionsOnly && withinFunction))
+					compile((ParseUnit)contents[0]);
+				return;
+				
+			case "block":
 				compile((ParseUnit)contents[0]);
 				return;
 				
@@ -276,6 +294,14 @@ public class BytecodeCompiler{
 				breakStatements.peek().add(bytecode.size());
 				breakUnits.peek().add(p);
 				add(inst(jump, 0, p));
+				return;
+				
+				
+				
+			case "func_def":
+				
+				
+				
 				return;
 				
 				

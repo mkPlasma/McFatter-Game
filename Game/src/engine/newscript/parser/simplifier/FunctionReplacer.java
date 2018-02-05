@@ -37,7 +37,7 @@ public class FunctionReplacer{
 	
 	private void process(ParseUnit p){
 		
-		boolean isBlock = p.getType().equals("s_block");
+		boolean isBlock = p.getType().equals("func_block") || p.getType().equals("task_block");
 		
 		if(isBlock){
 			// Push new list for each new block
@@ -72,9 +72,10 @@ public class FunctionReplacer{
 			if(!(o instanceof ParseUnit))
 				continue;
 			
+			
 			ParseUnit p2 = (ParseUnit)o;
 			
-			if(p2.getType().equals("s_block"))
+			if(p2.getType().equals("func_block") || p2.getType().equals("task_block"))
 				addFunction((ParseUnit)o);
 			else
 				addFunctions((ParseUnit)o);
@@ -83,24 +84,15 @@ public class FunctionReplacer{
 	
 	private void addFunction(ParseUnit p){
 		
-		if(p.getType().equals("s_block")){
-			
-			p = (ParseUnit)p.getContents()[0];
-			String type = p.getType();
-			
-			// Check type
-			if(!type.equals("func_block") && !type.equals("task_block"))
-				return;
-			
-			// func_def/task_def
-			p = (ParseUnit)p.getContents()[0];
-			Object[] cont = p.getContents();
-			int params = cont.length == 1 ? 0 : cont[1] instanceof Token ? 1 : ((ParseUnit)cont[1]).getContents().length;
-			
-			Token t = (Token)cont[0];
-			
-			addFunction(t.getValue(), params);
-		}
+		p = (ParseUnit)p.getContents()[0];
+		Object[] cont = p.getContents();
+		int params = cont.length == 1 ? 0 : cont[1] instanceof Token ? 1 : ((ParseUnit)cont[1]).getContents().length;
+		
+		// Function names
+		Token t = (Token)cont[0];
+		cont[0] = new Token(IDENTIFIER, Integer.toString(funcNum), t.getFile(), t.getLineNum());
+		
+		addFunction(t.getValue(), params);
 	}
 	
 	private void replaceFunctions(ParseUnit p){
@@ -151,6 +143,8 @@ public class FunctionReplacer{
 	}
 	
 	private void addFunction(String name, int params){
+		System.out.println(funcNum);
+		
 		functions.peek().add(name + "," + params + "," + funcNum);
 		funcNum++;
 	}
