@@ -93,6 +93,7 @@ public enum InstructionSet{
 	
 	// Uses top stack value as index for next value, then pushes element
 	array_elem,
+	// Use specified variable as array instead of value on stack
 	array_elem_v(true),
 	array_elem_v_l(true),
 	
@@ -103,6 +104,24 @@ public enum InstructionSet{
 	// Copies top stack value down, used for augmented array element assignment
 	copy_top,
 	
+	
+	// Pops specified number of values, reverse, and place in local variables, used for functions/tasks
+	init_params(true),
+	
+	// Jump to function, push value to return stack, and push local variable list
+	jump_func(true),
+	// Same as above, also allows function to return a value
+	jump_func_r(true),
+
+	// Same as above, also branches script
+	jump_branch(true),
+	jump_branch_r(true),
+	
+	// Pops value on return stack and returns from function
+	return_void,
+	
+	// Returns value if called with jump_x_r, otherwise returns void
+	return_value,
 	;
 	
 	private final boolean operand;

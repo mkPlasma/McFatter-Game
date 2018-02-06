@@ -17,6 +17,7 @@ public class DScript{
 	private ArrayList<Object> parseTree;
 	
 	private Instruction[] bytecode;
+	private int entryPoint;
 	
 	
 	public DScript(String path){
@@ -111,5 +112,13 @@ public class DScript{
 	
 	public Instruction[] getBytecode(){
 		return bytecode;
+	}
+	
+	public void setEntryPoint(int entryPoint){
+		this.entryPoint = entryPoint;
+	}
+	
+	public int getEntryPoint(){
+		return entryPoint;
 	}
 }

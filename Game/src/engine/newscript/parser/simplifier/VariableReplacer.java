@@ -192,7 +192,9 @@ public class VariableReplacer{
 				
 				// Single parameter
 				if(contents[1] instanceof Token){
-					addVariable(((Token)contents[1]).getValue(), local);
+					Token t2 = (Token)contents[1];
+					addVariable(t2.getValue(), local);
+					replaceVariable(p, 1, t2, 0);
 					return;
 				}
 				
@@ -200,8 +202,11 @@ public class VariableReplacer{
 				ParseUnit list = (ParseUnit)contents[1];
 				contents = list.getContents();
 				
-				for(Object o:contents)
-					addVariable(((Token)((ParseUnit)o).getContents()[0]).getValue(), local);
+				for(int i = 0; i < contents.length; i++){
+					Token t2 = (Token)((ParseUnit)contents[i]).getContents()[0];
+					addVariable(t2.getValue(), local);
+					replaceVariable(list, i, t2, 0);
+				}
 				
 				return;
 		}

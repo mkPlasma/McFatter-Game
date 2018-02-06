@@ -28,12 +28,19 @@ public class CompilerUtil{
 			case "||":	return op_or;
 			case "&&":	return op_and;
 			case "!":	return op_not;
-
-			case "++":	return op_inc;
-			case "--":	return op_dec;
-			case "!!":	return op_inv;
 			
 			case "~": case "~=":	return op_concat;
+		}
+		
+		return null;
+	}
+	
+	public static InstructionSet getUnaryOperationOpcode(String op, boolean local){
+		
+		switch(op){
+			case "++":	return local ? op_inc_l : op_inc;
+			case "--":	return local ? op_dec_l : op_dec;
+			case "!!":	return local ? op_inv_l : op_inv;
 		}
 		
 		return null;

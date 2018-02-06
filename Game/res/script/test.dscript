@@ -6,9 +6,3 @@ test(2);
 function test(a){
 	x += a;
 }
-
-test(2, 1);
-
-function test(a, y){
-	x += a;
-}

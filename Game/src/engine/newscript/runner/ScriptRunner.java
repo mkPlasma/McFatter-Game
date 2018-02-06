@@ -1,9 +1,14 @@
 package engine.newscript.runner;
 
-import static engine.newscript.bytecodegen.InstructionSet.*;
+import static engine.newscript.bytecodegen.InstructionSet.getName;
+import static engine.newscript.bytecodegen.InstructionSet.op_dec_l;
+import static engine.newscript.bytecodegen.InstructionSet.op_inc_l;
+import static engine.newscript.bytecodegen.InstructionSet.op_inv;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Stack;
 
 import engine.newscript.DScript;
@@ -41,7 +46,7 @@ public class ScriptRunner{
 			return;
 		
 		try{
-			for(instIndex = 0; instIndex < bytecode.length; instIndex++)
+			for(instIndex = script.getEntryPoint(); instIndex < bytecode.length; instIndex++)
 				runInstruction(bytecode[instIndex]);
 			
 			System.out.println("\nResult:");
@@ -61,6 +66,8 @@ public class ScriptRunner{
 	
 	
 	private void runInstruction(Instruction i) throws ScriptException{
+		
+		System.out.println("index: " + instIndex);
 		
 		currentInstruction = i;
 		
@@ -294,6 +301,18 @@ public class ScriptRunner{
 				push(stack.peek());
 				return;
 				
+				
+			case init_params:{
+				
+				Queue<Object> p = new LinkedList<Object>();
+				
+				for(int j = 0; j < op; j++)
+					p.add(pop());
+				
+				localVariables.peek().add(p.remove());
+				
+				return;
+			}
 				
 			default:
 				System.err.println("Unrecognized bytecode instruction '" + name + "'");

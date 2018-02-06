@@ -99,38 +99,41 @@ public class BytecodeCompiler{
 				return;
 				
 				
-			case "new_var":
+			case "new_var":{
 				
 				// Get variable number
-				int var = Integer.parseInt(((Token)contents[0]).getValue());
+				Token v = (Token)contents[0];
+				int var = getVarNum(v);
 				
 				// Create variable
-				add(inst(init_zero, var, (Token)contents[0]));
+				add(inst(isLocalVar(v) ? init_zero_l : init_zero, var, v));
 				
 				return;
-				
+			}
 				
 			case "new_var_def":{
 				
 				// Get variable number
-				var = Integer.parseInt(((Token)((ParseUnit)contents[0]).getContents()[0]).getValue());
+				Token v = (Token)((ParseUnit)contents[0]).getContents()[0];
+				int var = getVarNum(v);
+				boolean local = isLocalVar(v);
 				
 				// Check if literal value
 				Object o = getValue((ParseUnit)contents[2]);
 				
 				// If literal, add instruction to initialize
 				if(o instanceof Integer){
-					add(inst(init_int, (int)o, p));
+					add(inst(local ? init_int_l : init_int, (int)o, p));
 					return;
 				}
 				
 				if(o instanceof Float){
-					add(inst(init_float, Float.floatToIntBits((float)o), p));
+					add(inst(local ? init_float_l : init_float, Float.floatToIntBits((float)o), p));
 					return;
 				}
 				
 				if(o instanceof Boolean){
-					add(inst((Boolean)o ? init_true : init_false, p));
+					add(inst((Boolean)o ? (local ? init_true_l : init_true) : (local ? init_false_l : init_false), p));
 					return;
 				}
 				
@@ -140,7 +143,7 @@ public class BytecodeCompiler{
 				compileExpression((ParseUnit)contents[2]);
 				
 				// Create variable
-				add(inst(init_value, var, (ParseUnit)contents[0]));
+				add(inst(local ? init_value_l : init_value, var, (ParseUnit)contents[0]));
 				
 				return;
 			}
@@ -153,11 +156,13 @@ public class BytecodeCompiler{
 				boolean aug = !op.equals("=");
 				
 				// Get variable number
-				var = Integer.parseInt(((Token)contents[0]).getValue());
+				Token v = (Token)contents[0];
+				int var = getVarNum(v);
+				boolean local = isLocalVar(v);
 				
 				// Augmented assign variable
 				if(aug)
-					add(inst(load_var, var, (Token)contents[0]));
+					add(inst(local ? load_var_l : load_var, var, (Token)contents[0]));
 				
 				// Add expression
 				compileExpression((ParseUnit)contents[2]);
@@ -167,20 +172,21 @@ public class BytecodeCompiler{
 					add(inst(getOperationOpcode(op), t));
 				
 				// Store
-				add(inst(store_value, var, t));
+				add(inst(local ? store_value_l : store_value, var, t));
 				
 				return;
 			}
 				
-			case "assign_u":
+			case "assign_u":{
 				// Get variable number
-				var = Integer.parseInt(((Token)contents[0]).getValue());
+				Token v = (Token)contents[0];
+				int var = getVarNum(v);
 				
 				// Assignment
-				add(inst(getOperationOpcode(((Token)contents[1]).getValue()), var, (Token)contents[1]));
+				add(inst(getUnaryOperationOpcode(((Token)contents[1]).getValue(), isLocalVar(v)), var, (Token)contents[1]));
 				
 				return;
-				
+			}
 				
 			case "array":{
 				
@@ -207,28 +213,31 @@ public class BytecodeCompiler{
 				return;
 			}
 			
-			case "array_elem":
-				
-				// Add array
+			case "array_elem":{
 				
 				// Defined array
-				if(!(contents[0] instanceof Token))
+				if(!(contents[0] instanceof Token)){
+					
+					// Add array
 					compile((ParseUnit)contents[0]);
+					
+					// Add index
+					compileExpression((ParseUnit)contents[1]);
+					
+					// Get element
+					add(inst(array_elem, p));
+				}
 				
 				// Array in variable
-				else{
-					var = Integer.parseInt(((Token)contents[0]).getValue());
-					add(inst(load_var, var, p));
-				}
 				
 				// Add index
 				compileExpression((ParseUnit)contents[1]);
 				
 				// Get element
-				add(inst(array_elem, p));
+				add(inst(isLocalVar((Token)contents[0]) ? array_elem_v_l : array_elem_v, p));
 				
 				return;
-				
+			}
 				
 			case "array_elem_assign":{
 				
@@ -241,7 +250,10 @@ public class BytecodeCompiler{
 				boolean aug = !op.equals("=");
 				
 				// Get variable number
-				var = Integer.parseInt(((Token)eCont[0]).getValue());
+				Token v = (Token)eCont[0];
+				int var = getVarNum(v);
+				boolean local = isLocalVar(v);
+				
 				
 				// Augmented assign variable
 				if(aug){
@@ -252,7 +264,7 @@ public class BytecodeCompiler{
 					add(inst(copy_top, (ParseUnit)eCont[1]));
 					
 					// Get element
-					add(inst(array_elem_v, var, (ParseUnit)eCont[1]));
+					add(inst(local ? array_elem_v_l : array_elem_v, var, (ParseUnit)eCont[1]));
 				}
 				
 				// Add expression
@@ -263,7 +275,7 @@ public class BytecodeCompiler{
 					add(inst(getOperationOpcode(op), t));
 				
 				// Store
-				add(inst(store_array_elem, var, t));
+				add(inst(local ? store_array_elem_l : store_array_elem, var, t));
 				
 				return;
 			}
@@ -298,12 +310,28 @@ public class BytecodeCompiler{
 				
 				
 				
-			case "func_def":
+			case "func_block":{
 				
+				if(!functionsOnly)
+					return;
 				
+				withinFunction = true;
 				
+				Object[] dCont = ((ParseUnit)contents[0]).getContents();
+				int params = dCont[1] instanceof Token ? 1 : ((ParseUnit)dCont[1]).getContents().length;
+				
+				// Initialize parameters
+				add(inst(init_params, params, p));
+				
+				// Compile contents of block
+				compile((ParseUnit)contents[1]);
+				
+				// Set entry point for start of script
+				script.setEntryPoint(bytecode.size());
+				
+				withinFunction = false;
 				return;
-				
+			}
 				
 			case "while_block":
 				
@@ -431,7 +459,8 @@ public class BytecodeCompiler{
 			
 			// Variable
 			if(o instanceof Token && ((Token)o).getType() == IDENTIFIER){
-				add(inst(load_var, Integer.parseInt(((Token)o).getValue()), (Token)o));
+				Token v = (Token)o;
+				add(inst(isLocalVar(v) ? load_var_l : load_var, getVarNum(v), (Token)o));
 				return;
 			}
 			
@@ -478,6 +507,15 @@ public class BytecodeCompiler{
 		}
 		
 		return false;
+	}
+	
+	private int getVarNum(Token t){
+		String v = t.getValue();
+		return Integer.parseInt(v.substring(v.charAt(0) == 'l' ? 1 : 0));
+	}
+	
+	private boolean isLocalVar(Token t){
+		return t.getValue().charAt(0) == 'l';
 	}
 	
 	
