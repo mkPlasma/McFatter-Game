@@ -115,6 +115,7 @@ public enum InstructionSet{
 
 	// Same as above, also branches script
 	jump_branch(true),
+	// Returns script branch
 	jump_branch_r(true),
 	
 	// Pops value on return stack and returns from function

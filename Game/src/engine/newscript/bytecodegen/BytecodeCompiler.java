@@ -23,10 +23,12 @@ public class BytecodeCompiler{
 	
 	private ArrayList<Instruction> bytecode;
 	
-	// Compiling function
+	// Compiling functions
 	private boolean functionsOnly, withinFunction;
+	private ArrayList<Integer> functions;
+	private ArrayList<Boolean> task;
 	
-
+	// Store break statements while compiling loop
 	private Stack<ArrayList<Integer>> breakStatements;
 	private Stack<ArrayList<ParseUnit>> breakUnits;
 	
@@ -37,6 +39,10 @@ public class BytecodeCompiler{
 		dataGen = new DataGenerator();
 		
 		bytecode = new ArrayList<Instruction>();
+		
+
+		functions	= new ArrayList<Integer>();
+		task			= new ArrayList<Boolean>();
 		
 		breakStatements = new Stack<ArrayList<Integer>>();
 		breakUnits = new Stack<ArrayList<ParseUnit>>();
@@ -106,7 +112,7 @@ public class BytecodeCompiler{
 				int var = getVarNum(v);
 				
 				// Create variable
-				add(inst(isLocalVar(v) ? init_zero_l : init_zero, var, v));
+				add(isLocalVar(v) ? init_zero_l : init_zero, var, v);
 				
 				return;
 			}
@@ -123,17 +129,17 @@ public class BytecodeCompiler{
 				
 				// If literal, add instruction to initialize
 				if(o instanceof Integer){
-					add(inst(local ? init_int_l : init_int, (int)o, p));
+					add(local ? init_int_l : init_int, (int)o, p);
 					return;
 				}
 				
 				if(o instanceof Float){
-					add(inst(local ? init_float_l : init_float, Float.floatToIntBits((float)o), p));
+					add(local ? init_float_l : init_float, Float.floatToIntBits((float)o), p);
 					return;
 				}
 				
 				if(o instanceof Boolean){
-					add(inst((Boolean)o ? (local ? init_true_l : init_true) : (local ? init_false_l : init_false), p));
+					add((Boolean)o ? (local ? init_true_l : init_true) : (local ? init_false_l : init_false), p);
 					return;
 				}
 				
@@ -143,7 +149,7 @@ public class BytecodeCompiler{
 				compileExpression((ParseUnit)contents[2]);
 				
 				// Create variable
-				add(inst(local ? init_value_l : init_value, var, (ParseUnit)contents[0]));
+				add(local ? init_value_l : init_value, var, (ParseUnit)contents[0]);
 				
 				return;
 			}
@@ -162,17 +168,17 @@ public class BytecodeCompiler{
 				
 				// Augmented assign variable
 				if(aug)
-					add(inst(local ? load_var_l : load_var, var, (Token)contents[0]));
+					add(local ? load_var_l : load_var, var, (Token)contents[0]);
 				
 				// Add expression
 				compileExpression((ParseUnit)contents[2]);
 				
 				// Augmented assign operation
 				if(aug)
-					add(inst(getOperationOpcode(op), t));
+					add(getOperationOpcode(op), t);
 				
 				// Store
-				add(inst(local ? store_value_l : store_value, var, t));
+				add(local ? store_value_l : store_value, var, t);
 				
 				return;
 			}
@@ -183,7 +189,7 @@ public class BytecodeCompiler{
 				int var = getVarNum(v);
 				
 				// Assignment
-				add(inst(getUnaryOperationOpcode(((Token)contents[1]).getValue(), isLocalVar(v)), var, (Token)contents[1]));
+				add(getUnaryOperationOpcode(((Token)contents[1]).getValue(), isLocalVar(v)), var, (Token)contents[1]);
 				
 				return;
 			}
@@ -205,10 +211,10 @@ public class BytecodeCompiler{
 						compile((ParseUnit)o);
 				
 				// Add array length
-				add(inst(load_int, list.length, p));
+				add(load_int, list.length, p);
 				
 				// Create array
-				add(inst(array_create, p));
+				add(array_create, p);
 				
 				return;
 			}
@@ -225,7 +231,7 @@ public class BytecodeCompiler{
 					compileExpression((ParseUnit)contents[1]);
 					
 					// Get element
-					add(inst(array_elem, p));
+					add(array_elem, p);
 				}
 				
 				// Array in variable
@@ -234,7 +240,7 @@ public class BytecodeCompiler{
 				compileExpression((ParseUnit)contents[1]);
 				
 				// Get element
-				add(inst(isLocalVar((Token)contents[0]) ? array_elem_v_l : array_elem_v, p));
+				add(isLocalVar((Token)contents[0]) ? array_elem_v_l : array_elem_v, p);
 				
 				return;
 			}
@@ -261,10 +267,10 @@ public class BytecodeCompiler{
 					compileExpression((ParseUnit)eCont[1]);
 					
 					// Copy index to use again
-					add(inst(copy_top, (ParseUnit)eCont[1]));
+					add(copy_top, (ParseUnit)eCont[1]);
 					
 					// Get element
-					add(inst(local ? array_elem_v_l : array_elem_v, var, (ParseUnit)eCont[1]));
+					add(local ? array_elem_v_l : array_elem_v, var, (ParseUnit)eCont[1]);
 				}
 				
 				// Add expression
@@ -272,10 +278,10 @@ public class BytecodeCompiler{
 				
 				// Augmented assign operation
 				if(aug)
-					add(inst(getOperationOpcode(op), t));
+					add(getOperationOpcode(op), t);
 				
 				// Store
-				add(inst(local ? store_array_elem_l : store_array_elem, var, t));
+				add(local ? store_array_elem_l : store_array_elem, var, t);
 				
 				return;
 			}
@@ -293,10 +299,39 @@ public class BytecodeCompiler{
 				compileExpression((ParseUnit)contents[0]);
 				
 				// Retrieve value
-				add(inst(move_to_top, list.length - 1, p));
+				add(move_to_top, list.length - 1, p);
 				
 				// Remove other values
-				add(inst(pop_count, list.length - 1, p));
+				add(pop_count, list.length - 1, p);
+				
+				return;
+			}
+				
+			case "func_call":{
+				
+				// Add parameters
+				ParseUnit p2 = (ParseUnit)contents[1];
+				
+				// Single parameter
+				if(p2.getType().equals("expression"))
+					compileExpression(p2);
+				
+				// 
+				else{
+					Object[] list = p2.getContents();
+					
+					for(Object o:list)
+						compileExpression((ParseUnit)o);
+				}
+				
+				// Function number
+				int func = Integer.parseInt(((Token)contents[0]).getValue());
+				
+				// Whether function call is in an expression/should accept a return value
+				boolean exp = p.isWithin("expression");
+				
+				// Add jump
+				add(task.get(func) ? (exp ? jump_branch_r : jump_branch) : (exp ? jump_func_r : jump_func), functions.get(func), p);
 				
 				return;
 			}
@@ -305,26 +340,53 @@ public class BytecodeCompiler{
 				// Placeholder jump statement, replaced in while_block compile
 				breakStatements.peek().add(bytecode.size());
 				breakUnits.peek().add(p);
-				add(inst(jump, 0, p));
+				add(jump, 0, p);
+				return;
+				
+				
+			case "return":
+				
+				// Return void
+				if(contents.length == 1){
+					add(return_void, p);
+					return;
+				}
+				
+				// Return value
+				
+				// Add value
+				compileExpression((ParseUnit)contents[1]);
+				add(return_value, p);
+				
 				return;
 				
 				
 				
-			case "func_block":{
+			case "func_block": case "task_block":{
 				
 				if(!functionsOnly)
 					return;
 				
 				withinFunction = true;
 				
+				// Add function bytecode index
+				functions.add(bytecode.size());
+				task.add(p.getType().equals("task_block"));
+				
 				Object[] dCont = ((ParseUnit)contents[0]).getContents();
 				int params = dCont[1] instanceof Token ? 1 : ((ParseUnit)dCont[1]).getContents().length;
 				
 				// Initialize parameters
-				add(inst(init_params, params, p));
+				add(init_params, params, p);
 				
 				// Compile contents of block
 				compile((ParseUnit)contents[1]);
+				
+				// Add void return if necessary
+				Instruction i = bytecode.get(bytecode.size() - 1);
+				
+				if(i.getOpcode() != InstructionSet.getOpcode(return_void) && i.getOpcode() != InstructionSet.getOpcode(return_value))
+					add(return_void, p);
 				
 				// Set entry point for start of script
 				script.setEntryPoint(bytecode.size());
@@ -344,7 +406,7 @@ public class BytecodeCompiler{
 				// Condition jump index
 				int jIndex = bytecode.size();
 				// Placeholder jump
-				add(inst(jump_if_false, 0, p));
+				add(jump_if_false, 0, p);
 				
 				// Add list for break statements inside loop
 				breakStatements.push(new ArrayList<Integer>());
@@ -354,7 +416,7 @@ public class BytecodeCompiler{
 				compile((ParseUnit)contents[1]);
 				
 				// Add loop
-				add(inst(jump, index, p));
+				add(jump, index, p);
 				
 				// Add condition jump
 				bytecode.set(jIndex, inst(jump_if_false, bytecode.size(), p));
@@ -376,7 +438,7 @@ public class BytecodeCompiler{
 				
 				// Condition jump index
 				jIndex = bytecode.size();
-				add(inst(jump_if_false, 0, p));
+				add(jump_if_false, 0, p);
 				
 				// Add contents of block
 				compile((ParseUnit)contents[1]);
@@ -399,7 +461,7 @@ public class BytecodeCompiler{
 					// No condition for else
 					if(p2.getType().equals("else_block")){
 						stJumps.add(bytecode.size());
-						bytecode.add(inst(jump, 0, p2));
+						add(jump, 0, p2);
 						break;
 					}
 					
@@ -407,7 +469,7 @@ public class BytecodeCompiler{
 					compileExpression((ParseUnit)((ParseUnit)p2.getContents()[0]).getContents()[0]);
 					
 					// Add jump
-					bytecode.add(inst(jump_if_true, 0, p2));
+					add(jump_if_true, 0, p2);
 					stJumps.add(bytecode.size() - 1);
 				}
 				
@@ -430,7 +492,7 @@ public class BytecodeCompiler{
 					 // Jump to end
 					if(!isElse){
 						endJumps.add(bytecode.size());
-						bytecode.add(inst(jump, 0, p));
+						add(jump, 0, p);
 					}
 				}
 				
@@ -460,7 +522,7 @@ public class BytecodeCompiler{
 			// Variable
 			if(o instanceof Token && ((Token)o).getType() == IDENTIFIER){
 				Token v = (Token)o;
-				add(inst(isLocalVar(v) ? load_var_l : load_var, getVarNum(v), (Token)o));
+				add(isLocalVar(v) ? load_var_l : load_var, getVarNum(v), (Token)o);
 				return;
 			}
 			
@@ -477,14 +539,14 @@ public class BytecodeCompiler{
 			compileExpression((ParseUnit)contents[2]);
 			
 			// Add operation
-			add(inst(getOperationOpcode(((Token)contents[1]).getValue()), (Token)contents[1]));
+			add(getOperationOpcode(((Token)contents[1]).getValue()), (Token)contents[1]);
 			
 			return;
 		}
 		
 		// Unary operation
 		compileExpression((ParseUnit)contents[1]);
-		add(inst(getOperationOpcode(((Token)contents[0]).getValue()), (Token)contents[0]));
+		add(getOperationOpcode(((Token)contents[0]).getValue()), (Token)contents[0]);
 	}
 	
 	private boolean compileValue(ParseUnit p){
@@ -492,17 +554,17 @@ public class BytecodeCompiler{
 		Object o = getValue(p);
 		
 		if(o instanceof Integer){
-			add(inst(load_int, (int)o, p));
+			add(load_int, (int)o, p);
 			return true;
 		}
 		
 		if(o instanceof Float){
-			add(inst(load_float, Float.floatToIntBits((float)o), p));
+			add(load_float, Float.floatToIntBits((float)o), p);
 			return true;
 		}
 		
 		if(o instanceof Boolean){
-			add(inst((Boolean)o ? load_true : load_false, p));
+			add((Boolean)o ? load_true : load_false, p);
 			return true;
 		}
 		
@@ -519,9 +581,26 @@ public class BytecodeCompiler{
 	}
 	
 	
-	private void add(Instruction i){
-		bytecode.add(i);
+	private void add(InstructionSet i, Token t){
+		bytecode.add(inst(i, t));
 	}
+	
+	public void add(InstructionSet i, ParseUnit p){
+		bytecode.add(inst(i, p));
+	}
+	
+	public void add(InstructionSet i, int val, Token t){
+		bytecode.add(inst(i, val, t));
+	}
+	
+	public void add(InstructionSet i, int val, ParseUnit p){
+		bytecode.add(inst(i, val, p));
+	}
+	
+	public void add(byte i, int val, ParseUnit p){
+		bytecode.add(inst(i, val, p));
+	}
+	
 	
 	public Instruction inst(InstructionSet i, Token t){
 		return new Instruction(InstructionSet.getOpcode(i), getFileIndex(t, script), getLineNum(t));

@@ -1,9 +1,6 @@
 package engine.newscript.runner;
 
-import static engine.newscript.bytecodegen.InstructionSet.getName;
-import static engine.newscript.bytecodegen.InstructionSet.op_dec_l;
-import static engine.newscript.bytecodegen.InstructionSet.op_inc_l;
-import static engine.newscript.bytecodegen.InstructionSet.op_inv;
+import static engine.newscript.bytecodegen.InstructionSet.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +22,9 @@ public class ScriptRunner{
 	private Stack<ArrayList<Object>> localVariables;
 	private Stack<Object> stack;
 	
+	private Stack<Integer> returnStack;
+	private Stack<Boolean> returnValStack;
+	
 	private Instruction currentInstruction;
 	private int instIndex;
 	
@@ -38,6 +38,9 @@ public class ScriptRunner{
 		localVariables	= new Stack<ArrayList<Object>>();
 		
 		stack = new Stack<Object>();
+
+		returnStack		= new Stack<Integer>();
+		returnValStack	= new Stack<Boolean>();
 	}
 	
 	public void run(){
@@ -66,8 +69,6 @@ public class ScriptRunner{
 	
 	
 	private void runInstruction(Instruction i) throws ScriptException{
-		
-		System.out.println("index: " + instIndex);
 		
 		currentInstruction = i;
 		
@@ -313,6 +314,33 @@ public class ScriptRunner{
 				
 				return;
 			}
+				
+			case jump_func: case jump_func_r:
+				
+				localVariables.add(new ArrayList<Object>());
+				
+				returnStack.add(instIndex);
+				returnValStack.add(name == jump_func_r);
+				
+				instIndex = op - 1;
+				return;
+				
+				
+			case return_void:
+				localVariables.pop();
+				instIndex = returnStack.pop();
+				returnValStack.pop();
+				return;
+				
+				
+			case return_value:
+				localVariables.pop();
+				instIndex = returnStack.pop();
+				
+				if(!returnValStack.pop())
+					pop();
+				
+				return;
 				
 			default:
 				System.err.println("Unrecognized bytecode instruction '" + name + "'");

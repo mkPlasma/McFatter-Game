@@ -1,8 +1,8 @@
 
 set x;
 
-test(2);
+x = square(4);
 
-function test(a){
-	x += a;
+function square(a){
+	return a^2;
 }

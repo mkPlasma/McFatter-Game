@@ -132,7 +132,7 @@ public class ScriptParser{
 			return;
 		
 		// Print bytecode (debug)
-		//BytecodePrinter.printBytecode(bytecode, script.getFileName());
+		BytecodePrinter.printBytecode(bytecode, script.getFileName());
 		
 		// Clear tokens after
 		script.clearTokens();
