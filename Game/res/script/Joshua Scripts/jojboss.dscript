@@ -1,0 +1,181 @@
+set c = 30;
+set c2 = 15;
+set c3 = rand(5, 30);
+set dir = 90;
+set spd = 3;
+set angvel = 2.5;
+set color = _cyan;
+set type = _crystal;
+set boss = boss(_fighter,_cx,_ty - 32,7000);
+boss.setDir(90);
+boss.setSpd(2);
+boss.setAccel(-0.015);
+boss.setMinSpd(0);
+wait 90;
+
+
+
+patt1();
+while(boss.getHealth()> 4000){
+    wait;
+}
+boss.setInvulnerable();
+wait 30;
+boss.setInvulnerable(false);
+patt2();
+while(boss.getHealth()> 0){
+    wait;
+}
+
+
+task patt1(){
+    core();
+    while(!boss.isDeleted()){
+        for(d in 0, 360/c, 360){
+            circle(dir + d, angvel);
+
+        }
+        for(i in 30 ){
+            if(boss.getHealth() < 4000){
+                clearBullets();
+                return;
+            }
+            wait;
+        }
+        for(d in 0, 360/c, 360){
+
+            circleR(235 + d, -angvel);
+        }
+        for(i in 30 ){
+            if(boss.getHealth() < 4000){
+                clearBullets();
+                return;
+            }
+            wait;
+        }
+
+    }
+}
+
+
+task patt2(){
+    while(!boss.isDeleted()){
+        for(d in 0, 360/c, 360){
+            circle(dir + d, angvel);
+            aim(dir + d)
+
+        }
+        for(i in 30 ){
+            if(boss.getHealth() < 1){
+                clearBullets();
+                return;
+            }
+            wait;
+        }
+        for(d in 0, 360/c, 360){
+
+            circleR(235 + d, -angvel);
+        }
+        for(i in 30 ){
+            if(boss.getHealth() < 1){
+                clearBullets();
+                return;
+            }
+            wait;
+        }
+
+    }
+
+}
+
+
+task patt3(){
+    while(!boss.isDeleted()){
+        for(d in 0, 360/c, 360){
+            circle(dir + d, angvel);
+            aim(dir + d)
+
+        }
+        for(i in 30 ){
+            if(boss.getHealth() < 2000){
+                clearBullets();
+                return;
+            }
+            wait;
+        }
+        for(d in 0, 360/c, 360){
+
+            circleR(235 + d, -angvel);
+        }
+        for(i in 30 ){
+            if(boss.getHealth() < 2000){
+                clearBullets();
+                return;
+            }
+            wait;
+        }
+
+    }
+
+}
+
+
+
+
+
+
+task core(){
+    while(!boss.isDeleted()){
+        for(d in 0, 360/c, 360){
+            bullet(type, color, boss.getPos(), dir + d, spd, 10);
+        }
+        dir += 4.7;
+        print(dir);
+        for(i in 15  ){
+            if(boss.getHealth() < 4000){
+                clearBullets();
+                return;
+            }
+            wait;
+        }
+    }
+}
+
+
+task aim(dir3){
+    set b = bullet(_rice, _yellow, boss.getPos(), dir3, spd, 10);
+    wait 35;
+    if(b.isDeleted()){
+        return;
+    }
+    b.setDir(angleToPlayer(b.getPos()));
+
+}
+
+
+
+
+task circle(dir2, vel){
+    set b = bullet(_needle, _red, boss.getPos(),dir2,spd,10);
+    while(!b.isDeleted()){
+        b.setAngVel(vel);
+        b.setDespawnRange(64);
+        vel -= .7;
+        wait 35;
+        b.setAngVel(vel);
+    }
+}
+
+
+
+
+task circleR(dir4, vel){
+    set b = bullet(_needle, _red, boss.getPos(),dir4,spd,10);
+    while(!b.isDeleted()){
+        b.setAngVel(vel);
+        b.setDespawnRange(64);
+        vel += .7;
+        wait 35;
+        b.setAngVel(vel);
+    }
+}
