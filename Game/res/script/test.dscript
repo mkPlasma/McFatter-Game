@@ -1,8 +1,4 @@
 
 set x;
 
-x = square(4);
-
-function square(a){
-	return a^2;
-}
+x = randf(0, 2);

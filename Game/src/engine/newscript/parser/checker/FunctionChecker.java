@@ -3,6 +3,7 @@ package engine.newscript.parser.checker;
 import java.util.ArrayList;
 import java.util.Stack;
 
+import engine.newscript.BuiltInFunctionList;
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
@@ -11,9 +12,11 @@ import engine.newscript.parser.ParseUnit;
 public class FunctionChecker{
 
 	private Stack<ArrayList<String>> functions;
+	private BuiltInFunctionList biFunc;
 	
 	public FunctionChecker(){
-		functions	= new Stack<ArrayList<String>>();
+		functions = new Stack<ArrayList<String>>();
+		biFunc = new BuiltInFunctionList();
 	}
 	
 	public void process(DScript script) throws ScriptException{
@@ -101,6 +104,9 @@ public class FunctionChecker{
 			if(functionExistsInScope(func, params, 0))
 				throw new ScriptException("Duplicate function '" + func + "'", t.getFile(), t.getLineNum());
 			
+			if(biFunc.isBuiltInFunction(func + ',' + params))
+				throw new ScriptException("Duplicate built-in function '" + func + "'", t.getFile(), t.getLineNum());
+			
 			addFunction(func, params);
 		}
 	}
@@ -154,7 +160,7 @@ public class FunctionChecker{
 	}
 	
 	private void addFunction(String name, int paramCount){
-		functions.peek().add(name + "," + paramCount);
+		functions.peek().add(name + ',' + paramCount);
 	}
 	
 	private boolean functionExists(String func, int paramCount){
@@ -166,7 +172,7 @@ public class FunctionChecker{
 				if(f.equals(func))
 					return true;
 		
-		return false;
+		return biFunc.isBuiltInFunction(func);
 	}
 	
 	private boolean functionExistsInScope(String func, int paramCount, int scope){

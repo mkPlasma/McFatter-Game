@@ -1,11 +1,12 @@
 package engine.newscript.parser.simplifier;
 
 import static engine.newscript.lexer.TokenType.*;
-import static engine.newscript.parser.ParseUtil.replaceParseUnit;
+import static engine.newscript.parser.ParseUtil.*;
 
 import java.util.ArrayList;
 import java.util.Stack;
 
+import engine.newscript.BuiltInFunctionList;
 import engine.newscript.DScript;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
@@ -15,8 +16,11 @@ public class FunctionReplacer{
 	private Stack<ArrayList<String>> functions;
 	private int funcNum;
 	
+	private final BuiltInFunctionList biFunc;
+	
 	public FunctionReplacer(){
 		functions	= new Stack<ArrayList<String>>();
+		biFunc = new BuiltInFunctionList();
 	}
 	
 	public void process(DScript script){
@@ -110,6 +114,11 @@ public class FunctionReplacer{
 					params++;
 				
 				contents[0] = new Token(IDENTIFIER, getFunctionNumber(t.getValue(), params), t.getFile(), t.getLineNum());
+				
+				// If built-in
+				if(biFunc.isBuiltInFunction(t.getValue() + ',' + params))
+					replaceParseUnit(p, new ParseUnit("func_call_bi", contents));
+				
 				break;
 				
 				
@@ -143,10 +152,7 @@ public class FunctionReplacer{
 	}
 	
 	private void addFunction(String name, int params){
-		System.out.println(funcNum);
-		
-		functions.peek().add(name + "," + params + "," + funcNum);
-		funcNum++;
+		functions.peek().add(name + ',' + params + ',' + funcNum++);
 	}
 	
 	private String getFunctionNumber(String func, int params){
@@ -162,7 +168,7 @@ public class FunctionReplacer{
 					return getValue(f);
 		}
 		
-		return "";
+		return Integer.toString(biFunc.getBuiltInFunctionIndex(func));
 	}
 	
 	private String getFunctionNumberInScope(String func, int params, int scope){
