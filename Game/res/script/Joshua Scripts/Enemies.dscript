@@ -1,0 +1,90 @@
+task sweeperEnemy(x, y, spd, health ,inv){
+    set angvel = 1.5;
+    if(inv){
+        angvel!!;
+    }
+    set c = 36;
+    set e = enemy(_fighter, x, y, health);
+    e.setDir(90);
+    e.setSpd(spd);
+    e.setMinSpd(0);
+    e.setAccel(-0.255);
+
+    wait 30;
+    set count;
+    set dirb1 = 45;
+    for(i in 35){
+        count++;
+        shot(dirb1,5);
+        wait 10;
+        dirb1 += 5;
+        if(dirb1 >= 130){
+            dirb1 = 45;
+        }
+        if(e.isDeleted()){
+            return;
+        }
+    }
+    if(count == 35){
+        e.setDir(90);
+        e.setSpd(6);
+        e.setAccel(-0.009);
+        e.setMinSpd(0);
+        e.setAngVel(angvel);
+    }
+
+    wait 240;
+    e.setDir(90);
+    e.setAngVel(0);
+
+    wait 15;
+    e.setSpd(0);
+
+    if(e.isDeleted()){return;}
+
+    set dir2 = rand(0, 360);
+
+    while(!e.isDeleted()){
+        for(d in 0, 360/c, 360){
+            shot(dir2 + d*5,3.5);
+        }
+        dir2 += 13;
+        wait 10;
+    }
+
+
+    task shot(dirb, spdb){
+        set b = bullet(_needle, _purple, e.getPos(), dirb, spdb, -15);
+        wait 20;
+    }
+}
+
+task strikerEnemy(x, y, spd,health,inv){
+    set c = 6;
+    set dir = 45;
+    if(inv){
+        dir = 135;
+        x = _rx +32;
+    }
+
+    set e = enemy(_radial, x,y,health);
+    e.setDir(dir);
+    e.setSpd(spd);
+    e.setAccel(-0.001);
+    e.setMinSpd(0);
+    wait 30;
+    set dir2b2 = 100;
+    while(!e.isDeleted()){
+        for(d in 0, 360/c, 360){
+            bullets(dir2b2 + d*5, 4);
+        }
+        dir2b2 += 13;
+        wait 30;
+    }
+
+    task bullets(dirb2, spdb2){
+        set b = bullet(_orb, _pink, e.getPos(), dirb2, spdb2, -15);
+
+
+    }
+}

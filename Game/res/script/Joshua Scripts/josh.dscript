@@ -1,0 +1,26 @@
+run "Enemies";
+
+wait 200;
+set inv = false;
+
+for(i in 2, 6 ){
+  sweeperEnemy((_rx - 32*i), _ty - 50, 10 - i*.5, 150, inv);
+}
+inv!!;
+for(i in 2, 6 ){
+  sweeperEnemy((_lx + 32*i), _ty - 50, 10 - i*.5, 150, inv);
+}
+wait 750;
+clearBullets();
+
+for(i in 2, 6 ){
+    strikerEnemy((_lx - 32) +10*i,0 - 30*i, 5,200,inv);
+}
+inv!!;
+for(i in 2, 6 ){
+    strikerEnemy((_lx - 32) +10*i,0- 30*i, 5,200,inv);
+}
+
+wait 150;
+
+run "jojboss";
