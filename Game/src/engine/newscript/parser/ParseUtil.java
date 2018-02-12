@@ -84,6 +84,13 @@ public class ParseUtil{
 		
 		boolean paren = p2 != null && p2.getContents().length == 1 && p2.getContents()[0] instanceof Token;
 		
+		// Array
+		if(p != null && p.getType().equals("array"))
+			return p;
+		if(p != null && paren && p2.getType().equals("array"))
+			return p2;
+		
+		// Invalid
 		if(!paren && !(contents[0] instanceof Token))
 			return null;
 		
@@ -107,6 +114,10 @@ public class ParseUtil{
 		// String concatenation
 		if((t1 == T_STRING || t2 == T_STRING) && ot == T_NUM_STRING)
 			return T_STRING;
+		
+		// Array concatenation
+		if(op.equals("~"))
+			return T_ARRAY;
 		
 		return (t1 == T_ANY || t2 == T_ANY || (t1 == T_NUM_STRING && t2 == T_NUM) || (t1 == T_NUM && t2 == T_NUM_STRING) || t1 == t2) && (ot & t1) > 0 && (ot & t2) > 0 ? getOperatorReturnType(op) : -1;
 	}

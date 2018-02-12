@@ -7,7 +7,12 @@ import engine.newscript.parser.ParseUnit;
 
 public class DataGenerator{
 	
+	private ArrayList<Object> constants;
+	
+	
 	public void process(DScript script){
+		
+		constants.clear();
 		
 		ArrayList<Object> parseTree = script.getParseTree();
 		
@@ -16,6 +21,8 @@ public class DataGenerator{
 	}
 	
 	private void process(ParseUnit p){
+		
+		addConstants(p);
 		
 		Object[] contents = p.getContents();
 		
@@ -26,5 +33,9 @@ public class DataGenerator{
 			
 			process((ParseUnit)o);
 		}
+	}
+	
+	private void addConstants(ParseUnit p){
+		
 	}
 }

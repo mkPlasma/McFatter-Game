@@ -1,4 +1,2 @@
 
-set x;
-
-x = randf(0, 2);
+set x = "a" + "b";
