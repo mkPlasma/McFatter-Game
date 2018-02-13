@@ -107,8 +107,8 @@ public class FunctionReplacer{
 				Object[] contents = p.getContents();
 				
 				Token t = (Token)contents[0];
-				
-				int params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getContents().length;
+
+				int params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getType().equals("list") ? ((ParseUnit)contents[1]).getContents().length : 1;
 				
 				if(p.getParent() != null && p.getParent().getType().equals("dot_func_call"))
 					params++;
@@ -128,7 +128,7 @@ public class FunctionReplacer{
 				ParseUnit p2 = (ParseUnit)contents[0];
 				
 				t = (Token)p2.getContents()[0];
-				params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getContents().length;
+				params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getType().equals("list") ? ((ParseUnit)contents[1]).getContents().length : 1;
 				int scope = Integer.parseInt(((Token)p2.getContents()[2]).getValue());
 
 				Token n = new Token(IDENTIFIER, getFunctionNumberInScope(t.getValue(), params, scope), t.getFile(), t.getLineNum());

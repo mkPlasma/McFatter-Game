@@ -28,6 +28,14 @@ public class BuiltInFunctionList{
 		// Create functions
 		funcList = new BIFunc[]{
 			
+			// Print given value
+			new BIFunc("print", 1){
+				protected Object run(Instruction inst, Object[] params){
+					System.out.println(params[0]);
+					return null;
+				}
+			},
+			
 			// Generate random int between two numbers
 			new BIFunc("rand", 2){
 				protected Object run(Instruction inst, Object[] params){

@@ -121,7 +121,7 @@ public class FunctionChecker{
 				Token t = (Token)contents[0];
 				String func = t.getValue();
 				
-				int params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getContents().length;
+				int params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getType().equals("list") ? ((ParseUnit)contents[1]).getContents().length : 1;
 				
 				if(p.getParent() != null && p.getParent().getType().equals("dot_func_call"))
 					params++;
@@ -139,8 +139,8 @@ public class FunctionChecker{
 				
 				t = (Token)p2.getContents()[0];
 				func = t.getValue();
-				
-				params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getContents().length;
+
+				params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getType().equals("list") ? ((ParseUnit)contents[1]).getContents().length : 1;
 				
 				int scope = Integer.parseInt(((Token)p2.getContents()[2]).getValue());
 				

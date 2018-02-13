@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Stack;
 
-import engine.newscript.BuiltInFunctionList;
 import engine.newscript.DScript;
 import engine.newscript.ScriptPrinter;
 import engine.newscript.lexer.Token;
@@ -33,8 +32,6 @@ public class BytecodeCompiler{
 	private Stack<ArrayList<Integer>> breakStatements;
 	private Stack<ArrayList<ParseUnit>> breakUnits;
 	
-	private final BuiltInFunctionList biFunc;
-	
 	
 	public BytecodeCompiler(){
 		
@@ -48,8 +45,6 @@ public class BytecodeCompiler{
 		
 		breakStatements = new Stack<ArrayList<Integer>>();
 		breakUnits = new Stack<ArrayList<ParseUnit>>();
-		
-		biFunc = new BuiltInFunctionList();
 	}
 	
 	public void process(DScript script){
@@ -91,12 +86,12 @@ public class BytecodeCompiler{
 			
 			case "statements":
 				for(Object o:contents)
-					compile((ParseUnit)o);
+					if(!functionsOnly || (functionsOnly && withinFunction) || (o instanceof ParseUnit && (((ParseUnit)o).getType().equals("func_block")) || ((ParseUnit)o).getType().equals("task_block")))
+						compile((ParseUnit)o);
 				return;
 				
 			case "statement":
-				if(!functionsOnly || (functionsOnly && withinFunction))
-					compile((ParseUnit)contents[0]);
+				compile((ParseUnit)contents[0]);
 				return;
 				
 			case "block":
@@ -530,10 +525,16 @@ public class BytecodeCompiler{
 			// Other values
 			Object o = contents[0];
 			
-			// Variable
-			if(o instanceof Token && ((Token)o).getType() == IDENTIFIER){
-				Token v = (Token)o;
-				add(isLocalVar(v) ? load_var_l : load_var, getVarNum(v), (Token)o);
+			if(o instanceof Token){
+				Token t = (Token)o;
+				
+				// Variables
+				if(t.getType() == IDENTIFIER)
+					add(isLocalVar(t) ? load_var_l : load_var, getVarNum(t), t);
+				
+				else if(t.getType() == CONST)
+					add(load_const, Integer.parseInt(t.getValue()), t);
+				
 				return;
 			}
 			

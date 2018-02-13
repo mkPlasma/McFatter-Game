@@ -1,2 +1,3 @@
 
-set x = "a" + "b";
+for(i in 0, 2, 10)
+	print("value of i = " + i);

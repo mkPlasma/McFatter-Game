@@ -22,6 +22,9 @@ public class ScriptRunner{
 	private DScript script;
 	private Instruction[] bytecode;
 	
+	private Object[] constants;
+	
+	
 	private ArrayList<Object> globalVariables;
 	private Stack<ArrayList<Object>> localVariables;
 	private Stack<Object> stack;
@@ -41,6 +44,9 @@ public class ScriptRunner{
 		
 		bytecode = script.getBytecode();
 		
+		constants = script.getConstants();
+		
+		
 		globalVariables	= new ArrayList<Object>();
 		localVariables	= new Stack<ArrayList<Object>>();
 		
@@ -52,6 +58,9 @@ public class ScriptRunner{
 	
 	public void run(){
 		
+		// tmp
+		System.out.println("");
+		
 		if(bytecode == null)
 			return;
 		
@@ -59,6 +68,8 @@ public class ScriptRunner{
 			for(instIndex = script.getEntryPoint(); instIndex < bytecode.length; instIndex++)
 				runInstruction(bytecode[instIndex]);
 			
+			System.out.println("\nFinished");
+			/*
 			System.out.println("\nResult:");
 			System.out.println("\nGlobal:");
 			
@@ -68,6 +79,7 @@ public class ScriptRunner{
 			System.out.println("\nLocal:");
 			for(int i = 0; i < localVariables.size(); i++)
 				System.out.println(i + ": " + localVariables.get(i));
+			*/
 		}
 		catch(ScriptException e){
 			error(e);
@@ -158,7 +170,7 @@ public class ScriptRunner{
 				return;
 				
 			case load_const:
-				// TODO
+				push(constants[op]);
 				return;
 				
 			case load_var:
@@ -437,9 +449,18 @@ public class ScriptRunner{
 		push(operate(o1, o2, op));
 	}
 	
-	// Perform operation and return value
+	// Perform numerical operation and return value
 	@SuppressWarnings("incomplete-switch")
 	private Object operate(Object o1, Object o2, InstructionSet op) throws ScriptException{
+		
+		// String concatenation
+		if(o1 instanceof String || o2 instanceof String){
+			
+			if(op != op_add)
+				throwException("Type mismatch, expected + for string concatenation");
+			
+			return o1.toString() + o2.toString();
+		}
 		
 		if(!(o1 instanceof Float || o1 instanceof Integer) || !(o2 instanceof Float || o2 instanceof Integer))
 			throwException("Type mismatch, expected numbers in operation");
