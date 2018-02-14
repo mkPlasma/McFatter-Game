@@ -43,9 +43,19 @@ public class Grammar{
 				{UNTIL, PAREN_L, "expression", PAREN_R},
 			}),
 			
+			new Rule("for_pre", new Object[][]{
+				{FOR, PAREN_L, IDENTIFIER, OPERATOR4},
+				{FOR, PAREN_L, IDENTIFIER, LESS_THAN},
+				{FOR, PAREN_L, IDENTIFIER, GREATER_THAN},
+			}),
+			
 			new Rule("for_cond", new Object[][]{
-				{FOR, PAREN_L, IDENTIFIER, IN, "expression", PAREN_R},
-				{FOR, PAREN_L, IDENTIFIER, IN, "list", PAREN_R},
+				{"for_pre", "expression", PAREN_R},
+				{"for_pre", "list", PAREN_R},
+			}),
+			
+			new Rule("foreach_cond", new Object[][]{
+				{IDENTIFIER, IN, "expression", PAREN_R},
 			}),
 			
 			new Rule("func_call", new Object[][]{
@@ -61,7 +71,7 @@ public class Grammar{
 			}),
 			
 			new Rule("dot_func_call", new Object[][]{
-				{IDENTIFIER, DOT, "func_call"},
+				{"expression", DOT, "func_call"},
 			}),
 			
 			

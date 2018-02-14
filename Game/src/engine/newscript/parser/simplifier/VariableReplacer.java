@@ -166,7 +166,7 @@ public class VariableReplacer{
 		
 		switch(p.getType()){
 				
-			case "new_var": case "for_cond":
+			case "new_var": case "for_pre":
 				Token t = (Token)contents[0];
 				
 				addVariable(t.getValue(), local);

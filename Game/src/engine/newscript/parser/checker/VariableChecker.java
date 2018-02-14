@@ -157,7 +157,7 @@ public class VariableChecker{
 				return;
 				
 				
-			case "new_var": case "new_const_var": case "for_cond":
+			case "new_var": case "new_const_var": case "for_pre":
 				
 				t = (Token)contents[0];
 				
@@ -175,7 +175,7 @@ public class VariableChecker{
 		
 		switch(p.getType()){
 				
-			case "new_var": case "for_cond":
+			case "new_var": case "for_pre":
 				Token t = (Token)contents[0];
 				
 				addVariable(t.getValue(), local);
