@@ -58,6 +58,11 @@ public class StatementSimplifier{
 				replaceWaitUntil(p);
 				break;
 				
+			// Replace waits by wait
+			case "waits":
+				replaceWaitS(p);
+				break;
+				
 			// Change for loops into while loops
 			case "for_block":
 				replaceForLoop(p);
@@ -110,6 +115,30 @@ public class StatementSimplifier{
 		});
 		
 		replaceParseUnit(p, new ParseUnit("wait_while", contents));
+	}
+	
+	private void replaceWaitS(ParseUnit p){
+		
+		Object[] contents = p.getContents();
+		
+		// Single second
+		if(contents.length == 1){
+			replaceParseUnit(p, new ParseUnit("wait", new Object[]{
+				new Token(WAIT, "wait", p.getFile(), p.getLineNum()),
+				new ParseUnit("expression", new Object[]{new Token(INT, "60", p.getFile(), p.getLineNum())})
+			}));
+			return;
+		}
+		
+		// Expression
+		replaceParseUnit(p, new ParseUnit("wait", new Object[]{
+			new Token(WAIT, "wait", p.getFile(), p.getLineNum()),
+			new ParseUnit("expression", new Object[]{
+				contents[1],
+				new Token(OPERATOR2, "*", p.getFile(), p.getLineNum()),
+				new ParseUnit("expression", new Object[]{new Token(INT, "60", p.getFile(), p.getLineNum())})
+			}),
+		}));
 	}
 	
 	private void replaceForLoop(ParseUnit p){

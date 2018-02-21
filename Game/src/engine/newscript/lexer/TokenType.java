@@ -15,6 +15,7 @@ public enum TokenType{
 	TASK			("(task)\\b",		true),
 	RETURN			("(return)\\b"),
 	RETURNIF		("(returnif)\\b",	true),
+	RETURNIFW		("(returnifw)\\b",	true),
 	WAIT			("(wait)\\b"),
 	WAITS			("(waits)\\b"),
 	

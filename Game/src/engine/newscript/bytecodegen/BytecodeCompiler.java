@@ -243,8 +243,49 @@ public class BytecodeCompiler{
 				
 				return;
 			}
-				
+
 			case "array_elem_assign":{
+				
+				// array_elem contents
+				Object[] eCont = ((ParseUnit)contents[0]).getContents();
+				
+				Token t = (Token)contents[1];
+				String op = t.getValue();
+				
+				boolean aug = !op.equals("=");
+				
+				// Get variable number
+				Token v = (Token)eCont[0];
+				int var = getVarNum(v);
+				boolean local = isLocalVar(v);
+				
+				
+				// Augmented assign variable
+				if(aug){
+					// Add index
+					compileExpression((ParseUnit)eCont[1]);
+					
+					// Copy index to use again
+					add(copy_top, (ParseUnit)eCont[1]);
+					
+					// Get element
+					add(local ? array_elem_v_l : array_elem_v, var, (ParseUnit)eCont[1]);
+				}
+				
+				// Add expression
+				compileExpression((ParseUnit)contents[2]);
+				
+				// Augmented assign operation
+				if(aug)
+					add(getOperationOpcode(op), t);
+				
+				// Store
+				add(local ? store_array_elem_l : store_array_elem, var, t);
+				
+				return;
+			}
+			
+			case "array_elem_assign_u":{
 				
 				// array_elem contents
 				Object[] eCont = ((ParseUnit)contents[0]).getContents();

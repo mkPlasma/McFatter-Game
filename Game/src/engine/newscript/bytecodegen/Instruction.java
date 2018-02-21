@@ -8,10 +8,7 @@ public class Instruction{
 	private final int fileIndex, lineNum;
 	
 	public Instruction(byte opcode, int fileIndex, int lineNum){
-		this.opcode = opcode;
-		operand = 0;
-		this.fileIndex = fileIndex;
-		this.lineNum = lineNum;
+		this(opcode, 0, fileIndex, lineNum);
 	}
 	
 	public Instruction(byte opcode, int operand, int fileIndex, int lineNum){
