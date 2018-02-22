@@ -123,6 +123,10 @@ public enum InstructionSet{
 	
 	// Returns value if called with jump_x_r, otherwise returns void
 	return_value,
+	
+	// Calls a built-in function
+	func_bi(true),
+	func_bi_r(true),
 	;
 	
 	private final boolean operand;

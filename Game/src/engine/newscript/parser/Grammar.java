@@ -43,10 +43,22 @@ public class Grammar{
 				{UNTIL, PAREN_L, "expression", PAREN_R},
 			}),
 			
-			new Rule("for_cond", new Object[][]{
-				{FOR, PAREN_L, IDENTIFIER, IN, "expression", PAREN_R},
-				{FOR, PAREN_L, IDENTIFIER, IN, "list", PAREN_R},
+			new Rule("for_pre", new Object[][]{
+				{FOR, PAREN_L, IDENTIFIER, OPERATOR4},
+				{FOR, PAREN_L, IDENTIFIER, LESS_THAN},
+				{FOR, PAREN_L, IDENTIFIER, GREATER_THAN},
 			}),
+			
+			new Rule("for_cond", new Object[][]{
+				{"for_pre", "expression", PAREN_R},
+				{"for_pre", "list", PAREN_R},
+			}),
+			
+			/*
+			new Rule("foreach_cond", new Object[][]{
+				{FOR, PAREN_L, IDENTIFIER, IN, "expression", PAREN_R},
+			}),
+			*/
 			
 			new Rule("func_call", new Object[][]{
 				{IDENTIFIER, PAREN_L, PAREN_R},
@@ -61,7 +73,7 @@ public class Grammar{
 			}),
 			
 			new Rule("dot_func_call", new Object[][]{
-				{IDENTIFIER, DOT, "func_call"},
+				{"expression", DOT, "func_call"},
 			}),
 			
 			
@@ -175,6 +187,10 @@ public class Grammar{
 				{RETURNIF, "expression"},
 			}),
 			
+			new Rule("returnifw", new Object[][]{
+				{RETURNIFW, "expression"},
+			}),
+			
 			new Rule("wait_while", new Object[][]{
 				{WAIT, WHILE, "expression"},
 			}),
@@ -263,6 +279,11 @@ public class Grammar{
 				{"for_cond", "block"},
 			}),
 			
+			new Rule("foreach_block", FINAL, new Object[][]{
+				{"foreach_cond", "statement"},
+				{"foreach_cond", "block"},
+			}),
+			
 			new Rule("s_block", FINAL, new Object[][]{
 				{"func_block"},
 				{"task_block"},
@@ -272,6 +293,7 @@ public class Grammar{
 				{"while_block"},
 				{"until_block"},
 				{"for_block"},
+				{"foreach_block"},
 				{"block"},
 			}),
 			

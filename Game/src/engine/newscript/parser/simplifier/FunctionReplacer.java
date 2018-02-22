@@ -1,11 +1,12 @@
 package engine.newscript.parser.simplifier;
 
 import static engine.newscript.lexer.TokenType.*;
-import static engine.newscript.parser.ParseUtil.replaceParseUnit;
+import static engine.newscript.parser.ParseUtil.*;
 
 import java.util.ArrayList;
 import java.util.Stack;
 
+import engine.newscript.BuiltInFunctionList;
 import engine.newscript.DScript;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
@@ -15,8 +16,11 @@ public class FunctionReplacer{
 	private Stack<ArrayList<String>> functions;
 	private int funcNum;
 	
+	private final BuiltInFunctionList biFunc;
+	
 	public FunctionReplacer(){
 		functions	= new Stack<ArrayList<String>>();
+		biFunc = new BuiltInFunctionList();
 	}
 	
 	public void process(DScript script){
@@ -103,13 +107,18 @@ public class FunctionReplacer{
 				Object[] contents = p.getContents();
 				
 				Token t = (Token)contents[0];
-				
-				int params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getContents().length;
+
+				int params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getType().equals("list") ? ((ParseUnit)contents[1]).getContents().length : 1;
 				
 				if(p.getParent() != null && p.getParent().getType().equals("dot_func_call"))
 					params++;
 				
 				contents[0] = new Token(IDENTIFIER, getFunctionNumber(t.getValue(), params), t.getFile(), t.getLineNum());
+				
+				// If built-in
+				if(biFunc.isBuiltInFunction(t.getValue() + ',' + params))
+					replaceParseUnit(p, new ParseUnit("func_call_bi", contents));
+				
 				break;
 				
 				
@@ -119,7 +128,7 @@ public class FunctionReplacer{
 				ParseUnit p2 = (ParseUnit)contents[0];
 				
 				t = (Token)p2.getContents()[0];
-				params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getContents().length;
+				params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getType().equals("list") ? ((ParseUnit)contents[1]).getContents().length : 1;
 				int scope = Integer.parseInt(((Token)p2.getContents()[2]).getValue());
 
 				Token n = new Token(IDENTIFIER, getFunctionNumberInScope(t.getValue(), params, scope), t.getFile(), t.getLineNum());
@@ -143,10 +152,7 @@ public class FunctionReplacer{
 	}
 	
 	private void addFunction(String name, int params){
-		System.out.println(funcNum);
-		
-		functions.peek().add(name + "," + params + "," + funcNum);
-		funcNum++;
+		functions.peek().add(name + ',' + params + ',' + funcNum++);
 	}
 	
 	private String getFunctionNumber(String func, int params){
@@ -162,7 +168,7 @@ public class FunctionReplacer{
 					return getValue(f);
 		}
 		
-		return "";
+		return Integer.toString(biFunc.getBuiltInFunctionIndex(func));
 	}
 	
 	private String getFunctionNumberInScope(String func, int params, int scope){

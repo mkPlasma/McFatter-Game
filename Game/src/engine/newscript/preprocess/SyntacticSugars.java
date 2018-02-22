@@ -28,15 +28,16 @@ public class SyntacticSugars{
 		sugars.put("_cy", "240");
 		
 		// Screen borders
-		sugars.put("_lx", "32");
-		sugars.put("_rx", "416");
-		sugars.put("_ty", "16");
-		sugars.put("_by", "464");
+		sugars.put("_left", "32");
+		sugars.put("_right", "416");
+		sugars.put("_top", "16");
+		sugars.put("_bottom", "464");
 		
 		// Misc
 		sugars.put("_time", "scriptTime()");
 		sugars.put("_px", "playerX()");
 		sugars.put("_py", "playerY()");
+		sugars.put("_pi", "3.1415927");
 	}
 	
 	public void process(DScript script){

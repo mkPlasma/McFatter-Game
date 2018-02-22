@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Stack;
 
+import engine.newscript.BIFunc;
+import engine.newscript.BuiltInFunctionList;
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
 import engine.newscript.bytecodegen.Instruction;
@@ -15,9 +17,14 @@ import engine.newscript.bytecodegen.InstructionSet;
 
 public class ScriptRunner{
 	
+	private final BuiltInFunctionList biFuncList;
+	
 	private DScript script;
 	private Instruction[] bytecode;
-
+	
+	private Object[] constants;
+	
+	
 	private ArrayList<Object> globalVariables;
 	private Stack<ArrayList<Object>> localVariables;
 	private Stack<Object> stack;
@@ -25,14 +32,20 @@ public class ScriptRunner{
 	private Stack<Integer> returnStack;
 	private Stack<Boolean> returnValStack;
 	
-	private Instruction currentInstruction;
 	private int instIndex;
 	
+	
+	public ScriptRunner(){
+		biFuncList = new BuiltInFunctionList();
+	}
 	
 	public void init(DScript script){
 		this.script = script;
 		
 		bytecode = script.getBytecode();
+		
+		constants = script.getConstants();
+		
 		
 		globalVariables	= new ArrayList<Object>();
 		localVariables	= new Stack<ArrayList<Object>>();
@@ -45,6 +58,9 @@ public class ScriptRunner{
 	
 	public void run(){
 		
+		// tmp
+		System.out.println("");
+		
 		if(bytecode == null)
 			return;
 		
@@ -52,6 +68,8 @@ public class ScriptRunner{
 			for(instIndex = script.getEntryPoint(); instIndex < bytecode.length; instIndex++)
 				runInstruction(bytecode[instIndex]);
 			
+			System.out.println("\nFinished");
+			/*
 			System.out.println("\nResult:");
 			System.out.println("\nGlobal:");
 			
@@ -61,6 +79,7 @@ public class ScriptRunner{
 			System.out.println("\nLocal:");
 			for(int i = 0; i < localVariables.size(); i++)
 				System.out.println(i + ": " + localVariables.get(i));
+			*/
 		}
 		catch(ScriptException e){
 			error(e);
@@ -69,8 +88,6 @@ public class ScriptRunner{
 	
 	
 	private void runInstruction(Instruction i) throws ScriptException{
-		
-		currentInstruction = i;
 		
 		InstructionSet name = getName(i.getOpcode());
 		int op = i.getOperand();
@@ -153,7 +170,7 @@ public class ScriptRunner{
 				return;
 				
 			case load_const:
-				// TODO
+				push(constants[op]);
 				return;
 				
 			case load_var:
@@ -329,7 +346,11 @@ public class ScriptRunner{
 			case return_void:
 				localVariables.pop();
 				instIndex = returnStack.pop();
-				returnValStack.pop();
+				
+				// If a return value is expected, there must be one
+				if(returnValStack.pop())
+					throwException("Expected return value");
+				
 				return;
 				
 				
@@ -337,10 +358,39 @@ public class ScriptRunner{
 				localVariables.pop();
 				instIndex = returnStack.pop();
 				
+				// Pop return value if it is not used
 				if(!returnValStack.pop())
 					pop();
 				
 				return;
+				
+				
+			case func_bi: case func_bi_r:{
+				BIFunc f = biFuncList.get(op);
+				
+				// Initialize parameter list
+				Object[] params = new Object[f.getParamCount()];
+				
+				// Add parameters
+				for(int j = 0; j < params.length; j++)
+					params[j] = pop();
+				
+				// Call function and get return value
+				Object r = f.call(i, params);
+				
+				// If return value was expected
+				if(name == func_bi_r){
+					
+					// Error if no return value
+					if(r == null)
+						throwException(f.getName() + "() does not return a value");
+					
+					// Push value otherwise
+					push(r);
+				}
+				
+				return;
+			}
 				
 			default:
 				System.err.println("Unrecognized bytecode instruction '" + name + "'");
@@ -399,9 +449,18 @@ public class ScriptRunner{
 		push(operate(o1, o2, op));
 	}
 	
-	// Perform operation and return value
+	// Perform numerical operation and return value
 	@SuppressWarnings("incomplete-switch")
 	private Object operate(Object o1, Object o2, InstructionSet op) throws ScriptException{
+		
+		// String concatenation
+		if(o1 instanceof String || o2 instanceof String){
+			
+			if(op != op_add)
+				throwException("Type mismatch, expected + for string concatenation");
+			
+			return o1.toString() + o2.toString();
+		}
 		
 		if(!(o1 instanceof Float || o1 instanceof Integer) || !(o2 instanceof Float || o2 instanceof Integer))
 			throwException("Type mismatch, expected numbers in operation");
@@ -597,7 +656,8 @@ public class ScriptRunner{
 	
 	
 	private void throwException(String message) throws ScriptException{
-		throw new ScriptException(message, currentInstruction.getFileIndex(), currentInstruction.getLineNum());
+		Instruction i = bytecode[instIndex];
+		throw new ScriptException(message, i.getFileIndex(), i.getLineNum());
 	}
 	
 	private void error(ScriptException e){

@@ -16,8 +16,11 @@ public class DScript{
 	private Token[] tokens;
 	private ArrayList<Object> parseTree;
 	
+	
 	private Instruction[] bytecode;
 	private int entryPoint;
+	
+	private Object[] constants;
 	
 	
 	public DScript(String path){
@@ -120,5 +123,13 @@ public class DScript{
 	
 	public int getEntryPoint(){
 		return entryPoint;
+	}
+	
+	public void setConstants(Object[] constants){
+		this.constants = constants;
+	}
+	
+	public Object[] getConstants(){
+		return constants;
 	}
 }

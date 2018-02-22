@@ -58,9 +58,19 @@ public class StatementSimplifier{
 				replaceWaitUntil(p);
 				break;
 				
+			// Replace waits by wait
+			case "waits":
+				replaceWaitS(p);
+				break;
+				
 			// Change for loops into while loops
 			case "for_block":
 				replaceForLoop(p);
+				break;
+				
+			// Replace dot function calls
+			case "dot_func_call":
+				replaceDotFuncCall(p);
 				break;
 		}
 	}
@@ -107,12 +117,38 @@ public class StatementSimplifier{
 		replaceParseUnit(p, new ParseUnit("wait_while", contents));
 	}
 	
+	private void replaceWaitS(ParseUnit p){
+		
+		Object[] contents = p.getContents();
+		
+		// Single second
+		if(contents.length == 1){
+			replaceParseUnit(p, new ParseUnit("wait", new Object[]{
+				new Token(WAIT, "wait", p.getFile(), p.getLineNum()),
+				new ParseUnit("expression", new Object[]{new Token(INT, "60", p.getFile(), p.getLineNum())})
+			}));
+			return;
+		}
+		
+		// Expression
+		replaceParseUnit(p, new ParseUnit("wait", new Object[]{
+			new Token(WAIT, "wait", p.getFile(), p.getLineNum()),
+			new ParseUnit("expression", new Object[]{
+				contents[1],
+				new Token(OPERATOR2, "*", p.getFile(), p.getLineNum()),
+				new ParseUnit("expression", new Object[]{new Token(INT, "60", p.getFile(), p.getLineNum())})
+			}),
+		}));
+	}
+	
 	private void replaceForLoop(ParseUnit p){
 		
 		Object[] contents = p.getContents();
 		
+		Object[] forPre = ((ParseUnit)((ParseUnit)contents[0]).getContents()[0]).getContents();
+		
 		// Variable
-		Token id = (Token)((ParseUnit)contents[0]).getContents()[0];
+		Token id = (Token)forPre[0];
 		
 		// Expressions
 		Object[] list = ((ParseUnit)((ParseUnit)contents[0]).getContents()[1]).getContents();
@@ -129,9 +165,7 @@ public class StatementSimplifier{
 		contents[0] = new ParseUnit("while_cond", new Object[]{
 			new ParseUnit("expression", new Object[]{
 				new ParseUnit("expression", new Object[]{id}),
-				new Token(LESS_THAN, "<",
-					(exp instanceof Token ? ((Token)exp).getFile() : ((ParseUnit)exp).getFile()),
-					(exp instanceof Token ? ((Token)exp).getLineNum() : ((ParseUnit)exp).getLineNum())),
+				forPre[1],
 				
 				(len == 1 ?
 					new ParseUnit("expression", new Object[]{exp}) :
@@ -206,5 +240,64 @@ public class StatementSimplifier{
 		
 		// Replace for_block
 		replaceParseUnit(p, new ParseUnit("block", cont));
+	}
+	
+	private void replaceDotFuncCall(ParseUnit p){
+		
+		Object[] contents = p.getContents();
+		
+		// func_call
+		ParseUnit p2 = (ParseUnit)contents[1];
+		Object[] cont = p2.getContents();
+		
+		// No parameters originally
+		if(cont.length == 1){
+			
+			// Copy function name
+			Object[] newCont = new Object[2];
+			newCont[0] = cont[0];
+			
+			// Add parameter
+			newCont[1] = contents[0];
+			
+			// Replace dot_func_call
+			replaceParseUnit(p, new ParseUnit(p2.getType(), newCont));
+		}
+		
+		// Single parameter
+		else if(cont.length == 2){
+			
+			// Copy function name
+			Object[] newCont = new Object[2];
+			newCont[0] = cont[0];
+			
+			// Add parameter list
+			newCont[1] = new ParseUnit("list", new Object[]{
+				cont[1],
+				contents[0]
+			});
+			
+			// Replace dot_func_call
+			replaceParseUnit(p, new ParseUnit(p2.getType(), newCont));
+		}
+		
+		// Parameter list
+		else{
+			// List
+			ParseUnit list = (ParseUnit)cont[1];
+			
+			// Create new params
+			Object[] params = list.getContents();
+			Object[] newParams = new Object[params.length + 1];
+			
+			// Copy parameters
+			System.arraycopy(params, 0, newParams, 1, params.length);
+			
+			// Add expression
+			newParams[0] = contents[0];
+			
+			// Replace dot_func_call
+			replaceParseUnit(p, p2);
+		}
 	}
 }

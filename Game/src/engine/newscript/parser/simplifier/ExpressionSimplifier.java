@@ -85,7 +85,7 @@ public class ExpressionSimplifier{
 				return;
 			
 			Token t = (Token)c2;
-			p.setContents(operate(val1, val2, t));
+			p.setContents(operate(val1, val2, c1, c3, t));
 			
 			return;
 		}
@@ -156,16 +156,29 @@ public class ExpressionSimplifier{
 		}
 		
 		Token t = (Token)c1;
-		p.setContents(operate(val, null, t));
+		p.setContents(operate(val, null, null, null, t));
 		
 		return;
 	}
 	
-	private Object[] operate(Object o1, Object o2, Token op){
+	private Object[] operate(Object o1, Object o2, Object t1, Object t2, Token op){
 		
 		// Unary operation (oly binary op is !)
 		if(o2 == null)
 			return new Object[]{new Token(BOOLEAN, Boolean.toString(!(Boolean)o1), op.getFile(), op.getLineNum())};
+		
+		String opv = op.getValue();
+		String file = op.getFile();
+		int lineNum = op.getLineNum();
+		
+		// String concatenation
+		if((o1 instanceof String || o2 instanceof String) && opv.equals("+"))
+			return new Object[]{new Token(STRING, o1.toString() + o2.toString(), file, lineNum)};
+		
+		// Array concatenation
+		if(opv.equals("~"))
+			return arrayConcat(t1, t2);
+		
 		
 		// Number operation
 		if(o1 instanceof Integer || o1 instanceof Float){
@@ -175,7 +188,7 @@ public class ExpressionSimplifier{
 			
 			Object r = 0;
 			
-			switch(op.getValue()){
+			switch(opv){
 				case "+":	r = n1 + n2;	break;
 				case "-":	r = n1 - n2;	break;
 				case "*":	r = n1 * n2;	break;
@@ -188,13 +201,7 @@ public class ExpressionSimplifier{
 				case "<=":	r = n1 <= n2;	break;
 				case ">=":	r = n1 >= n2;	break;
 				case "!=":	r = n1 != n2;	break;
-				
-				// TODO: temporary, change to constant token
-				case "~":	r = n1;	break;
 			}
-			
-			String file = op.getFile();
-			int lineNum = op.getLineNum();
 			
 			// Comparison operation
 			if(r instanceof Boolean)
@@ -210,5 +217,42 @@ public class ExpressionSimplifier{
 		}
 		
 		return null;
+	}
+	
+	private Object[] arrayConcat(Object o1, Object o2){
+		
+		// Get values
+		Object[] a1 = getArrayValue(o1);
+		Object[] a2 = getArrayValue(o2);
+		
+		Object[] cont = new Object[a1.length + a2.length];
+		
+		// Concatenate
+		System.arraycopy(a1, 0, cont, 0, a1.length);
+		System.arraycopy(a2, 0, cont, a1.length, a2.length);
+		
+		return new Object[]{new ParseUnit("array", cont)};
+	}
+	
+	private Object[] getArrayValue(Object o){
+		
+		// Original value
+		Object[] oa = new Object[]{o};
+		
+		if(!(o instanceof ParseUnit))
+			return oa;
+		
+		ParseUnit p = (ParseUnit)o;
+		Object o2 = p.getContents()[0];
+		
+		if(!p.getType().equals("expression") || !(o2 instanceof ParseUnit))
+			return oa;
+		
+		ParseUnit p2 = (ParseUnit)o2;
+		
+		if(!p2.getType().equals("array"))
+			return oa;
+		
+		return p2.getContents();
 	}
 }

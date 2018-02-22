@@ -33,7 +33,6 @@ public class BytecodeCompiler{
 	private Stack<ArrayList<ParseUnit>> breakUnits;
 	
 	
-	
 	public BytecodeCompiler(){
 		
 		dataGen = new DataGenerator();
@@ -87,12 +86,12 @@ public class BytecodeCompiler{
 			
 			case "statements":
 				for(Object o:contents)
-					compile((ParseUnit)o);
+					if(!functionsOnly || (functionsOnly && withinFunction) || (o instanceof ParseUnit && (((ParseUnit)o).getType().equals("func_block")) || ((ParseUnit)o).getType().equals("task_block")))
+						compile((ParseUnit)o);
 				return;
 				
 			case "statement":
-				if(!functionsOnly || (functionsOnly && withinFunction))
-					compile((ParseUnit)contents[0]);
+				compile((ParseUnit)contents[0]);
 				return;
 				
 			case "block":
@@ -244,8 +243,49 @@ public class BytecodeCompiler{
 				
 				return;
 			}
-				
+
 			case "array_elem_assign":{
+				
+				// array_elem contents
+				Object[] eCont = ((ParseUnit)contents[0]).getContents();
+				
+				Token t = (Token)contents[1];
+				String op = t.getValue();
+				
+				boolean aug = !op.equals("=");
+				
+				// Get variable number
+				Token v = (Token)eCont[0];
+				int var = getVarNum(v);
+				boolean local = isLocalVar(v);
+				
+				
+				// Augmented assign variable
+				if(aug){
+					// Add index
+					compileExpression((ParseUnit)eCont[1]);
+					
+					// Copy index to use again
+					add(copy_top, (ParseUnit)eCont[1]);
+					
+					// Get element
+					add(local ? array_elem_v_l : array_elem_v, var, (ParseUnit)eCont[1]);
+				}
+				
+				// Add expression
+				compileExpression((ParseUnit)contents[2]);
+				
+				// Augmented assign operation
+				if(aug)
+					add(getOperationOpcode(op), t);
+				
+				// Store
+				add(local ? store_array_elem_l : store_array_elem, var, t);
+				
+				return;
+			}
+			
+			case "array_elem_assign_u":{
 				
 				// array_elem contents
 				Object[] eCont = ((ParseUnit)contents[0]).getContents();
@@ -307,7 +347,7 @@ public class BytecodeCompiler{
 				return;
 			}
 				
-			case "func_call":{
+			case "func_call": case "func_call_bi":{
 				
 				// Add parameters
 				ParseUnit p2 = (ParseUnit)contents[1];
@@ -316,7 +356,7 @@ public class BytecodeCompiler{
 				if(p2.getType().equals("expression"))
 					compileExpression(p2);
 				
-				// 
+				// Multiple parameters
 				else{
 					Object[] list = p2.getContents();
 					
@@ -324,14 +364,20 @@ public class BytecodeCompiler{
 						compileExpression((ParseUnit)o);
 				}
 				
-				// Function number
-				int func = Integer.parseInt(((Token)contents[0]).getValue());
-				
 				// Whether function call is in an expression/should accept a return value
 				boolean exp = p.isWithin("expression");
 				
-				// Add jump
-				add(task.get(func) ? (exp ? jump_branch_r : jump_branch) : (exp ? jump_func_r : jump_func), functions.get(func), p);
+				// Standard function call
+				if(p.getType().equals("func_call")){
+					// Function number
+					int func = Integer.parseInt(((Token)contents[0]).getValue());
+					
+					// Add jump
+					add(task.get(func) ? (exp ? jump_branch_r : jump_branch) : (exp ? jump_func_r : jump_func), functions.get(func), p);
+				}
+				
+				// Built-in function call
+				add(exp ? func_bi_r : func_bi, Integer.parseInt(((Token)contents[0]).getValue()), p);
 				
 				return;
 			}
@@ -374,10 +420,11 @@ public class BytecodeCompiler{
 				task.add(p.getType().equals("task_block"));
 				
 				Object[] dCont = ((ParseUnit)contents[0]).getContents();
-				int params = dCont[1] instanceof Token ? 1 : ((ParseUnit)dCont[1]).getContents().length;
+				int params = dCont.length == 1 ? 0 : dCont[1] instanceof Token ? 1 : ((ParseUnit)dCont[1]).getContents().length;
 				
 				// Initialize parameters
-				add(init_params, params, p);
+				if(params > 0)
+					add(init_params, params, p);
 				
 				// Compile contents of block
 				compile((ParseUnit)contents[1]);
@@ -519,10 +566,16 @@ public class BytecodeCompiler{
 			// Other values
 			Object o = contents[0];
 			
-			// Variable
-			if(o instanceof Token && ((Token)o).getType() == IDENTIFIER){
-				Token v = (Token)o;
-				add(isLocalVar(v) ? load_var_l : load_var, getVarNum(v), (Token)o);
+			if(o instanceof Token){
+				Token t = (Token)o;
+				
+				// Variables
+				if(t.getType() == IDENTIFIER)
+					add(isLocalVar(t) ? load_var_l : load_var, getVarNum(t), t);
+				
+				else if(t.getType() == CONST)
+					add(load_const, Integer.parseInt(t.getValue()), t);
+				
 				return;
 			}
 			

@@ -46,6 +46,13 @@ public class ExpressionChecker{
 						
 						break;
 						
+					case "wait": case "waits":
+						
+						if((t & T_NUM) <= 0)
+							throw new ScriptException("Expression must output number", p.getFile(), p.getLineNum());
+						
+						break;
+						
 						
 					case "list":
 						

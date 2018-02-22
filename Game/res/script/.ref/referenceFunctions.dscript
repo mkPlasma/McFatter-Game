@@ -149,6 +149,7 @@ b.getDespawnRange();
 e.setHealth(h);
 e.getHealth();
 e.setInvulnerable();
+e.setVulnerable();
 e.setInvulnerable(i);
 e.isInvulnerable();
 
@@ -163,10 +164,9 @@ b.setFrame(frame);
 b.getFrame();
 
 // Additive rendering
+b.setAdditive();
 b.setAdditive(a);
 b.isAdditive();
-// Set to true
-b.setAdditive();
 
 // Sprite scale
 b.setScale(s);
@@ -215,12 +215,12 @@ angleToLocation(pos1, pos2);
 
 // Random int between a (inclusive) and b (exclusive)
 rand(a, b);
-// Between -a and a
+// Between -a and a (inclusive)
 rand(a);
 
 // Random float
-randFloat(a, b);
-randFloat(a);
+randf(a, b);
+randf(a);
 // Random boolean
 randBool();
 
@@ -233,8 +233,6 @@ clearBullets();
 
 // Math
 
-// Pi
-pi();
 // Absolute value
 abs(x);
 
