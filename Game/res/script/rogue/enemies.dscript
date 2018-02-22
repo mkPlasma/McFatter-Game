@@ -7,13 +7,13 @@ task speedster(x, y, type, color, dir, spd ,health,inv){
     e.setSpd(spd);
     while(!e.isDeleted()){
         for(d in 0, 360/c, 360){
-            bullets();
+            bullets(d);
         }
         wait 2;
     }
 
-    task bullets(){
-        set b = bullet(type, color, e.getPos(), rand(0,360), 0, -15);
+    task bullets(d){
+        set b = bullet(type, color, e.getPos(), rand(0,360), 0, -15 + d/6);
         wait 120;
         b.setMaxSpd(3);
         b.setAccel(0.03);
