@@ -2,27 +2,29 @@
 set e = boss(_fighter, _cx, 120, 10000);
 e.setDir(90);
 
+
+
 spiral();
 
 task spiral(){
-    
+
     set const c = 64;
     set cn = 0;
-    
+
     set dir = 90;
     set av = 0.6;
-    
+
     while(!e.isDeleted()){
-        
+
         for(d in 0, 360/c, 360){
             //arc(dir + d*3, 1.5, _light_blue);
             //arc(dir + d, 2, _yellow);
             wavy(dir + d, 3, av > 0, 50);
         }
-        
+
         dir -= av;
         wait 10;
-        
+
         cn++;
         if(cn > 10){
             cn = 0;
@@ -36,9 +38,9 @@ task arc(dir, spd, col){
     set const a = 4;
     set const c = 4;
     set const r = 30;
-    
+
     dir -= a/2;
-    
+
     for(i in c){
         set d = dir + i*(a/c);
         set b = bullet(_wall, col, e.getPos() + {r*cos(d), r*sin(d)}, d, spd, 5);
@@ -47,23 +49,23 @@ task arc(dir, spd, col){
 }
 
 task wavy(dir, spd, inv, r){
-    
+
     set b = bullet(_scale, _purple, e.getPos() + {r*cos(dir), r*sin(dir)}, dir, spd, 5);
     b.setAccel(-0.06);
     b.setMinSpd(0);
-    
+
     for(i in 3){
         wait 60;
-        
+
         if(inv){dir += 90;}
         else{dir -= 90;}
-        
+
         b.setDir(dir);
         b.setSpd(3);
-        
+
         inv!!;
     }
-    
+
     b.setAccel(0);
     b.setSpd(4);
 }

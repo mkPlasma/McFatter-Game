@@ -1,0 +1,53 @@
+task speedster(x, y, type, color, dir, spd ,health,inv){
+
+    set c = 3;
+
+    set e = enemy(_radial, x,y,health);
+    e.setDir(dir);
+    e.setSpd(spd);
+    while(!e.isDeleted()){
+        for(d in 0, 360/c, 360){
+            bullets();
+        }
+        wait 2;
+    }
+
+    task bullets(){
+        set b = bullet(type, color, e.getPos(), rand(0,360), 0, -15);
+        wait 120;
+        b.setMaxSpd(3);
+        b.setAccel(0.03);
+
+
+
+    }
+}
+
+task bomber(x, y,dir, spd ,health){
+    set e = enemy(_fighter, x,y,health);
+    set c = 8;
+    e.setDir(dir);
+    e.setSpd(spd);
+    e.setAccel(-0.05);
+    e.setMinSpd(0);
+    while(!e.isDeleted()){
+        bullets();
+        wait 5;
+    }
+    task bullets(){
+        set b = bullet(_mine, _red_d, e.getPos(), rand(0, 180), 3, -15);
+        b.setScale(2);
+        b.setMaxSpd(3);
+        b.setAccel(.08);
+        wait 60;
+        b.delete();
+        for(d in 0, 360/c, 360){
+            bullets2(b.getPos(), rand(0, 360)+ d);
+        }
+
+
+    }
+    task bullets2(pos, dir2){
+        set b = bullet(_scale, _red_d, pos, dir2, 2, -15);
+    }
+    }

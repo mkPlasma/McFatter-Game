@@ -1,0 +1,4 @@
+run "enemies";
+//speedster(_lx, _ty, _scale, _red_d, 45, 9,100,true);
+//speedster(_rx, _ty, _scale, _red_d, 135, 9,100,true)
+bomber(_cx, _ty - 32, 90, 3, 1000);
