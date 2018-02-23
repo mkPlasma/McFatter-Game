@@ -22,11 +22,11 @@ public class BulletList{
 		TYPE_RICE			= 3,
 		TYPE_STAR			= 4,
 		TYPE_STAR4			= 5,
-		TYPE_PLUS			= 6,
-		TYPE_WALL			= 7,
-		TYPE_NEEDLE			= 8,
-		TYPE_RING			= 9,
-		TYPE_ORBIT			= 10,
+		TYPE_SQUARE			= 6,
+		TYPE_LASER_BLAST		= 7,
+		TYPE_WALL			= 8,
+		TYPE_NEEDLE			= 9,
+		TYPE_RING			= 10,
 		TYPE_MISSILE		= 11,
 		TYPE_MINE			= 12,
 		TYPE_LASER			= 13,
@@ -42,11 +42,11 @@ public class BulletList{
 		"rice",
 		"star",
 		"star4",
-		"plus",
+		"square",
+		"laser_blast",
 		"wall",
 		"needle",
 		"ring",
-		"orbit",
 		"missile",
 		"mine",
 		"laser",
@@ -139,24 +139,24 @@ public class BulletList{
 	
 	public int getHitboxSize(int type){
 		switch(type){
-			case TYPE_CRYSTAL:
 			case TYPE_NEEDLE:
 			case TYPE_LASER_HELIX:
 				return 1;
 			
 			case TYPE_SCALE:
 			case TYPE_RICE:
+			case TYPE_CRYSTAL:
 			case TYPE_STAR:
 			case TYPE_STAR4:
 			case TYPE_WALL:
-			case TYPE_PLUS:
-			case TYPE_ORBIT:
+			case TYPE_LASER_BLAST:
 			case TYPE_MISSILE:
 			case TYPE_LASER:
 			case TYPE_LASER_DIST:
 				return 2;
 			
 			case TYPE_ORB:
+			case TYPE_SQUARE:
 			case TYPE_RING:
 			case TYPE_ATOM:
 			case TYPE_MINE:
@@ -178,7 +178,8 @@ public class BulletList{
 			case TYPE_RICE:
 			case TYPE_STAR:
 			case TYPE_STAR4:
-			case TYPE_PLUS:
+			case TYPE_SQUARE:
+			case TYPE_LASER_BLAST:
 			case TYPE_NEEDLE:
 			case TYPE_RING:
 			case TYPE_MISSILE:
@@ -204,9 +205,10 @@ public class BulletList{
 		return	type == TYPE_SCALE			||
 				type == TYPE_CRYSTAL		||
 				type == TYPE_RICE			||
+				type == TYPE_LASER_BLAST		||
+				type == TYPE_WALL			||
 				type == TYPE_NEEDLE			||
 				type == TYPE_MISSILE		||
-				type == TYPE_WALL			||
 				type == TYPE_LASER			||
 				type == TYPE_LASER_DIST		||
 				type == TYPE_LASER_HELIX;
@@ -214,12 +216,9 @@ public class BulletList{
 	
 	public float getSpriteRotation(int type){
 		switch(type){
-			case TYPE_ORBIT:
-				return 4;
-		
 			case TYPE_STAR:
 			case TYPE_STAR4:
-			case TYPE_PLUS:
+			case TYPE_SQUARE:
 				return 2;
 			
 			case TYPE_MINE:

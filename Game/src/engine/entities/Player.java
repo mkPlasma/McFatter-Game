@@ -191,6 +191,6 @@ public class Player extends GameEntity{
 	}
 	
 	public int getHitboxSize(){
-		return 1;
+		return 2;
 	}
 }
