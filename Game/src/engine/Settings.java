@@ -1,13 +1,13 @@
 package engine;
 
-/*
- * 		Settings.java
- * 		
- * 		Purpose:	Holds certain global variables.
- * 		Notes:		May be replaced by external definitions.
- * 					Will probably still keep variables after loading them.
- * 		
+/**
+ * 
+ * Static variables for game settings.
+ * 
+ * @author Daniel
+ *
  */
+
 public class Settings{
 	
 	// Scale of window/resolution

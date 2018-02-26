@@ -7,6 +7,14 @@ import engine.newscript.DScript;
 import engine.newscript.lexer.Token;
 import engine.newscript.lexer.TokenType;
 
+/**
+ * 
+ * Generates parse tree from list of tokens.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class ParseTreeGenerator{
 	
 	private final Rule[] rules;

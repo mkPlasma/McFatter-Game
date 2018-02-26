@@ -4,12 +4,12 @@ import content.BulletList;
 import content.EffectList;
 import engine.screens.MainScreen;
 
-/*
- * 		Laser.java
- * 		
- * 		Purpose:	Solid laser object.
- * 		Notes:		Implement curvy lasers?
- * 		
+/**
+ * 
+ * Laser object, similar to a bullet but uses a rectangular hitbox and can be scaled.
+ * 
+ * @author Daniel
+ *
  */
 
 public class Laser extends Bullet{

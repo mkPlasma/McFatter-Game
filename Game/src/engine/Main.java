@@ -1,11 +1,11 @@
 package engine;
 
-/*
- * 		Main.java
- * 		
- * 		Purpose:	Starts the game.
- * 		Notes:		Should not need to be modified. Ask Daniel before modifying this file.
- * 			
+/**
+ * 
+ * Main start class. Initializes a GameThread instance.
+ * 
+ * @author Daniel
+ *
  */
 
 public class Main{

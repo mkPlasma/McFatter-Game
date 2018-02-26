@@ -1,5 +1,14 @@
 package engine.newscript;
 
+/**
+ * 
+ * List of all built-in functions for DScript.
+ * Any such functions are also run here.
+ * 
+ * @author Daniel
+ * 
+ */
+
 import java.util.ArrayList;
 import java.util.Random;
 

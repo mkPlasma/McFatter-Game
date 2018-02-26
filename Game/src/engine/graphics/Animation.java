@@ -3,15 +3,12 @@ package engine.graphics;
 import engine.entities.GameEntity;
 import engine.entities.MovableEntity;
 
-/*
- * 		Animation.java
- * 		
- * 		Purpose:	Holds a single animation.
- * 		Notes:		Includes rotations, scaling, and spritesheet animation
- * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
+/**
+ * 
+ * Holds animation data used by a sprite.
+ * 
+ * @author Daniel
+ *
  */
 
 public class Animation{

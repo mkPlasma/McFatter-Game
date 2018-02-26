@@ -1,5 +1,13 @@
 package engine.newscript.bytecodegen;
 
+/**
+ * 
+ * Set of all bytecode instructions.
+ * 
+ * @author Daniel
+ *
+ */
+
 public enum InstructionSet{
 	
 	// Initialize variable to zero
@@ -124,9 +132,18 @@ public enum InstructionSet{
 	// Returns value if called with jump_x_r, otherwise returns void
 	return_value,
 	
+	// Return void if top stack value is true (used for returnif)
+	return_if_true,
+	
 	// Calls a built-in function
 	func_bi(true),
 	func_bi_r(true),
+	
+	
+	// Wait a specified number of frames or use stack value
+	wait(true),
+	wait_s,
+	
 	;
 	
 	private final boolean operand;

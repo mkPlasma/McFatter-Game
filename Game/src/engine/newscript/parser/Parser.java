@@ -6,6 +6,14 @@ import engine.newscript.ScriptPrinter;
 import engine.newscript.parser.checker.ParseTreeChecker;
 import engine.newscript.parser.simplifier.ParseTreeSimplifier;
 
+/**
+ * 
+ * Contains instances of other parser classes.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class Parser{
 	
 	private final Grammar grammar;

@@ -9,6 +9,14 @@ import engine.newscript.DScript;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Generates list of constants in parse tree and replaces them with constant tokens.
+ * 
+ * @author Daniel
+ *
+ */
+
 public class DataGenerator{
 	
 	private ArrayList<Object> constants;

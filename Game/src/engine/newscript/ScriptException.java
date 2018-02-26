@@ -1,5 +1,14 @@
 package engine.newscript;
 
+/**
+ * 
+ * DScript exception object thrown during compilation or running.
+ * Contains error message and location of error.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class ScriptException extends Exception{
 	
 	private static final long serialVersionUID = 1L;

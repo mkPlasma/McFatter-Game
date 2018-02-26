@@ -9,6 +9,14 @@ import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Checks for valid expressions.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class ExpressionChecker{
 	
 	private ArrayList<Object> parseTree;

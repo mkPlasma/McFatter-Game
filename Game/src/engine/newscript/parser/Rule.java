@@ -1,5 +1,14 @@
 package engine.newscript.parser;
 
+/**
+ * 
+ * Single context-free grammar rule.
+ * Defined in Grammar.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class Rule{
 	
 	private final String name;

@@ -12,6 +12,15 @@ import engine.newscript.lexer.Token;
 import engine.newscript.lexer.TokenType;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Replaces all variable references with an index number for compilation.
+ * Also replaces referenced constant variables with their value and removes their definitions.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class VariableReplacer{
 	
 	// Stack for each block

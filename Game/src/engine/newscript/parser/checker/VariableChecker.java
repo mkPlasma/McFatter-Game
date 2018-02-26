@@ -10,6 +10,15 @@ import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Checks that referenced variables exist and duplicate variables.
+ * Also checks that constant variables have constant values.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class VariableChecker{
 	
 	// Stack for each block

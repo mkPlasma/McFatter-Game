@@ -5,12 +5,13 @@ import java.util.ArrayList;
 
 import engine.entities.GameEntity;
 
-/*
- * 		Sprite.java
- * 		
- * 		Purpose:	Holds an image and certain properties, such as scale or alpha
- * 		Notes:		Several entities may share one sprite to reduce memory use.
- * 			
+/**
+ * 
+ * Container for a Texture object and its properties.
+ * Several sprites may share a single Texture object, with each sprite being a different part of the texture.
+ * 
+ * @author Daniel
+ *
  */
 
 public class Sprite{

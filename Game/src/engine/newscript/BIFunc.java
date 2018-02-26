@@ -2,6 +2,14 @@ package engine.newscript;
 
 import engine.newscript.bytecodegen.Instruction;
 
+/**
+ * 
+ * DScript built-in function object.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public abstract class BIFunc{
 	
 	private final String name;

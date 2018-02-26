@@ -2,6 +2,14 @@ package engine.entities;
 
 import engine.screens.MainScreen;
 
+/**
+ * 
+ * Boss enemy type.
+ * 
+ * @author Daniel
+ *
+ */
+
 public class BossEnemy extends Enemy{
 	
 	private int maxHp;

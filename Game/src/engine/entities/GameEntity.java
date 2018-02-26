@@ -2,14 +2,12 @@ package engine.entities;
 
 import engine.graphics.Sprite;
 
-/*
- * 		GameEntity.java
- * 		
- * 		Purpose:	Generic abstract game entity.
- * 		Notes:		
- * 		
- * 		Children: Player.java, MovableEntity.java
- * 		
+/**
+ * 
+ * Generic abstract game entity.
+ * 
+ * @author Daniel
+ *
  */
 
 public abstract class GameEntity{

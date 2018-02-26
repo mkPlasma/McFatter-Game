@@ -12,30 +12,51 @@ import engine.newscript.BIFunc;
 import engine.newscript.BuiltInFunctionList;
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
+import engine.newscript.ScriptHandler;
 import engine.newscript.bytecodegen.Instruction;
 import engine.newscript.bytecodegen.InstructionSet;
+
+/**
+ * 
+ * Executes DScript bytecode.
+ * 
+ * @author Daniel
+ * 
+ */
 
 public class ScriptRunner{
 	
 	private final BuiltInFunctionList biFuncList;
 	
-	private DScript script;
-	private Instruction[] bytecode;
+	private final ScriptHandler handler;
 	
+	private DScript script;
+	
+	// Script data
+	private Instruction[] bytecode;
 	private Object[] constants;
 	
+	// Current script branch
+	private Branch branch;
 	
+	// Yield branch and return to ScriptHandler loop
+	private boolean yield;
+	
+	// Variables and work stack
 	private ArrayList<Object> globalVariables;
 	private Stack<ArrayList<Object>> localVariables;
 	private Stack<Object> stack;
 	
+	// Return stack for functions
 	private Stack<Integer> returnStack;
 	private Stack<Boolean> returnValStack;
 	
+	// Current instruction index
 	private int instIndex;
 	
 	
-	public ScriptRunner(){
+	public ScriptRunner(ScriptHandler handler){
+		this.handler = handler;
 		biFuncList = new BuiltInFunctionList();
 	}
 	
@@ -43,47 +64,39 @@ public class ScriptRunner{
 		this.script = script;
 		
 		bytecode = script.getBytecode();
-		
 		constants = script.getConstants();
 		
-		
 		globalVariables	= new ArrayList<Object>();
-		localVariables	= new Stack<ArrayList<Object>>();
-		
-		stack = new Stack<Object>();
-
-		returnStack		= new Stack<Integer>();
-		returnValStack	= new Stack<Boolean>();
 	}
 	
-	public void run(){
-		
-		// tmp
-		System.out.println("");
+	public void run(Branch branch) throws ScriptException{
 		
 		if(bytecode == null)
 			return;
 		
-		try{
-			for(instIndex = script.getEntryPoint(); instIndex < bytecode.length; instIndex++)
-				runInstruction(bytecode[instIndex]);
+		// Tick wait time
+		if(branch.tickWait())
+			return;
+		
+		this.branch = branch;
+		
+		// Get branch variables and return stack
+		stack			= branch.getWorkStack();
+		localVariables	= branch.getLocalVariables();
+		returnStack		= branch.getReturnStack();
+		returnValStack	= branch.getReturnValStack();
+		
+		// Run bytecode
+		for(instIndex = branch.getInstructionIndex(); instIndex < bytecode.length; instIndex++){
+			runInstruction(bytecode[instIndex]);
 			
-			System.out.println("\nFinished");
-			/*
-			System.out.println("\nResult:");
-			System.out.println("\nGlobal:");
-			
-			for(int i = 0; i < globalVariables.size(); i++)
-				System.out.println(i + ": " + globalVariables.get(i));
-			
-			System.out.println("\nLocal:");
-			for(int i = 0; i < localVariables.size(); i++)
-				System.out.println(i + ": " + localVariables.get(i));
-			*/
+			if(yield){
+				yield = false;
+				return;
+			}
 		}
-		catch(ScriptException e){
-			error(e);
-		}
+		
+		branch.finish();
 	}
 	
 	
@@ -343,7 +356,33 @@ public class ScriptRunner{
 				return;
 				
 				
+			case jump_branch: case jump_branch_r:
+				
+				// Create new branch, does not jump to task
+				Branch newBranch = new Branch(instIndex + 1, stack, localVariables, returnStack, returnValStack);
+				
+				// Return task branch if necessary
+				if(name == jump_branch_r)
+					newBranch.pushBranch(branch);
+				
+				handler.addBranch(newBranch);
+				
+				// Jump without adding return index
+				localVariables.add(new ArrayList<Object>());
+				instIndex = op - 1;
+				
+				return;
+				
+				
 			case return_void:
+				
+				// End task
+				if(returnStack.isEmpty()){
+					branch.finish();
+					yield();
+					return;
+				}
+				
 				localVariables.pop();
 				instIndex = returnStack.pop();
 				
@@ -391,6 +430,18 @@ public class ScriptRunner{
 				
 				return;
 			}
+				
+				
+			case wait:
+				branch.setWait(Math.max(0, op));
+				yield();
+				return;
+				
+			case wait_s:
+				branch.setWait(Math.max(0, (int)pop()));
+				yield();
+				return;
+				
 				
 			default:
 				System.err.println("Unrecognized bytecode instruction '" + name + "'");
@@ -644,6 +695,11 @@ public class ScriptRunner{
 		}
 	}
 	
+	// Update current branch and yield to next
+	private void yield(){
+		branch.setInstructionIndex(instIndex + 1);
+		yield = true;
+	}
 	
 	// Shorthand functions
 	private void push(Object o){
@@ -658,17 +714,5 @@ public class ScriptRunner{
 	private void throwException(String message) throws ScriptException{
 		Instruction i = bytecode[instIndex];
 		throw new ScriptException(message, i.getFileIndex(), i.getLineNum());
-	}
-	
-	private void error(ScriptException e){
-		
-		int file = e.getFileIndex();
-		int line = e.getLine();
-		
-		System.err.println(
-			"Runtime error in " + (file == 0 ? script.getFileName(): script.getFileName(file)) +
-			" on line " + line + ":\n" + e.getMessage() +
-			(line > 0 ? "\n" + line + ": " + script.getLine(file, line) : "")
-		);
 	}
 }

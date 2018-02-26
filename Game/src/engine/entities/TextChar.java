@@ -3,12 +3,12 @@ package engine.entities;
 import engine.graphics.Sprite;
 import engine.graphics.TextureCache;
 
-/*
- * 		Text.java
- * 		
- * 		Purpose:	Single character, drawn to screen
- * 		Notes:		
- * 		
+/**
+ * 
+ * Single drawable character entity.
+ * 
+ * @author Daniel
+ *
  */
 
 public class TextChar extends GameEntity{

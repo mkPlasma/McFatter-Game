@@ -6,9 +6,18 @@ import engine.IOFunctions;
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
 
+/**
+ * 
+ * Reads .dscript files and stores them into a string array.
+ * Removes comments, replaces include statements, and adds syntactic sugars.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class Preprocessor{
 	
-	private final SyntacticSugars sweetener;
+	private final SyntacticSugars syntacticSugars;
 	
 	private DScript script;
 	
@@ -22,7 +31,7 @@ public class Preprocessor{
 		files		= new ArrayList<ArrayList<String>>();
 		filePaths	= new ArrayList<String>();
 		
-		sweetener = new SyntacticSugars();
+		syntacticSugars = new SyntacticSugars();
 	}
 	
 	public void process(DScript script) throws ScriptException{
@@ -49,7 +58,7 @@ public class Preprocessor{
 				throw new ScriptException("Invalid token '$'", i + 1);
 		
 		process();
-		sweetener.process(script);
+		syntacticSugars.process(script);
 	}
 	
 	private void process() throws ScriptException{

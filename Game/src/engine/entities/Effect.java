@@ -1,11 +1,11 @@
 package engine.entities;
 
-/*
- * 		Effect.java
- * 		
- * 		Purpose:	Effect objects, drawn to screen
- * 		Notes:		
- * 		
+/**
+ * 
+ * Effect object drawn to screen.
+ * 
+ * @author Daniel
+ *
  */
 
 public class Effect extends MovableEntity{

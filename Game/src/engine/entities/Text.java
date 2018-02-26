@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 import engine.graphics.TextureCache;
 
-/*
- * 		Text.java
- * 		
- * 		Purpose:	Drawable string
- * 		Notes:		
- * 		
+/**
+ * 
+ * Container for a drawable string object, made of TextChar objects.
+ * 
+ * @author Daniel
+ *
  */
 
 public class Text extends GameEntity{

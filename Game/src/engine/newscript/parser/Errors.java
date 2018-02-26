@@ -2,6 +2,14 @@ package engine.newscript.parser;
 
 import static engine.newscript.lexer.TokenType.*;
 
+/**
+ * 
+ * List of specific rule-defined parse error messages.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class Errors{
 	
 	private final Rule[] rules;

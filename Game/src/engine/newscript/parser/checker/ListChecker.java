@@ -9,6 +9,14 @@ import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Checks list parse units in for loops and function definitions.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class ListChecker{
 	
 	public void process(DScript script) throws ScriptException{

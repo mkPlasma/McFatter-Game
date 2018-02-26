@@ -9,6 +9,14 @@ import java.util.regex.Pattern;
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
 
+/**
+ * 
+ * Generates lexical tokens from string array.
+ * 
+ * @author Daniel
+ *
+ */
+
 public class Lexer{
 	
 	private ArrayList<Token> tokens;

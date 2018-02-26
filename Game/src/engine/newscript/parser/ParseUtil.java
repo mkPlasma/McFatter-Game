@@ -6,15 +6,23 @@ import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
 import engine.newscript.lexer.TokenType;
 
+/**
+ * 
+ * Static methods for various parse unit tasks.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class ParseUtil{
 	
 	public static final int
-	T_NUM			= 0b0001,
-	T_BOOL			= 0b0010,
-	T_STRING		= 0b0100,
-	T_ARRAY		= 0b1000,
-	T_NUM_STRING	= T_NUM | T_STRING,
-	T_ANY			= T_NUM | T_BOOL | T_STRING | T_ARRAY;
+		T_NUM			= 0b0001,
+		T_BOOL			= 0b0010,
+		T_STRING		= 0b0100,
+		T_ARRAY		= 0b1000,
+		T_NUM_STRING	= T_NUM | T_STRING,
+		T_ANY			= T_NUM | T_BOOL | T_STRING | T_ARRAY;
 	
 	
 	public static void replaceParseUnit(ParseUnit a, Object b){

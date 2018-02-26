@@ -7,6 +7,14 @@ import java.util.Arrays;
 
 import engine.newscript.DScript;
 
+/**
+ * 
+ * Replaces minus and number tokens with negative number tokens where appropriate.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class NegativeReplacer{
 	
 	private ArrayList<Token> tokens;

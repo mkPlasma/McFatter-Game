@@ -13,12 +13,12 @@ import java.util.ArrayList;
 
 import org.lwjgl.BufferUtils;
 
-/*
- * 		IOFunctions.java
- * 		
- * 		Purpose:	Handles file reading and writing.
- * 		Notes:		
- * 		
+/**
+ * 
+ * Static methods for handling File I/O.
+ * 
+ * @author Daniel
+ *
  */
 
 public class IOFunctions{

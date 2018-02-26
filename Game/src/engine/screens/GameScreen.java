@@ -3,15 +3,12 @@ package engine.screens;
 import engine.graphics.Renderer;
 import engine.graphics.TextureCache;
 
-/*
- * 		GameScreen.java
- * 		
- * 		Purpose:	Game screen.
- * 		Notes:		Simple container for screen-specific
- * 					update and drawing methods.
- * 		
- * 		Children:	MainScreen.java, MapScreen.java
- * 		
+/**
+ * 
+ * Abstract game screen with update and drawing methods.
+ * 
+ * @author Daniel
+ *
  */
 
 public abstract class GameScreen{

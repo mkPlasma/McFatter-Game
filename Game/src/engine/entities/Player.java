@@ -9,15 +9,12 @@ import content.FrameList;
 import engine.graphics.Sprite;
 import engine.screens.MainScreen;
 
-/*
- * 		Player.java
- * 		
- * 		Purpose:	Player class.
- * 		Notes:		Will need a PlayerFrame or similar class
- * 					to differentiate player character/shot types.
- * 					
- * 					Also needs upgrade functionality.
- * 		
+/**
+ * 
+ * Controllable player entity.
+ * 
+ * @author Daniel
+ *
  */
 
 public class Player extends GameEntity{

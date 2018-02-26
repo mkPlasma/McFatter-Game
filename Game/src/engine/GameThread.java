@@ -14,12 +14,12 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 import java.nio.IntBuffer;
 
-/*
- * 		GameThread.java
- * 		
- * 		Purpose:	Game core. Initializes game window and runs logic and rendering code.
- * 		Notes:		Should not need to be modified. Ask Daniel before modifying this file.
- * 		
+/**
+ * 
+ * Game core. Initializes window and runs game logic and rendering.
+ * 
+ * @author Daniel
+ *
  */
 
 public class GameThread implements Runnable{

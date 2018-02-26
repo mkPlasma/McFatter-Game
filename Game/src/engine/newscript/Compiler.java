@@ -5,6 +5,15 @@ import engine.newscript.lexer.Lexer;
 import engine.newscript.parser.Parser;
 import engine.newscript.preprocess.Preprocessor;
 
+/**
+ * 
+ * Holds instances of all other DScript compiler classes.
+ * Takes an .dscript file and generates its bytecode.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class Compiler{
 	
 	private final Preprocessor preprocessor;

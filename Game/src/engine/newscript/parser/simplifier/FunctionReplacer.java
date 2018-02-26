@@ -11,6 +11,14 @@ import engine.newscript.DScript;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Replaces all function definitions and calls with an index number for compilation.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class FunctionReplacer{
 
 	private Stack<ArrayList<String>> functions;

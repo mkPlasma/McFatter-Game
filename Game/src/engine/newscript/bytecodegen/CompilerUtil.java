@@ -6,6 +6,14 @@ import engine.newscript.DScript;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Static methods for bytecode compiler.
+ * 
+ * @author Daniel
+ *
+ */
+
 public class CompilerUtil{
 	
 	public static InstructionSet getOperationOpcode(String op){

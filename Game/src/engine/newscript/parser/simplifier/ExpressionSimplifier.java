@@ -10,6 +10,14 @@ import engine.newscript.lexer.Token;
 import engine.newscript.lexer.TokenType;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Simplifies most constant expressions, reducing them into single token values.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class ExpressionSimplifier{
 	
 	public void process(DScript script){

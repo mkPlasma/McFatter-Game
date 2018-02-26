@@ -2,15 +2,12 @@ package engine.entities;
 
 import engine.graphics.Sprite;
 
-/*
- * 		EntityFrame.java
- * 		
- * 		Purpose:	Sprite container, intended to have more properties.
- * 		Notes:		Used by Effect objects, despite being a generic.
- * 					Effect objects currently do not require other properties.
- * 		
- * 		Children: 	BulletFrame.java, EnemyFrame.java
- * 		
+/**
+ * 
+ * Base frame class for holding preset data for other objects.
+ * 
+ * @author Daniel
+ *
  */
 
 public class EntityFrame{

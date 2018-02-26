@@ -1,5 +1,13 @@
 package engine.newscript.lexer;
 
+/**
+ * 
+ * List of all token types and their corresponding regexes.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public enum TokenType{
 	
 	SET				("(set)\\b",		true),

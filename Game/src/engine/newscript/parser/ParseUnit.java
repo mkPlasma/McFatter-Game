@@ -2,6 +2,15 @@ package engine.newscript.parser;
 
 import engine.newscript.lexer.Token;
 
+/**
+ * 
+ * Parse tree unit, can contain tokens and other parse units.
+ * Makes up the parse tree structure.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class ParseUnit{
 	
 	private final String type;

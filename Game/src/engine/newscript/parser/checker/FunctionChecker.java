@@ -9,6 +9,14 @@ import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Checks that function calls reference existing functions and duplicate functions.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class FunctionChecker{
 
 	private Stack<ArrayList<String>> functions;

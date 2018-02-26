@@ -6,6 +6,14 @@ import java.util.Map;
 import content.FrameList;
 import engine.newscript.DScript;
 
+/**
+ * 
+ * Simple syntactic sugar replacements for DScript programming convenience.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class SyntacticSugars{
 	
 	private final Map<String, String> sugars;
@@ -38,6 +46,7 @@ public class SyntacticSugars{
 		sugars.put("_px", "playerX()");
 		sugars.put("_py", "playerY()");
 		sugars.put("_pi", "3.1415927");
+		sugars.put("_2pi", "6.2831855");
 	}
 	
 	public void process(DScript script){

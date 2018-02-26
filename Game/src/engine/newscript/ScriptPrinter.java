@@ -7,6 +7,14 @@ import engine.newscript.bytecodegen.InstructionSet;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Static methods for printing DScript lexical tokens, parse tree, and bytecode.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class ScriptPrinter{
 	
 	public static void printTokens(Token[] tokens){

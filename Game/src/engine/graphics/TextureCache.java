@@ -2,17 +2,13 @@ package engine.graphics;
 
 import java.util.ArrayList;
 
-/*
- * 		Texture.java
- * 		
- * 		Purpose:	Caches sprite textures.
- * 		Notes:		Be sure to always cache your sprites!
- * 					Not caching textures could result in
- * 					ridiculous lag and memory usage.
- * 					
- * 					Use cache(spr) which loads the sprite
- * 					or uses a cached texture.
- * 			
+/**
+ * 
+ * Caches texture objects.
+ * Always use loadSprite(spr) to avoid reloading cached textures.
+ * 
+ * @author Daniel
+ *
  */
 
 public class TextureCache{

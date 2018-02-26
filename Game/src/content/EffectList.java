@@ -5,12 +5,13 @@ import engine.graphics.Animation;
 import engine.graphics.Sprite;
 import engine.graphics.TextureCache;
 
-/*
- * 		EffectList.java
- * 		
- * 		Purpose:	Holds presets for effects.
- * 		Notes:		
- * 		
+/**
+ * 
+ * Contains list of all effect types and properties.
+ * Also generates EffectFrame objects.
+ * 
+ * @author Daniel
+ *
  */
 
 public class EffectList{

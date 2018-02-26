@@ -5,6 +5,15 @@ import java.util.ArrayList;
 import engine.newscript.bytecodegen.Instruction;
 import engine.newscript.lexer.Token;
 
+/**
+ * 
+ * DScript container object.
+ * Contains original file text, files used, and properties for running.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class DScript{
 	
 	private final String path;

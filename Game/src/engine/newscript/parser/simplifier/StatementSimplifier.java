@@ -9,6 +9,14 @@ import engine.newscript.DScript;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Miscellaneous simplifier for converting until/for loops into while loops, waits into wait, etc.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class StatementSimplifier{
 	
 	public void process(DScript script){

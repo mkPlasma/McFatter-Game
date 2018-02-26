@@ -9,15 +9,12 @@ import java.io.IOException;
 
 import engine.IOFunctions;
 
-/*
- * 		ShaderProgram.java
- * 		
- * 		Purpose:	GLSL shader program.
- * 		Notes:		Should not need to be changed.
- * 		
- * 		Last modified by:	Daniel
- * 		Date:				
- * 		Changes:			
+/**
+ * 
+ * Container for GLSL shader programs.
+ * 
+ * @author Daniel
+ *
  */
 
 public class ShaderProgram{

@@ -2,14 +2,29 @@ package engine.newscript.parser;
 
 import static engine.newscript.lexer.TokenType.*;
 
+/**
+ * 
+ * Context-free grammar definitions for DScript.
+ * Defined using token types and other rules.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class Grammar{
 	
+	// Concatenate ParseUnit if generated (for lists and similar)
 	private static final Object CONCAT = null;
+	
+	// Whether to accept ParseUnit in final script
 	private static final boolean FINAL = true;
 	
 	private final Rule[] rules;
 	private final Rule[] finalValid;
+	
+	// List of valid match replacements, allows for variables to be used in expressions
 	private final Object[][] replacements;
+	
 	
 	public Grammar(){
 		rules = new Rule[]{

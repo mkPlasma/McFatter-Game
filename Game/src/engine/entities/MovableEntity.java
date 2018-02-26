@@ -1,14 +1,12 @@
 package engine.entities;
 
-/*
- * 		MovableEntity.java
- * 		
- * 		Purpose:	Abstract movable entity.
- * 		Notes:		Extensive movement properties, including
- * 					speed, direction, acceleration, and angular velocity.
- * 		
- * 		Children: Bullet.java, Enemy.java, Effect.java
- * 		
+/**
+ * 
+ * Abstract movable game entity.
+ * Contains properties such as speed, direction, acceleration, and angular velocity.
+ * 
+ * @author Daniel
+ *
  */
 
 public abstract class MovableEntity extends GameEntity{

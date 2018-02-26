@@ -7,6 +7,14 @@ import engine.newscript.ScriptException;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Checks certain context-sensitive parse unit types.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class ContextChecker{
 	
 	public void process(DScript script) throws ScriptException{

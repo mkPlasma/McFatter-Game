@@ -3,6 +3,14 @@ package engine.newscript.parser.simplifier;
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
 
+/**
+ * 
+ * Holds instances of all other parse tree simplifier and replacer classes.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class ParseTreeSimplifier{
 	
 	private final ExpressionSimplifier expressionSimplifier;

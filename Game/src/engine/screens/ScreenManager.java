@@ -3,13 +3,14 @@ package engine.screens;
 import engine.graphics.Renderer;
 import engine.graphics.TextureCache;
 
-/*
- * 		ScreenManager.java
- * 		
- * 		Purpose:	Holds instances of various game screens.
- * 		Notes:		
- * 		
+/**
+ * 
+ * Holds instances of each game screen.
+ * 
+ * @author Daniel
+ *
  */
+
 
 public class ScreenManager{
 	

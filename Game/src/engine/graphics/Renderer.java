@@ -16,12 +16,13 @@ import engine.entities.TextChar;
 import static engine.graphics.RenderBatch.*;
 import static engine.screens.MainScreen.*;
 
-/*
- * 		Renderer.java
- * 		
- * 		Purpose:	Renders game objects.
- * 		Notes:		
- * 		
+/**
+ * 
+ * Handles OpenGL rendering.
+ * Sets up and stores render batches, caches textures, etc.
+ * 
+ * @author Daniel
+ *
  */
 
 public class Renderer{
@@ -269,7 +270,8 @@ public class Renderer{
 		ArrayList<TextChar> chars = new ArrayList<TextChar>();
 		
 		for(Text t:texts)
-			chars.addAll(t.getChars());
+			if(t.isVisible())
+				chars.addAll(t.getChars());
 		
 		rbText.updateWithEntities(chars, 0);
 	}

@@ -5,12 +5,13 @@ import engine.graphics.Animation;
 import engine.graphics.Sprite;
 import engine.graphics.TextureCache;
 
-/*
- * 		BulletList.java
- * 		
- * 		Purpose:	Generates BulletFrame objects for bullet presets.
- * 		Notes:		
- * 		
+/**
+ * 
+ * Contains list of all bullet types and properties.
+ * Also generates BulletFrame objects.
+ * 
+ * @author Daniel
+ *
  */
 
 public class BulletList{
@@ -205,7 +206,7 @@ public class BulletList{
 		return	type == TYPE_SCALE			||
 				type == TYPE_CRYSTAL		||
 				type == TYPE_RICE			||
-				type == TYPE_LASER_BLAST		||
+				type == TYPE_LASER_BLAST	||
 				type == TYPE_WALL			||
 				type == TYPE_NEEDLE			||
 				type == TYPE_MISSILE		||

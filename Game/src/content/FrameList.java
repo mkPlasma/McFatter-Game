@@ -5,12 +5,12 @@ import engine.entities.EffectFrame;
 import engine.entities.EnemyFrame;
 import engine.graphics.TextureCache;
 
-/*
- * 		FrameList.java
- * 		
- * 		Purpose:	Holds instances of other frame lists.
- * 		Notes:		
- * 		
+/**
+ * 
+ * Holds instances of BulletList, EffectList, and EnemyList.
+ * 
+ * @author Daniel
+ *
  */
 
 public class FrameList{

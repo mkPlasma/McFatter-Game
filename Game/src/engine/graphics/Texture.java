@@ -1,12 +1,7 @@
 package engine.graphics;
 
-import static org.lwjgl.opengl.GL11.GL_RGBA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL11.glGenTextures;
-import static org.lwjgl.opengl.GL11.glTexImage2D;
-import static org.lwjgl.stb.STBImage.stbi_load_from_memory;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.stb.STBImage.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -17,12 +12,12 @@ import org.lwjgl.stb.STBImage;
 
 import engine.IOFunctions;
 
-/*
- * 		Texture.java
- * 		
- * 		Purpose:	Stores texture and ID.
- * 		Notes:		
- * 		
+/**
+ * 
+ * Container for data from a single PNG image.
+ * 
+ * @author Daniel
+ *
  */
 
 public class Texture{

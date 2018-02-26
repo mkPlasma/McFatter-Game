@@ -7,14 +7,12 @@ import engine.graphics.Animation;
 import engine.graphics.Sprite;
 import engine.screens.MainScreen;
 
-/*
- * 		Bullet.java
- * 		
- * 		Purpose:	Base bullet class.
- * 		Notes:		
- * 		
- * 		Children:	Laser.java
- * 		
+/**
+ * 
+ * Standard bullet projectile.
+ * 
+ * @author Daniel
+ *
  */
 
 public class Bullet extends MovableEntity{

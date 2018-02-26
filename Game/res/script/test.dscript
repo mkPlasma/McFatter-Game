@@ -1,2 +1,11 @@
 
-waits;
+
+test();
+
+wait 1;
+print("one");
+
+task test(){
+	wait 2;
+	print("two");
+}

@@ -10,6 +10,16 @@ import engine.newscript.parser.Grammar;
 import engine.newscript.parser.ParseUnit;
 import engine.newscript.parser.Rule;
 
+/**
+ * 
+ * Holds instances of all other parse tree checker classes.
+ * Also checks for any tokens or non-final parse units in parse tree.
+ * Throws a compiler error if any checks are failed.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class ParseTreeChecker{
 	
 	private final Errors errors;

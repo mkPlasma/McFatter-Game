@@ -1,6 +1,5 @@
 package engine.screens;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import org.lwjgl.glfw.GLFW;
@@ -15,13 +14,14 @@ import engine.entities.Player;
 import engine.entities.Text;
 import engine.graphics.Renderer;
 import engine.graphics.TextureCache;
+import engine.newscript.ScriptHandler;
 
-/*
- * 		MainScreen.java
- * 		
- * 		Purpose:	Controls the main game screen.
- * 		Notes:		Any gameplay will be processed by this class.
- * 		
+/**
+ * 
+ * Handles main game screen where gameplay takes place.
+ * 
+ * @author Daniel
+ *
  */
 
 public class MainScreen extends GameScreen{
@@ -33,6 +33,8 @@ public class MainScreen extends GameScreen{
 							MAX_TEXTS = 1024;
 	
 	private GameStage stage;
+	private ScriptHandler scriptHandler;
+	private ScriptSelector scriptSelector;
 	
 	private FrameList frameList;
 	
@@ -53,20 +55,14 @@ public class MainScreen extends GameScreen{
 	private int clearScreen;
 	private boolean slowMode;
 	
-	// temp
-	private Text scriptText;
-	private ArrayList<String> scriptNames = new ArrayList<String>();
-	private Text currentPath;
-	private Text scriptCursor;
-	private boolean scriptSelect;
-	private int scriptCursorIndex;
-	private String currentDir;
 	
 	public MainScreen(Renderer r, TextureCache tc){
 		super(r, tc);
 	}
 	
 	public void init(){
+		
+		scriptHandler = new ScriptHandler(this);
 		
 		frameList = new FrameList(tc);
 		
@@ -75,7 +71,10 @@ public class MainScreen extends GameScreen{
 		enemies			= new ArrayList<Enemy>(MAX_ENEMIES);
 		effects			= new ArrayList<Effect>(MAX_EFFECTS);
 		texts			= new ArrayList<Text>(MAX_TEXTS);
-
+		
+		scriptSelector = new ScriptSelector(this, scriptHandler);
+		scriptSelector.init();
+		
 		fpsText = new Text("", 0, 470, 1, tc);
 		addText(fpsText);
 		
@@ -83,83 +82,14 @@ public class MainScreen extends GameScreen{
 		rTime = 0;
 		paused = false;
 
-		// Load textures
-		
+		// Init renderer
 		r.initMainScreen();
 		
 		// Temporary test
 		player = new Player(224, 432, this);
 		tc.loadSprite(player.getSprite());
-		scriptSelectInit();
 	}
 	
-	// temp
-	private void scriptSelectInit(){
-		
-		paused = false;
-		
-		if(stage != null){
-			stage.deleteErrorText();
-			updateText();
-		}
-		
-		scriptNames.clear();
-		
-		if(scriptText != null)
-			scriptText.delete();
-		
-		if(currentPath != null)
-			currentPath.delete();
-		
-		scriptText = new Text("", 50, 50, 0.75f, tc);
-		currentPath = new Text("", 50, 32, 0.75f, tc);
-		addText(scriptText);
-		addText(currentPath);
-		
-		addFiles("");
-		
-		if(scriptCursor != null)
-			scriptCursor.delete();
-		
-		scriptCursor = new Text(">", 40, 68, 0.75f, tc);
-		addText(scriptCursor);
-		
-		scriptCursorIndex = 0;
-		
-		scriptSelect = true;
-	}
-	
-	private void addFiles(String directory){
-		
-		File[] files = new File("Game/res/script/" + directory).listFiles();
-		
-		if(files == null)
-			return;
-		
-		currentDir = directory;
-		currentPath.setText("script/" + directory);
-		
-		scriptNames.clear();
-		scriptText.setText("");
-		
-		// Add folders first
-		for(File file:files){
-			if(file.isDirectory() && !file.getName().equals(".ref")){
-				scriptText.setText(scriptText.getText() + "\n" + file.getName() + "/");
-				scriptNames.add(directory + file.getName() + "/");
-			}
-		}
-		
-		// Add files after
-		for(File file:files){
-			if(file.isFile() && file.getName().endsWith(".dscript")){
-
-				scriptText.setText(scriptText.getText() + "\n" + file.getName());
-				scriptNames.add(directory + file.getName());
-			}
-		}
-	}
-
 	public void setFPS(int fps){
 		fpsText.setText(Integer.toString(fps));
 		fpsText.setX(632 - fpsText.getWidth());
@@ -190,103 +120,11 @@ public class MainScreen extends GameScreen{
 	
 	public void update(){
 		
-		// Re-select script with ~
-		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_GRAVE_ACCENT)){
-			
-			scriptSelect = !scriptSelect;
-			
-			if(stage == null){
-				scriptSelect = true;
-				return;
-			}
-			else if(scriptSelect){
-				scriptSelectInit();
-				
-				for(Bullet b:enemyBullets)
-					b.delete();
-				for(Enemy e:enemies)
-					e.delete();
-				for(Effect e:effects)
-					e.delete();
-			}
-			else{
-				scriptText.delete();
-				currentPath.delete();
-				scriptNames.clear();
-				scriptCursor.delete();
-			}
-		}
+		scriptSelector.update();
 		
-		if(scriptSelect){
-			
-			// Cursor up
-			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_UP)){
-				if(scriptCursorIndex > 0)
-					scriptCursorIndex--;
-				else
-					scriptCursorIndex = scriptNames.size() - 1;
-			}
-			
-			// Cursor down
-			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_DOWN)){
-				if(scriptCursorIndex < scriptNames.size() - 1)
-					scriptCursorIndex++;
-				else
-					scriptCursorIndex = 0;
-			}
-			
-			scriptCursor.setY(68 + scriptCursorIndex*18);
-			
-			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_Z)){
-				
-				String script = scriptNames.get(scriptCursorIndex);
-				
-				if(script.endsWith("/")){
-					scriptCursorIndex = 0;
-					addFiles(script);
-					return;
-				}
-				
-				script = "Game/res/script/" + script;
-				
-				player.setPos(224, 432);
-				player.resetDeaths();
-				stage = new GameStage(script, player, this, r);
-				stage.init();
-				
-				scriptSelect = false;
-				
-				scriptText.delete();
-				currentPath.delete();
-				scriptNames.clear();
-				scriptCursor.delete();
-				
-				return;
-			}
-			
-			if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_X)){
-				
-				scriptCursorIndex = 0;
-				
-				if(currentDir.isEmpty())
-					return;
-				
-				scriptCursorIndex = 0;
-				
-				String dir = currentDir.substring(0, currentDir.length() - 1);
-				
-				int i = dir.lastIndexOf('/');
-				
-				if(i > 0)
-					dir = dir.substring(0, i);
-				else
-					dir = "";
-				
-				addFiles(dir);
-			}
-			
+		if(scriptSelector.selecting())
 			return;
-		}
+		
 		
 		// Pause
 		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_ESCAPE) && time > pauseTime + 30){
@@ -327,7 +165,7 @@ public class MainScreen extends GameScreen{
 		
 		// Reload script with Alt+R
 		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_R)){
-			stage.reloadScript();
+			scriptHandler.reload();
 			clearScreen = 2;
 		}
 		
@@ -342,7 +180,7 @@ public class MainScreen extends GameScreen{
 		
 		player.update();
 		
-		stage.update();
+		scriptHandler.run();
 		
 		updateEffects();
 		updateBullets();
@@ -350,6 +188,11 @@ public class MainScreen extends GameScreen{
 		updateText();
 		
 		checkCollisions();
+	}
+	
+	public void resetPlayer(){
+		player.setPos(224, 432);
+		player.resetDeaths();
 	}
 	
 	private void clearScreen(){

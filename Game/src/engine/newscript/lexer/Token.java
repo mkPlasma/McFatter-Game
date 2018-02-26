@@ -1,5 +1,13 @@
 package engine.newscript.lexer;
 
+/**
+ * 
+ * Lexical token. Holds token type, value, and location of token.
+ * 
+ * @author Daniel
+ * 
+ */
+
 public class Token{
 	
 	private final TokenType type;

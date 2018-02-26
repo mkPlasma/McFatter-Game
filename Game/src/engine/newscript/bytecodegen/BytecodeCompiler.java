@@ -15,6 +15,14 @@ import engine.newscript.ScriptPrinter;
 import engine.newscript.lexer.Token;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Generates bytecode from parse tree.
+ * 
+ * @author Daniel
+ *
+ */
+
 public class BytecodeCompiler{
 	
 	private final DataGenerator dataGen;
@@ -41,7 +49,7 @@ public class BytecodeCompiler{
 		
 
 		functions	= new ArrayList<Integer>();
-		task			= new ArrayList<Boolean>();
+		task		= new ArrayList<Boolean>();
 		
 		breakStatements = new Stack<ArrayList<Integer>>();
 		breakUnits = new Stack<ArrayList<ParseUnit>>();
@@ -349,19 +357,21 @@ public class BytecodeCompiler{
 				
 			case "func_call": case "func_call_bi":{
 				
-				// Add parameters
-				ParseUnit p2 = (ParseUnit)contents[1];
-				
-				// Single parameter
-				if(p2.getType().equals("expression"))
-					compileExpression(p2);
-				
-				// Multiple parameters
-				else{
-					Object[] list = p2.getContents();
+				if(contents.length > 1){
+					// Add parameters
+					ParseUnit p2 = (ParseUnit)contents[1];
 					
-					for(Object o:list)
-						compileExpression((ParseUnit)o);
+					// Single parameter
+					if(p2.getType().equals("expression"))
+						compileExpression(p2);
+					
+					// Multiple parameters
+					else{
+						Object[] list = p2.getContents();
+						
+						for(Object o:list)
+							compileExpression((ParseUnit)o);
+					}
 				}
 				
 				// Whether function call is in an expression/should accept a return value
@@ -374,6 +384,7 @@ public class BytecodeCompiler{
 					
 					// Add jump
 					add(task.get(func) ? (exp ? jump_branch_r : jump_branch) : (exp ? jump_func_r : jump_func), functions.get(func), p);
+					return;
 				}
 				
 				// Built-in function call
@@ -407,20 +418,56 @@ public class BytecodeCompiler{
 				return;
 				
 				
+			case "wait":
+				
+				// Single frame
+				if(contents.length == 1){
+					add(wait, 1, p);
+					return;
+				}
+				
+				// No expression
+				Object v = getValue(contents[1]);
+				
+				if(v instanceof Integer || v instanceof Float){
+					add(wait, v instanceof Integer ? (int)v : (int)(float)v, p);
+					return;
+				}
+				
+				// Expression
+				compileExpression((ParseUnit)contents[1]);
+				add(wait_s, p);
+				
+				return;
+				
 				
 			case "func_block": case "task_block":{
 				
-				if(!functionsOnly)
+				if(!functionsOnly || (functionsOnly && withinFunction))
 					return;
 				
+				// Add other functions within current one first
+				if(((ParseUnit)contents[1]).getType().equals("block")){
+					Object[] statements = ((ParseUnit)((ParseUnit)contents[1]).getContents()[0]).getContents();
+					
+					for(Object o:statements)
+						if(o instanceof ParseUnit && (((ParseUnit)o).getType().equals("func_block") || ((ParseUnit)o).getType().equals("task_block")))
+							compile((ParseUnit)o);
+				}
+					
 				withinFunction = true;
-				
-				// Add function bytecode index
-				functions.add(bytecode.size());
-				task.add(p.getType().equals("task_block"));
 				
 				Object[] dCont = ((ParseUnit)contents[0]).getContents();
 				int params = dCont.length == 1 ? 0 : dCont[1] instanceof Token ? 1 : ((ParseUnit)dCont[1]).getContents().length;
+				
+				int funcNum = Integer.parseInt(((Token)dCont[0]).getValue());
+				
+				// Add function bytecode index
+				while(functions.size() < funcNum + 1)
+					functions.add(0);
+				
+				functions.set(funcNum, bytecode.size());
+				task.add(p.getType().equals("task_block"));
 				
 				// Initialize parameters
 				if(params > 0)

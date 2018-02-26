@@ -1,5 +1,13 @@
 package engine.newscript.bytecodegen;
 
+/**
+ * 
+ * Single bytecode instruction.
+ * 
+ * @author Daniel
+ *
+ */
+
 public class Instruction{
 	
 	private final byte opcode;

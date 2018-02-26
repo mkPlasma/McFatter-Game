@@ -18,12 +18,12 @@ import engine.entities.Laser;
 import engine.entities.MovableEntity;
 import engine.entities.Player;
 
-/*
- * 		RenderBatch.java
- * 		
- * 		Purpose:	Stores VAOs/VBOs for a set of entities
- * 		Notes:		
- * 		
+/**
+ * 
+ * Container for OpenGL vertex data for a set of entities.
+ * 
+ * @author Daniel
+ *
  */
 
 public class RenderBatch{

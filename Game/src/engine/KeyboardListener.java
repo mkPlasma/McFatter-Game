@@ -3,13 +3,12 @@ package engine;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import org.lwjgl.glfw.GLFWKeyCallback;
 
-/*
- * 		KeyboardListener.java
- * 		
- * 		Purpose:	Key listener used for user input.
- * 		Notes:		May be changed to store specific inputs (firing, moving) which
- * 					can be modified by the user.
- * 		
+/**
+ * 
+ * GLFW key listener class for keyboard input.
+ * 
+ * @author Daniel
+ *
  */
 
 public class KeyboardListener extends GLFWKeyCallback{

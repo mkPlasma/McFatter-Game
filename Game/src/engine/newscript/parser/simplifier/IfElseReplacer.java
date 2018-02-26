@@ -5,6 +5,15 @@ import java.util.ArrayList;
 import engine.newscript.DScript;
 import engine.newscript.parser.ParseUnit;
 
+/**
+ * 
+ * Combines adjacent if/if else/else parse units into a single parse unit for compilation.
+ * 
+ * @author Daniel
+ * 
+ */
+
+
 public class IfElseReplacer{
 	
 	public void process(DScript script){
