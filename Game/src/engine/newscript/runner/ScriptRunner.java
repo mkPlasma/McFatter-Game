@@ -57,7 +57,7 @@ public class ScriptRunner{
 	
 	public ScriptRunner(ScriptHandler handler){
 		this.handler = handler;
-		biFuncList = new BuiltInFunctionList();
+		biFuncList = new BuiltInFunctionList(handler.getScreen());
 	}
 	
 	public void init(DScript script){

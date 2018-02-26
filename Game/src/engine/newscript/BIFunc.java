@@ -27,6 +27,9 @@ public abstract class BIFunc{
 		catch(ClassCastException e){
 			throw new ScriptException("Type mismatch on " + name + "(), expected " + getClassName(e.getMessage()), inst.getFileIndex(), inst.getLineNum());
 		}
+		catch(ArrayIndexOutOfBoundsException e){
+			throw new ScriptException(name + "() requires an array with more elements", inst.getFileIndex(), inst.getLineNum());
+		}
 	}
 	
 	protected abstract Object run(Instruction inst, Object[] params) throws ScriptException;

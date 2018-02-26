@@ -2,10 +2,10 @@
 
 test();
 
-wait 1;
+wait 60;
 print("one");
 
 task test(){
-	wait 2;
+	wait 120;
 	print("two");
 }

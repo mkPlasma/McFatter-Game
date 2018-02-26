@@ -24,7 +24,7 @@ public class FunctionChecker{
 	
 	public FunctionChecker(){
 		functions = new Stack<ArrayList<String>>();
-		biFunc = new BuiltInFunctionList();
+		biFunc = new BuiltInFunctionList(null);
 	}
 	
 	public void process(DScript script) throws ScriptException{

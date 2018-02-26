@@ -403,4 +403,8 @@ public class MainScreen extends GameScreen{
 	public FrameList getFrameList(){
 		return frameList;
 	}
+	
+	public Player getPlayer(){
+		return player;
+	}
 }

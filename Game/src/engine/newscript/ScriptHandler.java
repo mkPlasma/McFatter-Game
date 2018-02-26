@@ -78,6 +78,10 @@ public class ScriptHandler{
 		branches.add(currentBranch + 1, branch);
 	}
 	
+	public MainScreen getScreen(){
+		return screen;
+	}
+	
 	private void error(ScriptException e){
 		
 		int file = e.getFileIndex();

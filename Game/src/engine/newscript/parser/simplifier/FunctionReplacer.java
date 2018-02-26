@@ -28,7 +28,7 @@ public class FunctionReplacer{
 	
 	public FunctionReplacer(){
 		functions	= new Stack<ArrayList<String>>();
-		biFunc = new BuiltInFunctionList();
+		biFunc = new BuiltInFunctionList(null);
 	}
 	
 	public void process(DScript script){
