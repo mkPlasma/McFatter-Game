@@ -12,6 +12,8 @@ package engine.newscript;
 import java.util.ArrayList;
 import java.util.Random;
 
+import content.FrameList;
+import engine.entities.Bullet;
 import engine.entities.Player;
 import engine.newscript.bytecodegen.Instruction;
 import engine.screens.MainScreen;
@@ -29,7 +31,8 @@ public class BuiltInFunctionList{
 		this.screen = screen;
 		
 		random = new Random();
-		Player player = screen != null ? screen.getPlayer() : null;
+		Player player		= screen != null ? screen.getPlayer() : null;
+		FrameList frameList	= screen != null ? screen.getFrameList() : null;
 		
 		// Create functions
 		funcList = new BIFunc[]{
@@ -229,6 +232,93 @@ public class BuiltInFunctionList{
 			new BIFunc("randChoice", 1){
 				protected Object run(Instruction inst, Object[] params){
 					return random.nextBoolean();
+				}
+			},
+			
+			
+			
+			
+
+			
+			
+			
+			// Bullet
+			// type, color, pos, dir, spd, delay
+			new BIFunc("bullet", 6){
+				protected Object run(Instruction inst, Object[] params){
+					
+					ArrayList<Object> pos = (ArrayList<Object>)params[2];
+					
+					Bullet b = new Bullet(
+						frameList.getBullet(castInt(params[0]), castInt(params[1])),
+						castFloat(pos.get(0)), castFloat(pos.get(1)),
+						castFloat(params[3]),
+						castFloat(params[4]),
+						castInt(params[5]),
+						screen
+					);
+					
+					screen.addEnemyBullet(b);
+					return b;
+				}
+			},
+			// type, color, x, y, dir, spd, delay
+			new BIFunc("bullet", 7){
+				protected Object run(Instruction inst, Object[] params){
+					
+					Bullet b = new Bullet(
+						frameList.getBullet(castInt(params[0]), castInt(params[1])),
+						castFloat(params[2]), castFloat(params[3]),
+						castFloat(params[4]),
+						castFloat(params[5]),
+						castInt(params[6]),
+						screen
+					);
+					
+					screen.addEnemyBullet(b);
+					return b;
+				}
+			},
+			// type, color, pos, dir, spd, delay
+			new BIFunc("bullet", 9){
+				protected Object run(Instruction inst, Object[] params){
+					
+					ArrayList<Object> pos = (ArrayList<Object>)params[2];
+					
+					Bullet b = new Bullet(
+						frameList.getBullet(castInt(params[0]), castInt(params[1])),
+						castFloat(pos.get(0)), castFloat(pos.get(1)),
+						castFloat(params[3]),
+						castFloat(params[4]),
+						castFloat(params[5]),
+						castFloat(params[6]),
+						castFloat(params[7]),
+						castInt(params[8]),
+						screen
+					);
+					
+					screen.addEnemyBullet(b);
+					return b;
+				}
+			},
+			// type, color, x, y, dir, spd, minSpd, maxSpd, accel, delay
+			new BIFunc("bullet", 10){
+				protected Object run(Instruction inst, Object[] params){
+					
+					Bullet b = new Bullet(
+						frameList.getBullet(castInt(params[0]), castInt(params[1])),
+						castFloat(params[2]), castFloat(params[3]),
+						castFloat(params[4]),
+						castFloat(params[5]),
+						castFloat(params[6]),
+						castFloat(params[7]),
+						castFloat(params[8]),
+						castInt(params[9]),
+						screen
+					);
+					
+					screen.addEnemyBullet(b);
+					return b;
 				}
 			},
 		};

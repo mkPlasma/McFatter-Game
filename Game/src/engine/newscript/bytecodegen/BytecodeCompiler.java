@@ -119,7 +119,7 @@ public class BytecodeCompiler{
 				int var = getVarNum(v);
 				
 				// Create variable
-				add(isLocalVar(v) ? init_zero_l : init_zero, var, v);
+				add(isLocalVar(v) ? store_zero_l : store_zero, var, v);
 				
 				return;
 			}
@@ -131,32 +131,11 @@ public class BytecodeCompiler{
 				int var = getVarNum(v);
 				boolean local = isLocalVar(v);
 				
-				// Check if literal value
-				Object o = getValue((ParseUnit)contents[2]);
-				
-				// If literal, add instruction to initialize
-				if(o instanceof Integer){
-					add(local ? init_int_l : init_int, (int)o, p);
-					return;
-				}
-				
-				if(o instanceof Float){
-					add(local ? init_float_l : init_float, Float.floatToIntBits((float)o), p);
-					return;
-				}
-				
-				if(o instanceof Boolean){
-					add((Boolean)o ? (local ? init_true_l : init_true) : (local ? init_false_l : init_false), p);
-					return;
-				}
-				
-				// Non-literals
-				
 				// Add expression
 				compileExpression((ParseUnit)contents[2]);
 				
 				// Create variable
-				add(local ? init_value_l : init_value, var, (ParseUnit)contents[0]);
+				add(local ? store_value_l : store_value, var, (ParseUnit)contents[0]);
 				
 				return;
 			}

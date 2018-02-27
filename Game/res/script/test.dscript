@@ -1,11 +1,12 @@
 
+set const c = 5;
 
-test();
+set dir;
 
-wait 60;
-print("one");
-
-task test(){
-	wait 120;
-	print("two");
+while(true){
+	for(d < 0, 360/c, 360)
+		bullet(_orb, rand(0, 1), _cx, _top + 140, dir + d, 2, 5);
+	
+	dir += 13;
+	wait 5;
 }

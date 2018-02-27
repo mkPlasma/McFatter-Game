@@ -30,8 +30,6 @@ public class ScriptRunner{
 	
 	private final ScriptHandler handler;
 	
-	private DScript script;
-	
 	// Script data
 	private Instruction[] bytecode;
 	private Object[] constants;
@@ -61,8 +59,6 @@ public class ScriptRunner{
 	}
 	
 	public void init(DScript script){
-		this.script = script;
-		
 		bytecode = script.getBytecode();
 		constants = script.getConstants();
 		
@@ -107,62 +103,20 @@ public class ScriptRunner{
 		
 		switch(name){
 				
-			case init_zero:
-				globalVariables.add(0);
+			case store_zero:
+				setGlobalVar(op, 0);
 				return;
 				
-			case init_zero_l:
-				localVariables.peek().add(0);
-				return;
-
-			case init_value:
-				globalVariables.add(pop());
+			case store_zero_l:
+				setLocalVar(op, 0);
 				return;
 				
-			case init_value_l:
-				localVariables.peek().add(pop());
-				return;
-
-			case init_int:
-				globalVariables.add(op);
-				return;
-				
-			case init_int_l:
-				localVariables.peek().add(op);
-				return;
-
-			case init_float:
-				globalVariables.add(Float.intBitsToFloat(op));
-				return;
-				
-			case init_float_l:
-				localVariables.peek().add(Float.intBitsToFloat(op));
-				return;
-
-			case init_false:
-				globalVariables.add(false);
-				return;
-				
-			case init_false_l:
-				localVariables.peek().add(false);
-				return;
-
-			case init_true:
-				globalVariables.add(true);
-				return;
-				
-			case init_true_l:
-				localVariables.peek().add(true);
-				return;
-				
-				
-
 			case store_value:
-				globalVariables.set(op, pop());
+				setGlobalVar(op, pop());
 				return;
 				
 			case store_value_l:
-				localVariables.peek().set(op, pop());
+				setLocalVar(op, pop());
 				return;
 				
 				
@@ -411,7 +365,7 @@ public class ScriptRunner{
 				Object[] params = new Object[f.getParamCount()];
 				
 				// Add parameters
-				for(int j = 0; j < params.length; j++)
+				for(int j = params.length - 1; j >= 0; j--)
 					params[j] = pop();
 				
 				// Call function and get return value
@@ -448,6 +402,41 @@ public class ScriptRunner{
 				return;
 		}
 	}
+	
+	// Set global variable, add enough variables if necessary
+	private void setGlobalVar(int index, Object value){
+		
+		try{
+			globalVariables.set(index, value);
+		}
+		
+		// Add more variables if necessary
+		catch(IndexOutOfBoundsException e){
+			
+			while(globalVariables.size() < index + 1)
+				globalVariables.add(null);
+			
+			globalVariables.set(index, value);
+		}
+	}
+	
+	private void setLocalVar(int index, Object value){
+		
+		try{
+			localVariables.peek().set(index, value);
+		}
+		
+		// Add more variables if necessary
+		catch(IndexOutOfBoundsException e){
+			
+			while(localVariables.peek().size() < index + 1)
+				localVariables.peek().add(null);
+			
+			localVariables.peek().set(index, value);
+		}
+	}
+	
+	
 	
 	// Numerical operation
 	@SuppressWarnings("unchecked")

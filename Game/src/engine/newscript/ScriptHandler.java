@@ -27,6 +27,7 @@ public class ScriptHandler{
 	// Current running branch index
 	private int currentBranch;
 	
+	private String scriptPath;
 	private DScript script;
 	
 	
@@ -40,11 +41,13 @@ public class ScriptHandler{
 	}
 	
 	public void init(String scriptPath){
-		script = new DScript(scriptPath);
+		this.scriptPath = scriptPath;
 		init();
 	}
 	
 	private void init(){
+		script = new DScript(scriptPath);
+		
 		compiler.compile(script);
 		runner.init(script);
 		

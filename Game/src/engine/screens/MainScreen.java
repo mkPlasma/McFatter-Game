@@ -32,7 +32,6 @@ public class MainScreen extends GameScreen{
 							MAX_EFFECTS = 2048,
 							MAX_TEXTS = 1024;
 	
-	private GameStage stage;
 	private ScriptHandler scriptHandler;
 	private ScriptSelector scriptSelector;
 	
@@ -62,8 +61,6 @@ public class MainScreen extends GameScreen{
 	
 	public void init(){
 		
-		scriptHandler = new ScriptHandler(this);
-		
 		frameList = new FrameList(tc);
 		
 		enemyBullets	= new ArrayList<Bullet>(MAX_ENEMY_BULLETS);
@@ -71,9 +68,6 @@ public class MainScreen extends GameScreen{
 		enemies			= new ArrayList<Enemy>(MAX_ENEMIES);
 		effects			= new ArrayList<Effect>(MAX_EFFECTS);
 		texts			= new ArrayList<Text>(MAX_TEXTS);
-		
-		scriptSelector = new ScriptSelector(this, scriptHandler);
-		scriptSelector.init();
 		
 		fpsText = new Text("", 0, 470, 1, tc);
 		addText(fpsText);
@@ -88,6 +82,11 @@ public class MainScreen extends GameScreen{
 		// Temporary test
 		player = new Player(224, 432, this);
 		tc.loadSprite(player.getSprite());
+		
+		
+		scriptHandler = new ScriptHandler(this);
+		scriptSelector = new ScriptSelector(this, scriptHandler);
+		scriptSelector.init();
 	}
 	
 	public void setFPS(int fps){
