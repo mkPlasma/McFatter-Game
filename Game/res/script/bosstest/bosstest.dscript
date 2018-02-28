@@ -1,4 +1,4 @@
 set boss = boss(_fighter, _cx, 140, 4000);
 
-run "bosstest2";
-run "bosstest3";
+#include bosstest2;
+#include bosstest3;

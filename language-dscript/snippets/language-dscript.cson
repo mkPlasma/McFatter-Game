@@ -1,4 +1,4 @@
 '.source.dscript':
     'for directional':
         'prefix': 'ford'
-        'body': 'for(d in 0, 360/c, 360){\n\t${0}\n}'
+        'body': 'for(d < 0, 360/c, 360){\n\t${0}\n}'

@@ -14,8 +14,11 @@ while(true){
 	wait 1;
 }
 
-task split(pos, dir){
+task split(pos, dir, iterations){
 	
 	set b = bullet(_orb, _red, pos, dir, 2, 15);
+	
+	wait 30;
+	
 	
 }

@@ -14,7 +14,7 @@
 	},
 	
 	{# Properties
-		'match': '(#include)\\s*(.*);?'
+		'match': '(#include)\\s*(.*?);+?'
 		'captures':
 			'1':
 				'name': 'support.other.dscript'

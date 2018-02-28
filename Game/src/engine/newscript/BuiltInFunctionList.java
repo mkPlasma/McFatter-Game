@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import content.FrameList;
+import engine.entities.BossEnemy;
 import engine.entities.Bullet;
 import engine.entities.Enemy;
 import engine.entities.GameEntity;
@@ -75,7 +76,7 @@ public class BuiltInFunctionList{
 			},
 			new BIFunc("playerPos", 0){
 				protected Object run(Instruction inst, Object[] params){
-					ArrayList<Object> array = new ArrayList<Object>();
+					ArrayList<Object> array = new ArrayList<Object>(2);
 					array.add(player.getX());
 					array.add(player.getY());
 					
@@ -114,7 +115,7 @@ public class BuiltInFunctionList{
 					float r = castFloat(params[0]);
 					float t = (float)Math.toRadians(castFloat(params[1]));
 					
-					ArrayList<Object> array = new ArrayList<Object>();
+					ArrayList<Object> array = new ArrayList<Object>(2);
 					array.add((float)(r*Math.cos(t)));
 					array.add((float)(r*Math.sin(t)));
 					
@@ -420,6 +421,40 @@ public class BuiltInFunctionList{
 				}
 			},
 			
+			// Boss
+			// type, pos, health
+			new BIFunc("boss", 3){
+				protected Object run(Instruction inst, Object[] params){
+					
+					ArrayList<Object> pos = (ArrayList<Object>)params[1];
+					
+					BossEnemy b = new BossEnemy(
+						frameList.getEnemy(castInt(params[0])),
+						castFloat(pos.get(0)), castFloat(pos.get(1)),
+						castInt(params[2]),
+						screen
+					);
+					
+					screen.addEnemy(b);
+					return b;
+				}
+			},
+			// type, x, y, health
+			new BIFunc("boss", 4){
+				protected Object run(Instruction inst, Object[] params){
+					
+					BossEnemy b = new BossEnemy(
+						frameList.getEnemy(castInt(params[0])),
+						castFloat(params[1]), castFloat(params[2]),
+						castInt(params[3]),
+						screen
+					);
+					
+					screen.addEnemy(b);
+					return b;
+				}
+			},
+			
 			
 			// Entity functions
 			// Delete entity
@@ -508,6 +543,29 @@ public class BuiltInFunctionList{
 				protected Object run(Instruction inst, Object[] params){
 					((MovableEntity)params[0]).setMaxSpd(castFloat(params[1]));
 					return null;
+				}
+			},
+
+			new BIFunc("isDeleted", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((GameEntity)params[0]).isDeleted();
+				}
+			},
+			new BIFunc("getPos", 1){
+				protected Object run(Instruction inst, Object[] params){
+					
+					GameEntity g = (GameEntity)params[0];
+					ArrayList<Object> array = new ArrayList<Object>(2);
+
+					array.add(castFloat(g.getX()));
+					array.add(castFloat(g.getY()));
+					
+					return array;
+				}
+			},
+			new BIFunc("getHealth", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((Enemy)params[0]).getHealth();
 				}
 			},
 		};

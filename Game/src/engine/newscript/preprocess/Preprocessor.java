@@ -126,7 +126,7 @@ public class Preprocessor{
 	}
 	
 	private ArrayList<String> replaceInclude(String line) throws ScriptException{
-		String path = script.getFolder() + "/" + line.replaceAll("#include\\s+", "").replace(";", "") + ".dscript";
+		String path = script.getFolder() + "/" + line.replaceAll("#include\\s+(.*);", "$1").replace(";", "") + ".dscript";
 		
 		ArrayList<String> file2 = IOFunctions.readToArrayList(path);
 		
