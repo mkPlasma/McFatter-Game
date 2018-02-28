@@ -101,7 +101,7 @@ public class FunctionReplacer{
 		int params = cont.length == 1 ? 0 : cont[1] instanceof Token ? 1 : ((ParseUnit)cont[1]).getContents().length;
 		
 		// Function names
-		Token t = (Token)cont[0];
+		Token t = (Token)((ParseUnit)cont[0]).getContents()[0];
 		cont[0] = new Token(IDENTIFIER, Integer.toString(funcNum), t.getFile(), t.getLineNum());
 		
 		addFunction(t.getValue(), params);

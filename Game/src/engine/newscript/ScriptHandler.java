@@ -109,6 +109,10 @@ public class ScriptHandler{
 		return screen;
 	}
 	
+	public void hideErrorText(){
+		errorText.setVisible(false);
+	}
+	
 	private void compilationError(ScriptException e){
 		
 		String file = e.getFile();

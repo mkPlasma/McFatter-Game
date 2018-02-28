@@ -53,10 +53,10 @@ public class BulletList{
 		"laser",
 		"laser_dist",
 		"laser_helix",
-		"??",
-		"???",
+		"unknown1",
+		"unknown2",
 		"atom",
-		"????",
+		"unknown3",
 	};
 	
 	public static final byte

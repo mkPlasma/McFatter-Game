@@ -30,16 +30,21 @@ public class Grammar{
 		rules = new Rule[]{
 			
 			// Define parts of blocks
+			
+			new Rule("id_paren", new Object[][]{
+				{IDENTIFIER, PAREN_L},
+			}),
+			
 			new Rule("func_def", new Object[][]{
-				{FUNCTION, IDENTIFIER, PAREN_L, PAREN_R},
-				{FUNCTION, IDENTIFIER, PAREN_L, IDENTIFIER, PAREN_R},
-				{FUNCTION, IDENTIFIER, PAREN_L, "list", PAREN_R},
+				{FUNCTION, "id_paren", PAREN_R},
+				{FUNCTION, "id_paren", IDENTIFIER, PAREN_R},
+				{FUNCTION, "id_paren", "list", PAREN_R},
 			}),
 			
 			new Rule("task_def", new Object[][]{
-				{TASK, IDENTIFIER, PAREN_L, PAREN_R},
-				{TASK, IDENTIFIER, PAREN_L, IDENTIFIER, PAREN_R},
-				{TASK, IDENTIFIER, PAREN_L, "list", PAREN_R},
+				{TASK, "id_paren", PAREN_R},
+				{TASK, "id_paren", IDENTIFIER, PAREN_R},
+				{TASK, "id_paren", "list", PAREN_R},
 			}),
 			
 			new Rule("if_cond", new Object[][]{
@@ -75,14 +80,10 @@ public class Grammar{
 			}),
 			*/
 			
-			new Rule("func_call_pre", new Object[][]{
-				{IDENTIFIER, PAREN_L},
-			}),
-			
 			new Rule("func_call", new Object[][]{
-				{"func_call_pre", PAREN_R},
-				{"func_call_pre", "expression", PAREN_R},
-				{"func_call_pre", "list", PAREN_R},
+				{"id_paren", PAREN_R},
+				{"id_paren", "expression", PAREN_R},
+				{"id_paren", "list", PAREN_R},
 			}),
 			
 			new Rule("func_call_scope", new Object[][]{

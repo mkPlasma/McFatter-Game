@@ -56,7 +56,7 @@ public class SyntacticSugars{
 		// Replace
 		for(int i = 0; i < file.length; i++)
 			for(Map.Entry<String, String> e:sugars.entrySet())
-				file[i] = file[i].replace(e.getKey(), e.getValue());
+				file[i] = file[i].replaceAll("\\b" + e.getKey() + "\\b", e.getValue());
 		
 		script.setFile(file);
 	}

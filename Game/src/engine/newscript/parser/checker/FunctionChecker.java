@@ -104,7 +104,7 @@ public class FunctionChecker{
 			p = (ParseUnit)p.getContents()[0];
 			Object[] cont = p.getContents();
 			
-			Token t = (Token)cont[0];
+			Token t = (Token)((ParseUnit)cont[0]).getContents()[0];
 			
 			String func = t.getValue();
 			int params = cont.length == 1 ? 0 : cont[1] instanceof Token ? 1 : ((ParseUnit)cont[1]).getContents().length;

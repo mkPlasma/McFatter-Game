@@ -9,12 +9,12 @@
 	},
 	
 	{# Operators
-		'match': '(\\b|\\s)(\\+|-|\\*|/|%|\\^|!|\\|\\||&&|<|>|==|!=|<=|>=|=|\\+\\+|--|!!|\\+=|-=|\\*=|/=|%=)(\\b|\\s|;)'
+		'match': '(\\b|\\s)(\\+|\\-|\\*|/|%|~|\\^|!|\\|\\||&&|<|>|==|!=|<=|>=|=|\\+\\+|\\-\\-|!!|\\+=|\\-=|\\*=|/=|%=|~=)(\\b|\\s|;)'
 		'name': 'keyword.operator.dscript'
 	},
 	
 	{# Properties
-		'match': '(#include)\\s+(.+);'
+		'match': '(#include)\\s*(.*);?'
 		'captures':
 			'1':
 				'name': 'support.other.dscript'
@@ -46,7 +46,7 @@
 	},
 	
 	{# Built-in variables
-		'match': '\\b(_time|_cx|_cy|_lx|_rx|_ty|_by|_px|_py|_orb|_scale|_crystal|_rice|_star|_star4|_square|_laser_blast|_wall|_needle|_ring|_missile|_mine|_laser|_laser_dist|_laser_helix|_fighter|_radial|_red|_dark_red|_orange|_yellow|_gold|_green|_dark_green|_cyan|_light_blue|_blue|_dark_blue|_purple|_pink|_white|_gray|_black|_red_d|_dark_red_d|_orange_d|_yellow_d|_gold_d|_green_d|_dark_green_d|_cyan_d|_light_blue_d|_blue_d|_dark_blue_d|_purple_d|_pink_d|_white_d|_gray_d|_black_d)\\b'
+		'match': '\\b(_cx|_cy|_left|_right|_top|_bottom|_time|_px|_py|_pi|_2pi|_orb|_scale|_crystal|_rice|_star|_star4|_square|_laser_blast|_wall|_needle|_ring|_missile|_mine|_laser|_laser_dist|_laser_helix|_fighter|_radial|_red|_dark_red|_orange|_yellow|_gold|_green|_dark_green|_cyan|_light_blue|_blue|_dark_blue|_purple|_pink|_white|_gray|_black|_red_d|_dark_red_d|_orange_d|_yellow_d|_gold_d|_green_d|_dark_green_d|_cyan_d|_light_blue_d|_blue_d|_dark_blue_d|_purple_d|_pink_d|_white_d|_gray_d|_black_d)\\b'
 		'name': 'support.variable.dscript'
 	},
 	

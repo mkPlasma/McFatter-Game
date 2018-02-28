@@ -293,8 +293,9 @@ public class ScriptRunner{
 				
 				for(int j = 0; j < op; j++)
 					p.add(pop());
-				
-				localVariables.peek().add(p.remove());
+
+				for(int j = 0; j < op; j++)
+					setLocalVar(j, p.remove());
 				
 				return;
 			}

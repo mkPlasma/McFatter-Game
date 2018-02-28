@@ -1,12 +1,21 @@
 
-set const c = 5;
+set const c = 6;
 
 set dir;
+set dirAdd;
 
 while(true){
 	for(d < 0, 360/c, 360)
-		bullet(_orb, rand(0, 1), {_cx, _top + 140} + radius(20, dir + d), dir + d, 2, 15);
+		split({_cx, _top + 120}, dir + d);
 	
-	dir += 17;
+	dir += dirAdd;
+	dirAdd -= 0.1;
+	
 	wait 1;
+}
+
+task split(pos, dir){
+	
+	set b = bullet(_orb, _red, pos, dir, 2, 15);
+	
 }

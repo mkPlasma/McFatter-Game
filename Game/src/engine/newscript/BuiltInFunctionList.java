@@ -14,6 +14,10 @@ import java.util.Random;
 
 import content.FrameList;
 import engine.entities.Bullet;
+import engine.entities.Enemy;
+import engine.entities.GameEntity;
+import engine.entities.Laser;
+import engine.entities.MovableEntity;
 import engine.entities.Player;
 import engine.newscript.bytecodegen.Instruction;
 import engine.screens.MainScreen;
@@ -299,7 +303,7 @@ public class BuiltInFunctionList{
 					return b;
 				}
 			},
-			// type, color, pos, dir, spd, delay
+			// type, color, pos, dir, spd, minSpd, maxSpd, accel, delay
 			new BIFunc("bullet", 9){
 				protected Object run(Instruction inst, Object[] params){
 					
@@ -339,6 +343,171 @@ public class BuiltInFunctionList{
 					
 					screen.addEnemyBullet(b);
 					return b;
+				}
+			},
+			
+			// Laser
+			// type, color, pos, dir, length, width, delay
+			new BIFunc("laser", 7){
+				protected Object run(Instruction inst, Object[] params){
+					
+					ArrayList<Object> pos = (ArrayList<Object>)params[2];
+					
+					Laser l = new Laser(
+						frameList.getBullet(castInt(params[0]), castInt(params[1])),
+						castFloat(pos.get(0)), castFloat(pos.get(1)),
+						castFloat(params[3]),
+						castInt(params[4]),
+						castInt(params[5]),
+						castInt(params[7]),
+						screen
+					);
+					
+					screen.addEnemyBullet(l);
+					return l;
+				}
+			},
+			// type, color, x, y, dir, length, width, delay
+			new BIFunc("laser", 8){
+				protected Object run(Instruction inst, Object[] params){
+					
+					Laser l = new Laser(
+						frameList.getBullet(castInt(params[0]), castInt(params[1])),
+						castFloat(params[2]), castFloat(params[3]),
+						castFloat(params[4]),
+						castInt(params[5]),
+						castInt(params[6]),
+						castInt(params[7]),
+						screen
+					);
+					
+					screen.addEnemyBullet(l);
+					return l;
+				}
+			},
+			
+			// Enemy
+			// type, pos, health
+			new BIFunc("enemy", 3){
+				protected Object run(Instruction inst, Object[] params){
+					
+					ArrayList<Object> pos = (ArrayList<Object>)params[1];
+					
+					Enemy e = new Enemy(
+						frameList.getEnemy(castInt(params[0])),
+						castFloat(pos.get(0)), castFloat(pos.get(1)),
+						castInt(params[2]),
+						screen
+					);
+					
+					screen.addEnemy(e);
+					return e;
+				}
+			},
+			// type, x, y, health
+			new BIFunc("enemy", 4){
+				protected Object run(Instruction inst, Object[] params){
+					
+					Enemy e = new Enemy(
+						frameList.getEnemy(castInt(params[0])),
+						castFloat(params[1]), castFloat(params[2]),
+						castInt(params[3]),
+						screen
+					);
+					
+					screen.addEnemy(e);
+					return e;
+				}
+			},
+			
+			
+			// Entity functions
+			// Delete entity
+			new BIFunc("delete", 1){
+				protected Object run(Instruction inst, Object[] params){
+					GameEntity e = (GameEntity)params[0];
+					
+					if(e instanceof Bullet)
+						((Bullet)e).onDestroy(true);
+					else
+						e.delete();
+					
+					return null;
+				}
+			},
+			
+			// Delete without despawn effect
+			new BIFunc("deleteImmediate", 1){
+				protected Object run(Instruction inst, Object[] params){
+					((GameEntity)params[0]).delete();
+					return null;
+				}
+			},
+			
+			// Set position
+			new BIFunc("setX", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((GameEntity)params[0]).setX(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("setY", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((GameEntity)params[0]).setY(castFloat(params[1]));
+					return null;
+				}
+			},
+			// pos array
+			new BIFunc("setPos", 2){
+				protected Object run(Instruction inst, Object[] params){
+					ArrayList<Object> pos = (ArrayList<Object>)params[1];
+					((GameEntity)params[0]).setPos(castFloat(pos.get(0)), castFloat(pos.get(1)));
+					return null;
+				}
+			},
+			// x, y
+			new BIFunc("setPos", 3){
+				protected Object run(Instruction inst, Object[] params){
+					((GameEntity)params[0]).setPos(castFloat(params[1]), castFloat(params[2]));
+					return null;
+				}
+			},
+			
+			// Movement
+			new BIFunc("setDir", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((MovableEntity)params[0]).setDir(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("setAngVel", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((MovableEntity)params[0]).setAngVel(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("setSpd", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((MovableEntity)params[0]).setSpd(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("setAccel", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((MovableEntity)params[0]).setAccel(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("setMinSpd", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((MovableEntity)params[0]).setMinSpd(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("setMaxSpd", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((MovableEntity)params[0]).setMaxSpd(castFloat(params[1]));
+					return null;
 				}
 			},
 		};

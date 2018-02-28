@@ -107,6 +107,7 @@ public class ScriptSelector{
 		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_GRAVE_ACCENT)){
 			selecting = !selecting;
 			setTextVisible(selecting);
+			scriptHandler.hideErrorText();
 		}
 		
 		// Menu only
