@@ -2,6 +2,7 @@ package engine.newscript;
 
 import java.util.ArrayList;
 
+import engine.entities.Text;
 import engine.newscript.runner.Branch;
 import engine.newscript.runner.ScriptRunner;
 import engine.screens.MainScreen;
@@ -21,6 +22,10 @@ public class ScriptHandler{
 	private final Compiler compiler;
 	private final ScriptRunner runner;
 	
+	private Text errorText;
+	
+	private boolean stop;
+	
 	// Running branches
 	private ArrayList<Branch> branches;
 	
@@ -37,6 +42,10 @@ public class ScriptHandler{
 		compiler = new Compiler();
 		runner = new ScriptRunner(this);
 		
+		errorText = new Text("", 40, 40, 0.75f, screen.getTextureCache());
+		errorText.setVisible(false);
+		screen.addText(errorText);
+		
 		branches	= new ArrayList<Branch>();
 	}
 	
@@ -48,14 +57,28 @@ public class ScriptHandler{
 	private void init(){
 		script = new DScript(scriptPath);
 		
-		compiler.compile(script);
+		try{
+			compiler.compile(script);
+		}
+		catch(ScriptException e){
+			compilationError(e);
+			return;
+		}
+		
 		runner.init(script);
+		
+		errorText.setVisible(false);
 		
 		branches.clear();
 		branches.add(new Branch(script.getEntryPoint()));
+		
+		stop = false;
 	}
 	
 	public void run(){
+		
+		if(stop)
+			return;
 		
 		for(currentBranch = 0; currentBranch < branches.size(); currentBranch++){
 			
@@ -65,7 +88,8 @@ public class ScriptHandler{
 				runner.run(b);
 			}
 			catch(ScriptException e){
-				error(e);
+				runtimeError(e);
+				return;
 			}
 			
 			if(b.isFinished())
@@ -85,15 +109,33 @@ public class ScriptHandler{
 		return screen;
 	}
 	
-	private void error(ScriptException e){
+	private void compilationError(ScriptException e){
+		
+		String file = e.getFile();
+		int line = e.getLine();
+		
+		errorText.setVisible(true);
+		errorText.setText(
+			"Compilation error in " + (file == null ? script.getFileName(): file.substring(16)) +
+			" on line " + line + ":\n" + e.getMessage() +
+			(line > 0 ? "\n" + line + ": " + script.getLine(file, line) : "")
+		);
+		
+		stop = true;
+	}
+	
+	private void runtimeError(ScriptException e){
 		
 		int file = e.getFileIndex();
 		int line = e.getLine();
 		
-		System.err.println(
+		errorText.setVisible(true);
+		errorText.setText(
 			"Runtime error in " + (file == 0 ? script.getFileName(): script.getFileName(file)) +
 			" on line " + line + ":\n" + e.getMessage() +
 			(line > 0 ? "\n" + line + ": " + script.getLine(file, line) : "")
 		);
+		
+		stop = true;
 	}
 }

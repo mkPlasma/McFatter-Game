@@ -5,8 +5,8 @@ set dir;
 
 while(true){
 	for(d < 0, 360/c, 360)
-		bullet(_orb, rand(0, 1), _cx, _top + 140, dir + d, 2, 5);
+		bullet(_orb, rand(0, 1), {_cx, _top + 140} + radius(20, dir + d), dir + d, 2, 15);
 	
-	dir += 13;
-	wait 5;
+	dir += 17;
+	wait 1;
 }

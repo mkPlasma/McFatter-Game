@@ -32,9 +32,9 @@ public class Parser{
 	
 	public void process(DScript script) throws ScriptException{
 		treeGen.process(script);
-		treeCheck.process(script);
-		treeSimplify.process(script);
 		
 		ScriptPrinter.printParseTree(script.getParseTree().toArray(new Object[0]));
+		treeCheck.process(script);
+		treeSimplify.process(script);
 	}
 }

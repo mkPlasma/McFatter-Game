@@ -114,7 +114,7 @@ public class FunctionReplacer{
 			case "func_call":
 				Object[] contents = p.getContents();
 				
-				Token t = (Token)contents[0];
+				Token t = (Token)((ParseUnit)contents[0]).getContents()[0];
 
 				int params = contents.length == 1 ? 0 : ((ParseUnit)contents[1]).getType().equals("list") ? ((ParseUnit)contents[1]).getContents().length : 1;
 				

@@ -75,10 +75,14 @@ public class Grammar{
 			}),
 			*/
 			
+			new Rule("func_call_pre", new Object[][]{
+				{IDENTIFIER, PAREN_L},
+			}),
+			
 			new Rule("func_call", new Object[][]{
-				{IDENTIFIER, PAREN_L, PAREN_R},
-				{IDENTIFIER, PAREN_L, "expression", PAREN_R},
-				{IDENTIFIER, PAREN_L, "list", PAREN_R},
+				{"func_call_pre", PAREN_R},
+				{"func_call_pre", "expression", PAREN_R},
+				{"func_call_pre", "list", PAREN_R},
 			}),
 			
 			new Rule("func_call_scope", new Object[][]{

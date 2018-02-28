@@ -38,6 +38,7 @@ public class BuiltInFunctionList{
 		funcList = new BIFunc[]{
 			
 			// Print given value
+			// obj
 			new BIFunc("print", 1){
 				protected Object run(Instruction inst, Object[] params){
 					System.out.println(params[0]);
@@ -48,6 +49,7 @@ public class BuiltInFunctionList{
 			
 			
 			// Cast to integer
+			// num
 			new BIFunc("int", 1){
 				protected Object run(Instruction inst, Object[] params){
 					return (int)castFloat(params[0]);
@@ -79,6 +81,7 @@ public class BuiltInFunctionList{
 			
 
 			// Angle from position to player
+			// pos
 			new BIFunc("angleToPlayer", 1){
 				protected Object run(Instruction inst, Object[] params){
 					ArrayList<Object> array = (ArrayList<Object>)params[0];
@@ -89,12 +92,29 @@ public class BuiltInFunctionList{
 					return (float)Math.atan2(player.getY() - y, player.getX() - x);
 				}
 			},
+			// x, y
 			new BIFunc("angleToPlayer", 2){
 				protected Object run(Instruction inst, Object[] params){
 					float x = castFloat(params[0]);
 					float y = castFloat(params[1]);
 					
 					return (float)Math.atan2(player.getY() - y, player.getX() - x);
+				}
+			},
+			
+			
+			// Returns x, y array, radius r angle t
+			// r, t
+			new BIFunc("radius", 2){
+				protected Object run(Instruction inst, Object[] params){
+					float r = castFloat(params[0]);
+					float t = (float)Math.toRadians(castFloat(params[1]));
+					
+					ArrayList<Object> array = new ArrayList<Object>();
+					array.add((float)(r*Math.cos(t)));
+					array.add((float)(r*Math.sin(t)));
+					
+					return array;
 				}
 			},
 			

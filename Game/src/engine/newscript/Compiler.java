@@ -30,33 +30,15 @@ public class Compiler{
 		bytecodeCompiler = new BytecodeCompiler();
 	}
 	
-	public boolean compile(DScript script){
+	public boolean compile(DScript script) throws ScriptException{
 		
 		this.script = script;
 		
-		try{
-			preprocessor.process(script);
-			lexer.process(script);
-			parser.process(script);
-			bytecodeCompiler.process(script);
-		}
-		catch(ScriptException e){
-			error(e);
-			return false;
-		}
+		preprocessor.process(script);
+		lexer.process(script);
+		parser.process(script);
+		bytecodeCompiler.process(script);
 		
 		return true;
-	}
-	
-	private void error(ScriptException e){
-		
-		String file = e.getFile();
-		int line = e.getLine();
-		
-		System.err.println(
-			"Compilation error in " + (file == null ? script.getFileName(): file.substring(16)) +
-			" on line " + line + ":\n" + e.getMessage() +
-			(line > 0 ? "\n" + line + ": " + script.getLine(file, line) : "")
-		);
 	}
 }
