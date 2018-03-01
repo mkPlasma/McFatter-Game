@@ -6,7 +6,7 @@ set dirAdd;
 
 while(true){
 	for(d < 0, 360/c, 360)
-		split({_cx, _top + 120}, dir + d);
+		split({_cx, _top + 120}, dir + d, 0);
 	
 	dir += dirAdd;
 	dirAdd -= 0.1;
@@ -16,7 +16,7 @@ while(true){
 
 task split(pos, dir, iterations){
 	
-	set b = bullet(_orb, _red, pos, dir, 2, 15);
+	set b = bullet(_orb, _red_d, _cx, _cy, dir, 2, 15);
 	
 	wait 30;
 	

@@ -478,6 +478,11 @@ public class BuiltInFunctionList{
 					return null;
 				}
 			},
+			new BIFunc("isDeleted", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((GameEntity)params[0]).isDeleted();
+				}
+			},
 			
 			// Set position
 			new BIFunc("setX", 2){
@@ -486,10 +491,20 @@ public class BuiltInFunctionList{
 					return null;
 				}
 			},
+			new BIFunc("getX", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((GameEntity)params[0]).getX();
+				}
+			},
 			new BIFunc("setY", 2){
 				protected Object run(Instruction inst, Object[] params){
 					((GameEntity)params[0]).setY(castFloat(params[1]));
 					return null;
+				}
+			},
+			new BIFunc("getY", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((GameEntity)params[0]).getY();
 				}
 			},
 			// pos array
@@ -507,50 +522,6 @@ public class BuiltInFunctionList{
 					return null;
 				}
 			},
-			
-			// Movement
-			new BIFunc("setDir", 2){
-				protected Object run(Instruction inst, Object[] params){
-					((MovableEntity)params[0]).setDir(castFloat(params[1]));
-					return null;
-				}
-			},
-			new BIFunc("setAngVel", 2){
-				protected Object run(Instruction inst, Object[] params){
-					((MovableEntity)params[0]).setAngVel(castFloat(params[1]));
-					return null;
-				}
-			},
-			new BIFunc("setSpd", 2){
-				protected Object run(Instruction inst, Object[] params){
-					((MovableEntity)params[0]).setSpd(castFloat(params[1]));
-					return null;
-				}
-			},
-			new BIFunc("setAccel", 2){
-				protected Object run(Instruction inst, Object[] params){
-					((MovableEntity)params[0]).setAccel(castFloat(params[1]));
-					return null;
-				}
-			},
-			new BIFunc("setMinSpd", 2){
-				protected Object run(Instruction inst, Object[] params){
-					((MovableEntity)params[0]).setMinSpd(castFloat(params[1]));
-					return null;
-				}
-			},
-			new BIFunc("setMaxSpd", 2){
-				protected Object run(Instruction inst, Object[] params){
-					((MovableEntity)params[0]).setMaxSpd(castFloat(params[1]));
-					return null;
-				}
-			},
-
-			new BIFunc("isDeleted", 1){
-				protected Object run(Instruction inst, Object[] params){
-					return ((GameEntity)params[0]).isDeleted();
-				}
-			},
 			new BIFunc("getPos", 1){
 				protected Object run(Instruction inst, Object[] params){
 					
@@ -563,6 +534,104 @@ public class BuiltInFunctionList{
 					return array;
 				}
 			},
+			
+			new BIFunc("getTime", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((GameEntity)params[0]).getTime();
+				}
+			},
+			// Set to true
+			new BIFunc("setVisible", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((GameEntity)params[0]).getTime();
+				}
+			},
+			// Set to parameter
+			new BIFunc("setVisible", 2){
+				protected Object run(Instruction inst, Object[] params){
+					return ((GameEntity)params[0]).getTime();
+				}
+			},
+			new BIFunc("isVisible", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((GameEntity)params[0]).isVisible();
+				}
+			},
+			
+			
+			// Movement
+			new BIFunc("setDir", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((MovableEntity)params[0]).setDir(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getDir", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((MovableEntity)params[0]).getDir();
+				}
+			},
+			new BIFunc("setAngVel", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((MovableEntity)params[0]).setAngVel(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getAngVel", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((MovableEntity)params[0]).getAngVel();
+				}
+			},
+			new BIFunc("setSpd", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((MovableEntity)params[0]).setSpd(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getSpd", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((MovableEntity)params[0]).getSpd();
+				}
+			},
+			new BIFunc("setAccel", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((MovableEntity)params[0]).setAccel(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getAccel", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((MovableEntity)params[0]).getAccel();
+				}
+			},
+			new BIFunc("setMinSpd", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((MovableEntity)params[0]).setMinSpd(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getMinSpd", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((MovableEntity)params[0]).getMinSpd();
+				}
+			},
+			new BIFunc("setMaxSpd", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((MovableEntity)params[0]).setMaxSpd(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getMaxSpd", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((MovableEntity)params[0]).getMaxSpd();
+				}
+			},
+			
+			
+			// Bullet properties
+			
+			
+			
 			new BIFunc("getHealth", 1){
 				protected Object run(Instruction inst, Object[] params){
 					return ((Enemy)params[0]).getHealth();

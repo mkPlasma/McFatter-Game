@@ -154,6 +154,8 @@ public class ScriptSelector{
 			// If script
 			scriptHandler.init(file);
 			screen.resetPlayer();
+			screen.clearAll();
+			screen.unpause();
 			
 			selecting = false;
 			setTextVisible(false);

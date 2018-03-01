@@ -281,8 +281,8 @@ public class StatementSimplifier{
 			
 			// Add parameter list
 			newCont[1] = new ParseUnit("list", new Object[]{
-				cont[1],
-				contents[0]
+				contents[0],
+				cont[1]
 			});
 			
 			// Replace dot_func_call

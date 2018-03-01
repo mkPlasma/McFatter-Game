@@ -12,10 +12,10 @@ _cx // Center X, 224
 _cy // Center Y, 240
 
 // Border positions
-_lx // Left X, 32
-_rx // Right X, 416
-_ty // Top Y, 16
-_by // Bottom Y, 464
+_left // Left X, 32
+_right // Right X, 416
+_top // Top Y, 16
+_bottom // Bottom Y, 464
 
 _px // Player X, same as playerX()
 _py // Player Y, same as playerY()
@@ -27,11 +27,11 @@ _crystal
 _rice
 _star
 _star4
-_plus
+_square
+_laser_blast
 _wall
 _needle
 _ring
-_orbit
 _missile
 _mine
 _laser
