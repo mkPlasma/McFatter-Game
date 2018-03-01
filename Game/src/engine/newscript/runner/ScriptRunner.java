@@ -15,6 +15,7 @@ import engine.newscript.ScriptException;
 import engine.newscript.ScriptHandler;
 import engine.newscript.bytecodegen.Instruction;
 import engine.newscript.bytecodegen.InstructionSet;
+import sun.font.Script;
 
 /**
  * 
@@ -289,13 +290,13 @@ public class ScriptRunner{
 				
 			case init_params:{
 				
-				Queue<Object> p = new LinkedList<Object>();
+				Stack<Object> s = new Stack<Object>();
 				
 				for(int j = 0; j < op; j++)
-					p.add(pop());
-
+					s.push(pop());
+				
 				for(int j = 0; j < op; j++)
-					setLocalVar(j, p.remove());
+					setLocalVar(j, s.pop());
 				
 				return;
 			}
