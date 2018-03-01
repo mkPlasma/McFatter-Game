@@ -161,7 +161,7 @@ public class BuiltInFunctionList{
 						y2 = castFloat(array.get(1));
 					}
 					
-					return (float)Math.atan2(y1 - y2, x1 - x2);
+					return (float)Math.toDegrees(Math.atan2(y2 - y1, x2 - x1));
 				}
 			},
 			new BIFunc("angleToLocation", 4){
@@ -170,8 +170,8 @@ public class BuiltInFunctionList{
 					float y1 = castFloat(params[1]);
 					float x2 = castFloat(params[2]);
 					float y2 = castFloat(params[3]);
-
-					return (float)Math.atan2(y1 - y2, x1 - x2);
+					
+					return (float)Math.toDegrees(Math.atan2(y2 - y1, x2 - x1));
 				}
 			},
 			
@@ -261,6 +261,20 @@ public class BuiltInFunctionList{
 			},
 			
 			
+			
+			
+			// Math
+
+			new BIFunc("cos", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return (float)Math.toDegrees(Math.cos(castFloat(params[0])));
+				}
+			},
+			new BIFunc("sin", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return (float)Math.toDegrees(Math.sin(castFloat(params[0])));
+				}
+			},
 			
 			
 
