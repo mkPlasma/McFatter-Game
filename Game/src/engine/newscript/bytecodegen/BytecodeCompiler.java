@@ -77,9 +77,25 @@ public class BytecodeCompiler{
 		functionsOnly = false;
 		withinFunction = false;
 		
+		// Compile parse units
 		for(Object o:parseTree)
 			compile((ParseUnit)o);
 		
+		
+		// Replace function calls
+		for(int i = 0; i < bytecode.size(); i++){
+			
+			Instruction inst = bytecode.get(i);
+			InstructionSet name = InstructionSet.getName(inst.getOpcode());
+			
+			if(name == jump_func || name == jump_func_r){
+				
+				int funcNum = inst.getOperand();
+				boolean exp = name == jump_func_r;
+				
+				bytecode.set(i, inst(task.get(funcNum) ? (exp ? jump_branch_r : jump_branch) : (exp ? jump_func_r : jump_func), functions.get(funcNum), inst.getFileIndex(), inst.getLineNum()));
+			}
+		}
 		
 		script.setBytecode(bytecode.toArray(new Instruction[0]));
 		
@@ -89,8 +105,6 @@ public class BytecodeCompiler{
 	private void compile(ParseUnit p){
 		
 		Object[] contents = p.getContents();
-		
-		System.out.println(p.getType());
 		
 		switch(p.getType()){
 			
@@ -358,15 +372,13 @@ public class BytecodeCompiler{
 				// Whether function call is in an expression/should accept a return value
 				boolean exp = p.isWithin("expression");
 				
-				System.out.println("TYPE IS " + p.getType());
-				
 				// Standard function call
 				if(p.getType().equals("func_call")){
 					// Function number
-					int func = Integer.parseInt(((Token)contents[0]).getValue());
+					int funcNum = Integer.parseInt(((Token)contents[0]).getValue());
 					
-					// Add jump
-					add(task.get(func) ? (exp ? jump_branch_r : jump_branch) : (exp ? jump_func_r : jump_func), functions.get(func), p);
+					// Add placeholder jump to replace later
+					add(exp ? jump_func_r : jump_func, funcNum, p);
 					return;
 				}
 				
@@ -449,8 +461,11 @@ public class BytecodeCompiler{
 				while(functions.size() < funcNum + 1)
 					functions.add(0);
 				
+				while(task.size() < funcNum + 1)
+					task.add(false);
+				
 				functions.set(funcNum, bytecode.size());
-				task.add(p.getType().equals("task_block"));
+				task.set(funcNum, p.getType().equals("task_block"));
 				
 				// Initialize parameters
 				if(params > 0)
@@ -699,6 +714,10 @@ public class BytecodeCompiler{
 	
 	public Instruction inst(InstructionSet i, int val, ParseUnit p){
 		return new Instruction(InstructionSet.getOpcode(i), val, getFileIndex(p, script), getLineNum(p));
+	}
+	
+	public Instruction inst(InstructionSet i, int val, int fileIndex, int lineNum){
+		return new Instruction(InstructionSet.getOpcode(i), val, fileIndex, lineNum);
 	}
 	
 	public Instruction inst(byte i, int val, ParseUnit p){

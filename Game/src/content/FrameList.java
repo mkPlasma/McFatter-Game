@@ -112,9 +112,6 @@ public class FrameList{
 			vars[i + offset + len][1] = Integer.toString(i + len);
 		}
 		
-		for(String[] s:vars)
-			System.out.println(s[0]);
-		
 		return vars;
 	}
 	

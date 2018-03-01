@@ -27,7 +27,7 @@ public class FunctionReplacer{
 	private final BuiltInFunctionList biFunc;
 	
 	public FunctionReplacer(){
-		functions	= new Stack<ArrayList<String>>();
+		functions = new Stack<ArrayList<String>>();
 		biFunc = new BuiltInFunctionList(null);
 	}
 	
