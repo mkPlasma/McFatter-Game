@@ -42,13 +42,13 @@ public class MainScreen extends GameScreen{
 	private ArrayList<Effect> effects;
 	private ArrayList<Text> texts;
 	private Text fpsText;
+	private Text pauseText;
 	
 	private Player player;
 	
 	private int time, rTime;
 	
 	private boolean paused;
-	private int pauseTime = -30;
 	private boolean tickFrame;
 	
 	private int clearScreen;
@@ -71,6 +71,9 @@ public class MainScreen extends GameScreen{
 		
 		fpsText = new Text("", 0, 470, 1, tc);
 		addText(fpsText);
+		
+		pauseText = new Text("Paused", 430, 120, 1, tc);
+		addText(pauseText);
 		
 		time = 0;
 		rTime = 0;
@@ -100,6 +103,8 @@ public class MainScreen extends GameScreen{
 	
 	public void render(){
 		
+		pauseText.setVisible(paused);
+		
 		r.setTime(rTime);
 		r.updatePlayer(player);
 		r.updateEnemyBullets(enemyBullets);
@@ -126,10 +131,8 @@ public class MainScreen extends GameScreen{
 		
 		
 		// Pause
-		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_ESCAPE) && time > pauseTime + 30){
+		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_ESCAPE))
 			paused = !paused;
-			pauseTime = time;
-		}
 		
 		debugKeys();
 		
@@ -218,6 +221,25 @@ public class MainScreen extends GameScreen{
 				e.delete();
 		
 		clearScreen = 0;
+	}
+	
+	public void clearAll(){
+		
+		for(Bullet b:enemyBullets)
+			b.delete();
+		
+		for(Bullet b:playerBullets)
+			b.delete();
+		
+		for(Enemy e:enemies)
+			e.delete();
+		
+		for(Effect e:effects)
+			e.delete();
+	}
+	
+	public void unpause(){
+		paused = false;
 	}
 	
 	private void updateBullets(){

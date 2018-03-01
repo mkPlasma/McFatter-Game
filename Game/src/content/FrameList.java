@@ -108,9 +108,12 @@ public class FrameList{
 		for(int i = 0; i < len; i++){
 			vars[i + offset][0] = "_" + colors[i];
 			vars[i + offset][1] = Integer.toString(i);
-			vars[i + offset + len][0] = colors[i] + "_d";
+			vars[i + offset + len][0] = "_" + colors[i] + "_d";
 			vars[i + offset + len][1] = Integer.toString(i + len);
 		}
+		
+		for(String[] s:vars)
+			System.out.println(s[0]);
 		
 		return vars;
 	}
