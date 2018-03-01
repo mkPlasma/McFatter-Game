@@ -35,6 +35,6 @@ public class Parser{
 		treeCheck.process(script);
 		treeSimplify.process(script);
 		
-		//ScriptPrinter.printParseTree(script.getParseTree().toArray(new Object[0]));
+		ScriptPrinter.printParseTree(script.getParseTree().toArray(new Object[0]));
 	}
 }

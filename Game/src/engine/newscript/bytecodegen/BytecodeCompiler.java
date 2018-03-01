@@ -99,7 +99,7 @@ public class BytecodeCompiler{
 		
 		script.setBytecode(bytecode.toArray(new Instruction[0]));
 		
-		//ScriptPrinter.printBytecode(bytecode);
+		ScriptPrinter.printBytecode(bytecode);
 	}
 	
 	private void compile(ParseUnit p){
@@ -600,6 +600,10 @@ public class BytecodeCompiler{
 	private void compileExpression(ParseUnit p){
 		
 		Object[] contents = p.getContents();
+		
+		// Parenthesized
+		if(contents[0] instanceof ParseUnit && ((ParseUnit)contents[0]).getType().equals("expression_p"))
+			contents = ((ParseUnit)((ParseUnit)contents[0]).getContents()[0]).getContents();
 		
 		// Value
 		if(contents.length == 1){

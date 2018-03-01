@@ -54,7 +54,7 @@ public class ScriptSelector{
 		directoryText	= new Text("", 60, 40, 0.75f, screen.getTextureCache());
 		fileList		= new Text("", 60, 60, 0.75f, screen.getTextureCache());
 		cursor			= new Text(">", 45, 0, 1, screen.getTextureCache());
-
+		
 		screen.addText(directoryText);
 		screen.addText(fileList);
 		screen.addText(cursor);
