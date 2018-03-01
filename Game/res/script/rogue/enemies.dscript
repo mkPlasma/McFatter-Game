@@ -1,19 +1,19 @@
 task speedster(x, y, type, color, dir, spd ,health,inv){
 
-    set c = 3;
+    set const c = 3;
 
     set e = enemy(_radial, x,y,health);
     e.setDir(dir);
     e.setSpd(spd);
     while(!e.isDeleted()){
-        for(d in 0, 360/c, 360){
-            bullets(d);
+        for(d < 0, 360/c, 360){
+            bullets(d,type,color,e.getPos());
         }
         wait 2;
     }
 
-    task bullets(d){
-        set b = bullet(type, color, e.getPos(), rand(0,360), 0, -15 + d/6);
+    task bullets(d,type,color,pos){
+        set b = bullet(type, color, pos, rand(0,360), 0, -15 + d/6);
         wait 120;
         b.setMaxSpd(3);
         b.setAccel(0.03);
@@ -24,30 +24,66 @@ task speedster(x, y, type, color, dir, spd ,health,inv){
 }
 
 task bomber(x, y,dir, spd ,health){
+    set angvel = 1.5;
+    set counter = 0;
     set e = enemy(_fighter, x,y,health);
-    set c = 8;
+    set const c = 8;
     e.setDir(dir);
     e.setSpd(spd);
     e.setAccel(-0.05);
     e.setMinSpd(0);
     while(!e.isDeleted()){
-        bullets();
+        bullets(e.getPos());
         wait 5;
+        counter +=5;
+        if(counter == 500){
+            break;
+        }
     }
-    task bullets(){
-        set b = bullet(_mine, _red_d, e.getPos(), rand(0, 180), 3, -15);
-        b.setScale(2);
+    e.setDir(90);
+    e.setSpd(6);
+    e.setAccel(-0.009);
+    e.setMinSpd(0);
+    e.setAngVel(angvel);
+    wait 200;
+    e.delete();
+    return;
+
+    task bullets(pos){
+        set const c = 8;
+        set b = bullet(_mine, _red, pos, rand(0, 180), 3, -15);
+        //b.setScale(2);
         b.setMaxSpd(3);
         b.setAccel(.08);
         wait 60;
         b.delete();
-        for(d in 0, 360/c, 360){
+        for(d < 0, 360/c, 360){
             bullets2(b.getPos(), rand(0, 360)+ d);
         }
 
 
     }
     task bullets2(pos, dir2){
-        set b = bullet(_scale, _red_d, pos, dir2, 2, -15);
+        set b = bullet(_scale, _red, pos, dir2, 2, -15);
     }
+
     }
+
+task basic(x, y, health,spd,dir){
+    set e = enemy(_fighter, x,y,health);
+    set const c = 15;
+    e.setDir(90);
+    e.setSpd(spd);
+    e.setAccel(-0.05);
+    e.setMinSpd(0);
+    while(!e.isDeleted()){
+        for(d < 0, 360/c, 360){
+            bullets(dir + d,e.getPos());
+        }
+        wait 30;
+        dir += rand(5, 7);
+    }
+    task bullets(dir3,pos){
+        set b = bullet(_scale, _red, pos, dir3, 3, -15);
+    }
+}

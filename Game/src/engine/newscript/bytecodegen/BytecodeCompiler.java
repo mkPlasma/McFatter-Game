@@ -90,6 +90,8 @@ public class BytecodeCompiler{
 		
 		Object[] contents = p.getContents();
 		
+		System.out.println(p.getType());
+		
 		switch(p.getType()){
 			
 			case "statements":
@@ -355,6 +357,8 @@ public class BytecodeCompiler{
 				
 				// Whether function call is in an expression/should accept a return value
 				boolean exp = p.isWithin("expression");
+				
+				System.out.println("TYPE IS " + p.getType());
 				
 				// Standard function call
 				if(p.getType().equals("func_call")){
