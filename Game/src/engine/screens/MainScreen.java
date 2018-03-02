@@ -27,7 +27,7 @@ import engine.newscript.ScriptSelector;
 
 public class MainScreen extends GameScreen{
 	
-	public static final int MAX_ENEMY_BULLETS = 5024,
+	public static final int MAX_ENEMY_BULLETS = 4096,
 							MAX_PLAYER_BULLETS = 128,
 							MAX_ENEMIES = 64,
 							MAX_EFFECTS = 2048,
