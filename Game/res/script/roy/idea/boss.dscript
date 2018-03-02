@@ -1,185 +1,144 @@
-set hp = 10000;
-set e = boss(_fighter, _cx, _ty, hp);
-e.setDir(90);
-e.setSpd(3.5);
-e.setAccel(-0.05);
-e.setMinSpd(0);
+set e = boss(_fighter, _cx, _top, 5000);
 
-set cSpecial = 5;
+#include bossMovement;
+bossMovement(e);
+spellcard();
+set const cSpecial = 5;
 
-idea1();
-while(e.getHealth()> hp/2){
-    wait;
+task spellcard(){
+    wait 60;
+    idea2a();
 }
-e.setInvulnerable();
-wait 60;
-e.setInvulnerable(false);
-nonspell();
-while(e.getHealth()> 0){
-    wait;
-}
-
-
-task nonspell(){
-  wait 60;
-  idea2a();
-
-  wait 45;
-  idea2b();
-
-  wait 60;
-  idea2c();
-}
-
 task idea2a(){
-    set c = 45;
-
-    set x = e.getX();
-    set y = e.getY();
-
+    
     set dir;
-
+    
     set bool = true;
-
-    while(!e.isDeleted()){
-
-        for(j in 0, 2){
-            for(i in 0, cSpecial * 1.2){
-                for(d in 0, 360/c, 360){
-                    bullet0(x, y, dir + d);
-                    bullet0(x, y, dir + d + 2);
+        
+        for(j < 0, 2){
+            for(a < 0, 10){
+                for(d < 0, 360/(cSpecial * 9), 360){
+                    set x = e.getX();
+                    set y = e.getY();
+                    
+                    bullet(x, y, dir + d);
+                    bullet(x, y, dir + d + 2);
                 }
-
+                
                 if(bool){
                     dir += 90;
                 }
-
                 else{
                     dir -= 90;
                 }
-
+                
+                print(a);
+                
                 wait 5;
+            
             }
-
             wait 30;
-
             bool!!;
         }
-
-        wait 60;
+        
+        wait 120;
+        
     }
-}
 
 task idea2b(){
-
-    set c = 20;
-
-    set x = e.getX();
-    set y = e.getY();
-
+    
     set dir;
-    set bool = true;
-
     while(!e.isDeleted()){
-        for(i in 0, cSpecial){
-          for(d in 0, 360/c, 360){
-            bullet1(x, y, dir + d);
-            bullet1(x, y, dir + d + 2);
-          }
-
-          if(bool){
-            dir += 20;
-          }
-
-          else{
+        for(i < 0, cSpecial){
+            set random = rand(1,9);
+        
+            for(d < 0, 360/(cSpecial * 4), 360){
+                set x = e.getX();
+                set y = e.getY();
+                
+                bullet1(x, y, dir + d);
+                bullet1(x, y, dir + d + 2);
+            }
+            
+            wait 8;
             dir -= 20;
-          }
-
-          wait 5;
+        
         }
-
         wait 30;
-
-        bool!!;
-    }
-}
-
-task idea2c(){
-
-    set c = 5;
-
-    set x = e.getX();
-    set y = e.getY();
-
-    set dir;
-
-    while(!e.isDeleted()){
-      for(i in 0, cSpecial * 2){
-
-          set a1 = sin(rand(0,360));
-
-          for(d in 0, 360/c, 360){
-            bullet2(x, y, dir + d);
-          }
-
-          wait 8;
-
-          dir += 20;
-
+        
+        if(moving){
+            break;
         }
-
-      wait 30;
+        
     }
+    
+}
+    
+task idea2c(){
+    
+    set dir;
+    
+    while(!e.isDeleted()){
+        
+        for(i < 0, cSpecial * 2){
+        
+            set a1 = sin(rand(0,360));
+            
+            for(d < 0, 360/cSpecial, 360){
+                set x = e.getX();
+                set y = e.getY();
+                
+                bullet2(x, y, dir + d);
+            }
+        
+            wait 8;
+            dir += 20;
+        
+        }
+        wait 30;
+        if(moving){
+            break;
+        }
+        
+    }
+    
 }
 
 task idea1(){
-
-    set c = 45;
-
-    wait 60;
+    
     while(!e.isDeleted()){
-
+        
         set x = e.getX() + rand(120);
         set y = e.getY() + rand(60);
-
+        
         set dir = rand(0, 360);
-
-        for(d in 0, 360/c, 360){
-
+        
+        for(d < 0, 360/(cSpecial * 5), 360){
             bullet(x, y, dir + d);
-
         }
-
         wait 8;
-          if(e.getHealth() < hp/2){
-            clearBullets();
-            return;
-          }
-
-          wait;
+        
+        if(moving){
+            break;
+        }
     }
 }
 
-
 task bullet(x, y, dir){
-    set b = bullet(_laser_blast, _purple_d, x, y, dir, 2, 10);
+    set b = bullet(_laser_blast, _red, x, y, dir, 2, 5);
     b.setAccel(0.1);
     b.setMaxSpd(4);
-}
-task bullet0(x, y, dir){
-    set b = bullet(_star4, _pink, x, y, dir, 2, 10);
-    b.setAccel(0.1);
-    b.setMaxSpd(4);
-}
+} 
 task bullet1(x, y, dir){
     set b = bullet(_star, _blue, x, y, dir, .1, 10);
     b.setAccel(0.1);
     b.setMaxSpd(3);
-}
+} 
 task bullet2(x, y, dir){
-    set b = bullet(_orb, _purple_d, x, y, dir, .1, 10);
+    set b = bullet(_square, _purple_d, x, y, dir, .1, 30);
     b.setAccel(0.1);
     b.setMaxSpd(2);
-    b.setScale(2.5);
-    b.setHitboxSize(5);
-}
+    //b.setScale(2.5);
+    //b.setHitboxSize(5);
+    //b.setAdditive();
+} 

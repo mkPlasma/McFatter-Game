@@ -1,0 +1,31 @@
+set moving = false;
+e.setDir(90);
+e.setSpd(3.5);
+e.setAccel(-0.05);
+e.setMinSpd(0);
+wait 60;
+
+task bossMovement(e){
+
+    wait 240;
+    while(!e.isDeleted()){
+        set waitTime = rand(2,4);
+        set accel = randf(0.05, 0.09);
+        set spd = randf(2.5, 4);
+        moving = true;
+        set x = rand(_left + 80, _right - 80);
+        set y = rand(_top + 100, _top + 120);
+        
+        e.setDir(angleToLocation(e.getX(), e.getY(), x, y));
+        e.setSpd(3.5);
+        e.setAccel(-1 * accel);
+        e.setMinSpd(0);
+        
+        
+        wait 45;
+        
+        e.setDir(90);
+        moving = false;
+        wait waitTime * 60;
+    }
+}
