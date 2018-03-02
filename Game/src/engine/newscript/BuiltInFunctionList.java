@@ -84,7 +84,35 @@ public class BuiltInFunctionList{
 				}
 			},
 			
-
+			
+			
+			
+			
+			
+			// Math
+			
+			new BIFunc("cos", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return (float)Math.cos(Math.toRadians(castFloat(params[0])));
+				}
+			},
+			new BIFunc("sin", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return (float)Math.sin(Math.toRadians(castFloat(params[0])));
+				}
+			},
+			new BIFunc("tan", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return (float)Math.tan(Math.toRadians(castFloat(params[0])));
+				}
+			},
+			
+			new BIFunc("abs", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return (float)Math.abs(castFloat(params[0]));
+				}
+			},
+			
 			// Angle from position to player
 			// pos
 			new BIFunc("angleToPlayer", 1){
@@ -263,18 +291,6 @@ public class BuiltInFunctionList{
 			
 			
 			
-			// Math
-
-			new BIFunc("cos", 1){
-				protected Object run(Instruction inst, Object[] params){
-					return (float)Math.toDegrees(Math.cos(castFloat(params[0])));
-				}
-			},
-			new BIFunc("sin", 1){
-				protected Object run(Instruction inst, Object[] params){
-					return (float)Math.toDegrees(Math.sin(castFloat(params[0])));
-				}
-			},
 			
 			
 

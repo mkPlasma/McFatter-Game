@@ -33,6 +33,7 @@ public class Renderer{
 						  laserHitboxShader;
 	
 	private ArrayList<RenderBatch> renderBatches;
+	private ArrayList<RenderBatch> objRenderBatches;
 	
 	private RenderBatch
 		rbPlayer,
@@ -58,6 +59,7 @@ public class Renderer{
 	
 	private int time;
 	
+	private boolean renderObjects;
 	private boolean renderHitboxes;
 	
 	public Renderer(TextureCache tc){
@@ -95,8 +97,9 @@ public class Renderer{
 		laserHitboxShader.bindAttrib(3, "transforms");
 		laserHitboxShader.bindAttrib(4, "alpha");
 		laserHitboxShader.link();
-		
-		renderBatches = new ArrayList<RenderBatch>();
+
+		renderBatches	= new ArrayList<RenderBatch>();
+		objRenderBatches	= new ArrayList<RenderBatch>();
 	}
 	
 	// Initialize rendering for MainScreen
@@ -163,13 +166,30 @@ public class Renderer{
 		renderBatches.add(rbEnemyBulletsLa);
 		
 		renderBatches.add(rbEffects);
-
+		
 		renderBatches.add(rbHitboxes);
 		renderBatches.add(rbLaserHitboxes);
 		
 		renderBatches.add(rbBorder);
 		
 		renderBatches.add(rbText);
+		
+		// Add batches to objects-only list
+		objRenderBatches.add(rbEnemies);
+		objRenderBatches.add(rbPlayerBullets);
+		objRenderBatches.add(rbPlayer);
+		
+		objRenderBatches.add(rbEnemyBullets1);
+		objRenderBatches.add(rbEnemyBullets1a);
+		objRenderBatches.add(rbEnemyBullets2);
+		objRenderBatches.add(rbEnemyBullets2a);
+		objRenderBatches.add(rbEnemyBulletsL);
+		objRenderBatches.add(rbEnemyBulletsLa);
+		
+		objRenderBatches.add(rbEffects);
+
+		objRenderBatches.add(rbHitboxes);
+		objRenderBatches.add(rbLaserHitboxes);
 	}
 	
 	public void setTime(int time){
@@ -281,6 +301,9 @@ public class Renderer{
 			
 			RenderBatch rb = renderBatches.get(i);
 			
+			if(!renderObjects && objRenderBatches.contains(rb))
+				continue;
+			
 			if(rb.getShader() == 0)
 				basicShader.use();
 			else if(rb.getShader() == 1){
@@ -303,6 +326,10 @@ public class Renderer{
 			
 			rb.render();
 		}
+	}
+	
+	public void renderObjects(boolean renderObjects){
+		this.renderObjects = renderObjects;
 	}
 	
 	public void toggleRenderHitboxes(){

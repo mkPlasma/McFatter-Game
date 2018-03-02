@@ -601,6 +601,10 @@ public class BytecodeCompiler{
 		
 		Object[] contents = p.getContents();
 		
+		// Parenthesized
+		if(contents[0] instanceof ParseUnit && ((ParseUnit)contents[0]).getType().equals("expression_p"))
+			contents = ((ParseUnit)((ParseUnit)contents[0]).getContents()[0]).getContents();
+		
 		// Value
 		if(contents.length == 1){
 			

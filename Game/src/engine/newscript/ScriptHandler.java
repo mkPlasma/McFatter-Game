@@ -21,9 +21,14 @@ public class ScriptHandler{
 	
 	private final Compiler compiler;
 	private final ScriptRunner runner;
-	
+
+	private Text compileText;
 	private Text errorText;
 	
+	// Init on next frame
+	private int init;
+	
+	// Stop running
 	private boolean stop;
 	
 	// Running branches
@@ -42,6 +47,10 @@ public class ScriptHandler{
 		compiler = new Compiler();
 		runner = new ScriptRunner(this);
 		
+		compileText = new Text("Compiling...", 40, 40, 0.75f, screen.getTextureCache());
+		compileText.setVisible(false);
+		screen.addText(compileText);
+		
 		errorText = new Text("", 40, 40, 0.75f, screen.getTextureCache());
 		errorText.setVisible(false);
 		screen.addText(errorText);
@@ -51,11 +60,24 @@ public class ScriptHandler{
 	
 	public void init(String scriptPath){
 		this.scriptPath = scriptPath;
-		init();
+		initNextFrame();
+	}
+	
+	public void reload(){
+		initNextFrame();
+	}
+	
+	private void initNextFrame(){
+		init = 1;
+		compileText.setVisible(true);
+		errorText.setVisible(false);
 	}
 	
 	private void init(){
 		script = new DScript(scriptPath);
+		
+		compileText.setVisible(false);
+		init = -1;
 		
 		try{
 			compiler.compile(script);
@@ -77,6 +99,13 @@ public class ScriptHandler{
 	
 	public void run(){
 		
+		if(init == 0)
+			init();
+		else if(init > 0){
+			init--;
+			return;
+		}
+		
 		if(stop)
 			return;
 		
@@ -95,10 +124,6 @@ public class ScriptHandler{
 			if(b.isFinished())
 				branches.remove(currentBranch--);
 		}
-	}
-	
-	public void reload(){
-		init();
 	}
 	
 	public void addBranch(Branch branch){

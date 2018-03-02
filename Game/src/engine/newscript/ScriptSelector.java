@@ -1,4 +1,4 @@
-package engine.screens;
+package engine.newscript;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,7 +8,7 @@ import org.lwjgl.glfw.GLFW;
 
 import engine.KeyboardListener;
 import engine.entities.Text;
-import engine.newscript.ScriptHandler;
+import engine.screens.MainScreen;
 
 /**
  * 
@@ -54,7 +54,7 @@ public class ScriptSelector{
 		directoryText	= new Text("", 60, 40, 0.75f, screen.getTextureCache());
 		fileList		= new Text("", 60, 60, 0.75f, screen.getTextureCache());
 		cursor			= new Text(">", 45, 0, 1, screen.getTextureCache());
-
+		
 		screen.addText(directoryText);
 		screen.addText(fileList);
 		screen.addText(cursor);
@@ -76,7 +76,7 @@ public class ScriptSelector{
 		
 		// Empty folder
 		if(fileArr == null){
-			fileList.setText("(empty)");
+			fileList.setText("\n(empty)");
 			return;
 		}
 		
@@ -102,7 +102,7 @@ public class ScriptSelector{
 	}
 	
 	public void update(){
-
+		
 		// Select script or cancel with ~
 		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_GRAVE_ACCENT)){
 			selecting = !selecting;
@@ -136,6 +136,9 @@ public class ScriptSelector{
 		
 		// Select
 		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_Z)){
+			
+			if(files.isEmpty())
+				return;
 			
 			String file = files.get(cursorPos);
 			
@@ -175,7 +178,7 @@ public class ScriptSelector{
 			int i = dir.lastIndexOf('/');
 			
 			if(i > 0)
-				dir = dir.substring(0, i);
+				dir = dir.substring(0, i + 1);
 			else
 				dir = "";
 			
