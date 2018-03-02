@@ -27,6 +27,10 @@ public class Preprocessor{
 	
 	private int lineNum;
 	
+	// Muli-line comments
+	private boolean inComment;
+	
+	
 	public Preprocessor(){
 		files		= new ArrayList<ArrayList<String>>();
 		filePaths	= new ArrayList<String>();
@@ -75,6 +79,57 @@ public class Preprocessor{
 				continue;
 			}
 			
+			// Multi-line comment
+			int ind, ind2;
+			
+			do{
+				ind = getIndexOutOfQuotes(line, "/*");
+				ind2 = getIndexOutOfQuotes(line, "*/");
+				
+				// If closing found, or both and closing is first
+				if(ind2 > -1 && (ind < 0 || (ind > -1 && ind2 < ind))){
+					
+					// Close comment
+					if(inComment){
+						line = line.substring(ind2 + 2);
+						mainFile.set(i, line);
+						continue;
+					}
+					else
+						throw new ScriptException("Invalid end of comment", lineNum);
+				}
+				
+				// Comment on single line
+				if(ind > -1 && ind2 > -1){
+					line = line.substring(0, ind) + line.substring(ind2 + 2);
+					mainFile.set(i, line);
+					continue;
+				}
+				
+				// Start of comment
+				if(ind > -1){
+					inComment = true;
+					line = line.substring(0, ind);
+					mainFile.set(i, line);
+					continue;
+				}
+				
+			}while(ind > -1 || ind2 > -1);
+			
+			
+			if(inComment){
+				lineNum++;
+				continue;
+			}
+			
+			// Single-line comment
+			ind = getIndexOutOfQuotes(line, "//");
+			
+			if(ind > -1){
+				line = line.substring(0, ind);
+				mainFile.set(i, line);
+			}
+			
 			// Include statement
 			if(line.startsWith("#include")){
 				
@@ -91,38 +146,43 @@ public class Preprocessor{
 			
 			
 			
-			// Single-line comment
-			int ind = 0;
-			int offset = 0;
-			
-			do{
-				ind = line.substring(offset).indexOf("//");
-				
-				if(ind > -1){
-					ind += offset;
-					
-					// Check that comment is not in string
-					int q = 0;
-					
-					for(int j = 0; j < ind; j++){
-						if(line.charAt(j) == '"' && (j == 0 || (j > 0 && line.charAt(j - 1) != '\\')))
-							q++;
-					}
-					
-					// If not in string, remove and replace
-					if(q%2 == 0)
-						mainFile.set(i, line.substring(0, ind));
-					
-					offset = ind + 2;
-				}
-			}while(ind > -1);
-			
 			
 			
 			lineNum++;
 		}
 		
 		script.setFile(mainFile.toArray(new String[0]));
+	}
+	
+	// Get index of a string only if it is outside of quotes
+	private int getIndexOutOfQuotes(String line, String s){
+		
+		int ind;
+		int offset = 0;
+		
+		do{
+			ind = line.substring(offset).indexOf(s);
+			
+			if(ind > -1){
+				ind += offset;
+				
+				// Check that comment is not in string
+				int q = 0;
+				
+				for(int j = 0; j < ind; j++){
+					if(line.charAt(j) == '"' && (j == 0 || (j > 0 && line.charAt(j - 1) != '\\')))
+						q++;
+				}
+				
+				// If not in string, return
+				if(q%2 == 0)
+					return ind;
+				
+				offset = ind + 2;
+			}
+		}while(ind > -1);
+		
+		return -1;
 	}
 	
 	private ArrayList<String> replaceInclude(String line) throws ScriptException{

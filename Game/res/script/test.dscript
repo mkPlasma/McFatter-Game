@@ -1,10 +1,12 @@
 
+
 set const c = 3;
 set const sc = 16;
 set const maxIter = 1;
 
 set dir;
 set const dirAdd = -16;
+
 
 while(true){
 	for(d < 3)

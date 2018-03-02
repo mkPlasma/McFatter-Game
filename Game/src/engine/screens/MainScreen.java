@@ -15,6 +15,7 @@ import engine.entities.Text;
 import engine.graphics.Renderer;
 import engine.graphics.TextureCache;
 import engine.newscript.ScriptHandler;
+import engine.newscript.ScriptSelector;
 
 /**
  * 
@@ -26,7 +27,7 @@ import engine.newscript.ScriptHandler;
 
 public class MainScreen extends GameScreen{
 	
-	public static final int MAX_ENEMY_BULLETS = 204800,
+	public static final int MAX_ENEMY_BULLETS = 5024,
 							MAX_PLAYER_BULLETS = 128,
 							MAX_ENEMIES = 64,
 							MAX_EFFECTS = 2048,
@@ -72,7 +73,7 @@ public class MainScreen extends GameScreen{
 		fpsText = new Text("", 0, 470, 1, tc);
 		addText(fpsText);
 		
-		pauseText = new Text("Paused", 430, 120, 1, tc);
+		pauseText = new Text("Paused!", 430, 120, 1, tc);
 		addText(pauseText);
 		
 		time = 0;
@@ -113,6 +114,8 @@ public class MainScreen extends GameScreen{
 		r.updateEffects(effects);
 		r.updateHitboxes(enemyBullets, enemies, player);
 		r.updateText(texts);
+		
+		r.renderObjects(!scriptSelector.selecting());
 		
 		r.render();
 		
