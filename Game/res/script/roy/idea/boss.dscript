@@ -14,10 +14,11 @@ task idea2a(){
     set dir;
     
     set bool = true;
+    while(!e.isDeleted()){
         
-        for(j < 0, 2){
-            for(a < 0, 10){
-                for(d < 0, 360/(cSpecial * 9), 360){
+        for(i < 0, 2){
+            for(j < 0, 10){
+                for(d < 0, 360/cSpecial, 360){
                     set x = e.getX();
                     set y = e.getY();
                     
@@ -31,9 +32,6 @@ task idea2a(){
                 else{
                     dir -= 90;
                 }
-                
-                print(a);
-                
                 wait 5;
             
             }
@@ -43,7 +41,11 @@ task idea2a(){
         
         wait 120;
         
+        if(moving){
+            break;
+        }
     }
+}
 
 task idea2b(){
     
