@@ -99,7 +99,7 @@ public class BytecodeCompiler{
 		
 		script.setBytecode(bytecode.toArray(new Instruction[0]));
 		
-		ScriptPrinter.printBytecode(bytecode);
+		//ScriptPrinter.printBytecode(bytecode);
 	}
 	
 	private void compile(ParseUnit p){

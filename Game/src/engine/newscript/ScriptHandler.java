@@ -70,10 +70,14 @@ public class ScriptHandler{
 	private void initNextFrame(){
 		init = 1;
 		compileText.setVisible(true);
+		errorText.setVisible(false);
 	}
 	
 	private void init(){
 		script = new DScript(scriptPath);
+		
+		compileText.setVisible(false);
+		init = -1;
 		
 		try{
 			compiler.compile(script);
@@ -85,13 +89,11 @@ public class ScriptHandler{
 		
 		runner.init(script);
 		
-		compileText.setVisible(false);
 		errorText.setVisible(false);
 		
 		branches.clear();
 		branches.add(new Branch(script.getEntryPoint()));
 		
-		init = -1;
 		stop = false;
 	}
 	

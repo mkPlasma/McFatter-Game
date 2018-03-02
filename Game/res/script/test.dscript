@@ -1,2 +1,36 @@
-for(i < 1, 10)
-	print(i);
+
+set const c = 3;
+set const sc = 16;
+set const maxIter = 1;
+
+set dir;
+set const dirAdd = -16;
+
+while(true){
+	for(d < 3)
+		split({_cx, _top + 120}, dir + d*(360/c), (d -> _red, _green, _blue), 0);
+	
+	dir += dirAdd;
+	
+	wait 15;
+}
+
+task split(pos, dir, col, iterations){
+	
+	set b = bullet(_rice, col, pos, dir, 1.2, 10);
+	
+	if(iterations != maxIter){
+		b.setSpd(6);
+		b.setAccel(-0.2);
+		b.setMinSpd(0);
+	}
+	
+	wait 45;
+	
+	if(iterations < maxIter){
+		b.delete();
+		
+		for(d < 0, 360/sc, 360)
+			split(b.getPos(), dir + d, col, iterations + 1);
+	}
+}

@@ -168,8 +168,10 @@ public class MainScreen extends GameScreen{
 		// Reload script with Alt+R
 		if(KeyboardListener.isKeyDown(GLFW.GLFW_KEY_LEFT_ALT) && KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_R)){
 			scriptHandler.reload();
+			
 			resetPlayer();
-			clearScreen = 2;
+			clearAll();
+			paused = false;
 		}
 		
 		// Clear bullets with Alt+C

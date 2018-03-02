@@ -348,29 +348,25 @@ public class VariableReplacer{
 		return false;
 	}
 	
-	private int getVariablesScooe(String var){
+	private boolean isConstantVariable(String var){
 		
-		if(!localVariables.isEmpty()){
-			for(int i = localVariables.peek().size() - 1; i >= 0; i--){
-				
-				ArrayList<String> vars = localVariables.peek().get(i);
-				
-				for(String v:vars)
-					if(getName(v).equals(var))
-						return getNum(v);
-			}
-		}
-		
-		for(int i = globalVariables.size() - 1; i >= 0; i--){
+		for(int i = constVariables.size() - 1; i >= 0; i--){
 			
-			ArrayList<String> vars = globalVariables.get(i);
+			int ind2 = i - globalVariables.size();
 			
+			ArrayList<String> vars = localVariables.isEmpty() || ind2 < 0 ? globalVariables.get(i) : localVariables.peek().get(ind2);
+			ArrayList<String> constVars = constVariables.get(i);
+
 			for(String v:vars)
 				if(getName(v).equals(var))
-					return getNum(v);
+					return false;
+			
+			for(String v:constVars)
+				if(getName(v).equals(var))
+					return true;
 		}
 		
-		return -1;
+		return false;
 	}
 	
 	private boolean isConstantVariableInScope(String var, int scope){
