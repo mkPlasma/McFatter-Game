@@ -548,17 +548,17 @@ public class ScriptRunner{
 			float f = (float)v;
 			
 			switch(i){
-				case op_inc:	f++;		break;
-				case op_dec:	f--;		break;
-				case op_inv:	f = -f;		break;
+				case op_inc: case op_inc_l:	f++;		break;
+				case op_dec:	case op_dec_l:	f--;		break;
+				case op_inv:	case op_inv_l:	f = -f;		break;
 				
 				default:	return;
 			}
 			
 			if(local)
-				localVariables.peek().set(op, f);
+				setLocalVar(op, f);
 			else
-				globalVariables.set(op, f);
+				setGlobalVar(op, f);
 			
 			return;
 		}
@@ -567,22 +567,22 @@ public class ScriptRunner{
 			int n = (int)v;
 			
 			switch(i){
-				case op_inc:	n++;		break;
-				case op_dec:	n--;		break;
-				case op_inv:	n = -n;		break;
+				case op_inc: case op_inc_l:	n++;		break;
+				case op_dec:	case op_dec_l:	n--;		break;
+				case op_inv:	case op_inv_l:	n = -n;		break;
 				
 				default:	return;
 			}
 			
 			if(local)
-				localVariables.peek().set(op, n);
+				setLocalVar(op, n);
 			else
-				globalVariables.set(op, n);
+				setGlobalVar(op, n);
 			
 			return;
 		}
 		
-		if(i != op_inv)
+		if(i != op_inv && i != op_inv_l)
 			throwException("Type mismatch, expected number in assignment");
 		
 		
@@ -590,9 +590,9 @@ public class ScriptRunner{
 			throwException("Type mismatch, expected boolean in assignment");
 		
 		if(local)
-			localVariables.peek().set(op, !(boolean)v);
+			setLocalVar(op, !(boolean)v);
 		else
-			globalVariables.set(op, !(boolean)v);
+			setGlobalVar(op, !(boolean)v);
 	}
 	
 	// Concatenation operation
