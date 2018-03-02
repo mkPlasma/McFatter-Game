@@ -18,6 +18,7 @@ task idea2a(){
         
         for(i < 0, 2){
             for(j < 0, 10){
+                
                 for(d < 0, 360/cSpecial, 360){
                     set x = e.getX();
                     set y = e.getY();
