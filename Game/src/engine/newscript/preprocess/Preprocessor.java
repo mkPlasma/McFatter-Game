@@ -43,6 +43,7 @@ public class Preprocessor{
 		this.script = script;
 		
 		files.clear();
+		filePaths.clear();
 		
 		// Read file
 		mainFile = IOFunctions.readToArrayList(script.getPath());

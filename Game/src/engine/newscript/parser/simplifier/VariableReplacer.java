@@ -350,12 +350,15 @@ public class VariableReplacer{
 	
 	private boolean isConstantVariable(String var){
 		
-		for(int i = constVariables.size() - 1; i >= 0; i--){
+		int gs = globalVariables.size();
+		int n = gs + (localVariables.isEmpty() ? 0 : localVariables.peek().size());
+		
+		for(int i = n - 1; i >= 0; i--){
 			
-			int ind2 = i - globalVariables.size();
+			boolean local = i >= gs;
 			
-			ArrayList<String> vars = localVariables.isEmpty() || ind2 < 0 ? globalVariables.get(i) : localVariables.peek().get(ind2);
-			ArrayList<String> constVars = constVariables.get(i);
+			ArrayList<String> vars = local ? localVariables.peek().get(i - gs) : globalVariables.get(i);
+			ArrayList<String> constVars = local ? constVariables.get(i - gs) : constVariables.get(i);
 
 			for(String v:vars)
 				if(getName(v).equals(var))
