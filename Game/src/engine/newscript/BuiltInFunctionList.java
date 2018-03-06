@@ -85,33 +85,125 @@ public class BuiltInFunctionList{
 			},
 			
 			
+			// Array
+			new BIFunc("length", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((ArrayList<Object>)params[0]).size();
+				}
+			},
+			new BIFunc("remove", 2){
+				protected Object run(Instruction inst, Object[] params){
+					return ((ArrayList<Object>)params[0]).remove(castInt(params[1]));
+				}
+			},
 			
 			
 			
 			
 			// Math
+			new BIFunc("abs", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return castNumber(Math.abs(castFloat(params[0])));
+				}
+			},
+			new BIFunc("round", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return (int)Math.round(castFloat(params[0]));
+				}
+			},
+			new BIFunc("trunc", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return (int)castFloat(params[0]);
+				}
+			},
+			new BIFunc("floor", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return (int)Math.floor(castFloat(params[0]));
+				}
+			},
+			new BIFunc("ceil", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return (int)Math.ceil(castFloat(params[0]));
+				}
+			},
 			
+			new BIFunc("sqrt", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return castNumber(Math.sqrt(castFloat(params[0])));
+				}
+			},
+			new BIFunc("cbrt", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return castNumber(Math.cbrt(castFloat(params[0])));
+				}
+			},
+			new BIFunc("log", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return castNumber(Math.log(castFloat(params[0])));
+				}
+			},
+			new BIFunc("log10", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return castNumber(Math.log10(castFloat(params[0])));
+				}
+			},
+			new BIFunc("degrees", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return castNumber(Math.toDegrees(castFloat(params[0])));
+				}
+			},
+			new BIFunc("radians", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return castNumber(Math.toRadians(castFloat(params[0])));
+				}
+			},
+
 			new BIFunc("cos", 1){
 				protected Object run(Instruction inst, Object[] params){
-					return (float)Math.cos(Math.toRadians(castFloat(params[0])));
+					return castNumber(Math.cos(Math.toRadians(castFloat(params[0]))));
 				}
 			},
 			new BIFunc("sin", 1){
 				protected Object run(Instruction inst, Object[] params){
-					return (float)Math.sin(Math.toRadians(castFloat(params[0])));
+					return castNumber(Math.sin(Math.toRadians(castFloat(params[0]))));
 				}
 			},
 			new BIFunc("tan", 1){
 				protected Object run(Instruction inst, Object[] params){
-					return (float)Math.tan(Math.toRadians(castFloat(params[0])));
+					return castNumber(Math.tan(Math.toRadians(castFloat(params[0]))));
+				}
+			},
+			new BIFunc("acos", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return castNumber(Math.acos(castFloat(params[0])));
+				}
+			},
+			new BIFunc("asin", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return castNumber(Math.asin(castFloat(params[0])));
+				}
+			},
+			new BIFunc("atan", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return castNumber(Math.atan(castFloat(params[0])));
+				}
+			},
+			new BIFunc("atan2", 2){
+				protected Object run(Instruction inst, Object[] params){
+					return castNumber(Math.atan2(castFloat(params[0]), castFloat(params[1])));
+				}
+			},
+			new BIFunc("min", 2){
+				protected Object run(Instruction inst, Object[] params){
+					return castNumber(Math.min(castFloat(params[0]), castFloat(params[1])));
+				}
+			},
+			new BIFunc("max", 2){
+				protected Object run(Instruction inst, Object[] params){
+					return castNumber(Math.max(castFloat(params[0]), castFloat(params[1])));
 				}
 			},
 			
-			new BIFunc("abs", 1){
-				protected Object run(Instruction inst, Object[] params){
-					return (float)Math.abs(castFloat(params[0]));
-				}
-			},
 			
 			// Angle from position to player
 			// pos
@@ -678,6 +770,11 @@ public class BuiltInFunctionList{
 	// Cast to float from int or float
 	private float castFloat(Object o){
 		return o instanceof Integer ? (float)(int)o : (float)o;
+	}
+	
+	// Cast to int or float from float
+	private float castNumber(double d){
+		return (int)d == d ? (int)d : (float)d;
 	}
 	
 	

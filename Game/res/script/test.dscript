@@ -1,23 +1,26 @@
 
 
 set const c = 3;
-set const sc = 16;
+set const sc = 4;
 set const maxIter = 1;
 
 set dir;
-set const dirAdd = -16;
+set dir2;
+set const dirAdd = -8;
+set const dirAdd2 = 9;
 
 
 while(true){
 	for(d < 3)
-		split({_cx, _top + 120}, dir + d*(360/c), (d -> _red, _green, _blue), 0);
+		split({_cx, _top + 120}, dir + d*(360/c), dir2 + d*(360/c), (d -> _red, _green, _blue), 0);
 	
 	dir += dirAdd;
+	dir2 += dirAdd2;
 	
-	wait 15;
+	wait 3;
 }
 
-task split(pos, dir, col, iterations){
+task split(pos, dir, dir2, col, iterations){
 	
 	set b = bullet(_rice, col, pos, dir, 1.2, 10);
 	
@@ -33,6 +36,6 @@ task split(pos, dir, col, iterations){
 		b.delete();
 		
 		for(d < 0, 360/sc, 360)
-			split(b.getPos(), dir + d, col, iterations + 1);
+			split(b.getPos(), dir2 + d, dir, col, iterations + 1);
 	}
 }
