@@ -29,6 +29,7 @@ public abstract class BIFunc{
 			throw new ScriptException("Type mismatch on parameter in " + name + "()", inst.getFileIndex(), inst.getLineNum());
 		}
 		catch(ArrayIndexOutOfBoundsException e){
+			e.printStackTrace();
 			throw new ScriptException(name + "() requires an array with more elements", inst.getFileIndex(), inst.getLineNum());
 		}
 	}

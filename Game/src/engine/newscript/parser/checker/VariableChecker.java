@@ -299,7 +299,14 @@ public class VariableChecker{
 		// Positive - local		Negative - global
 		int i = localVariables.isEmpty() ? scope - 1 : localVariables.peek().size() - 1 - scope;
 		
-		ArrayList<String> vars = i < 0 ? globalVariables.get(globalVariables.size() + i) : localVariables.peek().get(i);
+		ArrayList<String> vars;
+		
+		try{
+			vars = i < 0 ? globalVariables.get(globalVariables.size() + i) : localVariables.peek().get(i);
+		}
+		catch(ArrayIndexOutOfBoundsException e){
+			return false;
+		}
 		
 		for(String v:vars)
 			if(v.equals(var))

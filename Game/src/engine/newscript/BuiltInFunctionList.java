@@ -20,6 +20,7 @@ import engine.entities.GameEntity;
 import engine.entities.Laser;
 import engine.entities.MovableEntity;
 import engine.entities.Player;
+import engine.graphics.Sprite;
 import engine.newscript.bytecodegen.Instruction;
 import engine.newscript.runner.Branch;
 import engine.screens.MainScreen;
@@ -510,7 +511,7 @@ public class BuiltInFunctionList{
 						castFloat(params[3]),
 						castInt(params[4]),
 						castInt(params[5]),
-						castInt(params[7]),
+						castInt(params[6]),
 						screen
 					);
 					
@@ -777,8 +778,65 @@ public class BuiltInFunctionList{
 				}
 			},
 			
+			// Sprite properties
+			new BIFunc("setScale", 1){
+				protected Object run(Instruction inst, Object[] params){
+					((GameEntity)params[0]).getSprite().setScale(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getScale", 0){
+				protected Object run(Instruction inst, Object[] params){
+					ArrayList<Object> array = new ArrayList<Object>(2);
+					Sprite s = ((GameEntity)params[0]).getSprite();
+					
+					array.add(s.getScaleX());
+					array.add(s.getScaleY());
+					
+					return array;
+				}
+			},
+			new BIFunc("setScaleX", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((GameEntity)params[0]).getSprite().setScaleX(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getScaleX", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((GameEntity)params[0]).getSprite().getScaleX();
+				}
+			},
+			new BIFunc("setScaleY", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((GameEntity)params[0]).getSprite().setScaleY(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getScaleY", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((GameEntity)params[0]).getSprite().getScaleY();
+				}
+			},
+			
 			
 			// Bullet properties
+			
+			
+			// Laser properties
+			
+			new BIFunc("setLength", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((Laser)params[0]).setLength(castInt(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("setWidth", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((Laser)params[0]).setWidth(castInt(params[1]));
+					return null;
+				}
+			},
 			
 			
 			
