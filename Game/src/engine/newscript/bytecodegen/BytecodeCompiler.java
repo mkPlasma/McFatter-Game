@@ -41,7 +41,7 @@ public class BytecodeCompiler{
 	private Stack<ArrayList<ParseUnit>> breakUnits;
 	
 	// Store bytecode for returnif comparisons
-	private ArrayList<Instruction> returnIfBytecode;
+	private Stack<ArrayList<Instruction>> returnIfBytecode;
 	
 	
 	
@@ -58,7 +58,7 @@ public class BytecodeCompiler{
 		breakStatements = new Stack<ArrayList<Integer>>();
 		breakUnits = new Stack<ArrayList<ParseUnit>>();
 		
-		returnIfBytecode = new ArrayList<Instruction>();
+		returnIfBytecode = new Stack<ArrayList<Instruction>>();
 	}
 	
 	public void process(DScript script){
@@ -105,7 +105,7 @@ public class BytecodeCompiler{
 		
 		script.setBytecode(bytecode.toArray(new Instruction[0]));
 		
-		ScriptPrinter.printBytecode(bytecode);
+		//ScriptPrinter.printBytecode(bytecode);
 	}
 	
 	private void compile(ParseUnit p){
@@ -427,16 +427,16 @@ public class BytecodeCompiler{
 				// Compile expression
 				compileExpression((ParseUnit)contents[0]);
 				
-				returnIfBytecode.clear();
+				returnIfBytecode.peek().clear();
 				
 				// Get added expression bytecode
 				int s2 = bytecode.size();
 				
 				for(int i = s; i < s2; i++)
-					returnIfBytecode.add(bytecode.remove(s));
+					returnIfBytecode.peek().add(bytecode.remove(s));
 				
 				// Add return
-				returnIfBytecode.add(inst(return_if_true, p));
+				returnIfBytecode.peek().add(inst(return_if_true, p));
 				
 				return;
 				
@@ -457,7 +457,7 @@ public class BytecodeCompiler{
 					
 					// Add returnif check if necessary
 					if(!returnIfBytecode.isEmpty())
-						bytecode.addAll(returnIfBytecode);
+						bytecode.addAll(returnIfBytecode.peek());
 					
 					return;
 				}
@@ -468,7 +468,7 @@ public class BytecodeCompiler{
 				
 				// Add returnif check if necessary
 				if(!returnIfBytecode.isEmpty())
-					bytecode.addAll(returnIfBytecode);
+					bytecode.addAll(returnIfBytecode.peek());
 				
 				return;
 				
@@ -489,6 +489,10 @@ public class BytecodeCompiler{
 					
 				withinFunction = true;
 				
+				// Add list for returnif condition
+				returnIfBytecode.push(new ArrayList<Instruction>());
+				
+				// func_def contents
 				Object[] dCont = ((ParseUnit)contents[0]).getContents();
 				int params = dCont.length == 1 ? 0 : dCont[1] instanceof Token ? 1 : ((ParseUnit)dCont[1]).getContents().length;
 				
@@ -519,6 +523,9 @@ public class BytecodeCompiler{
 				
 				// Set entry point for start of script
 				script.setEntryPoint(bytecode.size());
+				
+				// Remove returnif list
+				returnIfBytecode.pop();
 				
 				withinFunction = false;
 				return;

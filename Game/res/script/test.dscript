@@ -1,18 +1,18 @@
 
 /*
-set const c = 3;
-set const sc = 4;
+set const c = 6;
+set const sc = 2;
 set const maxIter = 1;
 
 set dir;
 set dir2;
-set const dirAdd = -8;
-set const dirAdd2 = 9;
+set const dirAdd = -3;
+set const dirAdd2 = 8;
 
 
 while(true){
-	for(d < 3)
-		split({_cx, _top + 120}, dir + d*(360/c), dir2 + d*(360/c), (d -> _red, _green, _blue), 0);
+	for(d < c)
+		split({_cx, _top + 120}, dir + d*(360/c), dir2 + d*(360/c), (d%3 -> _red, _green, _blue), 0);
 	
 	dir += dirAdd;
 	dir2 += dirAdd2;
@@ -22,7 +22,9 @@ while(true){
 
 task split(pos, dir, dir2, col, iterations){
 	
-	set b = bullet(_rice, col, pos, dir, 1.2, 10);
+	set b = bullet(_star4, col, pos + radius(dir, 2), dir, 1.2, 10);
+	
+	returnif b.isDeleted();
 	
 	if(iterations != maxIter){
 		b.setSpd(6);
@@ -41,26 +43,27 @@ task split(pos, dir, dir2, col, iterations){
 }
 */
 
-enemy();
+set b = enemy();
+
 
 task enemy(){
 	
 	set e = enemy(_fighter, _cx, _top + 140, 100);
 	e.setDir(90);
-	e.setSpd(0.5);
 	
-	returnif e.getY() > _cy;
+	returnif e.isDeleted();
 	
 	set const c = 16;
 	set dir = rand(0, 360);
 	
 	while(true){
 		
+		dir = angleToPlayer(e.getPos());
 		for(d < 0, 360/c, 360)
-			bullet(_scale, _green, e.getPos() + radius(20, dir + d), dir + d, 1, 0, 3, 0.05, 8);
+			bullet(_scale, _green, e.getPos() + radius(dir + d, 20), dir + d, 1, 0, 8, 0.05, 8);
 		
-		dir += rand(10);
+		dir += rand(2);
 		
-		wait 3;
+		wait 2;
 	}
 }

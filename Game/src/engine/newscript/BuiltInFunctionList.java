@@ -21,19 +21,17 @@ import engine.entities.Laser;
 import engine.entities.MovableEntity;
 import engine.entities.Player;
 import engine.newscript.bytecodegen.Instruction;
+import engine.newscript.runner.Branch;
 import engine.screens.MainScreen;
 
 public class BuiltInFunctionList{
 	
 	private final BIFunc[] funcList;
 	
-	private final MainScreen screen;
-	
 	private final Random random;
 	
 	
 	public BuiltInFunctionList(MainScreen screen){
-		this.screen = screen;
 		
 		random = new Random();
 		Player player		= screen != null ? screen.getPlayer() : null;
@@ -81,6 +79,37 @@ public class BuiltInFunctionList{
 					array.add(player.getY());
 					
 					return array;
+				}
+			},
+			
+			// Script branches
+			new BIFunc("stop", 1){
+				protected Object run(Instruction inst, Object[] params){
+					((Branch)params[0]).finish();
+					return null;
+				}
+			},
+			new BIFunc("pause", 1){
+				protected Object run(Instruction inst, Object[] params){
+					((Branch)params[0]).setPaused(true);
+					return null;
+				}
+			},
+			new BIFunc("resume", 1){
+				protected Object run(Instruction inst, Object[] params){
+					((Branch)params[0]).setPaused(false);
+					return null;
+				}
+			},
+			new BIFunc("setPaused", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((Branch)params[0]).setPaused((boolean)params[1]);
+					return null;
+				}
+			},
+			new BIFunc("isPaused", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((Branch)params[0]).isPaused();
 				}
 			},
 			
@@ -204,6 +233,21 @@ public class BuiltInFunctionList{
 				}
 			},
 			
+			// Returns {x, y} array, radius r angle t
+			// t, r
+			new BIFunc("radius", 2){
+				protected Object run(Instruction inst, Object[] params){
+					float t = (float)Math.toRadians(castFloat(params[0]));
+					float r = castFloat(params[1]);
+					
+					ArrayList<Object> array = new ArrayList<Object>(2);
+					array.add((float)(r*Math.cos(t)));
+					array.add((float)(r*Math.sin(t)));
+					
+					return array;
+				}
+			},
+			
 			
 			// Angle from position to player
 			// pos
@@ -214,7 +258,7 @@ public class BuiltInFunctionList{
 					float x = castFloat(array.get(0));
 					float y = castFloat(array.get(1));
 					
-					return (float)Math.atan2(player.getY() - y, player.getX() - x);
+					return (float)Math.toDegrees(Math.atan2(player.getY() - y, player.getX() - x));
 				}
 			},
 			// x, y
@@ -223,26 +267,9 @@ public class BuiltInFunctionList{
 					float x = castFloat(params[0]);
 					float y = castFloat(params[1]);
 					
-					return (float)Math.atan2(player.getY() - y, player.getX() - x);
+					return (float)Math.toDegrees(Math.atan2(player.getY() - y, player.getX() - x));
 				}
 			},
-			
-			
-			// Returns x, y array, radius r angle t
-			// r, t
-			new BIFunc("radius", 2){
-				protected Object run(Instruction inst, Object[] params){
-					float r = castFloat(params[0]);
-					float t = (float)Math.toRadians(castFloat(params[1]));
-					
-					ArrayList<Object> array = new ArrayList<Object>(2);
-					array.add((float)(r*Math.cos(t)));
-					array.add((float)(r*Math.sin(t)));
-					
-					return array;
-				}
-			},
-			
 			
 			
 			// Angle from one position to another
@@ -256,7 +283,7 @@ public class BuiltInFunctionList{
 					float x2 = castFloat(array2.get(0));
 					float y2 = castFloat(array2.get(1));
 					
-					return (float)Math.atan2(y1 - y2, x1 - x2);
+					return (float)Math.toDegrees(Math.atan2(y1 - y2, x1 - x2));
 				}
 			},
 			new BIFunc("angleToLocation", 3){
@@ -296,6 +323,7 @@ public class BuiltInFunctionList{
 			},
 			
 			
+			
 			// Generate random int between two numbers
 			new BIFunc("rand", 2){
 				protected Object run(Instruction inst, Object[] params){
@@ -324,7 +352,7 @@ public class BuiltInFunctionList{
 					if(a == 0)
 						return 0;
 					
-					return random.nextInt(a*2 + 2) - a;
+					return random.nextInt(a*2 + 1) - a;
 				}
 			},
 			

@@ -27,6 +27,10 @@ import sun.font.Script;
 
 public class ScriptRunner{
 	
+	// Max jumps per branch run to break out of infinite loop
+	private static final int MAX_JUMPS = 10000;
+	
+	
 	private final BuiltInFunctionList biFuncList;
 	
 	private final ScriptHandler handler;
@@ -38,8 +42,14 @@ public class ScriptRunner{
 	// Current script branch
 	private Branch branch;
 	
+	// Number of branches that run on current frame
+	private int activeBranches;
+	
 	// Yield branch and return to ScriptHandler loop
 	private boolean yield;
+	
+	// Number of current branch jumps
+	private int jumps;
 	
 	// Variables and work stack
 	private ArrayList<Object> globalVariables;
@@ -71,11 +81,14 @@ public class ScriptRunner{
 		if(bytecode == null)
 			return;
 		
-		// Tick wait time
-		if(branch.tickWait())
+		// Test if branch is waiting or paused
+		if(!branch.shouldRun())
 			return;
 		
 		this.branch = branch;
+		
+		activeBranches++;
+		jumps = 0;
 		
 		// Get branch variables and return stack
 		stack			= branch.getWorkStack();
@@ -200,13 +213,16 @@ public class ScriptRunner{
 				
 				
 			case jump:
+				checkJump();
 				instIndex = op - 1;
 				return;
 				
 			case jump_if_true:
 				try{
-					if((boolean)pop())
+					if((boolean)pop()){
+						checkJump();
 						instIndex = op - 1;
+					}
 				}catch(ClassCastException e){
 					throwException("Type mismatch, expected boolean");
 				}
@@ -214,8 +230,10 @@ public class ScriptRunner{
 				
 			case jump_if_false:
 				try{
-					if(!(boolean)pop())
+					if(!(boolean)pop()){
+						checkJump();
 						instIndex = op - 1;
+					}
 				}catch(ClassCastException e){
 					throwException("Type mismatch, expected boolean");
 				}
@@ -327,6 +345,7 @@ public class ScriptRunner{
 				localVariables.add(new ArrayList<Object>());
 				instIndex = op - 1;
 				
+				jumps++;
 				return;
 				
 				
@@ -362,22 +381,26 @@ public class ScriptRunner{
 				
 			case return_if_true:
 				
-				// Return if top stack value is true
-				if((Boolean)pop()){
-					
-					// End task
-					if(returnStack.isEmpty()){
-						branch.finish();
-						yield();
-						return;
+				try{
+					// Return if top stack value is true
+					if((boolean)pop()){
+						
+						// End task
+						if(returnStack.isEmpty()){
+							branch.finish();
+							yield();
+							return;
+						}
+						
+						localVariables.pop();
+						instIndex = returnStack.pop();
+						
+						// If a return value is expected, there must be one
+						if(returnValStack.pop())
+							throwException("Expected return value");
 					}
-					
-					localVariables.pop();
-					instIndex = returnStack.pop();
-					
-					// If a return value is expected, there must be one
-					if(returnValStack.pop())
-						throwException("Expected return value");
+				}catch(ClassCastException e){
+					throwException("Type mismatch, expected boolean");
 				}
 				
 				return;
@@ -715,6 +738,12 @@ public class ScriptRunner{
 		yield = true;
 	}
 	
+	// Check for infinite loop limit
+	private void checkJump() throws ScriptException{
+		if(++jumps >= MAX_JUMPS)
+			throwException("Infinite loop");
+	}
+	
 	// Shorthand functions
 	private void push(Object o){
 		stack.push(o);
@@ -722,6 +751,13 @@ public class ScriptRunner{
 	
 	private Object pop(){
 		return stack.pop();
+	}
+	
+	// Get and reset number of active branches
+	public int getActiveBranches(){
+		int tmp = activeBranches;
+		activeBranches = 0;
+		return tmp;
 	}
 	
 	

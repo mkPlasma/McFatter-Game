@@ -117,6 +117,8 @@ public class Bullet extends MovableEntity{
 				
 				e.getSprite().addAnimation(new Animation(Animation.ANIM_SCALE, 1, false, -0.2f, 2, 2 + delay*0.2f));
 				e.getSprite().addAnimation(new Animation(Animation.ANIM_ALPHA, 1, false, 1f/delay, 0, 1));
+
+				e.getSprite().rotate((float)Math.random()*360);
 				
 				screen.addEffect(e);
 				

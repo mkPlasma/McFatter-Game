@@ -17,6 +17,10 @@ import engine.screens.MainScreen;
 
 public class ScriptHandler{
 	
+	// How many frames to display active branches of
+	private static final int ACTIVE_BRANCH_FRAMES = 20;
+	
+	
 	private final MainScreen screen;
 	
 	private final Compiler compiler;
@@ -24,6 +28,7 @@ public class ScriptHandler{
 
 	private Text compileText;
 	private Text errorText;
+	private Text branchText;
 	
 	// Init on next frame
 	private int init;
@@ -33,6 +38,9 @@ public class ScriptHandler{
 	
 	// Running branches
 	private ArrayList<Branch> branches;
+	
+	// Number of active branches for past frames
+	private ArrayList<Integer> activeBranches;
 	
 	// Current running branch index
 	private int currentBranch;
@@ -55,7 +63,12 @@ public class ScriptHandler{
 		errorText.setVisible(false);
 		screen.addText(errorText);
 		
+		branchText = new Text("Active Branches: \nTotal Branches: ", 430, 160, 0.75f, screen.getTextureCache());
+		screen.addText(branchText);
+		
 		branches	= new ArrayList<Branch>();
+		
+		activeBranches = new ArrayList<Integer>(ACTIVE_BRANCH_FRAMES);
 	}
 	
 	public void init(String scriptPath){
@@ -124,6 +137,26 @@ public class ScriptHandler{
 			if(b.isFinished())
 				branches.remove(currentBranch--);
 		}
+		
+		setBranchText();
+	}
+	
+	private void setBranchText(){
+		
+		activeBranches.add(runner.getActiveBranches());
+		
+		// Remove earliest number if past max frames
+		if(activeBranches.size() > ACTIVE_BRANCH_FRAMES)
+			activeBranches.remove(0);
+		
+		
+		// Display highest active branch count of past frames
+		int active = 0;
+		
+		for(int a:activeBranches)
+			active = Math.max(active, a);
+		
+		branchText.setText("Active Branches: " + active + "\nTotal Branches: " + branches.size());
 	}
 	
 	public void addBranch(Branch branch){

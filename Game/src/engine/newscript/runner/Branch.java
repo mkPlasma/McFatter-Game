@@ -14,6 +14,9 @@ public class Branch{
 	// Current waiting time
 	private int waitTime;
 	
+	// If paused, will not run or tick wait timer
+	private boolean paused;
+	
 	
 	// Stack for temporary storage for operations
 	private Stack<Object> workStack;
@@ -51,13 +54,16 @@ public class Branch{
 		this.waitTime = waitTime;
 	}
 	
-	// Tick wait timer and return true if still waiting
-	public boolean tickWait(){
+	// Check if paused or waiting
+	public boolean shouldRun(){
+		
+		if(paused)
+			return false;
 		
 		if(waitTime > 0)
 			waitTime--;
 		
-		return waitTime != 0;
+		return waitTime == 0;
 	}
 	
 	public void setInstructionIndex(int i){
@@ -76,6 +82,15 @@ public class Branch{
 		return finished;
 	}
 	
+	public void setPaused(boolean paused){
+		this.paused = paused;
+	}
+	
+	public boolean isPaused(){
+		return paused;
+	}
+	
+	// Push added branch as a task return value
 	public void pushBranch(Branch b){
 		workStack.push(b);
 	}
