@@ -128,7 +128,7 @@ public enum InstructionSet{
 	
 	// Wait a specified number of frames or use stack value
 	wait(true),
-	wait_s,
+	wait_value,
 	
 	;
 	

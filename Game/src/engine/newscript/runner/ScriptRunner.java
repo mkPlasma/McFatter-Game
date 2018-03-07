@@ -360,6 +360,29 @@ public class ScriptRunner{
 				return;
 				
 				
+			case return_if_true:
+				
+				// Return if top stack value is true
+				if((Boolean)pop()){
+					
+					// End task
+					if(returnStack.isEmpty()){
+						branch.finish();
+						yield();
+						return;
+					}
+					
+					localVariables.pop();
+					instIndex = returnStack.pop();
+					
+					// If a return value is expected, there must be one
+					if(returnValStack.pop())
+						throwException("Expected return value");
+				}
+				
+				return;
+				
+				
 			case func_bi: case func_bi_r:{
 				BIFunc f = biFuncList.get(op);
 				
@@ -393,7 +416,7 @@ public class ScriptRunner{
 				yield();
 				return;
 				
-			case wait_s:
+			case wait_value:
 				branch.setWait(Math.max(0, (int)pop()));
 				yield();
 				return;

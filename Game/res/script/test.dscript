@@ -1,5 +1,5 @@
 
-
+/*
 set const c = 3;
 set const sc = 4;
 set const maxIter = 1;
@@ -37,5 +37,30 @@ task split(pos, dir, dir2, col, iterations){
 		
 		for(d < 0, 360/sc, 360)
 			split(b.getPos(), dir2 + d, dir, col, iterations + 1);
+	}
+}
+*/
+
+enemy();
+
+task enemy(){
+	
+	set e = enemy(_fighter, _cx, _top + 140, 100);
+	e.setDir(90);
+	e.setSpd(0.5);
+	
+	returnif e.getY() > _cy;
+	
+	set const c = 16;
+	set dir = rand(0, 360);
+	
+	while(true){
+		
+		for(d < 0, 360/c, 360)
+			bullet(_scale, _green, e.getPos() + radius(20, dir + d), dir + d, 1, 0, 3, 0.05, 8);
+		
+		dir += rand(10);
+		
+		wait 3;
 	}
 }

@@ -40,6 +40,10 @@ public class BytecodeCompiler{
 	private Stack<ArrayList<Integer>> breakStatements;
 	private Stack<ArrayList<ParseUnit>> breakUnits;
 	
+	// Store bytecode for returnif comparisons
+	private ArrayList<Instruction> returnIfBytecode;
+	
+	
 	
 	public BytecodeCompiler(){
 		
@@ -53,6 +57,8 @@ public class BytecodeCompiler{
 		
 		breakStatements = new Stack<ArrayList<Integer>>();
 		breakUnits = new Stack<ArrayList<ParseUnit>>();
+		
+		returnIfBytecode = new ArrayList<Instruction>();
 	}
 	
 	public void process(DScript script){
@@ -99,7 +105,7 @@ public class BytecodeCompiler{
 		
 		script.setBytecode(bytecode.toArray(new Instruction[0]));
 		
-		//ScriptPrinter.printBytecode(bytecode);
+		ScriptPrinter.printBytecode(bytecode);
 	}
 	
 	private void compile(ParseUnit p){
@@ -413,6 +419,28 @@ public class BytecodeCompiler{
 				return;
 				
 				
+			case "returnif":
+				
+				// Get size before adding expression
+				int s = bytecode.size();
+				
+				// Compile expression
+				compileExpression((ParseUnit)contents[0]);
+				
+				returnIfBytecode.clear();
+				
+				// Get added expression bytecode
+				int s2 = bytecode.size();
+				
+				for(int i = s; i < s2; i++)
+					returnIfBytecode.add(bytecode.remove(s));
+				
+				// Add return
+				returnIfBytecode.add(inst(return_if_true, p));
+				
+				return;
+				
+				
 			case "wait":
 				
 				// Single frame
@@ -426,12 +454,21 @@ public class BytecodeCompiler{
 				
 				if(v instanceof Integer || v instanceof Float){
 					add(wait, v instanceof Integer ? (int)v : (int)(float)v, p);
+					
+					// Add returnif check if necessary
+					if(!returnIfBytecode.isEmpty())
+						bytecode.addAll(returnIfBytecode);
+					
 					return;
 				}
 				
 				// Expression
 				compileExpression((ParseUnit)contents[1]);
-				add(wait_s, p);
+				add(wait_value, p);
+				
+				// Add returnif check if necessary
+				if(!returnIfBytecode.isEmpty())
+					bytecode.addAll(returnIfBytecode);
 				
 				return;
 				

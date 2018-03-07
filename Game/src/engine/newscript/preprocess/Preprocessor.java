@@ -45,6 +45,8 @@ public class Preprocessor{
 		files.clear();
 		filePaths.clear();
 		
+		inComment = false;
+		
 		// Read file
 		mainFile = IOFunctions.readToArrayList(script.getPath());
 		
@@ -92,6 +94,7 @@ public class Preprocessor{
 					
 					// Close comment
 					if(inComment){
+						inComment = false;
 						line = line.substring(ind2 + 2);
 						mainFile.set(i, line);
 						continue;
@@ -119,6 +122,7 @@ public class Preprocessor{
 			
 			
 			if(inComment){
+				mainFile.set(i, "");
 				lineNum++;
 				continue;
 			}
