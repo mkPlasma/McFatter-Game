@@ -446,6 +446,11 @@ public class BytecodeCompiler{
 				// Single frame
 				if(contents.length == 1){
 					add(wait, 1, p);
+					
+					// Add returnif check if necessary
+					if(!returnIfBytecode.isEmpty())
+						bytecode.addAll(returnIfBytecode.peek());
+					
 					return;
 				}
 				
@@ -691,8 +696,10 @@ public class BytecodeCompiler{
 		}
 		
 		// Unary operation
+		String op = ((Token)contents[0]).getValue();
+		
 		compileExpression((ParseUnit)contents[1]);
-		add(getOperationOpcode(((Token)contents[0]).getValue()), (Token)contents[0]);
+		add(op.equals("-") ? op_neg : getOperationOpcode(op), (Token)contents[0]);
 	}
 	
 	private boolean compileValue(ParseUnit p){

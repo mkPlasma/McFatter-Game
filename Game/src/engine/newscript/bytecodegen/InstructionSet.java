@@ -41,6 +41,8 @@ public enum InstructionSet{
 	op_mod,
 	op_exp,
 	
+	op_neg,
+	
 	op_eq,
 	op_lt,
 	op_gt,

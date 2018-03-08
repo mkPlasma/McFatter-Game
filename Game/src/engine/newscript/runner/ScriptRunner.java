@@ -164,7 +164,7 @@ public class ScriptRunner{
 				
 				
 				
-			case op_add: case op_sub: case op_mult: case op_div: case op_mod: case op_exp:
+			case op_add: case op_sub: case op_mult: case op_div: case op_mod: case op_exp: case op_neg:
 			case op_lt: case op_gt: case op_lte: case op_gte:
 				numOperation(name);
 				return;
@@ -489,6 +489,38 @@ public class ScriptRunner{
 	// Numerical operation
 	@SuppressWarnings("unchecked")
 	private void numOperation(InstructionSet op) throws ScriptException{
+		
+		// Unary operation
+		if(op == op_neg){
+			
+			Object o = pop();
+			
+			if(o instanceof ArrayList){
+				
+				ArrayList<Object> array = (ArrayList<Object>)o;
+				
+				for(int i = 0; i < array.size(); i++){
+					
+					Object o1 = array.get(i);
+					
+					try{
+						array.set(i, -(o1 instanceof Integer ? (int)o1 : (float)o1));
+					}
+					catch(ClassCastException e){
+						throwException("Type mismatch, expected number in operation");
+					}
+				}
+			}
+			
+			try{
+				push(-(o instanceof Integer ? (int)o : (float)o));
+			}
+			catch(ClassCastException e){
+				throwException("Type mismatch, expected number in operation");
+			}
+			
+			return;
+		}
 		
 		// Pop in reverse order
 		Object o2 = pop();
