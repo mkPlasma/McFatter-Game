@@ -84,7 +84,7 @@ public class BulletList{
 	}
 	
 	public BulletFrame get(int type, int color){
-		return new BulletFrame(type, color, getSprite(type, color), getHitboxSize(type), getHBLengthCrop(type),
+		return new BulletFrame(type, color, getSprite(type, color), getHitboxSize(type), getHitboxOffset(type), getHBLengthCrop(type),
 			getSpriteAlign(type), getSpriteRotation(type), getSpriteRotationBySpd(type));
 	}
 	
@@ -140,15 +140,15 @@ public class BulletList{
 	
 	public int getHitboxSize(int type){
 		switch(type){
-			case TYPE_NEEDLE:
 			case TYPE_LASER_HELIX:
 				return 1;
 			
 			case TYPE_SCALE:
-			case TYPE_RICE:
 			case TYPE_CRYSTAL:
+			case TYPE_RICE:
 			case TYPE_STAR:
 			case TYPE_STAR4:
+			case TYPE_NEEDLE:
 			case TYPE_WALL:
 			case TYPE_LASER_BLAST:
 			case TYPE_MISSILE:
@@ -168,14 +168,44 @@ public class BulletList{
 		}
 	}
 	
+	public int getHitboxOffset(int type){
+		switch(type){
+			case TYPE_ORB:
+			case TYPE_SCALE:
+			case TYPE_CRYSTAL:
+			case TYPE_RICE:
+			case TYPE_STAR:
+			case TYPE_STAR4:
+			case TYPE_SQUARE:
+			case TYPE_LASER_BLAST:
+			case TYPE_WALL:
+			case TYPE_RING:
+			case TYPE_MINE:
+			case TYPE_LASER:
+			case TYPE_LASER_DIST:
+			case TYPE_LASER_HELIX:
+			case TYPE_ATOM:
+				return 0;
+				
+			case TYPE_MISSILE:
+				return -1;
+				
+			case TYPE_NEEDLE:
+				return -3;
+			
+			default:
+				return 0;
+		}
+	}
+	
 	public float getHBLengthCrop(int type){
 		switch(type){
 			case TYPE_WALL:
 				return 0.45f;
 			
 			case TYPE_ORB:
-			case TYPE_SCALE:
 			case TYPE_CRYSTAL:
+			case TYPE_SCALE:
 			case TYPE_RICE:
 			case TYPE_STAR:
 			case TYPE_STAR4:

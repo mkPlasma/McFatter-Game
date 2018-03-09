@@ -1,3 +1,60 @@
 
-set x = 5;
-print(-x);
+set bs = boss(_fighter, _cx, _top + 120, 1000);
+bs.setDir(90);
+
+task movement(){
+    
+    returnif bs.isDeleted();
+    
+    while(true){
+        
+        wait 5*60 - 90;
+        set pos = {_cx + rand(40), _top + 120 + rand(40)};
+        
+        for(i < 90){
+            bs.setPos(bs.getPos() + (pos - bs.getPos())/15);
+            wait;
+        }
+    }
+}
+
+movement();
+spirals();
+
+task spirals(){
+    
+    returnif bs.isDeleted();
+    
+    while(true){
+        
+        spiral(_green, 0, false);
+        spiral(_pink, 0, true);
+        spiral(_blue, 1, false);
+        spiral(_orange, 1, true);
+        
+        waits 5;
+    }
+}
+
+
+task spiral(col, type, inv){
+    
+    set const c = 4;
+    
+    set dir = type -> 45, 0;
+    set dirAdd = type -> 4.5, 2.5;
+    set rad = type -> 20, 40;
+    
+    if(inv)
+        dirAdd = -dirAdd;
+    
+    for(i < 120){
+        
+        for(d < 0, 360/c, 360){
+            bullet(_missile, col, bs.getPos() + radius(dir + d, rad), dir + d, 2.2, 8);
+        }
+        
+        dir += dirAdd;
+        wait 2;
+    }
+}

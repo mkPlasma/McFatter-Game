@@ -10,6 +10,6 @@ boss.setInvulnerable();
 
 wait 150;
 
-run "bPattern1";
-run "bPattern2";
-run "bPattern3";
+#include bPattern1;
+#include bPattern2;
+#include bPattern3;

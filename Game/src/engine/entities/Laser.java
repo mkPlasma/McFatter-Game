@@ -43,7 +43,7 @@ public class Laser extends Bullet{
 		
 		iDelay = Math.min(delay, 15);
 		aWidth = width;
-		bombResist = true;
+		resistant = true;
 		
 		segmented = type == BulletList.TYPE_LASER_DIST || type == BulletList.TYPE_LASER_HELIX;
 		
@@ -105,7 +105,7 @@ public class Laser extends Bullet{
 	
 	public void onDestroy(boolean force){
 		
-		if((!force && bombResist) || deleteTime > 0)
+		if((!force && resistant) || deleteTime > 0)
 			return;
 		
 		deleteTime = 25;

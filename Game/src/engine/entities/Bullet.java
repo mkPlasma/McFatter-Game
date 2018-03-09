@@ -21,6 +21,9 @@ public class Bullet extends MovableEntity{
 	protected int type, color;
 	protected int hitboxSize;
 	
+	// Offset hitbox on y-axis
+	protected int hitboxOffset;
+	
 	protected BulletFrame frame;
 	
 	// Customizable bullet sprite
@@ -30,7 +33,7 @@ public class Bullet extends MovableEntity{
 	protected float damage, dmgReduce;
 	
 	// Won't despawn from bomb or player hit
-	protected boolean bombResist;
+	protected boolean resistant;
 	
 	// Delay effect before spawning
 	protected int delay;
@@ -137,12 +140,14 @@ public class Bullet extends MovableEntity{
 		type			= frame.getType();
 		color			= frame.getColor();
 		hitboxSize		= frame.getHitboxSize();
+		hitboxOffset		= frame.getHitboxOffset();
 		sprite			= new Sprite(frame.getSprite());
 	}
 	
 	public void onDestroy(boolean force){
 		
-		if(!force && bombResist)
+		// If resistant
+		if(!force && resistant)
 			return;
 		
 		deleted = true;
@@ -188,9 +193,12 @@ public class Bullet extends MovableEntity{
 		// Movement
 		super.update();
 		
+		// Damage reduction
+		damage -= dmgReduce;
+		
 		// Delete at borders
 		if(borderDespawn && x < 32 - despawnRange || x > 416 + despawnRange || y < 16 - despawnRange || y > 464 + despawnRange)
-			deleted = true;
+			delete();
 	}
 	
 	public void refreshSprite(){
@@ -222,27 +230,32 @@ public class Bullet extends MovableEntity{
 		return hitboxSize;
 	}
 	
+	public int getHitboxOffset(){
+		return hitboxOffset;
+	}
+	
 	public Sprite getSprite(){
 		return sprite;
 	}
 	
 	public void setFrame(BulletFrame frame){
 		this.frame = frame;
+		refreshSprite();
 	}
 	
 	public BulletFrame getFrame(){
 		return frame;
 	}
 	
-	public void setBombResist(boolean bombResist){
-		this.bombResist = bombResist;
+	public void setResistant(boolean resistant){
+		this.resistant = resistant;
 	}
 	
-	public boolean bombResist(){
-		return bombResist;
+	public boolean isResistant(){
+		return resistant;
 	}
 	
-	public void setDamage(int damage){
+	public void setDamage(float damage){
 		this.damage = damage;
 	}
 	
@@ -250,7 +263,7 @@ public class Bullet extends MovableEntity{
 		return damage;
 	}
 	
-	public void setDamageReduce(int dmgReduce){
+	public void setDamageReduce(float dmgReduce){
 		this.dmgReduce = dmgReduce;
 	}
 	

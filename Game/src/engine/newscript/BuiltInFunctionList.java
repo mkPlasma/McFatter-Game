@@ -779,13 +779,13 @@ public class BuiltInFunctionList{
 			},
 			
 			// Sprite properties
-			new BIFunc("setScale", 1){
+			new BIFunc("setScale", 2){
 				protected Object run(Instruction inst, Object[] params){
 					((GameEntity)params[0]).getSprite().setScale(castFloat(params[1]));
 					return null;
 				}
 			},
-			new BIFunc("getScale", 0){
+			new BIFunc("getScale", 1){
 				protected Object run(Instruction inst, Object[] params){
 					ArrayList<Object> array = new ArrayList<Object>(2);
 					Sprite s = ((GameEntity)params[0]).getSprite();
@@ -818,23 +818,180 @@ public class BuiltInFunctionList{
 					return ((GameEntity)params[0]).getSprite().getScaleY();
 				}
 			},
+			new BIFunc("setAdditive", 1){
+				protected Object run(Instruction inst, Object[] params){
+					((GameEntity)params[0]).getSprite().setAdditive(true);
+					return null;
+				}
+			},
+			new BIFunc("setAdditive", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((GameEntity)params[0]).getSprite().setAdditive((boolean)params[1]);
+					return null;
+				}
+			},
+			new BIFunc("isAdditive", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((GameEntity)params[0]).getSprite().isAdditive();
+				}
+			},
+			new BIFunc("setAlpha", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((GameEntity)params[0]).getSprite().setAlpha(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getAlpha", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((GameEntity)params[0]).getSprite().getAlpha();
+				}
+			},
 			
 			
 			// Bullet properties
+			new BIFunc("setType", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((Bullet)params[0]).setFrame(frameList.getBullet(castInt(params[1]), ((Bullet)params[0]).getColor()));
+					return null;
+				}
+			},
+			new BIFunc("getType", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((Bullet)params[0]).getType();
+				}
+			},
+			new BIFunc("setColor", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((Bullet)params[0]).setFrame(frameList.getBullet(((Bullet)params[0]).getType(), castInt(params[1])));
+					return null;
+				}
+			},
+			new BIFunc("getColor", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((Bullet)params[0]).getColor();
+				}
+			},
+
+			new BIFunc("setDamage", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((Bullet)params[0]).setDamage(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getDamage", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((Bullet)params[0]).getDamage();
+				}
+			},
+			new BIFunc("setDamageReduce", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((Bullet)params[0]).setDamageReduce(castFloat(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getDamageReduce", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((Bullet)params[0]).getDamageReduce();
+				}
+			},
+			
+			new BIFunc("setHitboxSize", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((Bullet)params[0]).setHitboxSize(castInt(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getHitboxSize", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((Bullet)params[0]).getHitboxSize();
+				}
+			},
+			
+			new BIFunc("setResistant", 1){
+				protected Object run(Instruction inst, Object[] params){
+					((Bullet)params[0]).setResistant(true);
+					return null;
+				}
+			},
+			new BIFunc("setResistant", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((Bullet)params[0]).setResistant((boolean)params[1]);
+					return null;
+				}
+			},
+			new BIFunc("isResistant", 2){
+				protected Object run(Instruction inst, Object[] params){
+					return ((Bullet)params[0]).isResistant();
+				}
+			},
+			
+			// Shared by Bullet/Enemy
+			new BIFunc("disableCollisions", 1){
+				protected Object run(Instruction inst, Object[] params){
+					
+					if(params[0] instanceof Bullet)
+						((Bullet)params[0]).setCollisions(false);
+					
+					((Enemy)params[0]).setCollisions(false);
+					return null;
+				}
+			},
+			new BIFunc("enableCollisions", 1){
+				protected Object run(Instruction inst, Object[] params){
+					
+					if(params[0] instanceof Bullet)
+						((Bullet)params[0]).setCollisions(true);
+					
+					((Enemy)params[0]).setCollisions(true);
+					return null;
+				}
+			},
+			new BIFunc("setCollisions", 1){
+				protected Object run(Instruction inst, Object[] params){
+					
+					if(params[0] instanceof Bullet)
+						((Bullet)params[0]).setCollisions((boolean)params[1]);
+					
+					((Enemy)params[0]).setCollisions((boolean)params[1]);
+					return null;
+				}
+			},
+			new BIFunc("getCollisions", 1){
+				protected Object run(Instruction inst, Object[] params){
+					
+					if(params[0] instanceof Bullet)
+						return ((Bullet)params[0]).collisionsEnabled();
+					
+					return ((Enemy)params[0]).collisionsEnabled();
+				}
+			},
+			
+			
+			
 			
 			
 			// Laser properties
-			
+
 			new BIFunc("setLength", 2){
 				protected Object run(Instruction inst, Object[] params){
 					((Laser)params[0]).setLength(castInt(params[1]));
 					return null;
 				}
 			},
+			new BIFunc("getLength", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((Laser)params[0]).getLength();
+				}
+			},
 			new BIFunc("setWidth", 2){
 				protected Object run(Instruction inst, Object[] params){
 					((Laser)params[0]).setWidth(castInt(params[1]));
 					return null;
+				}
+			},
+			new BIFunc("getWidth", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((Laser)params[0]).getWidth();
 				}
 			},
 			

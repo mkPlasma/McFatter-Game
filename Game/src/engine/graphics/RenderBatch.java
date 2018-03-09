@@ -406,6 +406,16 @@ public class RenderBatch{
 			if(uVBO){
 				vertices[i*2]		= e.getX();
 				vertices[i*2 + 1]	= e.getY();
+				
+				if(e instanceof Bullet){
+					int offset = ((Bullet)e).getHitboxOffset();
+					
+					if(offset != 0){
+						float dir = (float)Math.toRadians(((Bullet)e).getDir());
+						vertices[i*2]		+= (float)(offset*Math.cos(dir));
+						vertices[i*2 + 1]	+= (float)(offset*Math.sin(dir));
+					}
+				}
 			}
 			
 			if(uSZE){

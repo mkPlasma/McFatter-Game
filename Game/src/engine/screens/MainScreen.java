@@ -315,6 +315,13 @@ public class MainScreen extends GameScreen{
 			
 			if(b.collisionsEnabled()){
 				float[] bpos = b.getPos();
+				int offset = b.getHitboxOffset();
+				
+				if(offset != 0){
+					float dir = (float)Math.toRadians(b.getDir());
+					bpos[0] += (float)(offset*Math.cos(dir));
+					bpos[1] += (float)(offset*Math.sin(dir));
+				}
 				
 				// Bullet collisions
 				if(!(b instanceof Laser)){

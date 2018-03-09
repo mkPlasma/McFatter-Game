@@ -1671,7 +1671,7 @@ public class ScriptRunner{
 				return;
 			
 			case "setBombResist":
-				bl.setBombResist(paramCount == 1 ? true : (boolean)o2);
+				bl.setResistant(paramCount == 1 ? true : (boolean)o2);
 				return;
 			
 			case "setBorderDespawn":
@@ -1838,7 +1838,7 @@ public class ScriptRunner{
 				return;
 			
 			case "isBombResist":
-				returnValue = bl.bombResist();
+				returnValue = bl.isResistant();
 				return;
 			
 			case "getBorderDespawn":

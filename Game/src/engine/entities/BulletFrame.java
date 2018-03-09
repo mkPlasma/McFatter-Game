@@ -20,13 +20,17 @@ public class BulletFrame extends EntityFrame{
 	
 	private final int hitboxSize;
 	
+	// Hitbox y-axis offset
+	private final int hitboxOffset;
+	
 	// Crops the hitbox at the ends of lasers, value should be >0 and <1
 	private final float hbLengthCrop;
 	
-	public BulletFrame(int type, int color, Sprite sprite, int hitboxSize, float hbLengthCrop, boolean spriteAlign, float spriteRotation, boolean spriteRotationBySpd){
+	public BulletFrame(int type, int color, Sprite sprite, int hitboxSize, int hitboxOffset, float hbLengthCrop, boolean spriteAlign, float spriteRotation, boolean spriteRotationBySpd){
 		super(type, sprite, spriteAlign, spriteRotation);
 		this.color = color;
 		this.hitboxSize = hitboxSize;
+		this.hitboxOffset = hitboxOffset;
 		this.hbLengthCrop = hbLengthCrop;
 		this.spriteRotationBySpd = spriteRotationBySpd;
 	}
@@ -37,6 +41,10 @@ public class BulletFrame extends EntityFrame{
 	
 	public int getHitboxSize(){
 		return hitboxSize;
+	}
+	
+	public int getHitboxOffset(){
+		return hitboxOffset;
 	}
 	
 	public float getHBLengthCrop(){

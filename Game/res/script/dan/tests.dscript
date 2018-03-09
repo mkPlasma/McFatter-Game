@@ -9,8 +9,8 @@ clear();
 
 while(!boss.isDeleted()){
     
-    for(i in 250){
-        for(j in 4){
+    for(i < 250){
+        for(j < 4){
             freezeBullet(inv, 9 - i/(250/8.5));
         }
         
@@ -45,8 +45,8 @@ task freezeBullet(inv, spd){
     
     set b = bullet(type, color, boss.getPos(), rand(0, 360), spd, 0, spd, -0.1, -10);
     
-    while(!move){wait;}
-    if(b.isDeleted()){return;}
+    while(!move)wait;
+    if(b.isDeleted())return;
     
     set negative = randBool();
     set av = 0.2;
@@ -62,9 +62,9 @@ task aimFire(){
     
     set const ang = 15;
     
-    for(i in 10){
-        for(j in 5){
-            for(k in 10){
+    for(i < 10){
+        for(j < 5){
+            for(k < 10){
                 bullet(_star, _pink, boss.getPos(), angleToPlayer(boss.getPos()) - ang*2 + ang*j, 1 + k/2, 10);
             }
         }
