@@ -694,13 +694,21 @@ public class BuiltInFunctionList{
 			// Set to true
 			new BIFunc("setVisible", 1){
 				protected Object run(Instruction inst, Object[] params){
-					return ((GameEntity)params[0]).getTime();
+					((GameEntity)params[0]).setVisible(true);
+					return null;
+				}
+			},
+			new BIFunc("setInvisible", 1){
+				protected Object run(Instruction inst, Object[] params){
+					((GameEntity)params[0]).setVisible(false);
+					return null;
 				}
 			},
 			// Set to parameter
 			new BIFunc("setVisible", 2){
 				protected Object run(Instruction inst, Object[] params){
-					return ((GameEntity)params[0]).getTime();
+					((GameEntity)params[0]).setVisible((boolean)params[1]);
+					return null;
 				}
 			},
 			new BIFunc("isVisible", 1){
@@ -966,6 +974,16 @@ public class BuiltInFunctionList{
 				}
 			},
 			
+			new BIFunc("setBorderDespawn", 1){
+				protected Object run(Instruction inst, Object[] params){
+					
+					if(params[0] instanceof Bullet)
+						((Bullet)params[0]).setCollisions(false);
+					
+					((Enemy)params[0]).setCollisions(false);
+					return null;
+				}
+			},
 			
 			
 			
