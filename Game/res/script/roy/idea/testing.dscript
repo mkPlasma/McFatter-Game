@@ -1,0 +1,72 @@
+set e = boss(_radial, _cx, _top, 5000);
+
+#include bossMovement;
+
+bossMovement(e);
+
+task spiral(color, x){
+    set c = 4;
+    set dir;
+    
+    returnif e.isDeleted();
+    
+    while(true){
+        for(d < 0, 360/c, 360){
+            set actuald = dir + d;
+            bullet(_needle, color, e.getPos() + radius(actuald + (x * 90), 40), actuald , 3, 8);
+        }
+        dir += 8;
+        wait;
+    }
+}   
+
+
+succdisbigboithiccballs();
+task succdisbigboithiccballs(){
+    
+        for(i < 0, 3){
+            bullet1(e.getX(), e.getY(), angleToPlayer(e.getPos()));
+            waits 6;
+        }
+}
+
+task bullet1(x, y, dir){
+    set b = bullet(_orb, _gray, x, y, dir, 0, 50);
+    b.setScale(10);
+    b.setMaxSpd(7);
+    b.setAccel(.1);
+    
+    returnif b.isDeleted();
+    
+    while(true){
+        if(b.getX() < _left - 5 || b.getX() > _right - 5 || b.getY() > _bottom - 5 || b.getY() < _top ){
+            
+            //peeIsStoredInTheBalls(b.getX(), b.getY());
+            actualPattern();
+            b.setSpd(0);
+            b.setAccel(0);
+            waits 2;
+            b.setDir(angleToPlayer(b.getPos()));
+            b.setMaxSpd(7);
+            b.setAccel(.1);
+            wait 10;
+        }
+        
+        wait;
+    }
+}
+
+task actualPattern(){
+    for(d < 0, 360/25, 360){
+        bullet(_star, _blue, randf(_left, _right), 0, randf(80,100), randf(1,2), 10);
+        
+    }
+}
+
+task explosion(x, y){
+    for(i < 0, 5){
+        for(d < 0, 360/10, 360){
+            bullet(_orb, _blue, x, y, randf(0,360), randf(1,10), 10);
+        }
+    }
+}
