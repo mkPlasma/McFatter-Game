@@ -24,7 +24,7 @@ public class ScriptPrinter{
 	
 	private static void printToken(Token t){
 		String name = t.getType().name();
-		System.out.println(name + (name.length() >= 8 ? "" : "\t") + "\t" + t.getValue());
+		System.out.println(name + (name.length() >= 8 ? "" : "\t") + "\t" + t.getValue() + "\t");
 	}
 	
 	

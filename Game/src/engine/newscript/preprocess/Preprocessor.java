@@ -45,6 +45,7 @@ public class Preprocessor{
 		files.clear();
 		filePaths.clear();
 		
+		lineNum = 1;
 		inComment = false;
 		
 		// Read file
@@ -69,8 +70,6 @@ public class Preprocessor{
 	}
 	
 	private void process() throws ScriptException{
-		
-		lineNum = 1;
 		
 		// Process each line
 		for(int i = 0; i < mainFile.size(); i++){

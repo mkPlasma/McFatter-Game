@@ -1,5 +1,5 @@
 
-set boss = boss(_fighter, _cx, _ty - 32, 12000);
+set boss = boss(_fighter, _cx, _top - 32, 12000);
 
 boss.setDir(90);
 boss.setSpd(2);

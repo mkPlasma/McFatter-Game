@@ -2,6 +2,9 @@
 set bs = boss(_fighter, _cx, _top + 120, 1000);
 bs.setDir(90);
 
+movement();
+spirals();
+
 task movement(){
     
     returnif bs.isDeleted();
@@ -17,9 +20,6 @@ task movement(){
         }
     }
 }
-
-movement();
-spirals();
 
 task spirals(){
     
@@ -38,6 +38,8 @@ task spirals(){
 
 
 task spiral(col, type, inv){
+    
+    returnif bs.isDeleted();
     
     set const c = 4;
     

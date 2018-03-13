@@ -15,14 +15,10 @@ import engine.screens.MainScreen;
  *
  */
 
-public class Bullet extends MovableEntity{
+public class Bullet extends CollidableEntity{
 	
 	// Properties
 	protected int type, color;
-	protected int hitboxSize;
-	
-	// Offset hitbox on y-axis
-	protected int hitboxOffset;
 	
 	protected BulletFrame frame;
 	
@@ -40,15 +36,6 @@ public class Bullet extends MovableEntity{
 	
 	// false - fade		true - flare
 	protected boolean delayFlare;
-	
-	// Whether entity can collide
-	protected boolean collisions;
-	
-	// Despawn at screen borders
-	protected boolean borderDespawn;
-	
-	// How far outside screen to despawn
-	protected int despawnRange = 32;
 	
 	// Screen to add effects to
 	protected final MainScreen screen;
@@ -222,18 +209,6 @@ public class Bullet extends MovableEntity{
 		return color;
 	}
 	
-	public void setHitboxSize(int hitboxSize){
-		this.hitboxSize = hitboxSize;
-	}
-	
-	public int getHitboxSize(){
-		return hitboxSize;
-	}
-	
-	public int getHitboxOffset(){
-		return hitboxOffset;
-	}
-	
 	public Sprite getSprite(){
 		return sprite;
 	}
@@ -269,29 +244,5 @@ public class Bullet extends MovableEntity{
 	
 	public float getDamageReduce(){
 		return dmgReduce;
-	}
-
-	public void setCollisions(boolean collisions){
-		this.collisions = collisions;
-	}
-	
-	public boolean collisionsEnabled(){
-		return collisions;
-	}
-	
-	public void setBorderDespawn(boolean borderDespawn){
-		this.borderDespawn = borderDespawn;
-	}
-	
-	public boolean getBorderDespawn(){
-		return borderDespawn;
-	}
-	
-	public void setDespawnRange(int despawnRange){
-		this.despawnRange = despawnRange;
-	}
-	
-	public int getDespawnRange(){
-		return despawnRange;
 	}
 }

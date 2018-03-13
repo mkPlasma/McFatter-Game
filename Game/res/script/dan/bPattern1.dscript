@@ -8,20 +8,19 @@ wait 30;
 spiral(true);
 
 task spiral(inv){
-    set c = 12;
+    returnif boss.isDeleted();
+    
+    set const c = 12;
     set dir = rand(0, 360);
     set dirAdd = 3.7;
-    set col = _green;
+    set col = inv -> _cyan, _green;
     
-    if(inv){
-        dirAdd!!;
-        col = _cyan;
-    }
+    if(inv) dirAdd!!;
     
-    while(!boss.isDeleted()){
-        for(d in 0, 360/c, 360){
+    
+    while(true){
+        for(d < 0, 360/c, 360)
             bullet(_orb, col, boss.getPos(), dir + d, 2, 10);
-        }
         
         dir += dirAdd;
         
@@ -33,9 +32,8 @@ task spiral(inv){
     }
 }
 
-while(boss.getHealth() > 9000){
+while(boss.getHealth() > 9000)
     wait;
-}
 
 ended = true;
 clearBullets();

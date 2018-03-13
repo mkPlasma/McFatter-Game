@@ -14,11 +14,11 @@ while(!boss.isDeleted()){
     set dir = rand(0, 360);
     set dirAdd = 4;
     
-    if(inv){dirAdd!!;}
+    if(inv)dirAdd!!;
     inv!!;
     
-    for(i in 5){
-        for(d in 0, 360/c, 360){
+    for(i < 5){
+        for(d < 0, 360/c, 360){
             bullet(_scale, _yellow, boss.getPos(), dir + d, 2 + i*0.2, 10);
         }
         
@@ -35,13 +35,16 @@ while(!boss.isDeleted()){
 clearBullets();
 
 task aimed(){
+    
+    returnif boss.isDeleted();
+    
     set dir;
     set c = 5;
     
-    while(!boss.isDeleted()){
+    while(true){
         
-        for(i in 10){
-            for(d in 0, 80/c, 80){
+        for(i < 10){
+            for(d < 0, 80/c, 80){
                 aimBullet(dir + d - 36);
                 aimBullet(dir + d + 144);
             }
@@ -61,11 +64,9 @@ task aimBullet(dir){
     set b = bullet(_rice, _blue, boss.getPos(), dir, 3, -5);
     b.setAdditive();
     
-    wait 30;
+    returnif b.isDeleted();
     
-    if(b.isDeleted()){
-        return;
-    }
+    wait 30;
     
     b.setDir(angleToPlayer(b.getPos()));
 }

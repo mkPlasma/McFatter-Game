@@ -15,6 +15,7 @@ import java.util.Random;
 import content.FrameList;
 import engine.entities.BossEnemy;
 import engine.entities.Bullet;
+import engine.entities.CollidableEntity;
 import engine.entities.Enemy;
 import engine.entities.GameEntity;
 import engine.entities.Laser;
@@ -927,7 +928,7 @@ public class BuiltInFunctionList{
 					return null;
 				}
 			},
-			new BIFunc("isResistant", 2){
+			new BIFunc("isResistant", 1){
 				protected Object run(Instruction inst, Object[] params){
 					return ((Bullet)params[0]).isResistant();
 				}
@@ -936,52 +937,51 @@ public class BuiltInFunctionList{
 			// Shared by Bullet/Enemy
 			new BIFunc("disableCollisions", 1){
 				protected Object run(Instruction inst, Object[] params){
-					
-					if(params[0] instanceof Bullet)
-						((Bullet)params[0]).setCollisions(false);
-					
-					((Enemy)params[0]).setCollisions(false);
+					((CollidableEntity)params[0]).setCollisions(false);
 					return null;
 				}
 			},
 			new BIFunc("enableCollisions", 1){
 				protected Object run(Instruction inst, Object[] params){
-					
-					if(params[0] instanceof Bullet)
-						((Bullet)params[0]).setCollisions(true);
-					
-					((Enemy)params[0]).setCollisions(true);
+					((CollidableEntity)params[0]).setCollisions(true);
 					return null;
 				}
 			},
-			new BIFunc("setCollisions", 1){
+			new BIFunc("setCollisions", 2){
 				protected Object run(Instruction inst, Object[] params){
-					
-					if(params[0] instanceof Bullet)
-						((Bullet)params[0]).setCollisions((boolean)params[1]);
-					
-					((Enemy)params[0]).setCollisions((boolean)params[1]);
+					((CollidableEntity)params[0]).setCollisions((boolean)params[1]);
 					return null;
 				}
 			},
 			new BIFunc("getCollisions", 1){
 				protected Object run(Instruction inst, Object[] params){
-					
-					if(params[0] instanceof Bullet)
-						return ((Bullet)params[0]).collisionsEnabled();
-					
-					return ((Enemy)params[0]).collisionsEnabled();
+					return ((CollidableEntity)params[0]).collisionsEnabled();
 				}
 			},
 			
-			new BIFunc("setBorderDespawn", 1){
+			new BIFunc("setBorderDespawn", 2){
 				protected Object run(Instruction inst, Object[] params){
-					
-					if(params[0] instanceof Bullet)
-						((Bullet)params[0]).setCollisions(false);
-					
-					((Enemy)params[0]).setCollisions(false);
+					((CollidableEntity)params[0]).setBorderDespawn(false);
 					return null;
+				}
+			},
+			
+			new BIFunc("getBorderDespawn", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((CollidableEntity)params[0]).getBorderDespawn();
+				}
+			},
+			
+			new BIFunc("setDespawnRange", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((CollidableEntity)params[0]).setDespawnRange(castInt(params[1]));
+					return null;
+				}
+			},
+			
+			new BIFunc("setDespawnRange", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((CollidableEntity)params[0]).getDespawnRange();
 				}
 			},
 			
@@ -1015,9 +1015,45 @@ public class BuiltInFunctionList{
 			
 			
 			
+			
+			// Enemy properties
+			new BIFunc("setHealth", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((Enemy)params[0]).setHealth(castInt(params[1]));
+					return null;
+				}
+			},
+			
 			new BIFunc("getHealth", 1){
 				protected Object run(Instruction inst, Object[] params){
 					return ((Enemy)params[0]).getHealth();
+				}
+			},
+			
+			new BIFunc("setInvulnerable", 1){
+				protected Object run(Instruction inst, Object[] params){
+					((Enemy)params[0]).setInvulnerable(true);
+					return null;
+				}
+			},
+			
+			new BIFunc("setVulnerable", 1){
+				protected Object run(Instruction inst, Object[] params){
+					((Enemy)params[0]).setInvulnerable(false);
+					return null;
+				}
+			},
+			
+			new BIFunc("setInvulnerable", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((Enemy)params[0]).setInvulnerable((boolean)params[1]);
+					return null;
+				}
+			},
+			
+			new BIFunc("isInvulnerable", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((Enemy)params[0]).isInvulnerable();
 				}
 			},
 		};

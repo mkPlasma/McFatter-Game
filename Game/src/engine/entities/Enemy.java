@@ -17,20 +17,15 @@ import engine.screens.MainScreen;
  * 		
  */
 
-public class Enemy extends MovableEntity{
+public class Enemy extends CollidableEntity{
 	
 	protected EnemyFrame frame;
 	
 	// Customizable sprite
 	protected Sprite sprite;
 	
-	// Whether entity can collide
-	protected boolean collisions = true;
-	
-	protected int hitboxSize;
-	
-	protected boolean invulnerable;
 	protected int hp;
+	protected boolean invulnerable;
 	
 	protected final MainScreen screen;
 	
@@ -97,21 +92,5 @@ public class Enemy extends MovableEntity{
 	
 	public boolean isInvulnerable(){
 		return invulnerable;
-	}
-	
-	public void setHitboxSize(int hitboxSize){
-		this.hitboxSize = hitboxSize;
-	}
-	
-	public int getHitboxSize(){
-		return hitboxSize;
-	}
-	
-	public void setCollisions(boolean collisions){
-		this.collisions = collisions;
-	}
-	
-	public boolean collisionsEnabled(){
-		return collisions;
 	}
 }

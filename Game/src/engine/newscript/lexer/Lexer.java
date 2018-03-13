@@ -22,7 +22,7 @@ public class Lexer{
 	
 	private ArrayList<Token> tokens;
 	
-	private String file;
+	private String filePath;
 	private int lineNum;
 	
 	private final NegativeReplacer negativeReplacer;
@@ -41,6 +41,7 @@ public class Lexer{
 		script.clearFile();
 		
 		lineNum = 1;
+		filePath = null;
 		
 		// Build tokens for each line
 		for(String line:file){
@@ -55,7 +56,7 @@ public class Lexer{
 				continue;
 			}
 			else if(line.startsWith("$file")){
-				this.file = line.substring(6);
+				filePath = line.substring(6);
 				lineNum = 1;
 				continue;
 			}
@@ -67,7 +68,7 @@ public class Lexer{
 		script.setTokens(tokens.toArray(new Token[0]));
 		
 		negativeReplacer.process(script);
-		//ScriptPrinter.printTokens(script.getTokens());
+		ScriptPrinter.printTokens(script.getTokens());
 	}
 	
 	private void buildTokens(String line) throws ScriptException{
@@ -105,7 +106,7 @@ public class Lexer{
 						token = token.substring(0, token.length() - 1).substring(1);
 					
 					// Add token
-					tokens.add(new Token(type, token, file, lineNum));
+					tokens.add(new Token(type, token, filePath, lineNum));
 					
 					invalid = false;
 					break;
@@ -114,7 +115,7 @@ public class Lexer{
 			
 			// Token did not match any regex
 			if(invalid)
-				throw new ScriptException("Invalid token '" + line.charAt(0) + "'", file, lineNum);
+				throw new ScriptException("Invalid token '" + line.charAt(0) + "'", filePath, lineNum);
 			
 			// If line is empty, finish
 			if(line.isEmpty())

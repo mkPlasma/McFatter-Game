@@ -21,7 +21,7 @@ public abstract class MovableEntity extends GameEntity{
 	public MovableEntity(EntityFrame frame, float x, float y){
 		super(frame, x, y);
 	}
-
+	
 	public MovableEntity(EntityFrame frame, float x, float y, float dir, float spd){
 		super(frame, x, y);
 		
