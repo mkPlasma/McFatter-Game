@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
+import engine.newscript.ScriptPrinter;
 
 /**
  * 

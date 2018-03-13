@@ -199,7 +199,7 @@ public class Preprocessor{
 			throw new ScriptException("File " + path.substring(16) + " could not be found", lineNum);
 		
 		// Add to raw file list
-		files.add(file2);
+		files.add((ArrayList<String>)file2.clone());
 		filePaths.add(path);
 		setScriptFiles();
 		

@@ -52,7 +52,7 @@ public class DScript{
 	public void setRawFiles(String[][] rFiles){
 		this.rFiles = rFiles;
 	}
-
+	
 	public String getLine(String file, int line){
 		return rFiles[getFileIndex(file)][line - 1];
 	}

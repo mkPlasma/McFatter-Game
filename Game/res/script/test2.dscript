@@ -8,11 +8,11 @@ task movement(){
     
     while(true){
         
-        wait 5*60 - 90;
+        wait 5*60 - 240;
         set pos = {_cx + rand(40), _top + 120 + rand(40)};
         
-        for(i < 90){
-            bs.setPos(bs.getPos() + (pos - bs.getPos())/15);
+        for(i < 240){
+            bs.setPos(bs.getPos() + (pos - bs.getPos())/40);
             wait;
         }
     }
@@ -50,9 +50,8 @@ task spiral(col, type, inv){
     
     for(i < 120){
         
-        for(d < 0, 360/c, 360){
-            bullet(_missile, col, bs.getPos() + radius(dir + d, rad), dir + d, 2.2, 8);
-        }
+        for(d < 0, 360/c, 360)
+            bullet(_crystal, col, bs.getPos() + radius(dir + d, rad), dir + d, 2.2, 8);
         
         dir += dirAdd;
         wait 2;
