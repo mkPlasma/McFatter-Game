@@ -1,5 +1,5 @@
 
-boss.setInvulnerable(false);
+boss.setVulnerable();
 
 set ended = false;
 
@@ -8,7 +8,7 @@ wait 30;
 spiral(true);
 
 task spiral(inv){
-    returnif boss.isDeleted();
+    returnif boss.isDeleted() || boss.getHealth() < 9000;
     
     set const c = 12;
     set dir = rand(0, 360);
@@ -25,15 +25,10 @@ task spiral(inv){
         dir += dirAdd;
         
         wait 5;
-        
-        if(ended){
-            return;
-        }
     }
 }
 
 while(boss.getHealth() > 9000)
     wait;
 
-ended = true;
 clearBullets();

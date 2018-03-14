@@ -13,6 +13,7 @@ import engine.newscript.BuiltInFunctionList;
 import engine.newscript.DScript;
 import engine.newscript.ScriptException;
 import engine.newscript.ScriptHandler;
+import engine.newscript.ScriptPrinter;
 import engine.newscript.bytecodegen.Instruction;
 import engine.newscript.bytecodegen.InstructionSet;
 import sun.font.Script;
@@ -383,6 +384,9 @@ public class ScriptRunner{
 				
 				try{
 					// Return if top stack value is true
+					
+					System.out.println(stack.peek());
+					
 					if((boolean)pop()){
 						
 						// End task
@@ -618,7 +622,7 @@ public class ScriptRunner{
 	
 	private void unaryAssign(InstructionSet i, int op) throws ScriptException{
 		
-		boolean local = i == op_inc_l || i == op_dec_l || i == op_inc_l;
+		boolean local = i == op_inc_l || i == op_dec_l || i == op_inv_l;
 		
 		Object v = local ? localVariables.peek().get(op) : globalVariables.get(op);
 		

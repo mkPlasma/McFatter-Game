@@ -414,6 +414,14 @@ public class BuiltInFunctionList{
 			
 			
 			
+			// Force delete all enemy bullets
+			new BIFunc("clearBullets", 0){
+				protected Object run(Instruction inst, Object[] params){
+					screen.clearEnemyBullets();
+					return null;
+				}
+			},
+			
 			
 
 			

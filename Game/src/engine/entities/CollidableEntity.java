@@ -29,14 +29,17 @@ public abstract class CollidableEntity extends MovableEntity{
 	
 	public CollidableEntity(EntityFrame frame, float x, float y){
 		super(frame, x, y);
+		collisions = true;
 	}
 	
 	public CollidableEntity(EntityFrame frame, float x, float y, float dir, float spd){
 		super(frame, x, y, dir, spd);
+		collisions = true;
 	}
 
 	public CollidableEntity(EntityFrame frame, float x, float y, float dir, float spd, float minSpd, float maxSpd, float accel){
 		super(frame, x, y, dir, spd, minSpd, maxSpd, accel);
+		collisions = true;
 	}
 	
 	

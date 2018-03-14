@@ -94,6 +94,8 @@ public class Bullet extends CollidableEntity{
 		
 		// Delay effects
 		if(delay != 0){
+			collisions = false;
+			
 			if(delayFlare){
 				visible = false;
 				
@@ -190,6 +192,7 @@ public class Bullet extends CollidableEntity{
 	
 	public void refreshSprite(){
 		sprite.setTextureCoords(screen.getFrameList().bulletList.getSprite(type, color).getTextureCoords());
+		sprite.genTextureCoords();
 	}
 	
 	

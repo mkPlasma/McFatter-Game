@@ -68,7 +68,7 @@ public class Lexer{
 		script.setTokens(tokens.toArray(new Token[0]));
 		
 		negativeReplacer.process(script);
-		ScriptPrinter.printTokens(script.getTokens());
+		//ScriptPrinter.printTokens(script.getTokens());
 	}
 	
 	private void buildTokens(String line) throws ScriptException{

@@ -244,6 +244,12 @@ public class MainScreen extends GameScreen{
 			e.delete();
 	}
 	
+	public void clearEnemyBullets(){
+		
+		for(Bullet b:enemyBullets)
+			b.onDestroy(true);
+	}
+	
 	public void unpause(){
 		paused = false;
 	}
@@ -423,11 +429,6 @@ public class MainScreen extends GameScreen{
 			return;
 		
 		texts.add(text);
-	}
-	
-	public void clearEnemyBullets(){
-		for(Bullet b:enemyBullets)
-			b.onDestroy(true);
 	}
 	
 	public TextureCache getTextureCache(){

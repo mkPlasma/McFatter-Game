@@ -224,7 +224,17 @@ public class ExpressionSimplifier{
 			return new Object[]{new Token(FLOAT, Float.toString(rf), file, lineNum)};
 		}
 		
-		return null;
+		// Boolean operation
+		boolean b1 = (boolean)o1;
+		boolean b2 = (boolean)o2;
+		boolean r = false;
+		
+		switch(opv){
+			case "||":	r = b1 || b2;	break;
+			case "&&":	r = b1 && b2;	break;
+		}
+		
+		return new Object[]{new Token(BOOLEAN, Boolean.toString(r), file, lineNum)};
 	}
 	
 	private Object[] arrayConcat(Object o1, Object o2){

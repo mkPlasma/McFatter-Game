@@ -1,9 +1,36 @@
 package engine.graphics;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.GL_LINEAR;
+import static org.lwjgl.opengl.GL11.GL_ONE;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_POINTS;
+import static org.lwjgl.opengl.GL11.GL_SHORT;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glTexParameteri;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
+import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static org.lwjgl.opengl.GL15.glBufferData;
+import static org.lwjgl.opengl.GL15.glDeleteBuffers;
+import static org.lwjgl.opengl.GL15.glGenBuffers;
+import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
+import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import static org.lwjgl.opengl.GL30.glVertexAttribIPointer;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -12,6 +39,7 @@ import java.util.ArrayList;
 import org.lwjgl.BufferUtils;
 
 import engine.entities.Bullet;
+import engine.entities.CollidableEntity;
 import engine.entities.Enemy;
 import engine.entities.GameEntity;
 import engine.entities.Laser;
@@ -407,11 +435,11 @@ public class RenderBatch{
 				vertices[i*2]		= e.getX();
 				vertices[i*2 + 1]	= e.getY();
 				
-				if(e instanceof Bullet){
-					int offset = ((Bullet)e).getHitboxOffset();
+				if(e instanceof CollidableEntity){
+					int offset = ((CollidableEntity)e).getHitboxOffset();
 					
 					if(offset != 0){
-						float dir = (float)Math.toRadians(((Bullet)e).getDir());
+						float dir = (float)Math.toRadians(((CollidableEntity)e).getDir());
 						vertices[i*2]		+= (float)(offset*Math.cos(dir));
 						vertices[i*2 + 1]	+= (float)(offset*Math.sin(dir));
 					}
@@ -419,9 +447,8 @@ public class RenderBatch{
 			}
 			
 			if(uSZE){
-				if(e instanceof Bullet)	sizes[i] = (short)((Bullet)e).getHitboxSize();
-				if(e instanceof Player)	sizes[i] = (short)((Player)e).getHitboxSize();
-				if(e instanceof Enemy)	sizes[i] = (short)((Enemy)e).getHitboxSize();
+				if(e instanceof CollidableEntity) sizes[i] = (short)((CollidableEntity)e).getHitboxSize();
+				if(e instanceof Player) sizes[i] = (short)((Player)e).getHitboxSize();
 			}
 		}
 		

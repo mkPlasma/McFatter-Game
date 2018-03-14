@@ -8,8 +8,13 @@ boss.setMinSpd(0);
 
 boss.setInvulnerable();
 
+print(true || true);
+print(false || true);
+print(true || false);
+print(false || false);
+
 wait 150;
 
 #include bPattern1;
-#include bPattern2;
-#include bPattern3;
+//#include bPattern2;
+//#include bPattern3;
