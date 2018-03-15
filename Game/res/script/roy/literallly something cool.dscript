@@ -1,0 +1,78 @@
+set c = 35;
+set inv = false;
+for(i < 0, 20){
+    for(d in 0, 360/c, 360){
+        bullet(_orb, _blue, _cx, d, spd, 5);
+    }
+    wait 5;
+}
+
+
+task enemy(inv){
+    set color = 1;
+    set type = 1;
+    
+    set c = 4;
+    
+    set x = _rx - 80;
+    set av = 2.5;
+    
+    if(inv){
+        x = _lx + 80;
+        av!!;
+    }
+    
+    set e = enemy(_radial, x, _ty, 50);  
+    e.setAngVel(av);
+    e.setDir(90);
+    e.setSpd(7);
+    
+    wait ;
+    
+    if(e.isDeleted()){
+        return;    
+    }
+    
+    while(!e.isDeleted()){
+        gravityBullet();
+        
+        color++;
+        if(color > 30){
+            color = 1;
+        }
+        
+        type++;
+        if(type > 12){
+            type = 1;
+        }
+        wait 5;
+    }  
+    
+    task gravityBullet(){
+        
+        set dir = 270 + rand(45);
+        set spd = randFloat(1, 2);
+        
+        set vx = spd*cos(dir);
+        set vy = spd*sin(dir);
+        
+        
+        set b = bullet(_orb, _blue, e.getPos(), dir, spd, 5);
+        
+        while(!b.isDeleted()){
+            
+                vy += .03;
+                
+                
+            
+            dir = atan2(vy, vx);
+            spd = sqrt(vx^2 + vy^2);
+            
+            b.setDir(dir);
+            b.setSpd(spd);
+            
+            
+            wait ;
+        }
+    }
+}

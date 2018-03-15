@@ -7,7 +7,7 @@ wait 60;
 
 task bossMovement(e){
 
-    wait 240;
+    wait 300;
     while(!e.isDeleted()){
         set waitTime = rand(2,4);
         set accel = randf(0.05, 0.09);

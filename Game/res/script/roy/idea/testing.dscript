@@ -1,8 +1,32 @@
-set e = boss(_radial, _cx, _top, 5000);
+set e = boss(_fighter, _cx, _top, 5000);
 
 #include bossMovement;
 
 bossMovement(e);
+set dir;
+bulletwave();
+
+
+task bulletwave(){
+    set const c = 46;
+    set inv = true;
+    
+    while(!e.isDeleted()){
+        set wc;
+        
+        for(d < -25,360/c, 205){
+            set b = bullet(_star, _blue, e.getX(), e.getY(), (inv -> 205 - d, d), 3`®, 10);
+            b.setScale(1.7);
+            b.setHitboxSize(4);
+            
+            wc++;
+            
+            if(wc % 2 == 0) wait;
+        }
+        inv!!;
+    }
+}
+
 
 task spiral(color, x){
     set c = 4;
@@ -20,8 +44,6 @@ task spiral(color, x){
     }
 }   
 
-
-succdisbigboithiccballs();
 task succdisbigboithiccballs(){
     
         for(i < 0, 3){
@@ -31,7 +53,7 @@ task succdisbigboithiccballs(){
 }
 
 task bullet1(x, y, dir){
-    set b = bullet(_orb, _gray, x, y, dir, 0, 50);
+    set b = bullet(_orb, _gray, x, y, dir, 0, 90);
     b.setScale(10);
     b.setMaxSpd(7);
     b.setAccel(.1);
