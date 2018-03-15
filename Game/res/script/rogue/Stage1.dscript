@@ -1,7 +1,15 @@
 #include enemies;
-speedster(_left, _top, _scale, _red, 45, 9,100,true);
-speedster(_right, _top, _scale, _red, 135, 9,100,true);
+/*
+speedster(_left, _top, _scale, _red_d, 45, 9,100,true);
+speedster(_right, _top, _scale, _red_d, 135, 9,100,true);
 wait 240;
-bomber(_cx, _top - 32, 90, 3, 1000);
-wait 480;
-basic(_cx, _top - 32, 1000,4,90);
+bomber(_cx, _top - 32, 90, 3, 2000);
+wait 500;
+speedster(_left - 35, _cy -25, _scale, _blue_d, 10, 9,100,true);
+speedster(_right + 35, _cy -25, _scale, _blue_d, 170, 9,100,true);
+wait 100;
+basic(_cx, _top - 32, 2000,4,90);
+wait 500;
+flower(_cx, _top - 32, 1000,4,90);
+*/
+lasers(_cx, _top - 32, 1000,4,90);

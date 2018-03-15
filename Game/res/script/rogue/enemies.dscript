@@ -1,6 +1,8 @@
 task speedster(x, y, type, color, dir, spd ,health,inv){
 
-    set const c = 3;
+    set const c = 2;
+
+    print(_left);
 
     set e = enemy(_radial, x,y,health);
     e.setDir(dir);
@@ -23,6 +25,9 @@ task speedster(x, y, type, color, dir, spd ,health,inv){
     }
 }
 
+
+
+
 task bomber(x, y,dir, spd ,health){
     set angvel = 1.5;
     set counter = 0;
@@ -34,9 +39,9 @@ task bomber(x, y,dir, spd ,health){
     e.setMinSpd(0);
     while(!e.isDeleted()){
         bullets(e.getPos());
-        wait 5;
-        counter +=5;
-        if(counter == 500){
+        wait 10;
+        counter +=10;
+        if(counter == 450){
             break;
         }
     }
@@ -51,8 +56,8 @@ task bomber(x, y,dir, spd ,health){
 
     task bullets(pos){
         set const c = 8;
-        set b = bullet(_mine, _red, pos, rand(0, 180), 3, -15);
-        //b.setScale(2);
+        set b = bullet(_mine, _red_d, pos, rand(0, 180), 3, 0);
+        b.setScale(2);
         b.setMaxSpd(3);
         b.setAccel(.08);
         wait 60;
@@ -64,14 +69,20 @@ task bomber(x, y,dir, spd ,health){
 
     }
     task bullets2(pos, dir2){
-        set b = bullet(_scale, _red, pos, dir2, 2, -15);
+        set b = bullet(_scale, _purple_d, pos, dir2, 2, -15);
     }
 
     }
+
+
+
+
 
 task basic(x, y, health,spd,dir){
     set e = enemy(_fighter, x,y,health);
-    set const c = 15;
+    set angvel = 1.5;
+    set const c = 20;
+    set counter = 0;
     e.setDir(90);
     e.setSpd(spd);
     e.setAccel(-0.05);
@@ -80,10 +91,81 @@ task basic(x, y, health,spd,dir){
         for(d < 0, 360/c, 360){
             bullets(dir + d,e.getPos());
         }
-        wait 30;
+        wait 15;
+        counter +=15;
+        if(counter == 450){
+            break;
+        }
         dir += rand(5, 7);
     }
+    e.setDir(90);
+    e.setSpd(6);
+    e.setAccel(-0.009);
+    e.setMinSpd(0);
+    e.setAngVel(angvel);
+    wait 200;
+    e.delete();
+    return;
     task bullets(dir3,pos){
-        set b = bullet(_scale, _red, pos, dir3, 3, -15);
+        set b = bullet(_scale, _red_d, pos, dir3, 3, -15);
+    }
+}
+
+
+
+task flower(x, y, health,spd, dir){
+    set e = enemy(_fighter, x,y,health);
+    set const c = 15;
+    set dir2 = 90;
+    e.setDir(90);
+    e.setSpd(spd);
+    e.setAccel(-0.05);
+    e.setMinSpd(0);
+    while(!e.isDeleted()){
+        for(d < 0, 360/c, 360){
+            bullets(dir + d,e.getPos());
+            bullets2(dir2 - d,e.getPos());
+        }
+        wait 10;
+        dir += 17;
+        dir2 -= 17;
+    }
+        task bullets(dir3,pos){
+            set b = bullet(_scale, _purple, pos, dir3, 3, -15);
+        }
+        task bullets2(dir3,pos){
+            set b = bullet(_scale, _pink, pos, dir3, 3, -15);
+        }
+}
+
+
+task lasers(x, y, health,spd, dir){
+    set e = enemy(_fighter, x,y,health);
+    set const c = 15;
+    set dir2 = 90;
+    e.setDir(90);
+    e.setSpd(spd);
+    e.setAccel(-0.05);
+    e.setMinSpd(0);
+    while(e.getSpd() > .01){
+        wait;
+    }
+    print("sdfsdf");
+        while(!e.isDeleted()){
+            for(d < 0, 360/c, 360){
+                laserb(dir2 + d,e.getX(),e.getY());
+            }
+            wait 47;
+            dir2 += 5;
+        }
+
+
+
+    task laserb(dir,x,y){
+        set l = laser(_laser, _pink, x, y, dir, 370, 20, -60);
+        wait 45;
+        l.delete();
+
+
     }
 }

@@ -1,4 +1,4 @@
-run "Enemies";
+#include Enemies;
 
 wait 200;
 set inv = false;
@@ -24,3 +24,4 @@ for(i in 2, 6 ){
 wait 150;
 
 run "jojboss";
+®
