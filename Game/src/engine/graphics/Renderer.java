@@ -274,10 +274,8 @@ public class Renderer{
 			GameEntity e = el.get(i);
 			
 			if(e instanceof Laser){
-				el.remove(i);
+				el.remove(i--);
 				ll.add(e);
-				
-				i--;
 			}
 		}
 		

@@ -385,8 +385,6 @@ public class ScriptRunner{
 				try{
 					// Return if top stack value is true
 					
-					System.out.println(stack.peek());
-					
 					if((boolean)pop()){
 						
 						// End task

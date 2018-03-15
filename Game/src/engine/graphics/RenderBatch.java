@@ -68,7 +68,7 @@ public class RenderBatch{
 		UPDATE_ALL			= 0b011111,
 		UPDATE_LASER		= 0b111101,
 		UPDATE_HITBOX		= 0b000011,
-		UPDATE_LASER_HITBOX	= 0b001001;
+		UPDATE_LASER_HITBOX	= 0b000011;
 	
 	
 	private final int shader;

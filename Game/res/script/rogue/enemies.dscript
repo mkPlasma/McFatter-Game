@@ -150,20 +150,19 @@ task lasers(x, y, health,spd, dir){
     while(e.getSpd() > .01){
         wait;
     }
-    print("sdfsdf");
-        while(!e.isDeleted()){
-            for(d < 0, 360/c, 360){
-                laserb(dir2 + d,e.getX(),e.getY());
-            }
-            wait 47;
-            dir2 += 5;
+    while(!e.isDeleted()){
+        for(d < 0, 360/c, 360){
+            laserb(dir2 + d,e.getX(),e.getY());
         }
+        wait 47;
+        dir2 += 5;
+    }
 
 
 
     task laserb(dir,x,y){
-        set l = laser(_laser, _pink, x, y, dir, 370, 20, -60);
-        wait 45;
+        set l = laser(_laser, _pink, x, y, dir, 370, 20, 60);
+        wait 60;
         l.delete();
 
 
