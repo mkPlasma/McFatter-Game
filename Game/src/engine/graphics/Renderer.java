@@ -115,22 +115,22 @@ public class Renderer{
 		rbPlayerBullets = new RenderBatch(0, MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
 
 		// Enemy bullets
-		rbEnemyBullets1		= new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
-		rbEnemyBullets1a		= new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true);
-		rbEnemyBullets2		= new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, false);
-		rbEnemyBullets2a		= new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, true);
-		rbEnemyBulletsL		= new RenderBatch(1, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
-		rbEnemyBulletsLa		= new RenderBatch(1, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true);
+		rbEnemyBullets1		= new RenderBatch(SHADER_STANDARD, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
+		rbEnemyBullets1a		= new RenderBatch(SHADER_STANDARD, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true);
+		rbEnemyBullets2		= new RenderBatch(SHADER_STANDARD, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, false);
+		rbEnemyBullets2a		= new RenderBatch(SHADER_STANDARD, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, true);
+		rbEnemyBulletsL		= new RenderBatch(SHADER_LASER, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
+		rbEnemyBulletsLa		= new RenderBatch(SHADER_LASER, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true);
 		
 		// Enemies
-		rbEnemies = new RenderBatch(0, MAX_ENEMIES, 64, tc.cache("enemies.png").getID(), UPDATE_ALL, false);
+		rbEnemies = new RenderBatch(SHADER_STANDARD, MAX_ENEMIES, 64, tc.cache("enemies.png").getID(), UPDATE_ALL, false);
 		
 		// Effects
-		rbEffects = new RenderBatch(0, MAX_EFFECTS, 32, tc.cache("effects.png").getID(), UPDATE_ALL, true);
+		rbEffects = new RenderBatch(SHADER_STANDARD, MAX_EFFECTS, 32, tc.cache("effects.png").getID(), UPDATE_ALL, true);
 		
 		// Hitboxes
-		rbHitboxes = new RenderBatch(2, MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX);
-		rbLaserHitboxes = new RenderBatch(3, MAX_ENEMY_BULLETS, UPDATE_LASER_HITBOX);
+		rbHitboxes = new RenderBatch(SHADER_HITBOX, MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX);
+		rbLaserHitboxes = new RenderBatch(SHADER_L_HITBOX, MAX_ENEMY_BULLETS, UPDATE_LASER_HITBOX);
 		
 		// Text
 		rbText = new RenderBatch(MAX_TEXTS, 16, 32, tc.cache("font.png").getID(), UPDATE_ALL);
@@ -302,9 +302,9 @@ public class Renderer{
 			if(!renderObjects && objRenderBatches.contains(rb))
 				continue;
 			
-			if(rb.getShader() == 0)
+			if(rb.getShader() == SHADER_STANDARD)
 				basicShader.use();
-			else if(rb.getShader() == 1){
+			else if(rb.getShader() == SHADER_LASER){
 				laserShader.use();
 				glUniform1i(0, time);
 			}
@@ -312,7 +312,7 @@ public class Renderer{
 				if(!renderHitboxes)
 					continue;
 				
-				if(rb.getShader() == 2)
+				if(rb.getShader() == SHADER_HITBOX)
 					hitboxShader.use();
 				else
 					laserHitboxShader.use();

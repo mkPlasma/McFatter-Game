@@ -914,13 +914,13 @@ public class BuiltInFunctionList{
 			
 			new BIFunc("setHitboxSize", 2){
 				protected Object run(Instruction inst, Object[] params){
-					((Bullet)params[0]).setHitboxSize(castInt(params[1]));
+					((Bullet)params[0]).setHitboxWidth(castInt(params[1]));
 					return null;
 				}
 			},
 			new BIFunc("getHitboxSize", 1){
 				protected Object run(Instruction inst, Object[] params){
-					return ((Bullet)params[0]).getHitboxSize();
+					return ((Bullet)params[0]).getHitboxWidth();
 				}
 			},
 			

@@ -11,16 +11,9 @@ import engine.graphics.Sprite;
  *
  */
 
-public class EnemyFrame extends EntityFrame{
+public class EnemyFrame extends CollidableFrame{
 	
-	private final int hitboxSize;
-	
-	public EnemyFrame(int type, Sprite sprite, int hitboxSize, boolean spriteAlign, float spriteRotation){
-		super(type, sprite, spriteAlign, spriteRotation);
-		this.hitboxSize = hitboxSize;
-	}
-	
-	public int getHitboxSize(){
-		return hitboxSize;
+	public EnemyFrame(int type, Sprite sprite, int hitboxType, int hitboxWidth, int hitboxLength, int hitboxOffset, boolean spriteAlign, float spriteRotation){
+		super(type, sprite, hitboxType, hitboxWidth, hitboxLength, hitboxOffset, spriteAlign, spriteRotation);
 	}
 }

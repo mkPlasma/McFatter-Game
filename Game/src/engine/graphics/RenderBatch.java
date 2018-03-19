@@ -68,8 +68,13 @@ public class RenderBatch{
 		UPDATE_ALL			= 0b011111,
 		UPDATE_LASER		= 0b111101,
 		UPDATE_HITBOX		= 0b000011,
-		UPDATE_LASER_HITBOX	= 0b000011;
+		UPDATE_LASER_HITBOX	= 0b001011;
 	
+	public static final int
+		SHADER_STANDARD	= 0,
+		SHADER_LASER	= 1,
+		SHADER_HITBOX	= 2,
+		SHADER_L_HITBOX	= 3;
 	
 	private final int shader;
 	
@@ -112,7 +117,7 @@ public class RenderBatch{
 		rts = glGenBuffers();
 		alp = glGenBuffers();
 		
-		if(shader == 1)
+		if(shader == SHADER_LASER)
 			seg = glGenBuffers();
 		else
 			seg = 0;
@@ -127,7 +132,7 @@ public class RenderBatch{
 		this.textureID = textureID;
 		this.updates = updates;
 		
-		shader = 0;
+		shader = SHADER_STANDARD;
 		
 		vao = glGenVertexArrays();
 		vbo = glGenBuffers();
@@ -157,7 +162,7 @@ public class RenderBatch{
 		alp = 0;
 		seg = 0;
 		
-		if(shader == 2)
+		if(shader == SHADER_HITBOX)
 			rts = 0;
 		else
 			rts = glGenBuffers();
@@ -168,13 +173,13 @@ public class RenderBatch{
 	private void init(){
 		vboBuffer = BufferUtils.createFloatBuffer(capacity*2);
 		
-		if(shader == 0 || shader == 1 || shader == 3){
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_L_HITBOX){
 			szeBuffer = BufferUtils.createShortBuffer(capacity*2);
 			texBuffer = BufferUtils.createFloatBuffer(capacity*4);
 			rtsBuffer = BufferUtils.createFloatBuffer(capacity*3);
 			alpBuffer = BufferUtils.createFloatBuffer(capacity);
 			
-			if(shader == 1)
+			if(shader == SHADER_LASER)
 				segBuffer = BufferUtils.createShortBuffer(capacity);
 			
 			uVBO = true;
@@ -182,12 +187,12 @@ public class RenderBatch{
 			uTEX = true;
 			uRTS = true;
 			uALP = true;
-			uSEG = shader == 1;
+			uSEG = shader == SHADER_LASER;
 			
 			return;
 		}
 		
-		if(shader == 2){
+		if(shader == SHADER_HITBOX){
 			szeBuffer = BufferUtils.createShortBuffer(capacity);
 			
 			uVBO = true;
@@ -226,13 +231,13 @@ public class RenderBatch{
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		
-		if(shader == 0 || shader == 1)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
 			glEnableVertexAttribArray(2);
-		if(shader == 0 || shader == 1 || shader == 3)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_L_HITBOX)
 			glEnableVertexAttribArray(3);
-		if(shader == 0 || shader == 1)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
 			glEnableVertexAttribArray(4);
-		if(shader == 1)
+		if(shader == SHADER_LASER)
 			glEnableVertexAttribArray(5);
 		
 		// Set blend mode
@@ -245,13 +250,13 @@ public class RenderBatch{
 		glDisable(GL_BLEND);
 		
 		// Disable arrays
-		if(shader == 1)
+		if(shader == SHADER_LASER)
 			glDisableVertexAttribArray(5);
-		if(shader == 0 || shader == 1)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
 			glDisableVertexAttribArray(4);
-		if(shader == 0 || shader == 1 || shader == 3)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_L_HITBOX)
 			glDisableVertexAttribArray(3);
-		if(shader == 0 || shader == 1)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
 			glDisableVertexAttribArray(2);
 		
 		glDisableVertexAttribArray(1);
@@ -291,7 +296,7 @@ public class RenderBatch{
 		for(GameEntity e:(ArrayList<GameEntity>)entityList){
 			if(e.isVisible() && !e.isDeleted()){
 				
-				if(shader == 3 && !((Laser)e).collisionsEnabled())
+				if(shader == SHADER_L_HITBOX && !((Laser)e).collisionsEnabled())
 					continue;
 				
 				el.add(e);
@@ -335,11 +340,8 @@ public class RenderBatch{
 			float r = s.getRotation();
 			
 			// Align to direction
-			if(e instanceof MovableEntity && e.getFrame().spriteAlign())
+			if((e instanceof MovableEntity && e.getFrame().spriteAlign()) || e instanceof Laser)
 				r += ((MovableEntity)e).getDir() + 90;
-			
-			if(e instanceof Laser)
-				r = ((MovableEntity)e).getDir() + 90;
 			
 			// Fill arrays
 			if(uVBO){
@@ -368,14 +370,15 @@ public class RenderBatch{
 				
 				Laser l = (Laser)e;
 				
-				float len = l.getLength()/2f;
+				float len = l.getLength()/4f;
 				
 				// Correct origin
-				vertices[i*2]		+= len*Math.cos(Math.toRadians(l.getDir()));
-				vertices[i*2 + 1]	+= len*Math.sin(Math.toRadians(l.getDir()));
+				float ang = (float)Math.toRadians(l.getDir());
+				vertices[i*2]		+= len*Math.cos(ang);
+				vertices[i*2 + 1]	+= len*Math.sin(ang);
 
 				// Set scale
-				if(shader == 0 || shader == 1){
+				if(shader == SHADER_STANDARD || shader == SHADER_LASER){
 					sizes[i*2]		*= l.getScaleX();
 					sizes[i*2 + 1]	*= l.getScaleY();
 					
@@ -384,10 +387,9 @@ public class RenderBatch{
 				}
 				
 				// For hitboxes
-				if(shader == 3){
-					int crop = l.getHBLengthCrop();
-					sizes[i*2]		= (short)(l.getHitboxSize()/8f);
-					sizes[i*2 + 1]	= (short)((l.getLength() - crop*2)/16f);
+				if(shader == SHADER_L_HITBOX){
+					//sizes[i*2]		= (short)(8*l.getHitboxSize());
+					//sizes[i*2 + 1]	= (short)(2*(l.getLength() - crop*3));
 				}
 			}
 		}
@@ -447,7 +449,7 @@ public class RenderBatch{
 			}
 			
 			if(uSZE){
-				if(e instanceof CollidableEntity) sizes[i] = (short)((CollidableEntity)e).getHitboxSize();
+				if(e instanceof CollidableEntity) sizes[i] = (short)((CollidableEntity)e).getHitboxWidth();
 				if(e instanceof Player) sizes[i] = (short)((Player)e).getHitboxSize();
 			}
 		}
@@ -455,7 +457,7 @@ public class RenderBatch{
 		updateVBOs(vertices, sizes, null, null, null, null);
 	}
 	
-	private void updateVBOs(float[] vertices, short[] sizes, float[] texCoords, float[] transforms, float[] alphas, short[] segments){
+	private void updateVBOs(float[] vertices, short[] sizes, float[] texCoords, float[] rotations, float[] alphas, short[] segments){
 		
 		glBindVertexArray(vao);
 		
@@ -492,7 +494,7 @@ public class RenderBatch{
 			glBindBuffer(GL_ARRAY_BUFFER, sze);
 			glBufferData(GL_ARRAY_BUFFER, szeBuffer, GL_STATIC_DRAW);
 			
-			if(shader == 0 || shader == 1 || shader == 3)
+			if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_L_HITBOX)
 				glVertexAttribPointer(1, 2, GL_SHORT, false, 0, 0);
 			else
 				glVertexAttribIPointer(1, 1, GL_SHORT, 0, 0);
@@ -517,7 +519,7 @@ public class RenderBatch{
 		
 		if(uRTS){
 			rtsBuffer.clear();
-			rtsBuffer.put(transforms);
+			rtsBuffer.put(rotations);
 			rtsBuffer.flip();
 			
 			glBindBuffer(GL_ARRAY_BUFFER, rts);

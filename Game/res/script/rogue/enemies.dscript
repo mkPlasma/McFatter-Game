@@ -141,7 +141,7 @@ task flower(x, y, health,spd, dir){
 
 task lasers(x, y, health,spd, dir){
     set e = enemy(_fighter, x,y,health);
-    set const c = 15;
+    set const c = 1;
     set dir2 = 90;
     e.setDir(90);
     e.setSpd(spd);
@@ -154,16 +154,16 @@ task lasers(x, y, health,spd, dir){
         for(d < 0, 360/c, 360){
             laserb(dir2 + d,e.getX(),e.getY());
         }
-        wait 47;
+        wait 470000;
         dir2 += 5;
     }
 
 
 
     task laserb(dir,x,y){
-        set l = laser(_laser, _pink, x, y, dir, 370, 20, 60);
-        wait 60;
-        l.delete();
+        set l = laser(_laser, _pink, x, y, dir, 64, 32, 60);
+        wait 120;
+        //l.delete();
 
 
     }

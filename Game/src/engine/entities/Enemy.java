@@ -43,9 +43,9 @@ public class Enemy extends CollidableEntity{
 		initFrameProperties();
 	}
 	
-	private void initFrameProperties(){
+	protected void initFrameProperties(){
+		super.initFrameProperties();
 		sprite = new Sprite(frame.getSprite());
-		hitboxSize = frame.getHitboxSize();
 	}
 	
 	public void onDestroy(){

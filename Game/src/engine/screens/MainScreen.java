@@ -331,7 +331,7 @@ public class MainScreen extends GameScreen{
 				
 				// Bullet collisions
 				if(!(b instanceof Laser)){
-					if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) < pHitbox + b.getHitboxSize()){
+					if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) < pHitbox + b.getHitboxWidth()){
 						player.death();
 						b.onDestroy(false);
 					}
@@ -353,10 +353,8 @@ public class MainScreen extends GameScreen{
 					// Distance outwards from laser, used to 'crop' hitbox
 					double d3 = (-d*Math.cos(ang));
 					
-					int crop = l.getHBLengthCrop();
-					
 					// Check collision
-					if(d2 < pHitbox + l.getHitboxSize() && d3 > crop && d3 < l.getLength() - crop){
+					if(d2 < pHitbox + l.getHitboxWidth() && d3 > 0 && d3 < l.getLength()){
 						player.death();
 						b.onDestroy(false);
 					}
@@ -370,7 +368,7 @@ public class MainScreen extends GameScreen{
 			if(e.collisionsEnabled()){
 				float[] epos = e.getPos();
 				
-				if(Math.hypot(ppos[0] - epos[0], ppos[1] - epos[1]) < pHitbox + e.getHitboxSize()){
+				if(Math.hypot(ppos[0] - epos[0], ppos[1] - epos[1]) < pHitbox + e.getHitboxWidth()){
 					player.death();
 					e.damage(50);
 					continue;
@@ -381,7 +379,7 @@ public class MainScreen extends GameScreen{
 					if(b.collisionsEnabled()){
 						float[] bpos = b.getPos();
 						
-						if(Math.hypot(epos[0] - bpos[0], epos[1] - bpos[1]) < e.getHitboxSize() + b.getHitboxSize()){
+						if(Math.hypot(epos[0] - bpos[0], epos[1] - bpos[1]) < e.getHitboxWidth() + b.getHitboxWidth()){
 							e.damage((int)b.getDamage());
 							b.onDestroy(false);
 						}

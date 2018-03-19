@@ -25,8 +25,6 @@ public class Laser extends Bullet{
 	
 	private boolean segmented;
 	
-	private float hbLengthCrop;
-	
 	private Effect baseFlare;
 	
 	public Laser(BulletFrame frame, float x, float y, float dir, int length, int width, int delay, MainScreen screen){
@@ -59,7 +57,6 @@ public class Laser extends Bullet{
 	
 	public void initFrameProperties(){
 		super.initFrameProperties();
-		hbLengthCrop = frame.getHBLengthCrop();
 	}
 	
 	public void update(){
@@ -94,7 +91,6 @@ public class Laser extends Bullet{
 				}
 			}
 		}
-		
 		updateMovements();
 		
 		baseFlare.setPos(x, y);
@@ -115,7 +111,7 @@ public class Laser extends Bullet{
 	// 0 - x	1 - y	2 - both
 	private void updateScale(int s){
 		if(s == 0 || s == 2) scx = (float)(width)/sprite.getHeight();
-		if(s == 1 || s == 2) scy = (float)(length*2)/sprite.getWidth();
+		if(s == 1 || s == 2) scy = (float)(length)/sprite.getWidth();
 	}
 	
 	
@@ -150,8 +146,12 @@ public class Laser extends Bullet{
 		return scy;
 	}
 	
-	public int getHitboxSize(){
-		return (int)(scx*hitboxSize);
+	public int getHitboxWidth(){
+		return (int)(scx*hitboxWidth);
+	}
+	
+	public int getHitboxLength(){
+		return (int)(scy*hitboxWidth);
 	}
 	
 	public void setSegmented(boolean segmented){
@@ -160,14 +160,5 @@ public class Laser extends Bullet{
 	
 	public boolean isSegmented(){
 		return segmented;
-	}
-	
-	public int getHBLengthCrop(){
-		
-		// Absolute if whole number
-		if(hbLengthCrop % 1 == 0) return (int)hbLengthCrop;
-		
-		// Depends on length otherwise
-		return (int)(length*hbLengthCrop);
 	}
 }

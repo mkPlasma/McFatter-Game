@@ -5,6 +5,8 @@ import engine.graphics.Animation;
 import engine.graphics.Sprite;
 import engine.graphics.TextureCache;
 
+import static engine.entities.CollidableEntity.*;
+
 /**
  * 
  * Contains list of all enemy types and properties.
@@ -33,7 +35,7 @@ public class EnemyList{
 	}
 	
 	public EnemyFrame get(int type){
-		return new EnemyFrame(type, getSprite(type), 16, type == TYPE_FIGHTER, 0);
+		return new EnemyFrame(type, getSprite(type), HITBOX_CIRCLE, 16, 16, 0, type == TYPE_FIGHTER, 0);
 	}
 	
 	private Sprite getSprite(int type){
