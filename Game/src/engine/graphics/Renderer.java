@@ -72,7 +72,7 @@ public class Renderer{
 		basicShader.bindAttrib(0, "position");
 		basicShader.bindAttrib(1, "size");
 		basicShader.bindAttrib(2, "texCoords");
-		basicShader.bindAttrib(3, "transforms");
+		basicShader.bindAttrib(3, "rotation");
 		basicShader.bindAttrib(4, "alpha");
 		basicShader.link();
 		
@@ -80,21 +80,22 @@ public class Renderer{
 		laserShader.bindAttrib(0, "position");
 		laserShader.bindAttrib(1, "size");
 		laserShader.bindAttrib(2, "texCoords");
-		laserShader.bindAttrib(3, "transforms");
+		laserShader.bindAttrib(3, "rotation");
 		laserShader.bindAttrib(4, "alpha");
 		laserShader.bindAttrib(5, "segments");
 		laserShader.link();
 		
 		hitboxShader = new ShaderProgram("circle", "circle", "hitbox");
 		hitboxShader.bindAttrib(0, "position");
-		hitboxShader.bindAttrib(1, "radius");
+		hitboxShader.bindAttrib(1, "size");
+		hitboxShader.bindAttrib(3, "rotation");
 		hitboxShader.link();
 		
 		laserHitboxShader = new ShaderProgram("quad", "quad", "hitbox");
 		laserHitboxShader.bindAttrib(0, "position");
 		laserHitboxShader.bindAttrib(1, "size");
 		laserHitboxShader.bindAttrib(2, "texCoords");
-		laserHitboxShader.bindAttrib(3, "transforms");
+		laserHitboxShader.bindAttrib(3, "rotation");
 		laserHitboxShader.bindAttrib(4, "alpha");
 		laserHitboxShader.link();
 

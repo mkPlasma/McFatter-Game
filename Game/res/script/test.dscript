@@ -1,4 +1,5 @@
 
+
 /*
 set const c = 6;
 set const sc = 2;
@@ -40,5 +41,19 @@ task split(pos, dir, dir2, col, iterations){
 		for(d < 0, 360/sc, 360)
 			split(b.getPos(), dir2 + d, dir, col, iterations + 1);
 	}
+}
+*/
+
+set b = bullet(_rice, _white, _cx, _cy, 90, 0, 8);
+b.setResistant(true);
+
+/*
+set const c = 64;
+
+while(true){
+    for(d < 0, 360/c, 360){
+        bullet(_rice, _white, _cx, _cy, d, 1, 8);
+    }
+    wait 10;
 }
 */

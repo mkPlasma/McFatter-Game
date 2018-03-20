@@ -14,8 +14,8 @@ import engine.entities.Player;
 import engine.entities.Text;
 import engine.graphics.Renderer;
 import engine.graphics.TextureCache;
-import engine.newscript.ScriptHandler;
-import engine.newscript.ScriptSelector;
+import engine.script.ScriptHandler;
+import engine.script.ScriptSelector;
 
 /**
  * 

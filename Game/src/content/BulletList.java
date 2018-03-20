@@ -154,10 +154,12 @@ public class BulletList{
 		switch(type){
 			case TYPE_LASER_HELIX:
 				return new int[]{1, 1};
-			
+				
+			case TYPE_RICE:
+				return new int[]{10, 30};
+				
 			case TYPE_SCALE:
 			case TYPE_CRYSTAL:
-			case TYPE_RICE:
 			case TYPE_STAR:
 			case TYPE_STAR4:
 			case TYPE_NEEDLE:

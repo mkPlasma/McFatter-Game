@@ -1,11 +1,15 @@
 #version 150
 
 in vec2 position;
-in int radius;
+in vec2 size;
+in float rotation;
 
-out int gRadius;
+out vec2 gSize;
+out float gRotation;
 
 void main(){
-    gRadius = radius;
+    gSize = size;
+    gRotation = rotation;
+    
     gl_Position = vec4(position, 0.0, 1.0);
 }
