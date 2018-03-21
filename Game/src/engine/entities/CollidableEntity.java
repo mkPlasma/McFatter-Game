@@ -15,7 +15,7 @@ public abstract class CollidableEntity extends MovableEntity{
 	
 	public static final int
 		HITBOX_CIRCLE	= 0,
-		HITBOX_OVAL		= 1,
+		HITBOX_ELLIPSE		= 1,
 		HITBOX_RECTANGLE	= 2;
 	
 	// Shape of hitbox

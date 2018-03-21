@@ -44,9 +44,8 @@ task split(pos, dir, dir2, col, iterations){
 }
 */
 
-set b = bullet(_rice, _white, _cx, _cy, 90, 0, 8);
+set b = bullet(_laser_blast, _white, _cx, _cy, 0, 0, 8);
 b.setResistant(true);
-
 /*
 set const c = 64;
 

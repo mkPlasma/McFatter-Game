@@ -40,14 +40,13 @@ public class RenderBatch{
 		UPDATE_NONE			= 0,
 		UPDATE_ALL			= 0b011111,
 		UPDATE_LASER		= 0b111101,
-		UPDATE_HITBOX		= 0b001011,
-		UPDATE_LASER_HITBOX	= 0b001011;
+		UPDATE_HITBOX		= 0b001011;
 	
 	public static final int
 		SHADER_STANDARD	= 0,
 		SHADER_LASER	= 1,
 		SHADER_HITBOX	= 2,
-		SHADER_L_HITBOX	= 3;
+		SHADER_S_HITBOX	= 3;
 	
 	private final int shader;
 	
@@ -142,7 +141,7 @@ public class RenderBatch{
 	private void init(){
 		vboBuffer = BufferUtils.createFloatBuffer(capacity*2);
 		
-		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_L_HITBOX){
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_S_HITBOX){
 			szeBuffer = BufferUtils.createShortBuffer(capacity*2);
 			texBuffer = BufferUtils.createFloatBuffer(capacity*4);
 			rtsBuffer = BufferUtils.createFloatBuffer(capacity);
@@ -204,7 +203,7 @@ public class RenderBatch{
 		
 		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
 			glEnableVertexAttribArray(2);
-		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_HITBOX || shader == SHADER_L_HITBOX)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_HITBOX || shader == SHADER_S_HITBOX)
 			glEnableVertexAttribArray(3);
 		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
 			glEnableVertexAttribArray(4);
@@ -225,7 +224,7 @@ public class RenderBatch{
 			glDisableVertexAttribArray(5);
 		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
 			glDisableVertexAttribArray(4);
-		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_HITBOX || shader == SHADER_L_HITBOX)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_HITBOX || shader == SHADER_S_HITBOX)
 			glDisableVertexAttribArray(3);
 		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
 			glDisableVertexAttribArray(2);
@@ -267,7 +266,7 @@ public class RenderBatch{
 		for(GameEntity e:(ArrayList<GameEntity>)entityList){
 			if(e.isVisible() && !e.isDeleted()){
 				
-				if(shader == SHADER_L_HITBOX && !((Laser)e).collisionsEnabled())
+				if(shader == SHADER_S_HITBOX && !((CollidableEntity)e).collisionsEnabled())
 					continue;
 				
 				el.add(e);
@@ -321,8 +320,14 @@ public class RenderBatch{
 			}
 			
 			if(uSZE){
-				sizes[i*2]		= (short)s.getScaledWidth();
-				sizes[i*2 + 1]	= (short)s.getScaledHeight();
+				if(shader == SHADER_S_HITBOX){
+					sizes[i*2]		= (short)(4*((CollidableEntity)e).getHitboxWidth());
+					sizes[i*2 + 1]	= (short)(4*((CollidableEntity)e).getHitboxLength());
+				}
+				else{
+					sizes[i*2]		= (short)s.getScaledWidth();
+					sizes[i*2 + 1]	= (short)s.getScaledHeight();
+				}
 			}
 			
 			if(uTEX){
@@ -355,12 +360,6 @@ public class RenderBatch{
 					
 					if(uSEG)
 						segments[i] = (short)Math.max((int)(l.getLength()/(l.getActualWidth()/2f)), 1);
-				}
-				
-				// For hitboxes
-				if(shader == SHADER_L_HITBOX){
-					//sizes[i*2]		= (short)(8*l.getHitboxSize());
-					//sizes[i*2 + 1]	= (short)(2*(l.getLength() - crop*3));
 				}
 			}
 		}

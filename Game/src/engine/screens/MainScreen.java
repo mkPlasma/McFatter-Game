@@ -7,6 +7,7 @@ import org.lwjgl.glfw.GLFW;
 import content.FrameList;
 import engine.KeyboardListener;
 import engine.entities.Bullet;
+import engine.entities.CollidableEntity;
 import engine.entities.Effect;
 import engine.entities.Enemy;
 import engine.entities.Laser;
@@ -316,27 +317,63 @@ public class MainScreen extends GameScreen{
 		float[] ppos = player.getPos();
 		int pHitbox = player.getHitboxSize();
 		
-		// Enemy bullets
+		// Player/Enemy bullets
 		for(Bullet b:enemyBullets){
 			
 			if(b.collisionsEnabled()){
 				float[] bpos = b.getPos();
 				int offset = b.getHitboxOffset();
+				float dir = (float)Math.toRadians(b.getDir());
 				
 				if(offset != 0){
-					float dir = (float)Math.toRadians(b.getDir());
 					bpos[0] += (float)(offset*Math.cos(dir));
 					bpos[1] += (float)(offset*Math.sin(dir));
 				}
 				
-				// Bullet collisions
-				if(!(b instanceof Laser)){
-					if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) < pHitbox + b.getHitboxWidth()){
+				// Distance between bullet and player
+				int dist = (int)Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]);
+				
+				int hitboxType = b.getHitboxType();
+				int w = b.getHitboxWidth();
+				
+				// Circle/circle collisions
+				if(hitboxType == CollidableEntity.HITBOX_CIRCLE){
+					if(dist < pHitbox + w){
 						player.death();
 						b.onDestroy(false);
 					}
+					
+					return;
 				}
 				
+				int l = b.getHitboxLength();
+				
+				// Direction from bullet to player
+				float ang = (float)(Math.atan2(bpos[1] - ppos[1], bpos[0] - ppos[0]) - dir - Math.PI/2);
+				
+				// Radius at angle
+				int r;
+				
+				// Circle/ellipse collisions
+				if(hitboxType == CollidableEntity.HITBOX_ELLIPSE){
+					r = (int)((w*l)/Math.sqrt(Math.pow(l*Math.cos(ang), 2) + Math.pow(w*Math.sin(ang), 2)));
+				}
+				else{
+					// Angle to corners of rectangle
+					float cAng = (float)Math.atan2(l, w);
+					
+					r = (int)(1/(l*Math.cos(ang)));
+				}
+				
+				
+				// Circle/rectangle collisions
+				
+				if(dist < pHitbox + r){
+					player.death();
+					b.onDestroy(false);
+				}
+				
+				/*
 				// Laser collisions
 				else{
 					Laser l = (Laser)b;
@@ -359,6 +396,7 @@ public class MainScreen extends GameScreen{
 						b.onDestroy(false);
 					}
 				}
+				*/
 			}
 		}
 		
