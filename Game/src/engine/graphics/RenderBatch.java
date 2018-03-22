@@ -1,36 +1,9 @@
 package engine.graphics;
 
-import static org.lwjgl.opengl.GL11.GL_BLEND;
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL11.GL_LINEAR;
-import static org.lwjgl.opengl.GL11.GL_ONE;
-import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_POINTS;
-import static org.lwjgl.opengl.GL11.GL_SHORT;
-import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL11.glBlendFunc;
-import static org.lwjgl.opengl.GL11.glDisable;
-import static org.lwjgl.opengl.GL11.glDrawArrays;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11.glTexParameteri;
-import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
-import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
-import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
-import static org.lwjgl.opengl.GL15.glBindBuffer;
-import static org.lwjgl.opengl.GL15.glBufferData;
-import static org.lwjgl.opengl.GL15.glDeleteBuffers;
-import static org.lwjgl.opengl.GL15.glGenBuffers;
-import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
-import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
-import static org.lwjgl.opengl.GL30.glGenVertexArrays;
-import static org.lwjgl.opengl.GL30.glVertexAttribIPointer;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.*;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -67,9 +40,13 @@ public class RenderBatch{
 		UPDATE_NONE			= 0,
 		UPDATE_ALL			= 0b011111,
 		UPDATE_LASER		= 0b111101,
-		UPDATE_HITBOX		= 0b000011,
-		UPDATE_LASER_HITBOX	= 0b001001;
+		UPDATE_HITBOX		= 0b001011;
 	
+	public static final int
+		SHADER_STANDARD	= 0,
+		SHADER_LASER	= 1,
+		SHADER_HITBOX	= 2,
+		SHADER_S_HITBOX	= 3;
 	
 	private final int shader;
 	
@@ -112,7 +89,7 @@ public class RenderBatch{
 		rts = glGenBuffers();
 		alp = glGenBuffers();
 		
-		if(shader == 1)
+		if(shader == SHADER_LASER)
 			seg = glGenBuffers();
 		else
 			seg = 0;
@@ -127,7 +104,7 @@ public class RenderBatch{
 		this.textureID = textureID;
 		this.updates = updates;
 		
-		shader = 0;
+		shader = SHADER_STANDARD;
 		
 		vao = glGenVertexArrays();
 		vbo = glGenBuffers();
@@ -154,13 +131,9 @@ public class RenderBatch{
 		vbo = glGenBuffers();
 		sze = glGenBuffers();
 		tex = 0;
+		rts = glGenBuffers();
 		alp = 0;
 		seg = 0;
-		
-		if(shader == 2)
-			rts = 0;
-		else
-			rts = glGenBuffers();
 		
 		init();
 	}
@@ -168,13 +141,13 @@ public class RenderBatch{
 	private void init(){
 		vboBuffer = BufferUtils.createFloatBuffer(capacity*2);
 		
-		if(shader == 0 || shader == 1 || shader == 3){
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_S_HITBOX){
 			szeBuffer = BufferUtils.createShortBuffer(capacity*2);
 			texBuffer = BufferUtils.createFloatBuffer(capacity*4);
-			rtsBuffer = BufferUtils.createFloatBuffer(capacity*3);
+			rtsBuffer = BufferUtils.createFloatBuffer(capacity);
 			alpBuffer = BufferUtils.createFloatBuffer(capacity);
 			
-			if(shader == 1)
+			if(shader == SHADER_LASER)
 				segBuffer = BufferUtils.createShortBuffer(capacity);
 			
 			uVBO = true;
@@ -182,16 +155,18 @@ public class RenderBatch{
 			uTEX = true;
 			uRTS = true;
 			uALP = true;
-			uSEG = shader == 1;
+			uSEG = shader == SHADER_LASER;
 			
 			return;
 		}
 		
-		if(shader == 2){
+		if(shader == SHADER_HITBOX){
 			szeBuffer = BufferUtils.createShortBuffer(capacity);
+			rtsBuffer = BufferUtils.createFloatBuffer(capacity);
 			
 			uVBO = true;
 			uSZE = true;
+			uRTS = true;
 			
 			return;
 		}
@@ -226,13 +201,13 @@ public class RenderBatch{
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		
-		if(shader == 0 || shader == 1)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
 			glEnableVertexAttribArray(2);
-		if(shader == 0 || shader == 1 || shader == 3)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_HITBOX || shader == SHADER_S_HITBOX)
 			glEnableVertexAttribArray(3);
-		if(shader == 0 || shader == 1)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
 			glEnableVertexAttribArray(4);
-		if(shader == 1)
+		if(shader == SHADER_LASER)
 			glEnableVertexAttribArray(5);
 		
 		// Set blend mode
@@ -245,13 +220,13 @@ public class RenderBatch{
 		glDisable(GL_BLEND);
 		
 		// Disable arrays
-		if(shader == 1)
+		if(shader == SHADER_LASER)
 			glDisableVertexAttribArray(5);
-		if(shader == 0 || shader == 1)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
 			glDisableVertexAttribArray(4);
-		if(shader == 0 || shader == 1 || shader == 3)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_HITBOX || shader == SHADER_S_HITBOX)
 			glDisableVertexAttribArray(3);
-		if(shader == 0 || shader == 1)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
 			glDisableVertexAttribArray(2);
 		
 		glDisableVertexAttribArray(1);
@@ -291,7 +266,7 @@ public class RenderBatch{
 		for(GameEntity e:(ArrayList<GameEntity>)entityList){
 			if(e.isVisible() && !e.isDeleted()){
 				
-				if(shader == 3 && !((Laser)e).collisionsEnabled())
+				if(shader == SHADER_S_HITBOX && !((CollidableEntity)e).collisionsEnabled())
 					continue;
 				
 				el.add(e);
@@ -335,11 +310,8 @@ public class RenderBatch{
 			float r = s.getRotation();
 			
 			// Align to direction
-			if(e instanceof MovableEntity && e.getFrame().spriteAlign())
+			if((e instanceof MovableEntity && e.getFrame().spriteAlign()) || e instanceof Laser)
 				r += ((MovableEntity)e).getDir() + 90;
-			
-			if(e instanceof Laser)
-				r = ((MovableEntity)e).getDir() + 90;
 			
 			// Fill arrays
 			if(uVBO){
@@ -348,8 +320,14 @@ public class RenderBatch{
 			}
 			
 			if(uSZE){
-				sizes[i*2]		= (short)s.getScaledWidth();
-				sizes[i*2 + 1]	= (short)s.getScaledHeight();
+				if(shader == SHADER_S_HITBOX){
+					sizes[i*2]		= (short)(4*((CollidableEntity)e).getHitboxWidth());
+					sizes[i*2 + 1]	= (short)(4*((CollidableEntity)e).getHitboxLength());
+				}
+				else{
+					sizes[i*2]		= (short)s.getScaledWidth();
+					sizes[i*2 + 1]	= (short)s.getScaledHeight();
+				}
 			}
 			
 			if(uTEX){
@@ -368,26 +346,20 @@ public class RenderBatch{
 				
 				Laser l = (Laser)e;
 				
-				float len = l.getLength()/2f;
+				float len = l.getLength()/4f;
 				
 				// Correct origin
-				vertices[i*2]		+= len*Math.cos(Math.toRadians(l.getDir()));
-				vertices[i*2 + 1]	+= len*Math.sin(Math.toRadians(l.getDir()));
+				float ang = (float)Math.toRadians(l.getDir());
+				vertices[i*2]		+= len*Math.cos(ang);
+				vertices[i*2 + 1]	+= len*Math.sin(ang);
 
 				// Set scale
-				if(shader == 0 || shader == 1){
+				if(shader == SHADER_STANDARD || shader == SHADER_LASER){
 					sizes[i*2]		*= l.getScaleX();
 					sizes[i*2 + 1]	*= l.getScaleY();
 					
 					if(uSEG)
 						segments[i] = (short)Math.max((int)(l.getLength()/(l.getActualWidth()/2f)), 1);
-				}
-				
-				// For hitboxes
-				if(shader == 3){
-					int crop = l.getHBLengthCrop();
-					sizes[i*2]		= (short)(l.getHitboxSize()/8f);
-					sizes[i*2 + 1]	= (short)((l.getLength() - crop*2)/16f);
 				}
 			}
 		}
@@ -420,11 +392,15 @@ public class RenderBatch{
 			return;
 		
 		// VAO arguments
-		float[] vertices	 = null;
+		float[]
+			vertices	 = null,
+			rotations = null;
+		
 		short[] sizes = null;
 		
 		if(uVBO) vertices	= new float[size*2];
-		if(uSZE) sizes		= new short[size];
+		if(uSZE) sizes		= new short[size*2];
+		if(uRTS) rotations	= new float[size];
 		
 		for(int i = 0; i < el.size(); i++){
 			
@@ -447,15 +423,27 @@ public class RenderBatch{
 			}
 			
 			if(uSZE){
-				if(e instanceof CollidableEntity) sizes[i] = (short)((CollidableEntity)e).getHitboxSize();
-				if(e instanceof Player) sizes[i] = (short)((Player)e).getHitboxSize();
+				if(e instanceof CollidableEntity){
+					sizes[i*2]		= (short)((CollidableEntity)e).getHitboxWidth();
+					sizes[i*2 + 1]	= (short)((CollidableEntity)e).getHitboxLength();
+				}
+				
+				else if(e instanceof Player)
+					sizes[i*2] = sizes[i*2 + 1] = (short)((Player)e).getHitboxSize();
+			}
+			
+			if(uRTS){
+				if(e instanceof Player)
+					rotations[i] = 0;
+				else
+					rotations[i] = (float)Math.toRadians(((CollidableEntity)e).getDir() + 90);
 			}
 		}
 		
-		updateVBOs(vertices, sizes, null, null, null, null);
+		updateVBOs(vertices, sizes, null, rotations, null, null);
 	}
 	
-	private void updateVBOs(float[] vertices, short[] sizes, float[] texCoords, float[] transforms, float[] alphas, short[] segments){
+	private void updateVBOs(float[] vertices, short[] sizes, float[] texCoords, float[] rotations, float[] alphas, short[] segments){
 		
 		glBindVertexArray(vao);
 		
@@ -491,11 +479,7 @@ public class RenderBatch{
 			
 			glBindBuffer(GL_ARRAY_BUFFER, sze);
 			glBufferData(GL_ARRAY_BUFFER, szeBuffer, GL_STATIC_DRAW);
-			
-			if(shader == 0 || shader == 1 || shader == 3)
-				glVertexAttribPointer(1, 2, GL_SHORT, false, 0, 0);
-			else
-				glVertexAttribIPointer(1, 1, GL_SHORT, 0, 0);
+			glVertexAttribPointer(1, 2, GL_SHORT, false, 0, 0);
 			
 			if((updates & UPDATE_SZE) == 0)
 				uSZE = false;
@@ -517,7 +501,7 @@ public class RenderBatch{
 		
 		if(uRTS){
 			rtsBuffer.clear();
-			rtsBuffer.put(transforms);
+			rtsBuffer.put(rotations);
 			rtsBuffer.flip();
 			
 			glBindBuffer(GL_ARRAY_BUFFER, rts);

@@ -4,18 +4,19 @@ import java.util.ArrayList;
 
 import org.lwjgl.glfw.GLFW;
 
+import content.EffectList;
 import content.FrameList;
 import engine.KeyboardListener;
 import engine.entities.Bullet;
+import engine.entities.CollidableEntity;
 import engine.entities.Effect;
 import engine.entities.Enemy;
-import engine.entities.Laser;
 import engine.entities.Player;
 import engine.entities.Text;
 import engine.graphics.Renderer;
 import engine.graphics.TextureCache;
-import engine.newscript.ScriptHandler;
-import engine.newscript.ScriptSelector;
+import engine.script.ScriptHandler;
+import engine.script.ScriptSelector;
 
 /**
  * 
@@ -30,7 +31,7 @@ public class MainScreen extends GameScreen{
 	public static final int MAX_ENEMY_BULLETS = 4096,
 							MAX_PLAYER_BULLETS = 128,
 							MAX_ENEMIES = 64,
-							MAX_EFFECTS = 2048,
+							MAX_EFFECTS = 204800,
 							MAX_TEXTS = 1024;
 	
 	private ScriptHandler scriptHandler;
@@ -316,51 +317,121 @@ public class MainScreen extends GameScreen{
 		float[] ppos = player.getPos();
 		int pHitbox = player.getHitboxSize();
 		
-		// Enemy bullets
+		// Player/Enemy bullets
 		for(Bullet b:enemyBullets){
 			
 			if(b.collisionsEnabled()){
 				float[] bpos = b.getPos();
 				int offset = b.getHitboxOffset();
+				float dir = (float)(Math.toRadians(b.getDir())%(2*Math.PI));
 				
 				if(offset != 0){
-					float dir = (float)Math.toRadians(b.getDir());
 					bpos[0] += (float)(offset*Math.cos(dir));
 					bpos[1] += (float)(offset*Math.sin(dir));
 				}
 				
-				// Bullet collisions
-				if(!(b instanceof Laser)){
-					if(Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]) < pHitbox + b.getHitboxSize()){
+				// Distance between bullet and player
+				int dist = (int)Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]);
+				
+				int hitboxType = b.getHitboxType();
+				int w = b.getHitboxWidth();
+				
+				// Circle/circle collisions
+				if(hitboxType == CollidableEntity.HITBOX_CIRCLE){
+					if(dist < pHitbox + w){
 						player.death();
 						b.onDestroy(false);
 					}
+					
+					return;
 				}
 				
-				// Laser collisions
+				int l = b.getHitboxLength();
+				
+				// Direction from bullet to player
+				float ang = (float)(Math.atan2(ppos[1] - bpos[1], ppos[0] - bpos[0]));
+				
+				// Radius at angle
+				int r = 0;
+				
+				// Circle/ellipse collisions
+				if(hitboxType == CollidableEntity.HITBOX_ELLIPSE)
+					r = (int)((w*l)/Math.sqrt(Math.pow(l*Math.cos(ang), 2) + Math.pow(w*Math.sin(ang), 2)));
+				
+				// Circle/rectangle collisions
 				else{
-					Laser l = (Laser)b;
+					// Angle to corners of rectangle
+					float cAng = (float)((Math.atan2(l, w) - dir - Math.PI/2)%(2*Math.PI));
 					
-					// Angle between laser and player
-					double ang = (Math.atan2(bpos[1] - ppos[1], bpos[0] - ppos[0]) - Math.toRadians(l.getDir()));
+					// Find radius based on which side player is closest to
+					if(ang > Math.PI - cAng || ang < -Math.PI + cAng)
+						r = (int)(-w/(Math.cos(ang)));
 					
-					// Distance between laser base and player
-					double d = Math.hypot(ppos[0] - bpos[0], ppos[1] - bpos[1]);
+					else if(ang > cAng)
+						r = (int)(l/(Math.sin(ang)));
 					
-					// Perpendicular distance (actual distance to check)
-					double d2 = (Math.abs(d*Math.sin(ang)));
+					else if(ang > -cAng)
+						r = (int)(w/(Math.cos(ang)));
 					
-					// Distance outwards from laser, used to 'crop' hitbox
-					double d3 = (-d*Math.cos(ang));
-					
-					int crop = l.getHBLengthCrop();
-					
-					// Check collision
-					if(d2 < pHitbox + l.getHitboxSize() && d3 > crop && d3 < l.getLength() - crop){
-						player.death();
-						b.onDestroy(false);
+					else
+						r = (int)(-l/(Math.sin(ang)));
+				}
+				
+				if(dist < pHitbox + r){
+					player.death();
+					b.onDestroy(false);
+				}
+				
+				/*
+				final int res = 5;
+				
+				for(int x = 32; x < 416; x += res){
+					for(int y = 16; y < 464; y += res){
+						
+						// Direction from bullet to player
+						ang = (float)(Math.atan2(y - bpos[1], x - bpos[0]) + dir);
+						
+						// Angle to corners of rectangle
+						float cAng = (float)(Math.atan2(w, l) + dir);
+						
+						int col = 0;
+						
+						// Find radius based on which side player is closest to
+						r = 0;
+						if(ang > -cAng + 3*dir && ang < cAng + dir)
+							r = 100000000;
+
+						//else if(ang > -cAng + dir + Math.PI || (ang > -cAng + dir - Math.PI && ang < cAng + dir - Math.PI)){
+						//	r = 100000000;
+						//	col = 5;
+						//}
+						/*
+						else if(ang > cAng){
+							r = (int)(l/(Math.sin(ang)));
+							col = 5;
+						}
+						
+						else if(ang > -cAng){
+							r = (int)(w/(Math.cos(ang)));
+							col = 8;
+						}
+						
+						else{
+							r = (int)(-l/(Math.sin(ang)));
+							col = 11;
+						}
+						
+						dist = (int)Math.hypot(x - bpos[0], y - bpos[1]);
+
+						if(dist < pHitbox + r){
+							Effect e = new Effect(frameList.getEffect(EffectList.TYPE_FLARE, col, 0), x, y);
+							e.getSprite().setScale(0.5f);
+							e.setLifetime(1);
+							addEffect(e);
+						}
 					}
 				}
+				*/
 			}
 		}
 		
@@ -370,7 +441,7 @@ public class MainScreen extends GameScreen{
 			if(e.collisionsEnabled()){
 				float[] epos = e.getPos();
 				
-				if(Math.hypot(ppos[0] - epos[0], ppos[1] - epos[1]) < pHitbox + e.getHitboxSize()){
+				if(Math.hypot(ppos[0] - epos[0], ppos[1] - epos[1]) < pHitbox + e.getHitboxWidth()){
 					player.death();
 					e.damage(50);
 					continue;
@@ -381,7 +452,7 @@ public class MainScreen extends GameScreen{
 					if(b.collisionsEnabled()){
 						float[] bpos = b.getPos();
 						
-						if(Math.hypot(epos[0] - bpos[0], epos[1] - bpos[1]) < e.getHitboxSize() + b.getHitboxSize()){
+						if(Math.hypot(epos[0] - bpos[0], epos[1] - bpos[1]) < e.getHitboxWidth() + b.getHitboxWidth()){
 							e.damage((int)b.getDamage());
 							b.onDestroy(false);
 						}

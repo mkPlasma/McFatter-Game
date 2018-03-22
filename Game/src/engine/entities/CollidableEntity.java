@@ -1,5 +1,7 @@
 package engine.entities;
 
+import engine.graphics.Sprite;
+
 /**
  * 
  * Abstract collidable game entity.
@@ -11,8 +13,16 @@ package engine.entities;
 
 public abstract class CollidableEntity extends MovableEntity{
 	
-	// Hitbox radius
-	protected int hitboxSize;
+	public static final int
+		HITBOX_CIRCLE	= 0,
+		HITBOX_ELLIPSE		= 1,
+		HITBOX_RECTANGLE	= 2;
+	
+	// Shape of hitbox
+	protected int hitboxType;
+	
+	// Hitbox dimensions
+	protected int hitboxWidth, hitboxLength;
 	
 	// Offset hitbox on y-axis
 	protected int hitboxOffset;
@@ -42,13 +52,37 @@ public abstract class CollidableEntity extends MovableEntity{
 		collisions = true;
 	}
 	
-	
-	public void setHitboxSize(int hitboxSize){
-		this.hitboxSize = hitboxSize;
+	protected void initFrameProperties(){
+		CollidableFrame f = ((CollidableFrame)frame);
+		
+		hitboxType		= f.getHitboxType();
+		hitboxWidth		= f.getHitboxWidth();
+		hitboxLength		= f.getHitboxLength();
+		hitboxOffset		= f.getHitboxOffset();
 	}
 	
-	public int getHitboxSize(){
-		return hitboxSize;
+	public void setHitboxType(int hitboxType){
+		this.hitboxType = hitboxType;
+	}
+	
+	public int getHitboxType(){
+		return hitboxType;
+	}
+	
+	public void setHitboxWidth(int hitboxSize){
+		this.hitboxWidth = hitboxSize;
+	}
+	
+	public int getHitboxWidth(){
+		return hitboxWidth;
+	}
+	
+	public void setHitboxLength(int hitboxLength){
+		this.hitboxLength = hitboxLength;
+	}
+	
+	public int getHitboxLength(){
+		return hitboxLength;
 	}
 	
 	public void setHitboxOffset(int hitboxOffset){

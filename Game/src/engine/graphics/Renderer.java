@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import static org.lwjgl.opengl.GL20.*;
 
 import engine.entities.Bullet;
+import engine.entities.CollidableEntity;
 import engine.entities.Effect;
 import engine.entities.Enemy;
 import engine.entities.GameEntity;
@@ -30,7 +31,7 @@ public class Renderer{
 	private ShaderProgram basicShader,
 						  laserShader,
 						  hitboxShader,
-						  laserHitboxShader;
+						  squareHitboxShader;
 	
 	private ArrayList<RenderBatch> renderBatches;
 	private ArrayList<RenderBatch> objRenderBatches;
@@ -51,7 +52,7 @@ public class Renderer{
 		rbEffects,
 		
 		rbHitboxes,
-		rbLaserHitboxes,
+		rbSquareHitboxes,
 		
 		rbText;
 	
@@ -72,7 +73,7 @@ public class Renderer{
 		basicShader.bindAttrib(0, "position");
 		basicShader.bindAttrib(1, "size");
 		basicShader.bindAttrib(2, "texCoords");
-		basicShader.bindAttrib(3, "transforms");
+		basicShader.bindAttrib(3, "rotation");
 		basicShader.bindAttrib(4, "alpha");
 		basicShader.link();
 		
@@ -80,23 +81,24 @@ public class Renderer{
 		laserShader.bindAttrib(0, "position");
 		laserShader.bindAttrib(1, "size");
 		laserShader.bindAttrib(2, "texCoords");
-		laserShader.bindAttrib(3, "transforms");
+		laserShader.bindAttrib(3, "rotation");
 		laserShader.bindAttrib(4, "alpha");
 		laserShader.bindAttrib(5, "segments");
 		laserShader.link();
 		
 		hitboxShader = new ShaderProgram("circle", "circle", "hitbox");
 		hitboxShader.bindAttrib(0, "position");
-		hitboxShader.bindAttrib(1, "radius");
+		hitboxShader.bindAttrib(1, "size");
+		hitboxShader.bindAttrib(3, "rotation");
 		hitboxShader.link();
 		
-		laserHitboxShader = new ShaderProgram("quad", "quad", "hitbox");
-		laserHitboxShader.bindAttrib(0, "position");
-		laserHitboxShader.bindAttrib(1, "size");
-		laserHitboxShader.bindAttrib(2, "texCoords");
-		laserHitboxShader.bindAttrib(3, "transforms");
-		laserHitboxShader.bindAttrib(4, "alpha");
-		laserHitboxShader.link();
+		squareHitboxShader = new ShaderProgram("quad", "quad", "hitbox");
+		squareHitboxShader.bindAttrib(0, "position");
+		squareHitboxShader.bindAttrib(1, "size");
+		squareHitboxShader.bindAttrib(2, "texCoords");
+		squareHitboxShader.bindAttrib(3, "rotation");
+		squareHitboxShader.bindAttrib(4, "alpha");
+		squareHitboxShader.link();
 
 		renderBatches	= new ArrayList<RenderBatch>();
 		objRenderBatches	= new ArrayList<RenderBatch>();
@@ -115,22 +117,22 @@ public class Renderer{
 		rbPlayerBullets = new RenderBatch(0, MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
 
 		// Enemy bullets
-		rbEnemyBullets1		= new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
-		rbEnemyBullets1a		= new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true);
-		rbEnemyBullets2		= new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, false);
-		rbEnemyBullets2a		= new RenderBatch(0, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, true);
-		rbEnemyBulletsL		= new RenderBatch(1, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
-		rbEnemyBulletsLa		= new RenderBatch(1, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true);
+		rbEnemyBullets1		= new RenderBatch(SHADER_STANDARD, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
+		rbEnemyBullets1a		= new RenderBatch(SHADER_STANDARD, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true);
+		rbEnemyBullets2		= new RenderBatch(SHADER_STANDARD, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, false);
+		rbEnemyBullets2a		= new RenderBatch(SHADER_STANDARD, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, true);
+		rbEnemyBulletsL		= new RenderBatch(SHADER_LASER, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
+		rbEnemyBulletsLa		= new RenderBatch(SHADER_LASER, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true);
 		
 		// Enemies
-		rbEnemies = new RenderBatch(0, MAX_ENEMIES, 64, tc.cache("enemies.png").getID(), UPDATE_ALL, false);
+		rbEnemies = new RenderBatch(SHADER_STANDARD, MAX_ENEMIES, 64, tc.cache("enemies.png").getID(), UPDATE_ALL, false);
 		
 		// Effects
-		rbEffects = new RenderBatch(0, MAX_EFFECTS, 32, tc.cache("effects.png").getID(), UPDATE_ALL, true);
+		rbEffects = new RenderBatch(SHADER_STANDARD, MAX_EFFECTS, 32, tc.cache("effects.png").getID(), UPDATE_ALL, true);
 		
 		// Hitboxes
-		rbHitboxes = new RenderBatch(2, MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX);
-		rbLaserHitboxes = new RenderBatch(3, MAX_ENEMY_BULLETS, UPDATE_LASER_HITBOX);
+		rbHitboxes = new RenderBatch(SHADER_HITBOX, MAX_ENEMY_BULLETS + MAX_ENEMIES + 1, UPDATE_HITBOX);
+		rbSquareHitboxes = new RenderBatch(SHADER_S_HITBOX, MAX_ENEMY_BULLETS, UPDATE_HITBOX);
 		
 		// Text
 		rbText = new RenderBatch(MAX_TEXTS, 16, 32, tc.cache("font.png").getID(), UPDATE_ALL);
@@ -168,7 +170,7 @@ public class Renderer{
 		renderBatches.add(rbEffects);
 		
 		renderBatches.add(rbHitboxes);
-		renderBatches.add(rbLaserHitboxes);
+		renderBatches.add(rbSquareHitboxes);
 		
 		renderBatches.add(rbBorder);
 		
@@ -189,7 +191,7 @@ public class Renderer{
 		objRenderBatches.add(rbEffects);
 
 		objRenderBatches.add(rbHitboxes);
-		objRenderBatches.add(rbLaserHitboxes);
+		objRenderBatches.add(rbSquareHitboxes);
 	}
 	
 	public void setTime(int time){
@@ -268,21 +270,19 @@ public class Renderer{
 		el.addAll(enemies);
 		el.add(player);
 		
-		ArrayList<GameEntity> ll = new ArrayList<GameEntity>();
+		ArrayList<GameEntity> el2 = new ArrayList<GameEntity>();
 		
 		for(int i = 0; i < el.size(); i++){
 			GameEntity e = el.get(i);
 			
-			if(e instanceof Laser){
-				el.remove(i);
-				ll.add(e);
-				
-				i--;
+			if(e instanceof CollidableEntity && ((CollidableEntity)e).getHitboxType() == CollidableEntity.HITBOX_RECTANGLE){
+				el.remove(i--);
+				el2.add(e);
 			}
 		}
 		
 		rbHitboxes.updateHitboxes(el);
-		rbLaserHitboxes.updateWithEntities(ll, 0);
+		rbSquareHitboxes.updateWithEntities(el2, 0);
 	}
 	
 	public void updateText(ArrayList<Text> texts){
@@ -304,9 +304,9 @@ public class Renderer{
 			if(!renderObjects && objRenderBatches.contains(rb))
 				continue;
 			
-			if(rb.getShader() == 0)
+			if(rb.getShader() == SHADER_STANDARD)
 				basicShader.use();
-			else if(rb.getShader() == 1){
+			else if(rb.getShader() == SHADER_LASER){
 				laserShader.use();
 				glUniform1i(0, time);
 			}
@@ -314,10 +314,10 @@ public class Renderer{
 				if(!renderHitboxes)
 					continue;
 				
-				if(rb.getShader() == 2)
+				if(rb.getShader() == SHADER_HITBOX)
 					hitboxShader.use();
 				else
-					laserHitboxShader.use();
+					squareHitboxShader.use();
 			}
 			
 			// Don't bind texture again if last batch had same texture

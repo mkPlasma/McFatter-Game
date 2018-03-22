@@ -5,6 +5,8 @@ import engine.graphics.Animation;
 import engine.graphics.Sprite;
 import engine.graphics.TextureCache;
 
+import static engine.entities.CollidableEntity.*;
+
 /**
  * 
  * Contains list of all bullet types and properties.
@@ -84,7 +86,10 @@ public class BulletList{
 	}
 	
 	public BulletFrame get(int type, int color){
-		return new BulletFrame(type, color, getSprite(type, color), getHitboxSize(type), getHitboxOffset(type), getHBLengthCrop(type),
+		
+		int[] hitbox = getHitboxSize(type);
+		
+		return new BulletFrame(type, color, getSprite(type, color), getHitboxType(type), hitbox[0], hitbox[1], getHitboxOffset(type),
 			getSpriteAlign(type), getSpriteRotation(type), getSpriteRotationBySpd(type));
 	}
 	
@@ -138,33 +143,58 @@ public class BulletList{
 		return sprite;
 	}
 	
-	public int getHitboxSize(int type){
+	public int getHitboxType(int type){
 		switch(type){
-			case TYPE_LASER_HELIX:
-				return 1;
-			
 			case TYPE_SCALE:
 			case TYPE_CRYSTAL:
 			case TYPE_RICE:
+			case TYPE_MISSILE:
+				return HITBOX_ELLIPSE;
+				
+			case TYPE_LASER_BLAST:
+			case TYPE_LASER:
+			case TYPE_LASER_DIST:
+			case TYPE_LASER_HELIX:
+				return HITBOX_ELLIPSE;
+				
+			default:
+				return HITBOX_CIRCLE;
+		}
+	}
+	
+	public int[] getHitboxSize(int type){
+		switch(type){
+			case TYPE_LASER_HELIX:
+				return new int[]{1, 1};
+				
+			case TYPE_SCALE:
+			case TYPE_CRYSTAL:
+				return new int[]{2, 3};
+				
+			case TYPE_RICE:
+			case TYPE_MISSILE:
+			case TYPE_LASER_BLAST:
+				return new int[]{2, 4};
+				
 			case TYPE_STAR:
 			case TYPE_STAR4:
 			case TYPE_NEEDLE:
 			case TYPE_WALL:
-			case TYPE_LASER_BLAST:
-			case TYPE_MISSILE:
-			case TYPE_LASER:
-			case TYPE_LASER_DIST:
-				return 2;
+				return new int[]{2, 2};
 			
 			case TYPE_ORB:
 			case TYPE_SQUARE:
 			case TYPE_RING:
 			case TYPE_ATOM:
 			case TYPE_MINE:
-				return 3;
+				return new int[]{3, 3};
+			
+			case TYPE_LASER:
+			case TYPE_LASER_DIST:
+				return new int[]{40, 80};
 			
 			default:
-				return 0;
+				return new int[]{0, 0};
 		}
 	}
 	
@@ -197,39 +227,6 @@ public class BulletList{
 				return 0;
 		}
 	}
-	
-	public float getHBLengthCrop(int type){
-		switch(type){
-			case TYPE_WALL:
-				return 0.45f;
-			
-			case TYPE_ORB:
-			case TYPE_CRYSTAL:
-			case TYPE_SCALE:
-			case TYPE_RICE:
-			case TYPE_STAR:
-			case TYPE_STAR4:
-			case TYPE_SQUARE:
-			case TYPE_LASER_BLAST:
-			case TYPE_NEEDLE:
-			case TYPE_RING:
-			case TYPE_MISSILE:
-			case TYPE_ATOM:
-				return 0.2f;
-				
-			case TYPE_MINE:
-				return 0.1f;
-			
-			case TYPE_LASER:
-			case TYPE_LASER_DIST:
-			case TYPE_LASER_HELIX:
-				return 4;
-			
-			default:
-				return 0;
-		}
-	}
-	
 	
 	public boolean getSpriteAlign(int type){
 		

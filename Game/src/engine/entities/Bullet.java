@@ -20,8 +20,6 @@ public class Bullet extends CollidableEntity{
 	// Properties
 	protected int type, color;
 	
-	protected BulletFrame frame;
-	
 	// Customizable bullet sprite
 	protected Sprite sprite;
 	
@@ -125,11 +123,10 @@ public class Bullet extends CollidableEntity{
 		}
 	}
 	
-	public void initFrameProperties(){
+	protected void initFrameProperties(){
+		super.initFrameProperties();
 		type			= frame.getType();
-		color			= frame.getColor();
-		hitboxSize		= frame.getHitboxSize();
-		hitboxOffset		= frame.getHitboxOffset();
+		color			= ((BulletFrame)frame).getColor();
 		sprite			= new Sprite(frame.getSprite());
 	}
 	
@@ -222,7 +219,7 @@ public class Bullet extends CollidableEntity{
 	}
 	
 	public BulletFrame getFrame(){
-		return frame;
+		return (BulletFrame)frame;
 	}
 	
 	public void setResistant(boolean resistant){
