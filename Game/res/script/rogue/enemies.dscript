@@ -16,7 +16,7 @@ task speedster(x, y, type, color, dir, spd ,health,inv){
 
     task bullets(d,type,color,pos){
         set b = bullet(type, color, pos, rand(0,360), 0, -15 + d/6);
-        wait 120;
+        wait 30;
         b.setMaxSpd(3);
         b.setAccel(0.03);
 
@@ -60,7 +60,7 @@ task bomber(x, y,dir, spd ,health){
         b.setScale(2);
         b.setMaxSpd(3);
         b.setAccel(.08);
-        wait 60;
+        wait 45;
         b.delete();
         for(d < 0, 360/c, 360){
             bullets2(b.getPos(), rand(0, 360)+ d);
@@ -116,6 +116,8 @@ task basic(x, y, health,spd,dir){
 task flower(x, y, health,spd, dir){
     set e = enemy(_fighter, x,y,health);
     set const c = 15;
+    set angvel = 1.5;
+    set counter = 0;
     set dir2 = 90;
     e.setDir(90);
     e.setSpd(spd);
@@ -127,9 +129,21 @@ task flower(x, y, health,spd, dir){
             bullets2(dir2 - d,e.getPos());
         }
         wait 10;
+        counter +=10;
+        if(counter == 450){
+            break;
+        }
         dir += 17;
         dir2 -= 17;
     }
+    e.setDir(90);
+    e.setSpd(6);
+    e.setAccel(-0.009);
+    e.setMinSpd(0);
+    e.setAngVel(angvel);
+    wait 200;
+    e.delete();
+    return;
         task bullets(dir3,pos){
             set b = bullet(_scale, _purple, pos, dir3, 3, -15);
         }
