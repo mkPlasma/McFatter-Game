@@ -343,7 +343,7 @@ public class MainScreen extends GameScreen{
 						b.onDestroy(false);
 					}
 					
-					return;
+					break;
 				}
 				
 				int l = b.getHitboxLength();
