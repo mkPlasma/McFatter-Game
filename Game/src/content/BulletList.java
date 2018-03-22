@@ -152,7 +152,10 @@ public class BulletList{
 				return HITBOX_ELLIPSE;
 				
 			case TYPE_LASER_BLAST:
-				return HITBOX_RECTANGLE;
+			case TYPE_LASER:
+			case TYPE_LASER_DIST:
+			case TYPE_LASER_HELIX:
+				return HITBOX_ELLIPSE;
 				
 			default:
 				return HITBOX_CIRCLE;
@@ -171,14 +174,12 @@ public class BulletList{
 			case TYPE_RICE:
 			case TYPE_MISSILE:
 			case TYPE_LASER_BLAST:
-				return new int[]{20, 40};
+				return new int[]{2, 4};
 				
 			case TYPE_STAR:
 			case TYPE_STAR4:
 			case TYPE_NEEDLE:
 			case TYPE_WALL:
-			case TYPE_LASER:
-			case TYPE_LASER_DIST:
 				return new int[]{2, 2};
 			
 			case TYPE_ORB:
@@ -187,6 +188,10 @@ public class BulletList{
 			case TYPE_ATOM:
 			case TYPE_MINE:
 				return new int[]{3, 3};
+			
+			case TYPE_LASER:
+			case TYPE_LASER_DIST:
+				return new int[]{40, 80};
 			
 			default:
 				return new int[]{0, 0};
