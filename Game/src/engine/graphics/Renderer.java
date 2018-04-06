@@ -13,6 +13,7 @@ import engine.entities.Laser;
 import engine.entities.Player;
 import engine.entities.Text;
 import engine.entities.TextChar;
+import engine.graphics.RenderBatch;
 
 import static engine.graphics.RenderBatch.*;
 import static engine.screens.MainScreen.*;

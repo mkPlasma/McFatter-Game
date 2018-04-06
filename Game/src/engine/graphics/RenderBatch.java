@@ -346,9 +346,8 @@ public class RenderBatch{
 				
 				Laser l = (Laser)e;
 				
-				float len = l.getLength()/4f;
-				
 				// Correct origin
+				float len = l.getLength()/2f;
 				float ang = (float)Math.toRadians(l.getDir());
 				vertices[i*2]		+= len*Math.cos(ang);
 				vertices[i*2 + 1]	+= len*Math.sin(ang);
@@ -412,7 +411,7 @@ public class RenderBatch{
 				vertices[i*2 + 1]	= e.getY();
 				
 				if(e instanceof CollidableEntity){
-					int offset = ((CollidableEntity)e).getHitboxOffset();
+					float offset = ((CollidableEntity)e).getHitboxOffset();
 					
 					if(offset != 0){
 						float dir = (float)Math.toRadians(((CollidableEntity)e).getDir());
