@@ -912,18 +912,6 @@ public class BuiltInFunctionList{
 				}
 			},
 			
-			new BIFunc("setHitboxSize", 2){
-				protected Object run(Instruction inst, Object[] params){
-					((Bullet)params[0]).setHitboxWidth(castInt(params[1]));
-					return null;
-				}
-			},
-			new BIFunc("getHitboxSize", 1){
-				protected Object run(Instruction inst, Object[] params){
-					return ((Bullet)params[0]).getHitboxWidth();
-				}
-			},
-			
 			new BIFunc("setResistant", 1){
 				protected Object run(Instruction inst, Object[] params){
 					((Bullet)params[0]).setResistant(true);
@@ -964,6 +952,23 @@ public class BuiltInFunctionList{
 			new BIFunc("getCollisions", 1){
 				protected Object run(Instruction inst, Object[] params){
 					return ((CollidableEntity)params[0]).collisionsEnabled();
+				}
+			},
+			
+			new BIFunc("setHitboxScale", 2){
+				protected Object run(Instruction inst, Object[] params){
+					((CollidableEntity)params[0]).setHitboxScale(castInt(params[1]));
+					return null;
+				}
+			},
+			new BIFunc("getHitboxScaleX", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((CollidableEntity)params[0]).getHitboxScaleX();
+				}
+			},
+			new BIFunc("getHitboxScaleY", 1){
+				protected Object run(Instruction inst, Object[] params){
+					return ((CollidableEntity)params[0]).getHitboxScaleY();
 				}
 			},
 			

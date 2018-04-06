@@ -1,7 +1,5 @@
 package engine.entities;
 
-import engine.graphics.Sprite;
-
 /**
  * 
  * Abstract collidable game entity.
@@ -27,6 +25,9 @@ public abstract class CollidableEntity extends MovableEntity{
 	// Offset hitbox on y-axis
 	protected int hitboxOffset;
 	
+	// Scale hitbox size, y-scale affects offset
+	protected float hitboxScaleX, hitboxScaleY;
+	
 	// Whether entity can collide
 	protected boolean collisions;
 	
@@ -40,16 +41,19 @@ public abstract class CollidableEntity extends MovableEntity{
 	public CollidableEntity(EntityFrame frame, float x, float y){
 		super(frame, x, y);
 		collisions = true;
+		setHitboxScale(1);
 	}
 	
 	public CollidableEntity(EntityFrame frame, float x, float y, float dir, float spd){
 		super(frame, x, y, dir, spd);
 		collisions = true;
+		setHitboxScale(1);
 	}
 
 	public CollidableEntity(EntityFrame frame, float x, float y, float dir, float spd, float minSpd, float maxSpd, float accel){
 		super(frame, x, y, dir, spd, minSpd, maxSpd, accel);
 		collisions = true;
+		setHitboxScale(1);
 	}
 	
 	protected void initFrameProperties(){
@@ -74,7 +78,7 @@ public abstract class CollidableEntity extends MovableEntity{
 	}
 	
 	public int getHitboxWidth(){
-		return hitboxWidth;
+		return (int)(hitboxWidth*hitboxScaleX);
 	}
 	
 	public void setHitboxLength(int hitboxLength){
@@ -82,15 +86,36 @@ public abstract class CollidableEntity extends MovableEntity{
 	}
 	
 	public int getHitboxLength(){
-		return hitboxLength;
+		return (int)(hitboxLength*hitboxScaleY);
 	}
 	
 	public void setHitboxOffset(int hitboxOffset){
 		this.hitboxOffset = hitboxOffset;
 	}
 	
-	public int getHitboxOffset(){
-		return hitboxOffset;
+	public float getHitboxOffset(){
+		return hitboxOffset*hitboxScaleY;
+	}
+	
+	public void setHitboxScale(float hitboxScale){
+		hitboxScaleX = hitboxScale;
+		hitboxScaleY = hitboxScale;
+	}
+	
+	public void setHitboxScaleX(float hitboxScaleX){
+		this.hitboxScaleX = hitboxScaleX;
+	}
+	
+	public float getHitboxScaleX(){
+		return hitboxScaleX;
+	}
+	
+	public void setHitboxScaleY(float hitboxScaleY){
+		this.hitboxScaleY = hitboxScaleY;
+	}
+	
+	public float getHitboxScaleY(){
+		return hitboxScaleY;
 	}
 	
 	public void setCollisions(boolean collisions){

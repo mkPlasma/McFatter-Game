@@ -94,7 +94,7 @@ public class Laser extends Bullet{
 		updateMovements();
 		
 		baseFlare.setPos(x, y);
-		baseFlare.getSprite().setScale(width/12f);
+		baseFlare.getSprite().setScale(width/6f);
 		
 		time++;
 	}
@@ -110,8 +110,8 @@ public class Laser extends Bullet{
 	
 	// 0 - x	1 - y	2 - both
 	private void updateScale(int s){
-		if(s == 0 || s == 2) scx = (float)(width)/sprite.getHeight();
-		if(s == 1 || s == 2) scy = (float)(length)/sprite.getWidth();
+		if(s == 0 || s == 2) scx = (float)width/sprite.getHeight()*2;
+		if(s == 1 || s == 2) scy = (float)length/sprite.getWidth()*2;
 	}
 	
 	
@@ -147,11 +147,11 @@ public class Laser extends Bullet{
 	}
 	
 	public int getHitboxWidth(){
-		return (int)(scx*hitboxWidth);
+		return (int)(super.getHitboxWidth()*scx);
 	}
 	
 	public int getHitboxLength(){
-		return (int)(scy*hitboxWidth);
+		return (int)(super.getHitboxLength()*scy);
 	}
 	
 	public void setSegmented(boolean segmented){

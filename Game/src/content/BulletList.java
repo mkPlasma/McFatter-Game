@@ -151,11 +151,12 @@ public class BulletList{
 			case TYPE_MISSILE:
 				return HITBOX_ELLIPSE;
 				
+			case TYPE_WALL:
 			case TYPE_LASER_BLAST:
 			case TYPE_LASER:
 			case TYPE_LASER_DIST:
 			case TYPE_LASER_HELIX:
-				return HITBOX_ELLIPSE;
+				return HITBOX_RECTANGLE;
 				
 			default:
 				return HITBOX_CIRCLE;
@@ -164,8 +165,6 @@ public class BulletList{
 	
 	public int[] getHitboxSize(int type){
 		switch(type){
-			case TYPE_LASER_HELIX:
-				return new int[]{1, 1};
 				
 			case TYPE_SCALE:
 			case TYPE_CRYSTAL:
@@ -176,10 +175,12 @@ public class BulletList{
 			case TYPE_LASER_BLAST:
 				return new int[]{2, 4};
 				
+			case TYPE_WALL:
+				return new int[]{4, 1};
+				
 			case TYPE_STAR:
 			case TYPE_STAR4:
 			case TYPE_NEEDLE:
-			case TYPE_WALL:
 				return new int[]{2, 2};
 			
 			case TYPE_ORB:
@@ -191,7 +192,10 @@ public class BulletList{
 			
 			case TYPE_LASER:
 			case TYPE_LASER_DIST:
-				return new int[]{40, 80};
+				return new int[]{4, 8};
+				
+			case TYPE_LASER_HELIX:
+				return new int[]{2, 8};
 			
 			default:
 				return new int[]{0, 0};
