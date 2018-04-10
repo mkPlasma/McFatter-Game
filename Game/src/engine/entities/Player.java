@@ -44,7 +44,7 @@ public class Player extends GameEntity{
 	private Sprite sprite;
 	
 	public Player(float x, float y, MainScreen screen){
-		super(null, x, y);
+		super(x, y);
 		
 		this.screen = screen;
 		

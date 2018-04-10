@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import static org.lwjgl.opengl.GL20.*;
 
+import engine.entities.BGEntity;
+import engine.entities.Background;
 import engine.entities.Bullet;
 import engine.entities.CollidableEntity;
 import engine.entities.Effect;
@@ -32,7 +34,8 @@ public class Renderer{
 	private ShaderProgram basicShader,
 						  laserShader,
 						  hitboxShader,
-						  squareHitboxShader;
+						  squareHitboxShader,
+						  shader3D;
 	
 	private ArrayList<RenderBatch> renderBatches;
 	private ArrayList<RenderBatch> objRenderBatches;
@@ -55,6 +58,8 @@ public class Renderer{
 		rbHitboxes,
 		rbSquareHitboxes,
 		
+		rbBackground,
+		
 		rbText;
 	
 	private TextureCache tc;
@@ -69,6 +74,7 @@ public class Renderer{
 	}
 	
 	public void init(){
+		
 		// Init shaders
 		basicShader = new ShaderProgram("quad", "quad", "basic");
 		basicShader.bindAttrib(0, "position");
@@ -100,7 +106,15 @@ public class Renderer{
 		squareHitboxShader.bindAttrib(3, "rotation");
 		squareHitboxShader.bindAttrib(4, "alpha");
 		squareHitboxShader.link();
-
+		
+		shader3D = new ShaderProgram("quad", "quad", "basic");
+		shader3D.bindAttrib(0, "position");
+		shader3D.bindAttrib(1, "size");
+		shader3D.bindAttrib(2, "texCoords");
+		shader3D.bindAttrib(3, "rotation");
+		shader3D.bindAttrib(4, "alpha");
+		shader3D.link();
+		
 		renderBatches	= new ArrayList<RenderBatch>();
 		objRenderBatches	= new ArrayList<RenderBatch>();
 	}
@@ -122,8 +136,8 @@ public class Renderer{
 		rbEnemyBullets1a		= new RenderBatch(SHADER_STANDARD, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true);
 		rbEnemyBullets2		= new RenderBatch(SHADER_STANDARD, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, false);
 		rbEnemyBullets2a		= new RenderBatch(SHADER_STANDARD, MAX_ENEMY_BULLETS, 32, bulletTex2, UPDATE_ALL, true);
-		rbEnemyBulletsL		= new RenderBatch(SHADER_LASER, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
-		rbEnemyBulletsLa		= new RenderBatch(SHADER_LASER, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, true);
+		rbEnemyBulletsL		= new RenderBatch(SHADER_LASER, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_LASER, false);
+		rbEnemyBulletsLa		= new RenderBatch(SHADER_LASER, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_LASER, true);
 		
 		// Enemies
 		rbEnemies = new RenderBatch(SHADER_STANDARD, MAX_ENEMIES, 64, tc.cache("enemies.png").getID(), UPDATE_ALL, false);
@@ -140,11 +154,14 @@ public class Renderer{
 		
 		
 		// Background (temp)
+		/*
 		Sprite bg = new Sprite("bg.png", 0, 0, 768, 896);
 		tc.loadSprite(bg);
 		
 		RenderBatch rbBackground = new RenderBatch(1, 768, 896, bg.getTexture().getID(), UPDATE_NONE);
 		rbBackground.updateManual(224, 240, bg.getTextureCoords());
+		*/
+		rbBackground = new RenderBatch(SHADER_3D, 32, 32, tc.cache("bg.png").getID(), UPDATE_ALL, false);
 		
 		// Border
 		Sprite border = new Sprite("border.png", 0, 0, 1280, 960);
@@ -297,6 +314,26 @@ public class Renderer{
 		rbText.updateWithEntities(chars, 0);
 	}
 	
+	public void updateBG(Background bg){
+		
+		ArrayList<BGEntity> elements = bg.getElements();
+		BGEntity camera = bg.getCamera();
+		
+		for(int i = 0; i < elements.size(); i++){
+			BGEntity e = elements.get(i);
+			
+			e.setX(e.getX() - camera.getX());
+			e.setY(e.getY() - camera.getY());
+			e.setZ(e.getZ() - camera.getZ());
+			
+			e.setRotX(e.getRotX() - camera.getRotX());
+			e.setRotY(e.getRotY() - camera.getRotY());
+			e.setRotZ(e.getRotZ() - camera.getRotZ());
+		}
+		
+		rbBackground.updateWithEntities(elements, time);
+	}
+	
 	public void render(){
 		for(int i = 0; i < renderBatches.size(); i++){
 			
@@ -311,7 +348,7 @@ public class Renderer{
 				laserShader.use();
 				glUniform1i(0, time);
 			}
-			else{
+			else if(rb.getShader() == SHADER_HITBOX || rb.getShader() == SHADER_S_HITBOX){
 				if(!renderHitboxes)
 					continue;
 				
@@ -320,6 +357,9 @@ public class Renderer{
 				else
 					squareHitboxShader.use();
 			}
+			else if(rb.getShader() == SHADER_3D)
+				shader3D.use();
+			
 			
 			// Don't bind texture again if last batch had same texture
 			if(rb.getTextureID() != -1 && (i == 0 || rb.getTextureID() != renderBatches.get(i - 1).getTextureID()))

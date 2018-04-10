@@ -25,11 +25,7 @@ public abstract class GameEntity{
 	// Whether entity is drawn or not
 	protected boolean visible;
 	
-	// Stores a template of sprites and animations
-	protected EntityFrame frame;
-	
-	public GameEntity(EntityFrame frame, float x, float y){
-		this.frame = frame;
+	public GameEntity(float x, float y){
 		this.x = x;
 		this.y = y;
 		
@@ -38,14 +34,6 @@ public abstract class GameEntity{
 	
 	public abstract void update();
 	
-	
-	public EntityFrame getFrame(){
-		return frame;
-	}
-	
-	public Sprite getSprite(){
-		return frame.getSprite();
-	}
 	
 	public void delete(){
 		deleted = true;
@@ -95,5 +83,9 @@ public abstract class GameEntity{
 	
 	public boolean isVisible(){
 		return visible;
+	}
+	
+	public Sprite getSprite(){
+		return null;
 	}
 }

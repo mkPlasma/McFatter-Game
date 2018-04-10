@@ -45,8 +45,10 @@ public class Laser extends Bullet{
 		
 		segmented = type == BulletList.TYPE_LASER_DIST || type == BulletList.TYPE_LASER_HELIX;
 		
-		if(delay > 0)
+		if(delay > 0){
+			collisions = false;
 			width = 2;
+		}
 		
 		updateScale(2);
 		

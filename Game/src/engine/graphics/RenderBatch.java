@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import org.lwjgl.BufferUtils;
 
+import engine.entities.BGEntity;
 import engine.entities.Bullet;
 import engine.entities.CollidableEntity;
 import engine.entities.Enemy;
@@ -39,14 +40,15 @@ public class RenderBatch{
 		
 		UPDATE_NONE			= 0,
 		UPDATE_ALL			= 0b011111,
-		UPDATE_LASER		= 0b111101,
+		UPDATE_LASER		= 0b111111,
 		UPDATE_HITBOX		= 0b001011;
 	
 	public static final int
 		SHADER_STANDARD	= 0,
 		SHADER_LASER	= 1,
 		SHADER_HITBOX	= 2,
-		SHADER_S_HITBOX	= 3;
+		SHADER_S_HITBOX	= 3,
+		SHADER_3D		= 4;
 	
 	private final int shader;
 	
@@ -69,6 +71,9 @@ public class RenderBatch{
 	private int updates;
 	private boolean uVBO, uSZE, uTEX, uRTS, uALP, uSEG;
 	
+	// Size/rotation buffer multiplier (different for 3d)
+	private final int sSze, sRts;
+	
 	// Additive rendering
 	private boolean additive;
 	
@@ -88,6 +93,9 @@ public class RenderBatch{
 		tex = glGenBuffers();
 		rts = glGenBuffers();
 		alp = glGenBuffers();
+		
+		sSze = shader == SHADER_3D ? 3 : 2;
+		sRts = shader == SHADER_3D ? 3 : 1;
 		
 		if(shader == SHADER_LASER)
 			seg = glGenBuffers();
@@ -114,6 +122,9 @@ public class RenderBatch{
 		alp = glGenBuffers();
 		seg = 0;
 		
+		sSze = 2;
+		sRts = 1;
+		
 		init();
 	}
 	
@@ -135,16 +146,19 @@ public class RenderBatch{
 		alp = 0;
 		seg = 0;
 		
+		sSze = 2;
+		sRts = 1;
+		
 		init();
 	}
 	
 	private void init(){
-		vboBuffer = BufferUtils.createFloatBuffer(capacity*2);
+		vboBuffer = BufferUtils.createFloatBuffer(capacity*sSze);
 		
-		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_S_HITBOX){
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_S_HITBOX || shader == SHADER_3D){
 			szeBuffer = BufferUtils.createShortBuffer(capacity*2);
 			texBuffer = BufferUtils.createFloatBuffer(capacity*4);
-			rtsBuffer = BufferUtils.createFloatBuffer(capacity);
+			rtsBuffer = BufferUtils.createFloatBuffer(capacity*sRts);
 			alpBuffer = BufferUtils.createFloatBuffer(capacity);
 			
 			if(shader == SHADER_LASER)
@@ -201,11 +215,11 @@ public class RenderBatch{
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		
-		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_3D)
 			glEnableVertexAttribArray(2);
-		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_HITBOX || shader == SHADER_S_HITBOX)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_HITBOX || shader == SHADER_S_HITBOX || shader == SHADER_3D)
 			glEnableVertexAttribArray(3);
-		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_3D)
 			glEnableVertexAttribArray(4);
 		if(shader == SHADER_LASER)
 			glEnableVertexAttribArray(5);
@@ -222,11 +236,11 @@ public class RenderBatch{
 		// Disable arrays
 		if(shader == SHADER_LASER)
 			glDisableVertexAttribArray(5);
-		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_3D)
 			glDisableVertexAttribArray(4);
-		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_HITBOX || shader == SHADER_S_HITBOX)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_HITBOX || shader == SHADER_S_HITBOX || shader == SHADER_3D)
 			glDisableVertexAttribArray(3);
-		if(shader == SHADER_STANDARD || shader == SHADER_LASER)
+		if(shader == SHADER_STANDARD || shader == SHADER_LASER || shader == SHADER_3D)
 			glDisableVertexAttribArray(2);
 		
 		glDisableVertexAttribArray(1);
@@ -289,10 +303,10 @@ public class RenderBatch{
 			sizes = null,
 			segments = null;
 		
-		if(uVBO) vertices	= new float[size*2];
+		if(uVBO) vertices	= new float[size*sSze];
 		if(uSZE) sizes		= new short[size*2];
 		if(uTEX) texCoords	= new float[size*4];
-		if(uRTS) rotations	= new float[size];
+		if(uRTS) rotations	= new float[size*sRts];
 		if(uALP) alphas		= new float[size];
 		if(uSEG) segments	= new short[size];
 		
@@ -310,13 +324,20 @@ public class RenderBatch{
 			float r = s.getRotation();
 			
 			// Align to direction
-			if((e instanceof MovableEntity && e.getFrame().spriteAlign()) || e instanceof Laser)
+			if((e instanceof MovableEntity && ((MovableEntity)e).getFrame().spriteAlign()) || e instanceof Laser)
 				r += ((MovableEntity)e).getDir() + 90;
 			
 			// Fill arrays
 			if(uVBO){
-				vertices[i*2]		= e.getX();
-				vertices[i*2 + 1]	= e.getY();
+				if(shader == SHADER_3D){
+					vertices[i*3]		= (short)((BGEntity)e).getX();
+					vertices[i*3 + 1]	= (short)((BGEntity)e).getY();
+					vertices[i*3 + 2]	= (short)((BGEntity)e).getZ();
+				}
+				else{
+					vertices[i*2]		= e.getX();
+					vertices[i*2 + 1]	= e.getY();
+				}
 			}
 			
 			if(uSZE){
@@ -454,7 +475,7 @@ public class RenderBatch{
 			
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBufferData(GL_ARRAY_BUFFER, vboBuffer, GL_DYNAMIC_DRAW);
-			glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+			glVertexAttribPointer(0, sSze, GL_FLOAT, false, 0, 0);
 			
 			if((updates & UPDATE_VBO) == 0)
 				uVBO = false;
@@ -505,7 +526,7 @@ public class RenderBatch{
 			
 			glBindBuffer(GL_ARRAY_BUFFER, rts);
 			glBufferData(GL_ARRAY_BUFFER, rtsBuffer, GL_DYNAMIC_DRAW);
-			glVertexAttribPointer(3, 1, GL_FLOAT, false, 0, 0);
+			glVertexAttribPointer(3, sRts, GL_FLOAT, false, 0, 0);
 			
 			if((updates & UPDATE_RTS) == 0)
 				uRTS = false;

@@ -1,5 +1,7 @@
 package engine.entities;
 
+import engine.graphics.Sprite;
+
 /**
  * 
  * Abstract movable game entity.
@@ -11,26 +13,35 @@ package engine.entities;
 
 public abstract class MovableEntity extends GameEntity{
 	
+	// Stores a template of sprites and animations
+	protected EntityFrame frame;
+	
+	
+	// Movement properties
 	protected float	dir, dirRad, angVel,
 					spd, accel,
 					minSpd, maxSpd;
 	
+	// Limit speed if true
 	protected boolean useMinSpd, useMaxSpd;
 	
 	
 	public MovableEntity(EntityFrame frame, float x, float y){
-		super(frame, x, y);
+		super(x, y);
+		
+		this.frame = frame;
 	}
 	
 	public MovableEntity(EntityFrame frame, float x, float y, float dir, float spd){
-		super(frame, x, y);
+		super(x, y);
 		
+		this.frame = frame;
 		this.dir = dir;
 		this.spd = spd;
 	}
 	
 	public MovableEntity(EntityFrame frame, float x, float y, float dir, float spd, float minSpd, float maxSpd, float accel){
-		super(frame, x, y);
+		super(x, y);
 		
 		this.dir = dir;
 		this.spd = spd;
@@ -68,6 +79,14 @@ public abstract class MovableEntity extends GameEntity{
 		y += spd*Math.sin(dirRad);
 	}
 	
+	
+	public EntityFrame getFrame(){
+		return frame;
+	}
+	
+	public Sprite getSprite(){
+		return frame.getSprite();
+	}
 	
 	public float getDir(){
 		return dir;

@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import org.lwjgl.glfw.GLFW;
 
 import content.FrameList;
+import content.backgrounds.TestBG;
 import engine.KeyboardListener;
+import engine.entities.Background;
 import engine.entities.Bullet;
 import engine.entities.CollidableEntity;
 import engine.entities.Effect;
@@ -42,6 +44,8 @@ public class MainScreen extends GameScreen{
 	private ArrayList<Bullet> enemyBullets, playerBullets;
 	private ArrayList<Enemy> enemies;
 	private ArrayList<Effect> effects;
+	private Background bg;
+	
 	private ArrayList<Text> texts;
 	private Text fpsText;
 	private Text pauseText;
@@ -88,6 +92,8 @@ public class MainScreen extends GameScreen{
 		player = new Player(224, 432, this);
 		tc.loadSprite(player.getSprite());
 		
+		bg = new TestBG(tc);
+		bg.init();
 		
 		scriptHandler = new ScriptHandler(this);
 		scriptSelector = new ScriptSelector(this, scriptHandler);
@@ -115,6 +121,7 @@ public class MainScreen extends GameScreen{
 		r.updateEffects(effects);
 		r.updateHitboxes(enemyBullets, enemies, player);
 		r.updateText(texts);
+		r.updateBG(bg);
 		
 		r.renderObjects(!scriptSelector.selecting());
 		
@@ -197,6 +204,8 @@ public class MainScreen extends GameScreen{
 		updateText();
 		
 		checkCollisions();
+		
+		bg.update();
 	}
 	
 	public void resetPlayer(){
@@ -381,27 +390,6 @@ public class MainScreen extends GameScreen{
 					player.death();
 					b.onDestroy(false);
 				}
-				
-				/*
-				final int res = 5;
-				
-				for(int x = 32; x < 416; x += res){
-					for(int y = 16; y < 464; y += res){
-						
-						dist = (int)Math.hypot(x - bpos[0], y - bpos[1]);
-						
-						if(dist < pHitbox + r){
-							Effect e = new Effect(frameList.getEffect(EffectList.TYPE_FLARE, col, 0), x, y);
-							e.getSprite().setScale(0.5f);
-							e.setLifetime(1);
-							addEffect(e);
-						}
-					}
-				}
-				*/
-				
-				
-				
 			}
 		}
 		

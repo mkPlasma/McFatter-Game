@@ -31,7 +31,7 @@ public class Text extends GameEntity{
 	}
 	
 	public Text(String text, float x, float y, int wrap, float scale, int lifetime, TextureCache tc){
-		super(null, x, y);
+		super(x, y);
 		this.text = text;
 		this.lifetime = lifetime;
 		this.wrap = wrap;
