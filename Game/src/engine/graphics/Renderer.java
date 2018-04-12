@@ -2,6 +2,7 @@ package engine.graphics;
 
 import java.util.ArrayList;
 
+import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL20.*;
 
 import engine.entities.BGEntity;
@@ -66,6 +67,8 @@ public class Renderer{
 	
 	private int time;
 	
+	private BGEntity bgCamera;
+	
 	private boolean renderObjects;
 	private boolean renderHitboxes;
 	
@@ -107,7 +110,7 @@ public class Renderer{
 		squareHitboxShader.bindAttrib(4, "alpha");
 		squareHitboxShader.link();
 		
-		shader3D = new ShaderProgram("quad", "quad", "basic");
+		shader3D = new ShaderProgram("quad3d", "quad3d", "basic");
 		shader3D.bindAttrib(0, "position");
 		shader3D.bindAttrib(1, "size");
 		shader3D.bindAttrib(2, "texCoords");
@@ -161,7 +164,7 @@ public class Renderer{
 		RenderBatch rbBackground = new RenderBatch(1, 768, 896, bg.getTexture().getID(), UPDATE_NONE);
 		rbBackground.updateManual(224, 240, bg.getTextureCoords());
 		*/
-		rbBackground = new RenderBatch(SHADER_3D, 32, 32, tc.cache("bg.png").getID(), UPDATE_ALL, false);
+		rbBackground = new RenderBatch(SHADER_3D, 32, 0, tc.cache("bg.png").getID(), UPDATE_ALL, false);
 		
 		// Border
 		Sprite border = new Sprite("border.png", 0, 0, 1280, 960);
@@ -315,21 +318,8 @@ public class Renderer{
 	}
 	
 	public void updateBG(Background bg){
-		
 		ArrayList<BGEntity> elements = bg.getElements();
-		BGEntity camera = bg.getCamera();
-		
-		for(int i = 0; i < elements.size(); i++){
-			BGEntity e = elements.get(i);
-			
-			e.setX(e.getX() - camera.getX());
-			e.setY(e.getY() - camera.getY());
-			e.setZ(e.getZ() - camera.getZ());
-			
-			e.setRotX(e.getRotX() - camera.getRotX());
-			e.setRotY(e.getRotY() - camera.getRotY());
-			e.setRotZ(e.getRotZ() - camera.getRotZ());
-		}
+		bgCamera = bg.getCamera();
 		
 		rbBackground.updateWithEntities(elements, time);
 	}
@@ -338,6 +328,7 @@ public class Renderer{
 		for(int i = 0; i < renderBatches.size(); i++){
 			
 			RenderBatch rb = renderBatches.get(i);
+			RenderBatch pr = i > 0 ? renderBatches.get(i - 1) : null;
 			
 			if(!renderObjects && objRenderBatches.contains(rb))
 				continue;
@@ -346,7 +337,9 @@ public class Renderer{
 				basicShader.use();
 			else if(rb.getShader() == SHADER_LASER){
 				laserShader.use();
-				glUniform1i(0, time);
+				
+				if(pr.getShader() != SHADER_LASER)
+					glUniform1i(0, time);
 			}
 			else if(rb.getShader() == SHADER_HITBOX || rb.getShader() == SHADER_S_HITBOX){
 				if(!renderHitboxes)
@@ -357,12 +350,16 @@ public class Renderer{
 				else
 					squareHitboxShader.use();
 			}
-			else if(rb.getShader() == SHADER_3D)
+			else if(rb.getShader() == SHADER_3D){
 				shader3D.use();
+				
+				glUniform3f(0, bgCamera.getX(), bgCamera.getY(), bgCamera.getZ());
+				glUniform3f(1, (float)Math.toRadians(bgCamera.getRotX()), (float)Math.toRadians(bgCamera.getRotY()), (float)Math.toRadians(bgCamera.getRotZ()));
+			}
 			
 			
 			// Don't bind texture again if last batch had same texture
-			if(rb.getTextureID() != -1 && (i == 0 || rb.getTextureID() != renderBatches.get(i - 1).getTextureID()))
+			if(rb.getTextureID() != -1 && (pr == null || rb.getTextureID() != pr.getTextureID()))
 				rb.bindTexture();
 			
 			rb.render();

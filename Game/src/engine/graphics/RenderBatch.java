@@ -332,7 +332,9 @@ public class RenderBatch{
 				if(shader == SHADER_3D){
 					vertices[i*3]		= (short)((BGEntity)e).getX();
 					vertices[i*3 + 1]	= (short)((BGEntity)e).getY();
-					vertices[i*3 + 2]	= (short)((BGEntity)e).getZ();
+					
+				    // Z position is multiplied to fit in short
+					vertices[i*3 + 2]	= (short)(100*((BGEntity)e).getZ());
 				}
 				else{
 					vertices[i*2]		= e.getX();
@@ -356,8 +358,15 @@ public class RenderBatch{
 					texCoords[i*4 + j] = t[j];
 			}
 			
-			if(uRTS)
-				rotations[i] = (float)Math.toRadians(r);
+			if(uRTS){
+				if(shader == SHADER_3D){
+					rotations[i*3]		= (float)Math.toRadians(((BGEntity)e).getRotX());
+					rotations[i*3 + 1]	= (float)Math.toRadians(((BGEntity)e).getRotY());
+					rotations[i*3 + 2]	= (float)Math.toRadians(((BGEntity)e).getRotZ());
+				}
+				else
+					rotations[i] = (float)Math.toRadians(r);
+			}
 			
 			if(uALP)
 				alphas[i] = s.getAlpha();
