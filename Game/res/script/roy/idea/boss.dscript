@@ -128,7 +128,7 @@ task idea1(){
 }
 
 task bullet(x, y, dir){
-    set b = bullet(_laser_blast, _red, x, y, dir, 2, 5);
+    set b = bullet(_laser_beam, _red, x, y, dir, 2, 5);
     b.setAccel(0.1);
     b.setMaxSpd(4);
 } 

@@ -107,6 +107,8 @@ public class ScriptHandler{
 		branches.clear();
 		branches.add(new Branch(script.getEntryPoint()));
 		
+		screen.initBG();
+		
 		stop = false;
 	}
 	

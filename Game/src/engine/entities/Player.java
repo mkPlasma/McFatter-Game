@@ -33,7 +33,7 @@ public class Player extends GameEntity{
 	private float spd;
 	private boolean focused;
 	
-	private BulletFrame shot;
+	private BulletFrame shot, shot2, shot3;
 	
 	// Timer variables counts up for timing shots/bombs
 	private int shotCooldown = 0, bombCooldown = 0;
@@ -49,7 +49,10 @@ public class Player extends GameEntity{
 		this.screen = screen;
 		
 		// temp
-		shot = screen.getFrameList().getBullet(BulletList.TYPE_CRYSTAL, FrameList.COLOR_LIGHT_BLUE);
+		shot = screen.getFrameList().getBullet(BulletList.TYPE_LASER_BEAM, FrameList.COLOR_RED);
+		shot2 = screen.getFrameList().getBullet(BulletList.TYPE_NEEDLE, FrameList.COLOR_PINK);
+		shot3 = screen.getFrameList().getBullet(BulletList.TYPE_WALL, FrameList.COLOR_YELLOW);
+		
 		sprite = new Sprite("player.png", 0, 0, 64, 64);
 		
 		deathText = new Text("Deaths: 0", 430, 100, 1, screen.getTextureCache());
@@ -132,8 +135,12 @@ public class Player extends GameEntity{
 	}
 	
 	private void fire(){
-		screen.addPlayerBullet(new Bullet(shot, x - 10, y + 10, 270, 15, 0, 15, 0.1f, screen));
-		screen.addPlayerBullet(new Bullet(shot, x + 10, y + 10, 270, 15, 0, 15, 0.1f, screen));
+		screen.addPlayerBullet(new Bullet(shot, x + 6, y + 8, 270, 12, 0, 15, 0.05f, screen));
+		screen.addPlayerBullet(new Bullet(shot, x - 6, y + 8, 270, 12, 0, 15, 0.05f, screen));
+		
+		for(int i = 0; i < 5; i++)
+			screen.addPlayerBullet(new Bullet(focused ? shot3 : shot2, x + (i - 2)*(focused ? 0 : 4), y + 20, 270 + (i - 2)*(focused ? 1 : 8), 18, 0, 5, 0.2f, screen));
+		
 		shotCooldown = 4;
 	}
 	

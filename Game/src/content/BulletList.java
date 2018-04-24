@@ -26,7 +26,7 @@ public class BulletList{
 		TYPE_STAR			= 4,
 		TYPE_STAR4			= 5,
 		TYPE_SQUARE			= 6,
-		TYPE_LASER_BLAST		= 7,
+		TYPE_LASER_BEAM		= 7,
 		TYPE_WALL			= 8,
 		TYPE_NEEDLE			= 9,
 		TYPE_RING			= 10,
@@ -46,7 +46,7 @@ public class BulletList{
 		"star",
 		"star4",
 		"square",
-		"laser_blast",
+		"laser_beam",
 		"wall",
 		"needle",
 		"ring",
@@ -152,7 +152,7 @@ public class BulletList{
 				return HITBOX_ELLIPSE;
 				
 			case TYPE_WALL:
-			case TYPE_LASER_BLAST:
+			case TYPE_LASER_BEAM:
 			case TYPE_LASER:
 			case TYPE_LASER_DIST:
 			case TYPE_LASER_HELIX:
@@ -172,7 +172,7 @@ public class BulletList{
 				
 			case TYPE_RICE:
 			case TYPE_MISSILE:
-			case TYPE_LASER_BLAST:
+			case TYPE_LASER_BEAM:
 				return new int[]{2, 4};
 				
 			case TYPE_WALL:
@@ -211,7 +211,7 @@ public class BulletList{
 			case TYPE_STAR:
 			case TYPE_STAR4:
 			case TYPE_SQUARE:
-			case TYPE_LASER_BLAST:
+			case TYPE_LASER_BEAM:
 			case TYPE_WALL:
 			case TYPE_RING:
 			case TYPE_MINE:
@@ -237,7 +237,7 @@ public class BulletList{
 		return	type == TYPE_SCALE			||
 				type == TYPE_CRYSTAL		||
 				type == TYPE_RICE			||
-				type == TYPE_LASER_BLAST	||
+				type == TYPE_LASER_BEAM	||
 				type == TYPE_WALL			||
 				type == TYPE_NEEDLE			||
 				type == TYPE_MISSILE		||

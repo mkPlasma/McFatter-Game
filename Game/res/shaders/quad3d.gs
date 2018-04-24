@@ -6,6 +6,7 @@ layout(triangle_strip, max_vertices = 4) out;
 uniform int time;
 uniform vec3 camPosition;
 uniform vec3 camRotation;
+uniform vec2 fogRange;
 
 in vec2 gSize[];
 in vec4 gTexCoords[];
@@ -14,6 +15,7 @@ in float gAlpha[];
 
 out vec2 fTexCoords;
 out float fAlpha;
+out float fFogMix;
 
 vec3 rotate(vec3 pos, vec3 r){
     pos *= mat3(
@@ -35,31 +37,50 @@ vec3 rotate(vec3 pos, vec3 r){
     return pos;
 }
 
-void vertex(vec3 pos2, float tx, float ty){
+mat4 projectionMatrix(){
+    
+    const float fovy = 60.0;
+    const float aspect = 4.0/3.0;
+    const float near = 0.01;
+    const float far = 100000.0;
+    
+    const float top = -near*tan(radians(fovy)/2);
+    const float bottom = -top;
+    const float right = -top*aspect;
+    const float left = -right;
+    
+    return mat4(
+        2.0*near/(right - left), 0.0, 0.0, -near*(right + left)/(right - left),
+        0.0, 2.0*near/(top - bottom), 0.0, -near*(top + bottom)/(top - bottom),
+        0.0, 0.0, -(far + near)/(far - near), 2.0*far*near/(near - far),
+        0.0, 0.0, -1.0, 0.0
+    );
+}
+
+void vertex(vec2 p, float tx, float ty){
     
     vec4 pos = gl_in[0].gl_Position;
     
-    // Z position is multiplied to fit in short
-    pos.z /= 100;
+    // Fix z positioning
+    pos.z = -pos.z;
     
-    // Rotate around quad center
-    pos2 = rotate(pos2, gRotation[0]);
-    // Move to quad center
-    pos.xyz += pos2;
+    // Rotate around and move to quad center
+    pos.xyz += rotate(vec3(p, 0.0), gRotation[0]);
     
     // Move relative to camera
-    pos.xyz -= camPosition;
+    pos.xyz += camPosition;
+    
     // Rotate around camera
     pos.xyz = rotate(pos.xyz, camRotation);
     
     // Projection
-    pos = vec4((pos.x)/pos.z, (pos.y)/pos.z, 0.0, 1.0);
+    pos *= projectionMatrix();
     
+    // Adjust projection to center
+    pos.x -= pos.z*0.3;
     
-    // Normalize
-    pos.x = pos.x/320.0 - 1.0;
-    pos.y = -(pos.y/240.0 - 1.0);
-    pos.z = 0.0;
+    // Fog amount
+    fFogMix = max(0.0, min((pos.z - fogRange.x)/(fogRange.y - fogRange.x), 1.0));
     
     fAlpha = gAlpha[0];
     fTexCoords = vec2(tx, ty);
@@ -74,10 +95,10 @@ void main(){
     float x = gSize[0].x/4;
     float y = gSize[0].y/4;
     
-    vertex(vec3(-x, -y, 0), tx.x, tx.z);
-    vertex(vec3(x, -y, 0), tx.y, tx.z);
-    vertex(vec3(-x, y, 0), tx.x, tx.w);
-    vertex(vec3(x, y, 0), tx.y, tx.w);
+    vertex(vec2(-x, -y), tx.x, tx.z);
+    vertex(vec2(x, -y), tx.y, tx.z);
+    vertex(vec2(-x, y), tx.x, tx.w);
+    vertex(vec2(x, y), tx.y, tx.w);
     
     EndPrimitive();
 }

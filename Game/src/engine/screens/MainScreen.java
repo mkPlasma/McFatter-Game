@@ -260,6 +260,10 @@ public class MainScreen extends GameScreen{
 			b.onDestroy(true);
 	}
 	
+	public void initBG(){
+		bg.init();
+	}
+	
 	public void unpause(){
 		paused = false;
 	}

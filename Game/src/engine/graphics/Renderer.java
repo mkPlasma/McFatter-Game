@@ -2,7 +2,6 @@ package engine.graphics;
 
 import java.util.ArrayList;
 
-import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL20.*;
 
 import engine.entities.BGEntity;
@@ -60,6 +59,7 @@ public class Renderer{
 		rbSquareHitboxes,
 		
 		rbBackground,
+		rbBackground3D,
 		
 		rbText;
 	
@@ -67,7 +67,7 @@ public class Renderer{
 	
 	private int time;
 	
-	private BGEntity bgCamera;
+	private Background bg;
 	
 	private boolean renderObjects;
 	private boolean renderHitboxes;
@@ -110,7 +110,7 @@ public class Renderer{
 		squareHitboxShader.bindAttrib(4, "alpha");
 		squareHitboxShader.link();
 		
-		shader3D = new ShaderProgram("quad3d", "quad3d", "basic");
+		shader3D = new ShaderProgram("quad3d", "quad3d", "basicFog");
 		shader3D.bindAttrib(0, "position");
 		shader3D.bindAttrib(1, "size");
 		shader3D.bindAttrib(2, "texCoords");
@@ -132,7 +132,7 @@ public class Renderer{
 		rbPlayer = new RenderBatch(0, 1, 64, tc.cache("player.png").getID(), UPDATE_VBO, false);
 		
 		// Player bullets
-		rbPlayerBullets = new RenderBatch(0, MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
+		rbPlayerBullets = new RenderBatch(0, MAX_PLAYER_BULLETS, 32, bulletTex1, UPDATE_ALL, true);
 
 		// Enemy bullets
 		rbEnemyBullets1		= new RenderBatch(SHADER_STANDARD, MAX_ENEMY_BULLETS, 32, bulletTex1, UPDATE_ALL, false);
@@ -156,15 +156,8 @@ public class Renderer{
 		rbText = new RenderBatch(MAX_TEXTS, 16, 32, tc.cache("font.png").getID(), UPDATE_ALL);
 		
 		
-		// Background (temp)
-		/*
-		Sprite bg = new Sprite("bg.png", 0, 0, 768, 896);
-		tc.loadSprite(bg);
-		
-		RenderBatch rbBackground = new RenderBatch(1, 768, 896, bg.getTexture().getID(), UPDATE_NONE);
-		rbBackground.updateManual(224, 240, bg.getTextureCoords());
-		*/
-		rbBackground = new RenderBatch(SHADER_3D, 32, 0, tc.cache("bg.png").getID(), UPDATE_ALL, false);
+		// Background
+		rbBackground3D = new RenderBatch(SHADER_3D, 32, 0, tc.cache("bg.png").getID(), UPDATE_ALL, false);
 		
 		// Border
 		Sprite border = new Sprite("border.png", 0, 0, 1280, 960);
@@ -175,7 +168,7 @@ public class Renderer{
 		
 		
 		// Add in order of rendering
-		renderBatches.add(rbBackground);
+		renderBatches.add(rbBackground3D);
 		
 		renderBatches.add(rbEnemies);
 		renderBatches.add(rbPlayerBullets);
@@ -318,10 +311,10 @@ public class Renderer{
 	}
 	
 	public void updateBG(Background bg){
-		ArrayList<BGEntity> elements = bg.getElements();
-		bgCamera = bg.getCamera();
+		this.bg = bg;
 		
-		rbBackground.updateWithEntities(elements, time);
+		ArrayList<BGEntity> elements = bg.getElements();
+		rbBackground3D.updateWithEntities(elements, time);
 	}
 	
 	public void render(){
@@ -353,8 +346,17 @@ public class Renderer{
 			else if(rb.getShader() == SHADER_3D){
 				shader3D.use();
 				
-				glUniform3f(0, bgCamera.getX(), bgCamera.getY(), bgCamera.getZ());
-				glUniform3f(1, (float)Math.toRadians(bgCamera.getRotX()), (float)Math.toRadians(bgCamera.getRotY()), (float)Math.toRadians(bgCamera.getRotZ()));
+				BGEntity cam = bg.getCamera();
+				
+				// Uniform camera position/rotation
+				glUniform3f(shader3D.getUniformLocation("camPosition"), cam.getX(), cam.getY(), cam.getZ());
+				glUniform3f(shader3D.getUniformLocation("camRotation"), (float)Math.toRadians(cam.getRotX()), (float)Math.toRadians(cam.getRotY()), (float)Math.toRadians(cam.getRotZ()));
+				
+				// Uniform fog range
+				glUniform2f(shader3D.getUniformLocation("fogRange"), bg.getFogStart(), bg.getFogMax());
+				
+				// Uniform fog color
+				glUniform4f(shader3D.getUniformLocation("fogColor"), bg.getFogR(), bg.getFogG(), bg.getFogB(), bg.getFogA());
 			}
 			
 			

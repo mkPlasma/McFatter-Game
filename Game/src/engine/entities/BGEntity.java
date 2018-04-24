@@ -26,7 +26,7 @@ public class BGEntity extends GameEntity{
 	public BGEntity(Sprite sprite, float x, float y, float z){
 		super(x, y);
 		this.z = z;
-		this.sprite = sprite;
+		this.sprite = sprite == null ? null : new Sprite(sprite);
 	}
 	
 	public void update(){

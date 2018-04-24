@@ -19,6 +19,13 @@ public abstract class Background{
 	protected BGEntity camera;
 	protected ArrayList<BGEntity> elements;
 	
+	// Fog start/max range
+	protected int fogStart, fogMax;
+	
+	// Fog color
+	protected float fogR, fogG, fogB, fogA;
+	
+	
 	public Background(TextureCache tc){
 		this.tc = tc;
 		
@@ -31,6 +38,9 @@ public abstract class Background{
 	public abstract void update();
 	
 	protected void updateElements(){
+		
+		camera.update();
+		
 		for(BGEntity e:elements)
 			e.update();
 	}
@@ -42,5 +52,41 @@ public abstract class Background{
 	
 	public ArrayList<BGEntity> getElements(){
 		return elements;
+	}
+	
+	public void setFogRange(int start, int max){
+		fogStart = start;
+		fogMax = max;
+	}
+	
+	public int getFogStart(){
+		return fogStart;
+	}
+	
+	public int getFogMax(){
+		return fogMax;
+	}
+	
+	public void setFogColor(float r, float g, float b, float a){
+		fogR = r;
+		fogG = g;
+		fogB = b;
+		fogA = a;
+	}
+	
+	public float getFogR(){
+		return fogR;
+	}
+	
+	public float getFogG(){
+		return fogG;
+	}
+	
+	public float getFogB(){
+		return fogB;
+	}
+	
+	public float getFogA(){
+		return fogA;
 	}
 }

@@ -330,11 +330,9 @@ public class RenderBatch{
 			// Fill arrays
 			if(uVBO){
 				if(shader == SHADER_3D){
-					vertices[i*3]		= (short)((BGEntity)e).getX();
-					vertices[i*3 + 1]	= (short)((BGEntity)e).getY();
-					
-				    // Z position is multiplied to fit in short
-					vertices[i*3 + 2]	= (short)(100*((BGEntity)e).getZ());
+					vertices[i*3]		= ((BGEntity)e).getX();
+					vertices[i*3 + 1]	= ((BGEntity)e).getY();
+					vertices[i*3 + 2]	= ((BGEntity)e).getZ();
 				}
 				else{
 					vertices[i*2]		= e.getX();
