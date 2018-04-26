@@ -1,6 +1,7 @@
 package engine.entities;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import engine.graphics.TextureCache;
 
@@ -25,12 +26,17 @@ public abstract class Background{
 	// Fog color
 	protected float fogR, fogG, fogB, fogA;
 	
+	protected int time;
+	
+	private final BGComparator comp;
 	
 	public Background(TextureCache tc){
 		this.tc = tc;
 		
 		camera = new BGEntity(null, 0, 0, 0);
 		elements = new ArrayList<BGEntity>();
+		
+		comp = new BGComparator();
 	}
 	
 	
@@ -45,6 +51,9 @@ public abstract class Background{
 			e.update();
 	}
 	
+	protected void sortElements(){
+		Collections.sort(elements, comp);
+	}
 	
 	public BGEntity getCamera(){
 		return camera;

@@ -1,6 +1,7 @@
 package engine.graphics;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import static org.lwjgl.opengl.GL20.*;
 
@@ -157,7 +158,7 @@ public class Renderer{
 		
 		
 		// Background
-		rbBackground3D = new RenderBatch(SHADER_3D, 32, 0, tc.cache("bg.png").getID(), UPDATE_ALL, false);
+		rbBackground3D = new RenderBatch(SHADER_3D, 64, 0, tc.cache("bg.png").getID(), UPDATE_ALL, false);
 		
 		// Border
 		Sprite border = new Sprite("border.png", 0, 0, 1280, 960);

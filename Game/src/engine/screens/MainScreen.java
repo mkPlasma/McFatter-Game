@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.lwjgl.glfw.GLFW;
 
 import content.FrameList;
-import content.backgrounds.TestBG;
+import content.backgrounds.BGStage1;
 import engine.KeyboardListener;
 import engine.entities.Background;
 import engine.entities.Bullet;
@@ -92,7 +92,7 @@ public class MainScreen extends GameScreen{
 		player = new Player(224, 432, this);
 		tc.loadSprite(player.getSprite());
 		
-		bg = new TestBG(tc);
+		bg = new BGStage1(tc);
 		bg.init();
 		
 		scriptHandler = new ScriptHandler(this);
