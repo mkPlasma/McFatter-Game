@@ -29,8 +29,13 @@ basic(_cx, _top - 32, 2000,4,90);
 wait 500;
 flower(_cx, _top - 32, 1000,4,90);
 wait 500;
+<<<<<<< HEAD
 lasers(_cx, _top - 32, 2000,4,90);
 wait 1800;
 aimbot(90,2,1000,_cx - 30,_top);
 aimbot(90,2,1000,_cx + 30,_top);
+=======
+lasers(_cx, _top - 32, 1000,4,90);
+wait 500;
+>>>>>>> branch 'master' of https://gitlab.com/mkPlasma/McFatter-Game.git
 aimbot(90,3,1000,_cx,_top);
