@@ -30,5 +30,5 @@ wait 500;
 flower(_cx, _top - 32, 1000,4,90);
 wait 500;
 lasers(_cx, _top - 32, 1000,4,90);
-wait 700;
+wait 500;
 aimbot(90,3,1000,_cx,_top);

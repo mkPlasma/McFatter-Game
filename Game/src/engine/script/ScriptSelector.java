@@ -108,6 +108,11 @@ public class ScriptSelector{
 			selecting = !selecting;
 			setTextVisible(selecting);
 			scriptHandler.hideErrorText();
+			
+			if(selecting)
+				screen.pauseBGM();
+			else
+				screen.playBGM();
 		}
 		
 		// Menu only

@@ -18,8 +18,10 @@ public class KeyboardListener extends GLFWKeyCallback{
 	private static boolean pressed[] = new boolean[65536];
 	
 	public void invoke(long window, int key, int scancode, int action, int mods){
-		keys[key] = action != GLFW_RELEASE;
-		pressed[key] = keys[key];
+		try{
+			keys[key] = action != GLFW_RELEASE;
+			pressed[key] = keys[key];
+		}catch(ArrayIndexOutOfBoundsException e){}
 	}
 	
 	public static boolean isKeyDown(int key){

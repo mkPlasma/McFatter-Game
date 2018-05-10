@@ -1,19 +1,25 @@
 package engine;
 
-import org.lwjgl.glfw.*;
-import org.lwjgl.opengl.*;
-import org.lwjgl.system.*;
-
-import engine.screens.ScreenManager;
-
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
-import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+
+import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.openal.AL;
+import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.ALC;
+import org.lwjgl.openal.ALC10;
+import org.lwjgl.openal.ALCCapabilities;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.system.MemoryStack;
+
+import engine.screens.ScreenManager;
 
 /**
  * 
@@ -30,8 +36,10 @@ public class GameThread implements Runnable{
 	// Resolution scale
 	private float scale;
 	
-	final int TARGET_FPS = 60;
-	final long OPTIMAL_TIME = 1000000000/TARGET_FPS;
+	private final int TARGET_FPS = 60;
+	private final long OPTIMAL_TIME = 1000000000/TARGET_FPS;
+	
+	private long alDevice, alContext;
 	
 	private ScreenManager screenManager;
 	
@@ -90,6 +98,15 @@ public class GameThread implements Runnable{
 		
 		GL.createCapabilities();
 		glClearColor(0, 0, 0, 0);
+		
+		
+		// Init OpenAL
+		alDevice = ALC10.alcOpenDevice((ByteBuffer)null);
+		ALCCapabilities deviceCaps = ALC.createCapabilities(alDevice);
+		
+		alContext = ALC10.alcCreateContext(alDevice, (IntBuffer)null);
+		ALC10.alcMakeContextCurrent(alContext);
+		AL.createCapabilities(deviceCaps);
 		
 		screenManager = new ScreenManager();
 		screenManager.init();
@@ -162,6 +179,12 @@ public class GameThread implements Runnable{
 	
 	private void cleanup(){
 		screenManager.cleanup();
+		
+		alDevice = ALC10.alcGetContextsDevice(alContext);
+		ALC10.alcMakeContextCurrent(NULL);
+		ALC10.alcDestroyContext(alContext);
+		ALC10.alcCloseDevice(alDevice);
+		
 		
 		glfwFreeCallbacks(window);
 		glfwDestroyWindow(window);
