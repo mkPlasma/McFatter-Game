@@ -109,6 +109,9 @@ public class ScriptHandler{
 		
 		screen.initBG();
 		
+		screen.stopBGM();
+		screen.playBGM();
+		
 		stop = false;
 	}
 	

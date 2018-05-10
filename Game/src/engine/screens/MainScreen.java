@@ -19,6 +19,7 @@ import engine.graphics.Renderer;
 import engine.graphics.TextureCache;
 import engine.script.ScriptHandler;
 import engine.script.ScriptSelector;
+import engine.sound.BGMPlayer;
 
 /**
  * 
@@ -51,6 +52,8 @@ public class MainScreen extends GameScreen{
 	private Text pauseText;
 	
 	private Player player;
+	
+	private BGMPlayer bgm;
 	
 	private int time, rTime;
 	
@@ -95,6 +98,9 @@ public class MainScreen extends GameScreen{
 		bg = new BGStage1(tc);
 		bg.init();
 		
+		bgm = new BGMPlayer(1);
+		bgm.load();
+		
 		scriptHandler = new ScriptHandler(this);
 		scriptSelector = new ScriptSelector(this, scriptHandler);
 		scriptSelector.init();
@@ -107,6 +113,7 @@ public class MainScreen extends GameScreen{
 	
 	public void cleanup(){
 		r.cleanup();
+		bgm.cleanup();
 	}
 	
 	public void render(){
@@ -142,8 +149,14 @@ public class MainScreen extends GameScreen{
 		
 		
 		// Pause
-		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_ESCAPE))
+		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_ESCAPE)){
 			paused = !paused;
+			
+			if(paused)
+				pauseBGM();
+			else
+				playBGM();
+		}
 		
 		debugKeys();
 		
@@ -266,6 +279,18 @@ public class MainScreen extends GameScreen{
 	
 	public void unpause(){
 		paused = false;
+	}
+	
+	public void playBGM(){
+		bgm.play();
+	}
+	
+	public void pauseBGM(){
+		bgm.pause();
+	}
+	
+	public void stopBGM(){
+		bgm.stop();
 	}
 	
 	private void updateBullets(){
