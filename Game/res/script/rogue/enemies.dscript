@@ -155,6 +155,8 @@ task flower(x, y, health,spd, dir){
 
 task lasers(x, y, health,spd, dir){
     set e = enemy(_fighter, x,y,health);
+    set angvel = 1.5;
+    set counter = 0;
     set const c = 6;
     set dir2 = 90;
     e.setDir(90);
@@ -168,10 +170,21 @@ task lasers(x, y, health,spd, dir){
         for(d < 0, 360/c, 360){
             laserb(dir2 + d,e.getX(),e.getY());
         }
-        wait 45;
+        wait 30;
         dir2 += 15.7;
+        counter +=10;
+        if(counter == 450){
+            break;
+        }
 
     }
+    e.setDir(90);
+    e.setSpd(6);
+    e.setAccel(-0.009);
+    e.setMinSpd(0);
+    e.setAngVel(angvel);
+    wait 200;
+    e.delete();
 
 
 
@@ -188,8 +201,20 @@ task formation(x,y,dir,spd){
     set e = enemy(_fighter, x,y,1000);
     e.setDir(dir);
     e.setMinSpd(spd);
+    for(i < 5){
+        b(e.getPos(),spd,dir);
+        wait 20;
+    }
+
+    task b(pos,spd,dir){
+        set b = bullet(_orb,_pink,pos,dir,2,-15);
+        b.setMinSpd(3);
+        b.setDir(angleToPlayer(b.getPos()));
 
 
+
+
+}
 }
 
 task aimbot(dir,spd,health,x,y){
@@ -207,6 +232,14 @@ task aimbot(dir,spd,health,x,y){
         wait 20 ;
         dir2 += 15.7;
     }
+    formation(_cx, _top,90,5);
+    wait 5;
+    formation(_cx - 19, _top,90,4);
+    formation(_cx +19 , _top,90,4);
+    wait 20;
+    formation(_cx - 19, _top,90,4);
+    formation(_cx +19 , _top,90,4);
+
 
     task b(pos,spd,dir){
         set b = bullet(_scale,_pink,pos,dir,spd,-15);
@@ -221,7 +254,7 @@ task aimbot(dir,spd,health,x,y){
 
         b.setDir(angleToPlayer(b.getPos()));
         wait 15;
-        b.setMinSpd(6);
+        b.setMinSpd(4);
 
 
 
