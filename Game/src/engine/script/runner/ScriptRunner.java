@@ -442,7 +442,8 @@ public class ScriptRunner{
 				return;
 				
 			case wait_value:
-				branch.setWait(Math.max(0, (int)pop()));
+				Object w = pop();
+				branch.setWait(Math.max(0, w instanceof Integer ? (int)w : (int)(float)w));
 				yield();
 				return;
 				
