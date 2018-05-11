@@ -1,6 +1,7 @@
 package engine.script.parser.checker;
 
 import static engine.script.parser.ParseUtil.*;
+import static engine.script.lexer.TokenType.*;
 
 import java.util.ArrayList;
 
@@ -182,11 +183,12 @@ public class ExpressionChecker{
 		if(!(c1 instanceof Token))
 			return -1;
 		
+		Token tk = (Token)c1;
+		
 		// Variable/function call
 		if(t == -1)
-			return T_BOOL;
+			return tk.getType() == BOOL_UNARY ? T_BOOL : T_NUM;
 		
-		Token tk = (Token)c1;
 		int rt = getReturnType(t, -1, tk.getValue());
 		
 		if(rt == -1)

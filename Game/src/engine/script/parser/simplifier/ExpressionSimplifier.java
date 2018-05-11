@@ -171,13 +171,20 @@ public class ExpressionSimplifier{
 	
 	private Object[] operate(Object o1, Object o2, Object t1, Object t2, Token op){
 		
-		// Unary operation (oly binary op is !)
-		if(o2 == null)
-			return new Object[]{new Token(BOOLEAN, Boolean.toString(!(Boolean)o1), op.getFile(), op.getLineNum())};
-		
 		String opv = op.getValue();
 		String file = op.getFile();
 		int lineNum = op.getLineNum();
+
+		// Unary operation
+		if(o2 == null){
+			
+			if(opv.equals("!"))
+				return new Object[]{new Token(BOOLEAN, Boolean.toString(!(Boolean)o1), op.getFile(), op.getLineNum())};
+			
+			// Negative
+			else
+				return new Object[]{new Token(o1 instanceof Integer ? INT : FLOAT, '-' + o1.toString(), op.getFile(), op.getLineNum())};
+		}
 		
 		// String concatenation
 		if((o1 instanceof String || o2 instanceof String) && opv.equals("+"))

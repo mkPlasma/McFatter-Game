@@ -2,6 +2,7 @@ package engine.script.parser.simplifier;
 
 import engine.script.DScript;
 import engine.script.ScriptException;
+import engine.script.ScriptPrinter;
 
 /**
  * 
@@ -30,11 +31,12 @@ public class ParseTreeSimplifier{
 	public void process(DScript script) throws ScriptException{
 		expressionSimplifier.process(script);
 		variableReplacer.process(script);
-		functionReplacer.process(script);
-		statementSimplifier.process(script);
-		ifElseReplacer.process(script);
 		
 		// Simplify expressions again after constant variables have been replaced
 		expressionSimplifier.process(script);
+		
+		functionReplacer.process(script);
+		statementSimplifier.process(script);
+		ifElseReplacer.process(script);
 	}
 }

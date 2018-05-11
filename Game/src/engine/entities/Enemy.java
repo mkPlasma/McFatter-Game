@@ -27,6 +27,9 @@ public class Enemy extends CollidableEntity{
 	protected int hp;
 	protected boolean invulnerable;
 	
+	// Don't despawn immediately if spawned outside border
+	protected boolean borderDespawnImmune;
+	
 	protected final MainScreen screen;
 	
 	public Enemy(EnemyFrame frame, float x, float y, int hp, MainScreen screen){
@@ -41,6 +44,9 @@ public class Enemy extends CollidableEntity{
 	
 	public void onCreate(){
 		initFrameProperties();
+		
+		borderDespawn = true;
+		borderDespawnImmune = shouldBorderDespawn();
 	}
 	
 	protected void initFrameProperties(){
@@ -53,11 +59,22 @@ public class Enemy extends CollidableEntity{
 		
 		
 		// Explosion effect
-		
 		Effect e = new Effect(screen.getFrameList().getEffect(EffectList.TYPE_CLOUD, FrameList.COLOR_BLACK, 2), x, y);
 		e.getSprite().rotate((float)Math.random()*360);
 		e.getSprite().setScale(4);
 		screen.addEffect(e);
+	}
+	
+	public void update(){
+		super.update();
+		
+		// Allow despawning if enemy enters border
+		if(!shouldBorderDespawn())
+			borderDespawnImmune = false;
+		
+		// Delete at borders
+		if(!borderDespawnImmune && shouldBorderDespawn())
+			delete();
 	}
 	
 	public void damage(int damage){

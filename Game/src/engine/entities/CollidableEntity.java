@@ -126,6 +126,10 @@ public abstract class CollidableEntity extends MovableEntity{
 		return collisions;
 	}
 	
+	public boolean shouldBorderDespawn(){
+		return borderDespawn && (x < 32 - despawnRange || x > 416 + despawnRange || y < 16 - despawnRange || y > 464 + despawnRange);
+	}
+	
 	public void setBorderDespawn(boolean borderDespawn){
 		this.borderDespawn = borderDespawn;
 	}

@@ -138,8 +138,12 @@ public class Player extends GameEntity{
 		screen.addPlayerBullet(new Bullet(shot, x + 6, y + 8, 270, 12, 0, 15, 0.05f, screen));
 		screen.addPlayerBullet(new Bullet(shot, x - 6, y + 8, 270, 12, 0, 15, 0.05f, screen));
 		
-		for(int i = 0; i < 5; i++)
-			screen.addPlayerBullet(new Bullet(focused ? shot3 : shot2, x + (i - 2)*(focused ? 0 : 4), y + 20, 270 + (i - 2)*(focused ? 1 : 8), 18, 0, 5, 0.2f, screen));
+		if(focused)
+			for(int i = 0; i < 5; i++)
+				screen.addPlayerBullet(new Bullet(shot3, x, y + 20, 270 + (i - 2), 18, 0, 5, 0.2f, screen));
+		else
+			for(int i = 0; i < 8; i++)
+				screen.addPlayerBullet(new Bullet(shot2, x + (i - 3.5f)*4, y + 20, 270 + (i - 3.5f)*8, 18, 0, 8, 0.1f, screen));
 		
 		shotCooldown = 4;
 	}

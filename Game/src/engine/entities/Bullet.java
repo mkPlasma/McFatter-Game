@@ -183,7 +183,7 @@ public class Bullet extends CollidableEntity{
 		damage -= dmgReduce;
 		
 		// Delete at borders
-		if(borderDespawn && x < 32 - despawnRange || x > 416 + despawnRange || y < 16 - despawnRange || y > 464 + despawnRange)
+		if(shouldBorderDespawn())
 			delete();
 	}
 	

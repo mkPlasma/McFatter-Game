@@ -24,7 +24,7 @@ public class BGStage1 extends Background{
 	private ArrayList<BGEntity> asteroids;
 	
 	// Scale of each layer
-	private final float spd1 = 0.1f, spd2 = 0.15f, spd3 = 0.25f;
+	private final float spd1 = 0.05f, spd2 = 0.15f, spd3 = 0.25f;
 	
 	private boolean slow;
 	
@@ -56,7 +56,7 @@ public class BGStage1 extends Background{
 		tc.loadSprite(stars2);
 		
 		Sprite clouds = new Sprite("bg.png", 768, 0, 768, 896);
-		clouds.setAlpha(0.5f);
+		//clouds.setAlpha(0.5f);
 		tc.loadSprite(clouds);
 		
 		// Create layers
