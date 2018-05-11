@@ -595,6 +595,9 @@ public class BytecodeCompiler{
 				// Jumps into each instruction group
 				Queue<Integer> stJumps = new LinkedList<Integer>();
 				
+				// True if else statement at end of chain
+				boolean elseJump = false;
+				
 				// Add conditions
 				for(Object o2:contents){
 					ParseUnit p2 = (ParseUnit)o2;
@@ -603,6 +606,8 @@ public class BytecodeCompiler{
 					if(p2.getType().equals("else_block")){
 						stJumps.add(bytecode.size());
 						add(jump, 0, p2);
+						
+						elseJump = true;
 						break;
 					}
 					
@@ -616,6 +621,12 @@ public class BytecodeCompiler{
 				
 				// Jump to end of chain
 				ArrayList<Integer> endJumps = new ArrayList<Integer>();
+				
+				// If no else statement, jump to end of chain
+				if(!elseJump){
+					endJumps.add(bytecode.size());
+					add(jump, 0, p);
+				}
 				
 				// Add contents of block
 				for(Object o2:contents){
