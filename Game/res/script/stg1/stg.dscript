@@ -1,4 +1,7 @@
 
+#include enm;
+
+/*
 // V-wave of accelerating enemies
 circleEnm(_cx, 0);
 wait 25;
@@ -13,68 +16,30 @@ waits;
 
 // Aimed barrage enemies, random
 for(i < 12){
-    aimEnm(rand(_right + 80, _left - 80));
+    aimEnm(rand(_left + 40, _right - 40));
     wait 30;
 }
 
+waits 2.8;
 
-// Accelerating enemy, fires a ring of aimed bullets
-task circleEnm(x, turnDir){
-    
-    set e = enemy(_fighter, x, _top - 32, 100);
-    returnif e.isDeleted();
-    
-    e.setDir(90);
-    e.setSpd(1);
-    
-    wait 40;
-    
-    e.setMaxSpd(4);
-    e.setAccel(0.04);
-    
-    if(turnDir == 1)
-        e.setAngVel(0.2);
-    else if(turnDir == 2)
-        e.setAngVel(-0.2);
-    
-    wait 30;
-    
-    set const c = 24;
-    set dir = angleToPlayer(e.getPos()) + rand(30);
-    
-    for(d < 0, 360/c, 360)
-        bullet(_orb, _blue, e.getPos(), dir + d, 2.5, 10);
+tankEnm(_cx);
+waits 7;
+
+
+tankEnm2(_cx - 80, false);
+waits 7;
+
+tankEnm2(_cx + 80, true);
+*/
+
+for(i < 8){
+    sEnm(false);
+    wait 10;
 }
 
-// Fires aimed barrage
-task aimEnm(x){
-    
-    set e = enemy(_fighter, x, _top - 32, 400);
-    returnif e.isDeleted();
-    
-    e.setDir(90);
-    e.setSpd(randf(3, 6));
-    e.setMinSpd(0);
-    e.setAccel(-0.05);
-    
-    set av = randBool() -> 0.5, -0.5;
-    e.setAngVel(av);
-    
-    wait 60;
-    
-    e.setAngVel(0);
-    
-    set const c = 3;
-    set const ang = 30;
-    set dir = angleToPlayer(e.getPos());
-    
-    for(d < -ang/2, ang/(c - 1), ang/2)
-        bullet(_crystal, _green, e.getPos(), dir + d, 2.5, 10);
-    
-    wait 60;
-    
-    e.setDir(e.getDir() + 180);
-    e.setMaxSpd(4);
-    e.setAccel(0.05);
-    e.setAngVel(-av);
+waits 0.5;
+
+for(i < 8){
+    sEnm(true);
+    wait 10;
 }

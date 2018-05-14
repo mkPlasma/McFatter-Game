@@ -1,0 +1,185 @@
+
+// Accelerating enemy, fires a ring of aimed bullets
+task circleEnm(x, turnDir){
+    
+    set e = enemy(_fighter, x, _top - 32, 100);
+    returnif e.isDeleted();
+    
+    e.setDir(90);
+    e.setSpd(1);
+    
+    wait 40;
+    
+    e.setMaxSpd(6);
+    e.setAccel(0.04);
+    
+    if(turnDir == 1)
+        e.setAngVel(0.2);
+    else if(turnDir == 2)
+        e.setAngVel(-0.2);
+    
+    wait 15;
+    
+    set const c = 16;
+    
+    for(i < 2){
+        set dir = angleToPlayer(e.getPos()) + rand(30);
+        
+        for(d < 0, 360/c, 360)
+            bullet(_orb, _blue, e.getPos(), dir + d, 2.5, 10);
+        
+        wait 60;
+    }
+}
+
+// Fires aimed barrage
+task aimEnm(x){
+    
+    set e = enemy(_fighter, x, _top - 32, 150);
+    returnif e.isDeleted();
+    
+    set spd = randf(3, 4);
+    
+    e.setDir(90);
+    e.setSpd(spd);
+    e.setMinSpd(0);
+    e.setAccel(-spd/60);
+    
+    set av = randBool() -> 0.4, -0.4;
+    e.setAngVel(av);
+    
+    wait 60;
+    
+    e.setAngVel(0);
+    
+    set const ang = 80;
+    set dir = angleToPlayer(e.getPos());
+    
+    for(i < 3){
+        set c = i%2 == 0 -> 7, 6;
+        
+        for(d < -ang/2, ang/(c - 1), ang/2)
+            bullet(_crystal, (i%2 == 0 -> _green, _cyan), e.getPos(), dir + d, 2 + i/2, 10);
+    }
+    
+    e.setDir(e.getDir() + 180);
+    e.setMaxSpd(4);
+    e.setAccel(spd/60);
+    e.setAngVel(-av);
+}
+
+// High HP enemy, spiral pattern
+task tankEnm(x){
+    
+    set e = enemy(_fighter, x, _top - 32, 2000);
+    returnif e.isDeleted();
+    
+    e.setDir(90);
+    e.setSpd(6);
+    e.setAccel(-0.08);
+    e.setMinSpd(0);
+    
+    set dir = 90;
+    set dir2 = 45;
+    set dir3 = 180;
+    
+    for(i < 84){
+        
+        for(d < 0, 360/4, 360)
+            bullet(_rice, _red, e.getPos() + radius(dir + d, 15), dir + d, 1.5, -10);
+        
+        for(d < 0, 360/8, 360)
+            bullet(_rice, _light_blue, e.getPos() + radius(dir2 + d, 25), dir2 + d, 2.2, -10);
+        
+        if(i%4 == 0){
+            for(d < 0, 360/6, 360){
+                set b = bullet(_orb, _blue, e.getPos() + radius(dir3 + d, 30), dir3 + d, 1, 10);
+                b.setScale(1.5);
+                b.setHitboxScale(1.8);
+            }
+        }
+        
+        dir += 4.3;
+        dir2 -= 9.7;
+        dir3 += 71;
+        
+        wait 5;
+    }
+    
+    e.setAccel(0.05);
+    e.setMaxSpd(1.5);
+}
+
+// High HP enemy, moves down slowly, spiral pattern
+task tankEnm2(x, inv){
+    
+    set e = enemy(_fighter, x, _top - 32, 1000);
+    returnif e.isDeleted();
+    
+    e.setDir(90);
+    e.setSpd(4);
+    e.setAccel(-0.08);
+    e.setMinSpd(0.5);
+    
+    set dir = 90;
+    set dirAdd = inv -> 6.3, -6.3;
+    
+    for(i < 84){
+        
+        for(d < 0, 360/4, 360)
+            bullet(_rice, _red, e.getPos() + radius(dir + d, 15), dir + d, 4, 2, 4, -0.08, -10);
+        
+        dir += dirAdd;
+        
+        wait 5;
+    }
+    
+    e.setAccel(0.05);
+    e.setMaxSpd(4);
+}
+
+// Enemy moving in an S path
+task sEnm(inv){
+    
+    set e = enemy(_radial, (inv -> _right + 20, _left - 20), _top + 50, 100);
+    returnif e.isDeleted();
+    fire(e);
+    
+    e.setDir(inv -> 180, 0);
+    e.setSpd(6);
+    
+    wait 19;
+    
+    e.setAngVel(inv -> -3, 3);
+    wait 20;
+    
+    e.setAngVel(inv -> 3, -3);
+    wait 20;
+    
+    e.setAngVel(0);
+    
+    task fire(e){
+        returnif e.isDeleted();
+        
+        set const c = 8;
+        set const c2 = 24;
+        
+        set w = rand(10, 40);
+        wait w;
+        
+        while(true){
+            set dir = angleToPlayer(e.getPos());
+            set dir2 = rand(0, 360);
+            
+            for(d < 0, 360/c, 360){
+                for(s <= 1, 0.5, 3)
+                    bullet(_crystal, _red, e.getPos() + radius(dir + d, 10), dir + d, s*3, s, s*3, -0.6, 5);
+            }
+            
+            for(d < 0, 360/c2, 360)
+                bullet(_orb, _blue, e.getPos() + radius(dir2 + d, 20), dir2 + d, 1.5, 5);
+            
+            wait 40;
+        }
+    }
+}
