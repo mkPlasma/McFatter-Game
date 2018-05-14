@@ -69,7 +69,7 @@ public class Enemy extends CollidableEntity{
 		super.update();
 		
 		// Allow despawning if enemy enters border
-		if(!shouldBorderDespawn())
+		if(shouldBorderDespawn())
 			borderDespawnImmune = false;
 		
 		// Delete at borders

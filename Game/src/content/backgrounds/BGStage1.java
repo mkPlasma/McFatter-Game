@@ -81,7 +81,7 @@ public class BGStage1 extends Background{
 		spr.setScale(1.5f);
 		
 		planet = new BGEntity(spr, -64, -420, 416);
-		planet.setVelY(0.1f);
+		planet.setVelY(0.095f);
 		elements.add(planet);
 		
 		
@@ -89,7 +89,7 @@ public class BGStage1 extends Background{
 		tc.loadSprite(spr);
 		
 		moon = new BGEntity(spr, 32, -480, 416);
-		moon.setVelY(0.12f);
+		moon.setVelY(0.115f);
 		elements.add(moon);
 		
 		
@@ -151,7 +151,7 @@ public class BGStage1 extends Background{
 		}
 		
 		// Slow down
-		if(time == 4660){
+		if(time == 4667){
 			slow = true;
 			
 			planet.setVelY(0);
