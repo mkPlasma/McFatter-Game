@@ -106,6 +106,7 @@ public class ScriptSelector{
 		// Select script or cancel with ~
 		if(KeyboardListener.isKeyPressed(GLFW.GLFW_KEY_GRAVE_ACCENT)){
 			selecting = !selecting;
+			
 			setTextVisible(selecting);
 			scriptHandler.hideErrorText();
 			
@@ -164,6 +165,7 @@ public class ScriptSelector{
 			screen.resetPlayer();
 			screen.clearAll();
 			screen.unpause();
+			screen.getPlayer().setShotCooldown(2);
 			
 			selecting = false;
 			setTextVisible(false);

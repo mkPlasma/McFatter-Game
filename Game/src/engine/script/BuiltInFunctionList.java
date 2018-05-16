@@ -406,7 +406,9 @@ public class BuiltInFunctionList{
 			// Pick random item from an array
 			new BIFunc("randChoice", 1){
 				protected Object run(Instruction inst, Object[] params){
-					return random.nextBoolean();
+					ArrayList<Object> array = (ArrayList<Object>)params[0];
+					
+					return array.get(random.nextInt(array.size()));
 				}
 			},
 			
@@ -957,7 +959,7 @@ public class BuiltInFunctionList{
 			
 			new BIFunc("setHitboxScale", 2){
 				protected Object run(Instruction inst, Object[] params){
-					((CollidableEntity)params[0]).setHitboxScale(castInt(params[1]));
+					((CollidableEntity)params[0]).setHitboxScale(castFloat(params[1]));
 					return null;
 				}
 			},

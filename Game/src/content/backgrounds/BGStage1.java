@@ -151,7 +151,7 @@ public class BGStage1 extends Background{
 		}
 		
 		// Slow down
-		if(time == 4667){
+		if(time == 4670){
 			slow = true;
 			
 			planet.setVelY(0);

@@ -33,6 +33,8 @@ public class Player extends GameEntity{
 	private float spd;
 	private boolean focused;
 	
+	private boolean shotEnabled;
+	
 	private BulletFrame shot, shot2, shot3;
 	
 	// Timer variables counts up for timing shots/bombs
@@ -47,6 +49,8 @@ public class Player extends GameEntity{
 		super(x, y);
 		
 		this.screen = screen;
+		
+		shotEnabled = true;
 		
 		// temp
 		shot = screen.getFrameList().getBullet(BulletList.TYPE_LASER_BEAM, FrameList.COLOR_RED);
@@ -130,7 +134,7 @@ public class Player extends GameEntity{
 		if(bombCooldown > 0)
 			bombCooldown--;
 		
-		if(isKeyDown(GLFW_KEY_Z) && shotCooldown == 0)
+		if(shotEnabled && isKeyDown(GLFW_KEY_Z) && shotCooldown == 0)
 			fire();
 	}
 	
@@ -143,7 +147,7 @@ public class Player extends GameEntity{
 				screen.addPlayerBullet(new Bullet(shot3, x, y + 20, 270 + (i - 2), 18, 0, 5, 0.2f, screen));
 		else
 			for(int i = 0; i < 8; i++)
-				screen.addPlayerBullet(new Bullet(shot2, x + (i - 3.5f)*4, y + 20, 270 + (i - 3.5f)*8, 18, 0, 8, 0.1f, screen));
+				screen.addPlayerBullet(new Bullet(shot2, x + (i - 3.5f)*3, y + 20, 270 + (i - 3.5f)*8, 18, 0, 8, 0.1f, screen));
 		
 		shotCooldown = 4;
 	}
@@ -190,5 +194,17 @@ public class Player extends GameEntity{
 	
 	public int getHitboxSize(){
 		return 2;
+	}
+	
+	public void setShotCooldown(int shotCooldown){
+		this.shotCooldown = shotCooldown;
+	}
+	
+	public void setShotEnabled(boolean shotEnabled){
+		this.shotEnabled = shotEnabled;
+	}
+	
+	public boolean isShotEnabled(){
+		return shotEnabled;
 	}
 }

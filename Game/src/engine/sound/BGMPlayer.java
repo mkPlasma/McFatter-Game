@@ -37,8 +37,8 @@ public class BGMPlayer{
 		if(error(AL10.alGetError()))
 			return;
 		
-		AL10.alSourcei(source.get(0), AL10.AL_BUFFER,	buffer.get(0));
-		
+		AL10.alSourcei(source.get(0), AL10.AL_BUFFER, buffer.get(0));
+		AL10.alSourcei(source.get(0), AL10.AL_LOOPING, AL10.AL_TRUE);
 		
 		if(error(AL10.alGetError()))
 			return;

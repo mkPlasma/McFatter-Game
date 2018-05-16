@@ -31,11 +31,16 @@ import engine.sound.BGMPlayer;
 
 public class MainScreen extends GameScreen{
 	
-	public static final int MAX_ENEMY_BULLETS = 4096,
-							MAX_PLAYER_BULLETS = 128,
-							MAX_ENEMIES = 64,
-							MAX_EFFECTS = 204800,
-							MAX_TEXTS = 1024;
+	public static final int
+		MAX_ENEMY_BULLETS	= 4096,
+		MAX_PLAYER_BULLETS	= 128,
+		MAX_ENEMIES			= 64,
+		MAX_EFFECTS			= 204800,
+		MAX_TEXTS			= 1024;
+	
+	private static final float
+		SPD_SLOWDOWN	= 0.5f,
+		SPD_SPEEDUP		= 5;
 	
 	private ScriptHandler scriptHandler;
 	private ScriptSelector scriptSelector;
@@ -160,7 +165,7 @@ public class MainScreen extends GameScreen{
 		
 		debugKeys();
 		
-		if((!paused || tickFrame) && (!slowMode || (slowMode && time % 2 == 0)))
+		if((!paused || tickFrame) && (!slowMode || (slowMode && time % (1/SPD_SLOWDOWN) == 0)))
 			updateGameStage();
 		
 		time++;
@@ -184,9 +189,11 @@ public class MainScreen extends GameScreen{
 		
 		// Fast forward with F
 		if(!paused && KeyboardListener.isKeyDown(GLFW.GLFW_KEY_F)){
-			updateGameStage();
-			updateGameStage();
-			rTime += 2;
+			
+			for(int i = 0; i < SPD_SPEEDUP - 1; i++)
+				updateGameStage();
+			
+			rTime += SPD_SPEEDUP - 1;
 		}
 		
 		// Reload script with Alt+R

@@ -1,7 +1,7 @@
 
 #include enm;
 
-/*
+
 // V-wave of accelerating enemies
 circleEnm(_cx, 0);
 wait 25;
@@ -12,34 +12,81 @@ for(i < 1, 5){
     wait 25;
 }
 
-waits;
-
-// Aimed barrage enemies, random
-for(i < 12){
-    aimEnm(rand(_left + 40, _right - 40));
-    wait 30;
-}
-
 waits 2.8;
 
-tankEnm(_cx);
-waits 7;
-
-
-tankEnm2(_cx - 80, false);
-waits 7;
-
-tankEnm2(_cx + 80, true);
-*/
-
-for(i < 8){
-    sEnm(false);
-    wait 10;
+// Aimed barrage enemies, random
+for(i < 15){
+    aimEnm(rand(_left + 40, _right - 40), 0);
+    wait 23;
 }
 
-waits 0.5;
+waits 1.28;
 
-for(i < 8){
-    sEnm(true);
-    wait 10;
+tankEnm(_cx, false);
+waits 8;
+
+set inv = false;
+
+for(i < 4){
+    for(j < 8){
+        sEnm(false, inv);
+        wait 10;
+    }
+    
+    inv!!;
+    waits;
+}
+
+waits 0.7;
+
+spiralEnm(_cx - 60, false);
+spiralEnm(_cx + 60, true);
+
+waits 5;
+
+tankEnm(_cx, true);
+
+waits 7;
+
+// S path enemies and aimed enemies simultaneously
+sEnmWaves();
+
+for(i < 15){
+    aimEnm(rand(_left + 40, _right - 40), 1);
+    wait 40;
+}
+
+waits 2;
+
+spiralEnm(_cx - 60, false);
+
+waits 6;
+
+spiralEnm(_cx + 60, true);
+
+waits 5.9;
+
+
+for(i < 80){
+    fallEnm();
+    wait 8;
+}
+
+waits 1.4;
+
+tankEnm(_cx, false);
+
+task sEnmWaves(){
+    
+    set inv = false;
+    
+    for(i < 10){
+        for(j < 4){
+            sEnm(i > 5, inv);
+            wait 18;
+        }
+        
+        inv!!;
+        waits;
+    }
 }

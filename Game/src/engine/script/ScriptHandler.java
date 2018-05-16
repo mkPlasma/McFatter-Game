@@ -89,6 +89,8 @@ public class ScriptHandler{
 	private void init(){
 		script = new DScript(scriptPath);
 		
+		screen.stopBGM();
+		
 		compileText.setVisible(false);
 		init = -1;
 		
@@ -109,7 +111,6 @@ public class ScriptHandler{
 		
 		screen.initBG();
 		
-		screen.stopBGM();
 		screen.playBGM();
 		
 		stop = false;
