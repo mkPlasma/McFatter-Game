@@ -33,11 +33,11 @@ public class BuiltInFunctionList{
 	private final Random random;
 	
 	
-	public BuiltInFunctionList(MainScreen screen){
+	public BuiltInFunctionList(final MainScreen screen){
 		
 		random = new Random();
-		Player player		= screen != null ? screen.getPlayer() : null;
-		FrameList frameList	= screen != null ? screen.getFrameList() : null;
+		final Player player		= screen != null ? screen.getPlayer() : null;
+		final FrameList frameList	= screen != null ? screen.getFrameList() : null;
 		
 		// Create functions
 		funcList = new BIFunc[]{

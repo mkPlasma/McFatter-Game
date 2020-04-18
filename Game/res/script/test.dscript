@@ -45,12 +45,10 @@ task split(pos, dir, dir2, col, iterations){
 
 
 
-/*
 set const c = 6;
 
 for(d < 0, 360/c, 360){
-    set l = laser(_laser, _purple, _cx, _cy, d, 500, 16, 60);
+    set l = laser(_laser_helix, _purple, _cx, _cy, d, 500, 16, 60);
     l.setAdditive();
     l.setAngVel(0.2);
 }
-*/
