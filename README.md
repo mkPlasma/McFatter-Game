@@ -1,6 +1,6 @@
 # McFatter-Game
 
-This is a 2D bullet-hell game engine made in Java using LWJGL for window management and user input, and OpenGL for rendering.
+This is a 2D bullet hell game engine made in Java using LWJGL for window management and user input, and OpenGL for rendering.
 It includes a player with movement and firing, stages, and enemies and bullets with complex, programmable behaviors.
 
 Bullets, enemies, and stages are controlled by a custom scripting language called DScript. DScript is a Java-like scripting language with features like variables, loops, and functions.
